@@ -1,8 +1,0 @@
-function Mout=CleanLocalGlobal(M,i,th)
-
-
-   [rows,cols,vals] =find(M{i}>th|M{i}(:,id1:id2)<-th);
-   M{i}(rows,:)=[];
-   
-   Mout=M{i};
-   
