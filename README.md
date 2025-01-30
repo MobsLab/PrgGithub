@@ -1,5 +1,19 @@
+# Update 2025-01-30
+
+There were some already existing git repos in the PrgGithub folder. I updated them. I think we should delete them from this repo.
+You will find them here :
+
+- [./OnlinePlaceDecoding](https://github.com/MobsLab/OnlinePlaceDecoding.git)
+- [./PreProcessing/NomenclatureCodes](https://github.com/MobsLab/PreProcessing.git)
+- [./Dima/\_CleanCodeForGit](https://github.com/MobsLab/AnalysisNeuro.git)
+- [./Processing](https://github.com/MobsLab/GetFunctions.git) - not updated compared to Dropbox yet : we need to figure the delta wave computation out.
+- [./Sam](https://github.com/MobsLab/SamMnemozyne.git) - can also be found in the [Mnremozyne repo](https://github.com/MobsLab/Mnemozyne.git), SamMnemozyne branch.
+- [./ERC_Codes](https://github.com/MobsLab/Mnemozyne.git)
+- Ella Navigation model ?
+
 # PrgGithub
-This is our repository for Matlab and Python codes. 
+
+This is our repository for Matlab and Python codes.
 
 ## Future
 
