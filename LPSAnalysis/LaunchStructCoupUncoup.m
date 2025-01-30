@@ -1,0 +1,59 @@
+%% LaunchStructCoupUncoup
+
+%Parietalcoupled
+struct='PaCx'
+RipS=RpairSPa;
+RipD=RpairDPa;
+SpiD=SpairDPa;
+SpiR=SpairRPa;
+DelS=DpairSPa;
+DelR=DpairRPa;
+
+FigureScriptCoupUncoup
+DataLPSPaC{num,m}=Dat;
+clear Dat
+
+
+%PrefrontalCoupled
+struct='PFCx'
+
+RipS=RpairSPF;
+RipD=RpairDPF;
+SpiD=SpairDPF;
+SpiR=SpairRPF;
+DelS=DpairSPF;
+DelR=DpairRPF;
+
+FigureScriptCoupUncoup
+DataLPSPFC{num,m}=Dat;
+clear Dat
+
+%ParietalUncoupled
+struct='PaCx'
+RipS=RunpairSPa;
+RipD=RunpairDPa;
+SpiD=SunpairDPa;
+SpiR=SunpairRPa;
+DelS=DunpairSPa;
+DelR=DunpairRPa;
+
+FigureScriptCoupUncoup
+DataLPSPaUC{num,m}=Dat;
+clear Dat
+
+
+
+%PrefrontalUncoupled
+struct='PFCx'
+
+RipS=RunpairSPF;
+RipD=RunpairDPF;
+SpiD=SunpairDPF;
+SpiR=SunpairRPF;
+DelS=DunpairSPF;
+DelR=DunpairRPF;
+
+
+FigureScriptCoupUncoup
+DataLPSPFUC{num,m}=Dat;
+clear Dat

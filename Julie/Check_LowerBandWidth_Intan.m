@@ -1,0 +1,32 @@
+% Check Check_LowerBandWidth_Intan
+
+% to check that the low power close to 0 is not due tu a frequency cut-of
+% of zero
+
+
+
+Dir.path={
+'/media/DataMOBS23/M244/20150506/FEAR-Mouse-244-06052015-EXTenvC/fichiers intan';
+'/media/DataMOBS23/M244/20150507/FEAR-Mouse-244-07052015-EXTenvB/fichiers intan';
+'/media/DataMOBS23/M244/20150508/FEAR-Mouse-244-08052015-EXTenvC/fichiers intan';
+
+'/media/DataMOBS23/M243/20150506/FEAR-Mouse-243-06052015-EXTenvC/fichiers_intan';
+'/media/DataMOBS23/M243/20150507/FEAR-Mouse-243-07052015-EXTenvB/fichiers intan';
+'/media/DataMOBS23/M243/20150508/FEAR-Mouse-243-08052015-EXTenvC/fichiers_intan';
+
+'/media/DataMOBS23/M248/20150326/FEAR-Mouse-248-26032015-EXTenvC_150326_155513/fichiers intan';
+'/media/DataMOBS23/M248/20150327/FEAR-Mouse-248-27032015-EXPLOpost_150327_165700';
+
+};
+
+
+for man=1:length(Dir.path)
+    cd(Dir.path{man})
+    read_Intan_RHD2000_file
+    Dir.lower_bandwidth{man}=frequency_parameters.desired_lower_bandwidth;
+    Dir.frequency_parameters{man}=frequency_parameters;
+    clear frequency_parameters
+    
+end
+cd /media/DataMOBsRAID/ProjetAversion/DATA-Fear
+save /media/DataMOBsRAID/ProjetAversion/DATA-Fear/frequency_parameters Dir2 -Append

@@ -1,0 +1,104 @@
+clear all
+[Dir,KeepFirstSessionOnly,CtrlEphys]=GetRightSessionsFor4HzPaper('CtrlAllData')
+Info.hemisphere = 'R';
+Info.scoring = [];
+
+Info.threshold = [5 7];
+Info.durations = [150 20 200];
+Info.frequency_band = [120 250];
+Info.EventFileName='HPCRipples.evt.s00';
+
+for mm=13:length(Dir.path)
+    cd(Dir.path{mm})
+    go = 0;
+    
+    if exist('ChannelsToAnalyse/dHPC_rip.mat')>0
+        if (exist('Ripples.mat'))>0
+            clear RipplesEpochR
+            load('Ripples.mat')
+            try RipplesEpochR
+            catch
+                go = 1;
+            end
+        else go=1;
+        end
+    end
+    
+    if go
+        disp(Dir.path{mm})
+        delete('HPCRipplesSleepThresh.evt.s01')
+        delete('HPCRipplesSleepThresh.evt.s00.evt.rir')
+        delete('HPCRipples.evt.s00.evt.rir')
+        delete('HPCRipples.evt.s00')
+        clear ExpeInfo FreezeAccEpoch FreezeEpoch
+        
+        load('ExpeInfo.mat')
+        load('ChannelsToAnalyse/dHPC_rip.mat')
+        load(['LFPData/LFP',num2str(channel),'.mat'])
+        Info.channel = channel;
+        
+        load('StateEpochSB.mat','TotalNoiseEpoch')
+        
+        if ExpeInfo.SleepSession==0
+            load('behavResources.mat')
+            try FreezeAccEpoch
+            catch FreezeAccEpoch=[];
+            end
+            if isempty(FreezeAccEpoch)
+                Info.Epoch=FreezeEpoch-TotalNoiseEpoch;
+            else
+                Info.Epoch=FreezeAccEpoch-TotalNoiseEpoch;
+            end
+        else
+            load('StateEpochSB.mat','SWSEpoch')
+            Info.Epoch=SWSEpoch-TotalNoiseEpoch;
+            clear SWSEpoch
+        end
+        
+        %% ripples detection SB
+        [Ripples, meanVal, stdVal] = FindRipplesKJ(LFP, Info.Epoch, 'frequency_band',Info.frequency_band, 'threshold',Info.threshold, 'durations',Info.durations);
+        RipplesEpoch = intervalSet(Ripples(:,1)*10, Ripples(:,3)*10);
+        
+        eval(['RipplesEpoch' Info.hemisphere '= RipplesEpoch;']);
+        eval(['ripples_Info' Info.hemisphere '= Info;']);
+        eval(['Ripples' Info.hemisphere '= Ripples;']);
+        eval(['meanVal' Info.hemisphere '= meanVal;']);
+        eval(['stdVal' Info.hemisphere '= stdVal;']);
+        
+        PlotRipRaw(LFP,Ripples(:,2)/1e3);
+        
+        saveas(1,'Ripples.fig');
+        saveas(1,'Ripples.png');
+        close all
+        
+        %% save
+        save('Ripples.mat', ['RipplesEpoch' Info.hemisphere], ['ripples_Info' Info.hemisphere], ['Ripples' Info.hemisphere], ['meanVal' Info.hemisphere], ['stdVal' Info.hemisphere])
+        %evt classic
+        clear evt
+        extens = 'rip';
+        if ~isempty(Info.hemisphere)
+            extens(end) = lower(Info.hemisphere(1));
+        end
+        
+        evt.time = Ripples(:,2)/1e3; %peaks
+        for i=1:length(evt.time)
+            evt.description{i}= ['ripples' Info.hemisphere];
+        end
+        delete([Info.EventFileName '.evt.' extens]);
+        CreateEvent(evt, Info.EventFileName, extens);
+        
+        clear stdVal meanVal Ripples RipplesEpoch
+        clear(['RipplesEpoch' Info.hemisphere], ['ripples_Info' Info.hemisphere], ['Ripples' Info.hemisphere], ['meanVal' Info.hemisphere], ['stdVal' Info.hemisphere])
+        
+        
+        Info=rmfield(Info,'Epoch');
+        Info=rmfield(Info,'channel');
+        
+        if exist('H_VHigh_Spectrum.mat')==0
+            VeryHighSpectrum([cd filesep],channel,'H')
+        end
+        clear LFP channel ExpeInfo
+        
+    end
+    %   end
+end

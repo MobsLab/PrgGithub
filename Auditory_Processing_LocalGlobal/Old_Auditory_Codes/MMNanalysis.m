@@ -1,0 +1,139 @@
+
+res=pwd;
+smo=2;
+load([res,'/LFPData/InfoLFP']);
+
+load StateEpoch
+Epoch=SWSEpoch;
+% rg=Range(LFP);
+% Epoch1=intervalSet(rg(1),rg(end));
+load ChannelNames
+J1=-2000;
+J2=+11000;
+
+for num=[1 2 3 4 7 8 10 11 14];
+
+    clear LFP
+    load([res,'/LFPData/LFP',num2str(num)]);
+    LFP2=ResampleTSD(LFP,500);%{num}
+
+    load LocalGlobalAssignment1
+    if 1
+        figure, [fh, rasterAx, histAx, MLstd1(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalStdGlobStdA;LocalStdGlobStdB])),Epoch), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, MLdev1(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalDvtGlobStdA;LocalDvtGlobStdB])),Epoch), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, MGdev1(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalStdGlobDvtA;LocalStdGlobDvtB])),Epoch), J1, J2,'BinSize',800);close
+        MGstd1(num)=MLstd1(num);
+    end
+    load LocalGlobalAssignment2
+    if 1
+        figure, [fh, rasterAx, histAx, MLstd2(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalStdGlobStdA;LocalStdGlobStdB])),Epoch), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, MLdev2(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalDvtGlobStdA;LocalDvtGlobStdB])),Epoch), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, MGdev2(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalStdGlobDvtA;LocalStdGlobDvtB])),Epoch), J1, J2,'BinSize',800);close
+        MGstd2(num)=MLstd2(num);
+    end
+    load LocalGlobalAssignment3
+    if 1
+        figure, [fh, rasterAx, histAx, MLstd3(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalStdGlobStdA;LocalStdGlobStdB])),Epoch), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, MLdev3(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalDvtGlobStdA;LocalDvtGlobStdB])),Epoch), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, MGdev3(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalStdGlobDvtA;LocalStdGlobDvtB])),Epoch), J1, J2,'BinSize',800);close
+        MGstd3(num)=MLstd3(num);
+    end
+    load LocalGlobalAssignment4
+    if 1
+        figure, [fh, rasterAx, histAx, MLstd4(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalStdGlobStdA;LocalStdGlobStdB])),Epoch), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, MLdev4(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalDvtGlobStdA;LocalDvtGlobStdB])),Epoch), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, MGdev4(num)]=ImagePETH(LFP2, Restrict(ts(sort([LocalStdGlobDvtA;LocalStdGlobDvtB])),Epoch), J1, J2,'BinSize',800);close
+        MGstd4(num)=MLstd4(num);
+    end
+
+%---------------------------------------------------------------------------
+%------------------------- Local Effect-------------------------------------
+%---------------------------------------------------------------------------
+    lim=5500;
+    pval=0.05;
+
+    temp1a=Data(MLstd1(num))';
+    temp1b=Data(MLstd2(num))';
+    temp1c=Data(MLstd3(num))';
+    temp1d=Data(MLstd4(num))';
+    Msa=[temp1a(:,1:size(temp1a,2)-1);temp1b(:,1:size(temp1a,2)-1);temp1c(:,1:size(temp1a,2)-1);temp1d(:,1:size(temp1a,2)-1)];
+    Msa(Msa>lim)=nan;
+    Msa(Msa<-lim)=nan;
+    
+    temp2a=Data(MLdev1(num))';
+    temp2b=Data(MLdev2(num))';
+    temp2c=Data(MLdev2(num))';
+    temp2d=Data(MLdev4(num))';
+    Msb=[temp2a(:,1:size(temp1a,2)-1);temp2b(:,1:size(temp1a,2)-1);temp2c(:,1:size(temp1a,2)-1);temp2d(:,1:size(temp1a,2)-1)];
+    Msb(Msb>lim)=nan;
+    Msb(Msb<-lim)=nan;
+    
+    [Ma,Sa,Ea]=MeanDifNan(RemoveNan(Msa));
+    [Mb,Sb,Eb]=MeanDifNan(RemoveNan(Msb));
+
+    [h,p]=ttest2(RemoveNan(Msa),RemoveNan(Msb));
+    rg=Range(MLdev1(num),'ms');
+    pr=rescale(p,500, 550);
+        
+    tps=Range(MLstd1(num),'ms');
+
+    figure, plot(tps(1:end-1),SmoothDec((Ma),smo),'k','linewidth',2), 
+    hold on, plot(tps(1:end-1),SmoothDec((Ma+Ea),smo),'k') 
+    hold on, plot(tps(1:end-1),SmoothDec((Ma-Ea),smo),'k') 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb),smo),'r','linewidth',2) 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb+Eb),smo),'r') 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb-Eb),smo),'r') 
+    hold on, plot(rg(p<pval),pr(p<pval),'gx')
+    title(['awake local effect, channel',num2str(num) ' (' ChannelName{num} ')'])
+    hold on, axis([-100 1100 -1500 1200])
+    for a=0:150:600
+        hold on, plot(a,min(axis):max(axis),'b','linewidth',1);
+    end
+
+%---------------------------------------------------------------------------
+%-------------------------Global Effect-------------------------------------
+%---------------------------------------------------------------------------
+    temp1a=Data(MGstd1(num))';
+    temp1b=Data(MGstd2(num))';
+    temp1c=Data(MGstd3(num))';
+    temp1d=Data(MGstd4(num))';
+    Msa=[temp1a(:,1:size(temp1a,2)-1);temp1b(:,1:size(temp1a,2)-1);temp1c(:,1:size(temp1a,2)-1);temp1d(:,1:size(temp1a,2)-1)];
+    Msa(Msa>lim)=nan;
+    Msa(Msa<-lim)=nan;
+    
+    temp2a=Data(MGdev1(num))';
+    temp2b=Data(MGdev2(num))';
+    temp2c=Data(MGdev3(num))';
+    temp2d=Data(MGdev4(num))';
+    Msb=[temp2a(:,1:size(temp1a,2)-1);temp2b(:,1:size(temp1a,2)-1);temp2c(:,1:size(temp1a,2)-1);temp2d(:,1:size(temp1a,2)-1)];
+    Msb(Msb>lim)=nan;
+    Msb(Msb<-lim)=nan;
+
+    [Ma,Sa,Ea]=MeanDifNan(RemoveNan(Msa));
+    [Mb,Sb,Eb]=MeanDifNan(RemoveNan(Msb));
+
+    [h,p]=ttest2(RemoveNan(Msa),RemoveNan(Msb));
+    rg=Range(MGdev1(num),'ms');
+    pr=rescale(p,500, 550);
+    
+    tps=Range(MGstd1(num),'ms');
+
+    figure, plot(tps(1:end-1),SmoothDec((Ma),smo),'k','linewidth',2), 
+    hold on, plot(tps(1:end-1),SmoothDec((Ma+Ea),smo),'k') 
+    hold on, plot(tps(1:end-1),SmoothDec((Ma-Ea),smo),'k') 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb),smo),'r','linewidth',2) 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb+Eb),smo),'r') 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb-Eb),smo),'r') 
+    hold on, plot(rg(p<pval),pr(p<pval),'gx')
+    title(['awake Global effect, channel',num2str(num) ' (' ChannelName{num} ')'])
+
+    hold on, axis([-100 1100 -1500 1200])
+    for a=0:150:600
+        hold on, plot(a,min(axis):max(axis),'b','linewidth',1);
+    end
+
+end
+
+% save AwakeEffect MGdev1 MGdev2 MGdev3 MGdev4 MGstd1 MGstd2 MGstd3 MGstd4 MLdev1 MLdev2 MLdev3 MLdev4 MLstd1 MLstd2 MLstd3 MLstd4
+% save SWSEffect MGdev1 MGdev2 MGdev3 MGdev4 MGstd1 MGstd2 MGstd3 MGstd4 MLdev1 MLdev2 MLdev3 MLdev4 MLstd1 MLstd2 MLstd3 MLstd4
+

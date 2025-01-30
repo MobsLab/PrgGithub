@@ -1,0 +1,20 @@
+function A = PfcHcEEGTraces(A)
+
+A = getResource(A, 'SpectrumMaze');
+A = getResource(A, 'SpectrumTrials');
+
+
+
+A = registerResource(A, 'PfcTrace', 'numeric', {1,1}, ...
+    'pfcTrace', ...
+    [' the best  trace for prefraontal EEG']);
+
+A = registerResource(A, 'HcTrace', 'numeric', {1,1}, ...
+    'hcTrace', ...
+    ['the best trace for hippocampal EEG']);
+
+    A = getResource(A, 'PfcTrace2');
+    A = getResource(A, 'HcTrace2');
+
+
+    A = saveAllResources(A);

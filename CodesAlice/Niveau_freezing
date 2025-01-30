@@ -1,0 +1,38 @@
+load('behavResources.mat')   
+
+im_diffint=im_diff;
+        x=im_diffint(:,2);
+        nanx = isnan(x);
+        t    = 1:numel(x);
+        x(nanx) = interp1(t(~nanx), x(~nanx), t(nanx));
+        x(isnan(x))=nanmean(x);
+        im_diffint(:,2)=x;
+        im_diff=im_diffint;
+        
+        Imdifftsd=tsd(im_diffint(:,1)*1e4,SmoothDec(im_diffint(:,2)',1));
+figure
+plot(Range(Imdifftsd,'s'),Data(Imdifftsd))
+hold on
+plot(Range(Imdifftsd,'s'),Data(Imdifftsd))
+plot(Range(Restrict(Imdifftsd,FreezeEpoch),'s'),Data(Restrict(Imdifftsd,FreezeEpoch)))
+line(xlim,[th_immob th_immob])
+
+
+
+SessionNames={'WallRetestShockMAPEyeshock','WallRetestSafeMAPEyeshock','WallHabShockMAPEyeshock','WallHabSafeMAPEyeshock','WallCondShockMAPEyeshock','WallCondSafeMAPEyeshock'};
+
+for ss=1:length(SessionNames)
+    
+    SessionNames{ss}
+    Dir=PathForExperimentsEmbReact(SessionNames{ss})
+    
+    for mouse=1:length(Dir.path)
+        for session=1:length(Dir.path{mouse})
+            subplot(length(Dir.path{mouse}),1,session)
+            cd(Dir.path{mouse}{session})
+            load('behavResources.mat')
+        end
+    end
+
+
+saveas(fig.Number,['/home/vador/Dropbox/Mobs_member/AliceLallemand/Figures-Behaviour/Trajectories',SessionNames{ss},'M',num2str(Dir.ExpeInfo{mouse}{session}.nmouse),'.png'])

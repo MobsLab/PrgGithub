@@ -1,0 +1,76 @@
+ %% Entropy method
+
+%  look at evolution of permutation entropy
+m1=[57];
+t=0.0001*10000; %time step,seconds*10000
+win=0.1; %window, seconds
+win_dt=0.05; %move along window
+duration=5000; %total duration, seconds
+disp('entropy method')
+for m=m1
+    m
+for i=1:(duration-win)/win_dt
+    
+    Epoch=intervalSet(12078*10000+(i-1)*win_dt*10000, 12078*10000+win*10000+(i-1)*win_dt*10000);
+    y=Data(Restrict(LFPtest,Epoch));
+    ly = length(y);
+    permlist = perms(1:m);
+    c(1:length(permlist))=0;
+    
+ for j=1:ly-t*(m-1)
+    [a,iv]=sort(y(j:t:j+t*(m-1)));
+     for jj=1:length(permlist)
+         if (abs(permlist(jj,:)'-iv))==0
+             c(jj) = c(jj) + 1 ;
+         end
+     end
+ end
+
+ 
+c=c(find(c~=0));
+p = c/sum(c);
+pe{(m-1)/2}(i) = (-sum(p .* log(p)))/length(permlist);
+time(i)=(12078+(i-1)*win_dt+12078+win+(i-1)*win_dt)/2;
+end    
+std_pe=std(pe{(m-1)/2});
+mean_pe=mean(pe{(m-1)/2});
+deriv_pe=diff(pe{(m-1)/2});
+deriv1_pe = [deriv_pe 0];
+deriv2_pe = [0 deriv_pe];
+PeaksIdx_pe = find(deriv1_pe > 0 & deriv2_pe < 0);
+Peaks_val_pe=pe{(m-1)/2}(PeaksIdx_pe);
+PeaksIdx_high_pe=PeaksIdx_pe(Peaks_val_pe<(mean_pe-2*std_pe));
+PeaksIdx_low_pe=PeaksIdx_pe(Peaks_val_pe<(mean_pe-std_pe));
+brst_high_pe = burstinfo(time(PeaksIdx_high_pe), 0.15, inf, 3);
+brst_low_pe = burstinfo(time(PeaksIdx_low_pe), 0.15, inf, 3);
+
+
+%    figure(m-2)     
+%      plot(time/10000,pe/length(permlist))
+%    hold on
+%     plot(time/10000,smooth(pe/length(permlist),5),'k')
+%     title(num2str(m))
+%     
+end
+    
+clear event1
+event1.time=[ brst_high_pe.t_start  brst_high_pe.t_end ]';
+for i=1:length(brst_high_pe.t_start)
+    
+   event1.description{i}='spinstart';
+   event1.description{i+length(brst_high_pe.t_start)}='spinstop';
+
+end
+
+SaveEvents(strcat('Sophie_sp_high_ent.evt.h', voie{v}),event1)
+
+clear event1
+event1.time=[ brst_low_pe.t_start  brst_low_pe.t_end ]';
+event1.time=event1.time(:);
+for i=1:length(brst_low_pe.t_start)
+    
+   event1.description{i}='spinstart';
+      event1.description{i+length(brst_low_pe.t_start)}='spinstop';
+
+end
+SaveEvents(strcat('Sophie_sp_low_ent.evt.l', voie{v}),event1)

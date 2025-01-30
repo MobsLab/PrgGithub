@@ -1,0 +1,100 @@
+% MinNumSpikes : minimum number of spikes across whole session for neuron
+% to be analysed
+% 
+
+
+function [map,stats,ZoneFr,ZoneFrRand]=UMazeSpatialPatterns(Sp,Xtsd,Ytsd,TotEpoch,SpeedThresh,ZoneEpoch,MinNumSpikes,NumBt)
+
+% Parameters
+UmazeZoneNames={'Shock','NoShock','Centre','CentreShock','CentreNoShock'};
+TypeNames={'All','Run'};
+Alpha2Side=[2.5,97.5];
+Alpha1Side=[5,95];
+
+% Restrict to user chosen epoch
+Xtsd=Restrict(Xtsd,TotEpoch);
+Ytsd=Restrict(Ytsd,TotEpoch);
+for z=1:5
+    ZoneEpoch{z}=and(ZoneEpoch{z},TotEpoch);
+end
+Sp=Restrict(Sp,TotEpoch);
+
+% Get running epoch
+[RunningEpoch,RunSpeed]=GetRunPer(Xtsd,Ytsd,SpeedThresh,0);
+RunningEpoch=and(RunningEpoch,TotEpoch);
+for zz=1:5
+    EpochsOfInt{1,zz}=CleanUpEpoch(and(ZoneEpoch{z},TotEpoch));
+    EpochsOfInt{2,zz}=CleanUpEpoch(and(ZoneEpoch{z},RunningEpoch));
+end
+
+
+if  length(Sp)>MinNumSpikes
+    
+    % Place field calculated on all data
+    try,[map.All,stats.All]=PlaceField_SB(Sp,Xtsd,Ytsd,'figure',0,'limitmaze',[0 ceil(max(Data(Xtsd))*1.2) 0 ceil(max(Data(Ytsd))*1.2)],'size',100,'smoothing',2);
+    catch
+        map.All=NaN;
+        stats.All=NaN;
+    end
+    
+    % Place field calculated on run epoch only
+    try,[map.Run,stats.Run]=PlaceField_SB(Restrict(Sp,RunningEpoch),Restrict(Xtsd,RunningEpoch),Restrict(Ytsd,RunningEpoch),'figure',0,'limitmaze',[0 ceil(max(Data(Xtsd))*1.2) 0 ceil(max(Data(Ytsd))*1.2)],'size',100,'smoothing',2);
+    catch
+        map.Run=NaN;
+        stats.Run=NaN;
+    end
+    
+    
+    for z=1:2
+        for zz=1:5
+            ZoneFr.(UmazeZoneNames{zz}).(TypeNames{z})=FiringRateEpoch(Sp,EpochsOfInt{z,zz});
+        end
+        ZoneFr.ModInd.(TypeNames{z})=(ZoneFr.Shock.(TypeNames{z})-ZoneFr.NoShock.(TypeNames{z}))./(ZoneFr.Shock.(TypeNames{z})+ZoneFr.NoShock.(TypeNames{z}));
+    end
+    
+    for k=1:NumBt
+        ISI=diff(Range(Sp));
+        ISI=ISI(randperm(length(ISI)));
+        tppossstart=max(Stop(TotEpoch))-sum(ISI);
+        NewSp=cumsum([tppossstart*rand;ISI]);
+        NewSp=tsd(NewSp,NewSp);
+        for z=1:2
+            for zz=1:5
+                ZoneFrRand.(UmazeZoneNames{zz}).(TypeNames{z})(k)=FiringRateEpoch(NewSp,EpochsOfInt{z,zz});
+            end
+            ZoneFrRand.ModInd.(TypeNames{z})=(ZoneFrRand.Shock.(TypeNames{z})-ZoneFrRand.NoShock.(TypeNames{z}))./(ZoneFrRand.Shock.(TypeNames{z})+ZoneFrRand.NoShock.(TypeNames{z}));
+        end
+    end
+    
+    for z=1:2
+        if ZoneFr.ModInd.(TypeNames{z})<prctile(ZoneFrRand.ModInd.(TypeNames{z}),Alpha2Side(1)), ZoneFr.ModIndSig.(TypeNames{z})=-1;
+        elseif ZoneFr.ModInd.(TypeNames{z})>prctile(ZoneFrRand.ModInd.(TypeNames{z}),Alpha2Side(2)),ZoneFr.ModIndSig.(TypeNames{z})=1;
+        else,ZoneFr.ModIndSig.(TypeNames{z})=0;end
+    end
+    
+else
+    
+    map.All=NaN;
+    stats.All=NaN;
+    map.Run=NaN;
+    stats.Run=NaN;
+    
+    for z=1:2
+        for zz=1:5
+            ZoneFr.(UmazeZoneNames{zz}).(TypeNames{z})=NaN;
+        end
+        ZoneFr.ModInd.(TypeNames{z})=NaN;
+    end
+    
+    for z=1:2
+        for zz=1:5
+            ZoneFrRand.(UmazeZoneNames{zz}).(TypeNames{z})(1:NumBt)=nan(1,NumBt);
+        end
+        ZoneFrRand.ModInd.(TypeNames{z})=nan(1,NumBt);
+    end
+end
+
+for z=1:2
+    ZoneFr.ModInd.(TypeNames{z})=NaN;
+end
+end

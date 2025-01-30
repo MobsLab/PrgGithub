@@ -1,0 +1,38 @@
+%CheckLFPSize.m
+%22.09.2016
+
+Tend=[];
+list=dir;
+for i=3:length(dir)
+    if strcmp(list(i).name(1:3),'LFP')
+    temp=load(list(i).name);
+
+    tend=max(Range(temp.LFP))*1E-4;
+    Tend=[Tend;tend];
+    end
+end
+save Tend Tend list
+
+
+
+
+figure, hold on
+
+
+temp=load('LFP32.mat');
+LFP32=temp.LFP;
+plot(Data(LFP32),'b')
+
+temp=load('LFP33.mat');
+LFP33=temp.LFP;
+plot(Data(LFP33),'r')
+
+temp=load('LFP34.mat');
+LFP34=temp.LFP;
+plot(Data(LFP34),'g')
+
+figure, hold on
+
+plot(Range(LFP32)*1E-4,Data(LFP32),'b')
+plot(Range(LFP33)*1E-4,Data(LFP33),'r')
+plot(Range(LFP34)*1E-4,Data(LFP34),'g')

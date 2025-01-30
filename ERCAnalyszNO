@@ -1,0 +1,85 @@
+clear all,close all
+m=0;
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse261/MFB/NosePoke-MFBcalib2-19012016-m261/';
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse261/MFB/NosePoke-MFBcalib3-19012016-m261/';
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse261/MFB/NosePoke-MFBdroite4-20012016-m261/';
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse261/MFB/NosePoke-MFBdroite5-20012016-m261/';
+
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse261/PAG/NosePoke-PAG-21012016-m261/';
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse261/PAG/NosePoke-PAG3-22012016-m261/';
+
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse262/MFB/NosePoke-MFBcalib2-19012016-m262/';
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse262/MFB/NosePoke-MFBcalib3-19012016-m262/';
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse262/MFB/NosePoke-MFBcalib4-20012016-m262/';
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse262/MFB/NosePoke-MFBcalib5-21012016-m262/';
+
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse262/PAG/NosePoke-PAG-21012016-m262/';
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse262/PAG/NosePoke-PAG2-21012016-m262/';
+m=m+1;filename{m}='/media/DataMOBsRAID/ManipsERC/NosePokeERC/Mouse262/PAG/NosePoke-PAG3-22012016-m262';
+DataGroups{1}=[1:4];
+DataGroups{2}=[5:6];
+DataGroups{3}=[7:10];
+DataGroups{4}=[11:12];
+for t=1:4
+    figure
+    cols=copper(length(DataGroups{t}));
+    number=0;
+    for mm=DataGroups{t}
+        number=number+1;
+        cd(filename{mm})
+        load('PokeInfo.mat')
+        Xtsd=tsd(Range(Xtsd),naninterp(Data(Xtsd)));
+        xd=Data(Xtsd);
+        diffx=(xd(2:end)-xd(1:end-1)).^2;
+        Ytsd=tsd(Range(Ytsd),naninterp(Data(Ytsd)));
+        yd=Data(Ytsd);
+        diffy=(yd(2:end)-yd(1:end-1)).^2;
+        Vtsd=tsd(Range(Vtsd),sqrt(diffx+diffy));
+        %
+        subplot(2,2,1)
+        %                 numstims=[];
+        %                 for k=1:length(chgvolt)
+        %                     numstims(k)=length(Data(Restrict(Poketsd,And(PokeONEpoch,subset(VoltEpochs,k)))))/1000;
+        %                 end,
+        %                 numstims=sortrows([VoltageUsed(:,1)';numstims]',1);
+        %                 plot(numstims(:,1),numstims(:,2),'color',cols(number,:),'linewidth',2)
+        %                 hold on
+        %                 plot(numstims(:,1),numstims(:,2),'*','color',cols(number,:),'linewidth',2)
+        %                 title('nose poke time with smoothing')
+        
+        numstims=[];
+        for k=1:length(chgvolt)
+            numstims(k)=sum(Range(Restrict(mfbts,subset(VoltEpochs,k)),'s')*0+1);
+        end
+        numstims=sortrows([VoltageUsed(:,1)';numstims]',1);
+        plot(numstims(:,1),numstims(:,2),'color',cols(number,:),'linewidth',2)
+        hold on
+        plot(numstims(:,1),numstims(:,2),'*','color',cols(number,:),'linewidth',2)
+        title('number of stims')
+        
+        
+        
+        %% vitesse
+        subplot(2,2,3)
+        numstims=[];
+        for k=1:length(chgvolt)
+            numstims(k)=nanmean(Data(Restrict(Vtsd,(And(PokeONEpoch,subset(VoltEpochs,k))))));
+        end
+        numstims=sortrows([VoltageUsed(:,1)';numstims]',1);
+        plot(numstims(:,1),numstims(:,2),'color',cols(number,:),'linewidth',2)
+        hold on
+        plot(numstims(:,1),numstims(:,2),'*','color',cols(number,:),'linewidth',2)
+        ylim([0 2])
+        title('average speed during stim')
+        PokeONEpoch=thresholdIntervals(Poketsd,0.5,'Direction','Above');
+        PokeONEpoch=mergeCloseIntervals(PokeONEpoch,0.5*1e4);
+        cols2=jet(length(Start(VoltEpochs)));
+        subplot(2,2,[2,4])
+        for y=1:length(Start(VoltEpochs))
+            [M,S,tt]=mETAverage(Start(And(PokeONEpoch,subset(VoltEpochs,y))),Range(Vtsd),Data(Vtsd),500,50);hold on
+            plot(tt/1E3,M,'color',cols2(y,:),'linewidth',2)
+        end
+        ylim([0 4])
+        
+    end
+end

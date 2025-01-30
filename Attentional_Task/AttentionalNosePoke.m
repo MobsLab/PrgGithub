@@ -1,0 +1,252 @@
+% AttentionalNosePoke
+res=pwd;
+smo=2;
+load([res,'/LFPData/InfoLFP']);
+
+load behavResources
+
+MFBstimEvent=Range(stim);
+save StimTonePoke MFBstimEvent
+disp(['nombre de stimulations MFB :   ', num2str(length(MFBstimEvent))])
+
+%---------------------------------------------------
+% LFP 1 : Find the Tone opening the nosepoke windows
+%---------------------------------------------------
+num=input('  LFP channel for the rewarding tone TTL ?  ');
+clear LFP
+clear i;
+load([res,'/LFPData/LFP',num2str(num)]);
+i=num+1;
+
+clear signalTone tpsTone
+signalTone=Data(LFP);
+tpsTone=Range(LFP);
+
+A=find(signalTone<-3000);
+
+a=1;
+ToneEvent=[];
+ToneEvent(a,1)=tpsTone(A(1));
+a=2;
+for j=1:length(A)-1
+    if A(j+1)-A(j)>10;
+        ToneEvent(a,1)=tpsTone(A(j+1));
+        a=a+1;
+    end
+end
+ToneEvent(a,1)=tpsTone(A(j));
+save StimTonePoke -append ToneEvent
+
+
+clear LFP
+clear i;
+load([res,'/LFPData/LFP',num2str(num)]);
+i=num+1;
+EpochTone=intervalSet((ToneEvent-0.05E4),(ToneEvent+0.05E4));
+EpochTone=mergeCloseIntervals(EpochTone,1E4);
+
+figure, plot(Range(LFP,'s'),Data(LFP),'k') 
+hold on, title([InfoLFP.structure(i),'n= ',num2str(length(ToneEvent))])
+hold on, plot(Range(Restrict(LFP,EpochTone),'s'),Data(Restrict(LFP,EpochTone)),'r')
+hold on, plot(ToneEvent/1E4,1,'bo','markerfacecolor','b');
+
+disp(['nombre de sons récompensant :   ', num2str(length(ToneEvent))])
+
+
+%-----------------------------------------------------
+% LFP 2 : Find the non-rewarding tone > generalization
+%-----------------------------------------------------
+generalization=input('was there a genralization sound 1(yes) / 0(no)  ? ')
+if generalization==1;
+    
+    res=pwd;
+    smo=2;
+    load([res,'/LFPData/InfoLFP']);
+    
+    
+    num=input('  LFP channel for the non-rewarding sound ?  ');
+    clear LFP
+    clear i;
+    load([res,'/LFPData/LFP',num2str(num)]);
+    i=num+1;
+    
+    
+    signalAllSound=Data(LFP);
+    tpsAllSound=Range(LFP);
+    
+    tpsAllSound1=find(tpsAllSound<620000);
+    
+    A=find(signalAllSound(1:length(tpsAllSound1),1)>-1500);
+    B=find(signalAllSound(length(tpsAllSound1):length(tpsAllSound),1)>-1500);
+    B=B+77500;
+    
+    a=1;
+    GenToneEvent=[];
+    GenToneEvent(a,1)=tpsAllSound(A(1));
+    a=2;
+    for j=1:length(A)-1
+        if A(j+1)-A(j)>700;
+            GenToneEvent(a,1)=tpsAllSound(A(j+1));
+            a=a+1;
+        end
+    end
+    for j=1:length(B)-1
+        if B(j+1)-B(j)>700;
+            GenToneEvent(a,1)=tpsAllSound(B(j+1));
+            a=a+1;
+        end
+    end
+    GenToneEvent(a,1)=tpsAllSound(B(j));
+    i=1;
+    while i<length(GenToneEvent)
+        for j=1:length(ToneEvent)
+            if abs(GenToneEvent(i,1)-ToneEvent(j,1))<0.5*1E4
+                GenToneEvent(i,:)=[]; 
+            end
+        end
+        i=i+1;
+    end
+    save StimTonePoke -append GenToneEvent
+    
+    clear LFP;clear i;
+    load([res,'/LFPData/LFP',num2str(num)]);
+    i=num+1;
+    
+    figure, plot(Range(LFP,'s'),Data(LFP),'k'), title([InfoLFP.structure(i),'n= ',num2str(length(GenToneEvent))])
+    hold on, plot(GenToneEvent/1E4,-25,'bo','markerfacecolor','b');
+    hold on, plot(ToneEvent/1E4,-30,'ro','markerfacecolor','r');
+    
+    % plot the stimulation triggered to the Generalization Tone
+    %----------------------------------------------------------
+    J1=-0.5*1E4;
+    J2=+7.5*1E4;
+    num=3;
+    clear LFP;clear i;
+    load([res,'/LFPData/LFP',num2str(num)]);
+    i=num+1;
+    
+    figure, [fh, rasterAx, histAx, ToneToLFP(i)]=ImagePETH(LFP, ts(GenToneEvent), J1, J2,'BinSize',800); title('Poke trig to Tone')
+
+end
+%---------------------------------------------------
+% LFP 3 : Find all the NosePoke time !!
+%--------------------------------------------------
+
+clear LFP
+clear i;
+
+num=input('  LFP channel for Nose Poke ?  ');
+load([res,'/LFPData/LFP',num2str(num)]);
+LFP2=ResampleTSD(LFP,500);
+i=num+1;
+
+signalPoke=Data(LFP);
+tpsPoke=Range(LFP);
+
+C=find(signalPoke<-3000);
+
+a=1;
+PokeEvent=[];
+PokeEvent(a,1)=tpsPoke(C(1));
+a=2;
+for j=1:length(C)-1
+    if C(j+1)-C(j)>2;
+        PokeEvent(a,1)=tpsPoke(C(j+1));   % début du nose poke
+        a=a+1;
+    end
+end
+
+a=1;
+for j=1:length(C)-1
+    if C(j+1)-C(j)>2;
+        PokeEvent(a,2)=tpsPoke(C(j));    % fin du nose poke
+        a=a+1;
+    end
+end
+PokeEvent(a,2)=tpsPoke(C(j));
+save StimTonePoke -append PokeEvent
+
+
+clear LFP
+clear i;
+
+num=3;
+load([res,'/LFPData/LFP',num2str(num)]);
+LFP2=ResampleTSD(LFP,500);
+i=num+1;
+
+EpochPoke=intervalSet((PokeEvent(:,1)-0.01E4),(PokeEvent(:,2)+0.01E4));
+EpochPoke=mergeCloseIntervals(EpochPoke,1E4);
+
+figure, plot(Range(LFP,'s'),Data(LFP),'k'), title([InfoLFP.structure(i),'n= ',num2str(length(PokeEvent))])
+hold on, plot(Range(Restrict(LFP,EpochPoke),'s'),Data(Restrict(LFP,EpochPoke)),'r')
+hold on, plot(PokeEvent(:,1)/1E4,10,'rd','markerfacecolor','r','MarkerSize',5);
+hold on, plot(PokeEvent(:,2)/1E4,10,'bd','markerfacecolor','b','MarkerSize',5);
+
+disp(['nombre de poke :   ', num2str(length(PokeEvent))])
+
+% plot the nose poke triggered to the tone
+%-----------------------------------------
+J1=-0.5*1E4;
+J2=+20*1E4;
+figure, [fh, rasterAx, histAx, ToneToLFP(i)]=ImagePETH(LFP, ts(ToneEvent), J1, J2,'BinSize',800); title('NosePoke triggered to Rewarding Tone (500ms)')
+
+
+% plot the nose poke triggered to the Rewarding Tone
+%---------------------------------------------------
+clear ID
+load StimTonePoke
+idx=find((PokeEvent(:,2)-PokeEvent(:,1))/1E4>0.05);
+for i=1:length(ToneEvent), 
+    id=(PokeEvent(idx,1)-ToneEvent(i))/1E4; 
+    idd=id(find(id>0));
+    ID(i)=min(idd);
+end
+MeanReward=mean(ID);
+PercReward=length(find(ID<3.1))/length(ID)*100;
+
+save Results MeanReward PercReward
+
+figure, plot(ID,'ko-')
+hold on, plot(0:0.1:length(ID),4,'b'), title(['Success for Rewarding Tone (%) = ',num2str(PercReward)])
+
+
+% plot the nose poke triggered to the Generalization Tone
+%--------------------------------------------------------
+if generalization==1
+    clear IDgen
+    load StimTonePoke
+    idx=find((PokeEvent(:,2)-PokeEvent(:,1))/1E4>0.05);
+    
+    for i=2:length(GenToneEvent),
+        id=(PokeEvent(idx,2)-GenToneEvent(i))/1E4;
+        idd=id(find(id>0));
+        IDgen(i)=min(idd);
+    end
+    MeanGen=mean(IDgen);
+    PercGen=length(find(IDgen<3))/length(IDgen)*100;
+    
+    save Results MeanGen PercGen
+    
+    figure, plot(IDgen,'ko-')
+    hold on, plot(0:0.1:length(IDgen),3,'b'), title(['NosePoke for non-Rewarding Tone (%) = ',num2str(MeanGen)])
+end
+%--------------------------------------------------------
+if generalization==1
+    legend{1}='Rewarding Tone';
+    legend{2}='Generalization Tone';
+    
+    figure, subplot(1,2,1)
+    hold on, bar(MeanGen,'k','linewidth',1)
+    hold on, bar(MeanReward,'r','linewidth',1)
+    set(gca,'xtick',1:2)
+    set(gca,'xticklabel',legend)
+    ylabel('mean time after the tone')
+    
+    hold, subplot(1,2,2)
+    hold on, bar(PercGen,'k','linewidth',1)
+    hold on, bar(PercReward,'r','linewidth',1)
+    set(gca,'xtick',1:2)
+    set(gca,'xticklabel',legend)
+    ylabel('% of success to nosepoke within 3seconds')
+end

@@ -1,0 +1,39 @@
+A = getResource(A,'PosYS','Rat20/201226');
+A = getResource(A,'PosXS','Rat20/201226');
+XS = XS{1};
+YS = YS{1};
+
+dPC1_1 = Data(scorePC1_1);
+XS = Restrict(XS,mazeEpoch);
+YS = Restrict(YS,mazeEpoch);
+
+x = Data(XS);
+y = Data(YS);
+
+tBegin = Start(mazeEpoch);
+
+figure(1),clf
+
+plot(x,y)
+
+for i=150:length(tBins)
+
+	[merde,ix] = Restrict(XS,tBins(i),'align','closest');	
+%  	[merde,iY] = Restrict(YS,tBins(i),'align','closest');	
+
+	title(num2str(tBins(i)));
+	text(x(ix),y(ix),'*','Color','r');
+	if dPC1_1(i)>1
+		sound([1:10],10);
+	end;
+	pause(0.01);
+
+	if mod(i,100)==0
+		figure(1),clf
+		plot(x,y)
+	end
+
+end
+
+
+

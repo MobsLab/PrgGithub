@@ -1,0 +1,15 @@
+datasets = List2Cell([ parent_dir filesep 'datasets_general.list' ] );
+
+%  A = getResource(A,'TrialRules',datasets);
+nbDays = length(datasets);
+
+shiftDays = {};
+
+for i=1:nbDays
+
+	trial = Data(trialRules{i});
+	if sum(diff(trial))>0
+		shiftDays = [shiftDays  ; {datasets{i}}];
+	end
+
+end

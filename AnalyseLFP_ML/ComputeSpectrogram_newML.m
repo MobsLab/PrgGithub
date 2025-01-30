@@ -1,0 +1,264 @@
+function [Spi,ti,freqfi,num_channel,params_out,movingwin_out]=ComputeSpectrogram_newML(movingwin,params,InfoLFP,nameStructure,option,suffix)
+ 
+
+% [Spi,ti,freqfi,num_channel]=ComputeSpectrogram_newML(movingwin,params,InfoLFP,nameStructure,option,suffix)
+%
+% inputs:
+% LFP = from LFPData.m
+% movingwin =
+% params =
+% InfoLFP = structure as in listLFP_to_InfoLFP_ML.m InfoLFP.channel .depth .structure
+% nameStructure (optional) = e.g. 'Bulb' if outputs asked
+% option (optional) = 'All' to compute all Spectra or 'Unique' to get Sp from already chosen channel of nameStructure
+%                        'deep' or 'sup' see /ChannelsToAnalyse
+% suffix (optional) = in name spectrum L for low, H for high (see ComputeAllSpectrogramsML.m)
+%
+% outputs:
+% [Sp,t,f] = [Spectre, time, frequencies] of channelToAnnalyse in nameStructure
+% num_channel = channelToAnnalyse in nameStructure
+
+
+%% initialization
+
+if ~exist('movingwin','var') || ~exist('params','var') || ~exist('InfoLFP','var')
+    error('Not enough input arguments')
+end
+if ~exist('suffix','var')
+    suffix='';
+end
+if ~exist('option','var') || (exist('option','var') && sum(strcmp(option,{'Unique' 'All' 'deep' 'sup'}))<1)
+    option='ask';
+end
+
+res=pwd;
+FileToSave=[res,'/SpectrumData',suffix];
+if ~exist(FileToSave,'dir'), 
+    mkdir(res,['SpectrumData',suffix]);
+else
+    disp([FileToSave,' already exists.'])
+%     a=2; FileToSave=[res,'/SpectrumData',suffix,num2str(a)];
+%     while exist(FileToSave,'dir')
+%         a=a+1;FileToSave=[res,'/SpectrumData',suffix,num2str(a)];
+%     end
+end
+
+colori={'b','r','k','g','c','m'};
+colori=[colori,colori,colori,colori,colori,colori];
+typo={ '-','-','-','-','-','-','--','--','--','--','--','--','-.','-.','-.','-.','-.','-.',':',':',':',':',':',':','-','-','-','-','-','-','--','--','--','--','--','--'};
+
+%% choose channels to analyze
+
+% try
+%     
+%     try
+%         load([FileToSave,'/Channels.mat']); Channels;
+%     catch
+%         try load([res,'/SpectrumDataL/Channels.mat']);end
+%         try load([res,'/SpectrumDataH/Channels.mat']);end
+%         Channels;
+%         save([FileToSave,'/Channels.mat'],'Channels');
+%     end
+%     
+%     if exist('nameStructure','var'),
+%         ChannelsToCompute=Channels(strcmp(InfoLFP.structure(find(ismember(InfoLFP.channel,Channels))),nameStructure));
+%     else
+%         ChannelsToCompute=Channels;
+%     end
+%     
+% catch
+%     
+%     indxFileToSave=strfind(FileToSave,'/');
+%     disp(['Creating Spectrum for all channels and saving in ',FileToSave(indxFileToSave(end):end),'...'])   
+%     
+%     if strcmp(option,'All')
+%         Channels=InfoLFP.channel;
+%         
+%     else
+%         figure('color',[1 1 1]),
+%         a=0; b=0;
+%         legendL=[];
+%         I=intervalSet(0,30*1E4);
+%         
+%         Channels=InfoLFP.channel(strcmp(InfoLFP.structure,nameStructure));
+%         depthi=InfoLFP.depth(strcmp(InfoLFP.structure,nameStructure));
+%         for i=1:length(Channels)
+%             clear LFP
+%             load([res,'/LFPData/LFP',num2str(Channels(i))],'LFP')
+%             
+%             a=a+1;
+%             b=b+max(Data(Restrict(LFP,I)))-min(Data(Restrict(LFP,I)));
+%             hold on, plot(Range(Restrict(LFP,I),'s'),Data(Restrict(LFP,I))+b,[colori{a},typo{a}]);
+%             legendL=[legendL,{[nameStructure,' -Ch',num2str(Channels(i)),' (prof',num2str(depthi(i)),')']}];
+%         end
+%         
+%         legend(legendL)
+%         
+%         disp('Enter channels (num in neuroscope) for which spectrogram will be calculated ');
+%         
+%         if exist('nameStructure','var'),
+%             Channels=input(['      e.g. [1:3] or [] for all channels in ',nameStructure,': ']);
+%         else
+%             Channels=input('      e.g. [1:3] or [] for all channels in InfoLFP.mat: ');
+%         end
+%     end
+%     if isempty(Channels), Channels=InfoLFP.channel;end
+% 
+%     % save
+%     try 
+%         save([FileToSave,'/Channels'],'Channels','-append');
+%     catch
+%         save([FileToSave,'/Channels'],'Channels');
+%     end
+%     
+%     if exist('nameStructure','var'),
+%          ChannelsToCompute=Channels(strcmp(InfoLFP.structure(find(ismember(InfoLFP.channel,Channels))),nameStructure));
+%     else
+%         ChannelsToCompute=Channels;
+%     end
+%     close
+% end
+
+
+if strcmp(option,'All')
+	ChannelsToCompute=InfoLFP.channel;
+end
+
+if exist('nameStructure','var'),
+    ChannelsToCompute=InfoLFP.channel(strcmp(InfoLFP.structure,nameStructure));
+else
+    ChannelsToCompute=InfoLFP.channel;
+end
+
+if ~exist('legendL','var')
+    legendL=[];
+    [h,indx]=ismember(ChannelsToCompute,InfoLFP.channel);
+    for i=indx
+        legendL=[legendL,{[InfoLFP.structure{i},' -Ch',num2str(InfoLFP.channel(i)),' (prof',num2str(InfoLFP.depth(i)),')']}];
+    end
+end
+
+
+
+%% determine channel to analyse
+if ~isempty(ChannelsToCompute)
+    
+    if strcmp(option,'Unique')
+        try
+            load([FileToSave,'/UniqueChannel',nameStructure],'channelToAnalyse'); num_channel;
+        catch
+            try load([res,'/SpectrumDataH/UniqueChannel',nameStructure],'channelToAnalyse'); end
+            try load([res,'/SpectrumDataL/UniqueChannel',nameStructure],'channelToAnalyse'); end
+            try num_channel=channelToAnalyse; disp('Using UniqueChannel from previous spectrum analysis'); save([FileToSave,'/UniqueChannel',nameStructure],'channelToAnalyse'); end
+        end
+    elseif sum(strcmp(option,{'deep' 'sup'}))
+        try
+            load([res,'/ChannelsToAnalyse/',nameStructure,'_',option],'channel');num_channel=channel;
+        catch
+            try
+                load([res,'/ChannelsToAnlayse/',nameStructure,'_',option],'channel');num_channel=channel;
+                rename('ChannelsToAnlayse','ChannelsToAnalyse')
+            catch
+                if strcmp(nameStructure,'Bulb') && strcmp(option,'deep')
+                    try
+                        load('SpectrumDataL/UniqueChannelBulb.mat','channelToAnalyse')
+                        disp('Using UniqueChannelBulb.mat')
+                        num_channel=channelToAnalyse;
+                    end
+                end
+                if ~exist('num_channel','var')
+                    disp(['No channel defined in ChannelsToAnalyse/',nameStructure,'_',option])
+                    listLFP_to_InfoLFP_ML(res,1);
+                    channel=input(['Enter channel ',nameStructure,'_',option,': ']);
+                    %disp(['keyboard to enter channel ',nameStructure,'_',option,' and others ']);
+                    %disp('For example, enter '' channel = 7 '', then press return');keyboard
+                    num_channel=channel;
+                    if ~exist('ChannelsToAnalyse','dir'); mkdir('ChannelsToAnalyse');end
+                    try
+                        save(['ChannelsToAnalyse/',nameStructure,'_',option],'channel','-append');
+                    catch
+                        save(['ChannelsToAnalyse/',nameStructure,'_',option],'channel');
+                    end
+                end
+                
+            end
+        end
+    end
+end
+
+%% compute Spectrogramms
+if ~isempty(ChannelsToCompute)
+    if exist('num_channel','var') && ~isempty(num_channel)
+        
+        clear Sp t f LFP LFP_temp
+        try
+            load([FileToSave,'/Spectrum',num2str(num_channel)],'Sp','t','f','params','movingwin');
+            Spi=Sp; ti=t; freqfi=f; params_out=params; movingwin_out=movingwin;
+            disp(['... /Spectrum',num2str(num_channel),' has been loaded'])
+        catch
+            disp(['... computing and saving /Spectrum',num2str(num_channel)])
+            load([res,'/LFPData/LFP',num2str(num_channel)],'LFP')
+            LFP_temp=ResampleTSD(LFP,params.Fs);
+            [Sp,t,f]=mtspecgramc(Data(LFP_temp),movingwin,params);
+            Spi=Sp; ti=t; freqfi=f;
+            save([FileToSave,'/Spectrum',num2str(num_channel)],'-v7.3','Sp','t','f','params','movingwin');
+        end
+        
+    elseif ~exist('num_channel','var') 
+        
+        figure('Color',[1 1 1])
+        for cc=1:length(ChannelsToCompute)
+            clear LFP LFP_temp Sp t f
+            
+            try
+                load([FileToSave,'/Spectrum',num2str(ChannelsToCompute(cc))],'Sp','t','f');
+                Sp; t; f;
+            catch
+                %disp('check concordance InfoLFP.channel et Channels(cc)...'); keyboard;
+                load([res,'/LFPData/LFP',num2str(ChannelsToCompute(cc))],'LFP')
+                
+                LFP_temp=ResampleTSD(LFP,params.Fs);
+                [Sp,t,f]=mtspecgramc(Data(LFP_temp),movingwin,params);
+                try
+                    save([FileToSave,'/Spectrum',num2str(ChannelsToCompute(cc))],'-v7.3','Sp','t','f','params','movingwin');
+                catch
+                    keyboard
+                end
+            end
+            disp(['       - Spectrum',num2str(ChannelsToCompute(cc)),': done'])
+            hold on, plot(f,mean(Sp,1),[colori{cc},typo{cc}],'linewidth',2)
+            if exist('num_channel','var') && ChannelsToCompute(cc)==num_channel
+                Spi=Sp; ti=t; freqfi=f;
+            end
+        end
+        legend(legendL)
+        
+        try
+            title(['lfp ',FileToSave(strfind(FileToSave,'Mouse'):end)])
+        catch
+            title('lfp ')
+        end
+        if ~strcmp(option,'All')
+            num_channel=input(['Enter channel to analyse in ',nameStructure,':']);
+            channelToAnalyse=num_channel;
+            save([res,'/SpectrumDataL/UniqueChannel',nameStructure],'channelToAnalyse');
+            load([FileToSave,'/Spectrum',num2str(num_channel)],'Sp','t','f');
+            keyboard
+            Spi=Sp; ti=t; freqfi=f;
+        end
+    else 
+        num_channel=[];
+        disp(['No ',nameStructure,'_',option,' channel for this day'])
+    end
+
+else
+    disp(['No Channels recorded in ',nameStructure])
+    num_channel=NaN;
+end
+
+try
+    Spi;  ti; freqfi; params_out; movingwin_out;
+catch
+    Spi=nan; ti=nan; freqfi=nan; params_out=nan; movingwin_out=nan;
+end
+
+    

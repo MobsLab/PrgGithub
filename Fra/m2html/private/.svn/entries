@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-05-25T10:43:10.993826Z"
+   url="file:///home/battagli/svn/matlab/trunk/m2html/private"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="splitcode.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="d316fad5a496784266817e4f135eb4de"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="strtok.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="3c3fd0f2fd95883bd2df7ce127755c27"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="mfileparse.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="83154b8b4721d7110aef80b0d3cb7073"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="mexexts.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="d38c9da14cbcc2b3d827612020071686"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="searchindex.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="8440a8663f28834e1f1f103ae5aa3c9a"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="openfile.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="06e1c761fa4509ab07dee4659bb6d875"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+</wc-entries>

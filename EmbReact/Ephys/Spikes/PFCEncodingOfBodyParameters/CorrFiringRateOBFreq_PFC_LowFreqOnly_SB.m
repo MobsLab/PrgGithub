@@ -1,0 +1,88 @@
+clear all,
+MiceNumber=[490,507,508,509,510,512,514];
+epoch_names = {'Shock','NoShock','Centre','CentreShock','CentreNoShock'};
+num_bootstraps = 100;
+cd /media/DataMOBsRAIDN/ProjectEmbReact/Mouse490/20161201/ProjectEmbReact_M490_20161201_SleepPreSound
+SaveFolder = '/media/DataMOBsRAIDN/ProjectEmbReact/Figures/SpikeAnalysis/PFCNeurons_UMazeSpatialFiring/';
+load('B_Low_Spectrum.mat')
+SaveFolder='/media/DataMOBsRAIDN/ProjectEmbReact/Figures/SpikeAnalysis/PFC_Neurons_TwoTypesOfFreezing/';
+FreqLimsFz=[2.5:0.15:6];
+NoSleep = 0;
+for mm=1:length(MiceNumber)
+    
+    Dir = GetAllMouseTaskSessions(MiceNumber(mm));
+    x1 = strfind(Dir,'Cond');
+    
+    ToKeep = find(cellfun(@isempty,x1));
+    Dir = Dir(ToKeep);
+    x2 = strfind(Dir,'SoundTest');
+    ToKeep = find(cellfun(@isempty,x2));
+    Dir = Dir(ToKeep);
+    
+    
+    % Spikes
+    S_concat=ConcatenateDataFromFolders_SB(Dir,'spikes');
+    % OB Spectrum
+    OBSpec_concat=ConcatenateDataFromFolders_SB(Dir,'spectrum','prefix','B_Low');
+    % Speed
+    Speed=ConcatenateDataFromFolders_SB(Dir,'speed');
+    Speed = Restrict(Speed,ts(Range(OBSpec_concat)));
+    
+    % NoiseEpoch
+    NoiseEp_concat=ConcatenateDataFromFolders_SB(Dir,'epoch','epochname','noiseepoch');
+    TotalEpoch = intervalSet(0,max(Range(OBSpec_concat)));
+    TotalEpoch = TotalEpoch - NoiseEp_concat;
+    
+    % InstFreq
+    instfreq_concat_PT=ConcatenateDataFromFolders_SB(Dir,'instfreq','suffix_instfreq','B','method','PT');
+    y=interp1(Range(instfreq_concat_PT),Data(instfreq_concat_PT),Range(OBSpec_concat));
+    instfreq_concat_PT = tsd(Range(OBSpec_concat),y);
+    instfreq_concat_WV=ConcatenateDataFromFolders_SB(Dir,'instfreq','suffix_instfreq','B','method','WV');
+    instfreq_concat_WV=Restrict(instfreq_concat_WV,ts(Range(OBSpec_concat)));
+    y=interp1(Range(instfreq_concat_WV),Data(instfreq_concat_WV),Range(OBSpec_concat));
+    y(y>15)=NaN;
+    y=naninterp(y);
+    instfreq_concat_WV = tsd(Range(OBSpec_concat),y);
+    instfreq_concat_Both = tsd(Range(OBSpec_concat),nanmean([Data(instfreq_concat_WV),Data(instfreq_concat_PT)]')');
+    
+    if NoSleep
+        Sleepstate=ConcatenateDataFromFolders_SB(Dir,'epoch','epochname','sleepstates');
+        TotalEpoch = and(TotalEpoch,Sleepstate{1});
+    end
+    
+    TotalEpoch = and(TotalEpoch,and(thresholdIntervals(instfreq_concat_Both,6,'Direction','Below'),thresholdIntervals(instfreq_concat_Both,2,'Direction','Above')));
+    
+    
+    ToPlot=Data(Restrict(instfreq_concat_Both,TotalEpoch));
+    Dat=zscore(log(Data(Restrict(OBSpec_concat,TotalEpoch)))');
+    
+    % get rid of ends
+    ToPlot = ToPlot(3:end-3);
+    Dat = Dat(:,3:end-3);
+    
+    for sp=1:length(S_concat)
+        [Y,X]=hist(Range(S_concat{sp}),Range(OBSpec_concat));
+        spike_count=tsd(X,Y');
+        dat=Data(Restrict(spike_count,TotalEpoch));
+        dat = dat(3:end-3);
+        [R,P]=corrcoef(ToPlot,dat);
+        RSpk{mm}(sp)=R(1,2);
+        PSpk{mm}(sp)=P(1,2);
+        for btstrp = 1:1000
+            btstrp
+            num=ceil(rand*length(ToPlot));
+            ToPlot_rand = fliplr([ToPlot(num+1:end);ToPlot(1:num)]);
+            [R,P]=corrcoef(ToPlot_rand,dat);
+            RSpk_btstrp{mm}(sp,btstrp) = R(1,2);
+            PSpk_btstrp{mm}(sp,btstrp) = P(1,2);
+        end
+    end
+end
+
+if NoSleep
+    cd /media/DataMOBsRAIDN/ProjectEmbReact/Figures/SpikeAnalysis/PFC_Neurons_TwoTypesOfFreezing
+    save('PFCUnitFiringOnOBFrequencyCorrLowFrequenciesNoSleep.mat','PSpk','RSpk','PSpk_btstrp','RSpk_btstrp')
+else
+    cd /media/DataMOBsRAIDN/ProjectEmbReact/Figures/SpikeAnalysis/PFC_Neurons_TwoTypesOfFreezing
+    save('PFCUnitFiringOnOBFrequencyCorrLowFrequencies.mat','PSpk','RSpk','PSpk_btstrp','RSpk_btstrp')
+end

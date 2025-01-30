@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="17"
+   name=""
+   committed-date="2006-06-30T12:20:20.485057Z"
+   url="file:///home/battagli/svn/matlab/trunk/projects/amyphys"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="AmygdalaSpikeData_fn.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e9193fb0bc93e1e33131a4afcb434192"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="untitled.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="2d828523ab5d4733e83213b21971132a"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyPhysStableInterval.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a4c4133d3f2e7bd0a7b882ab153da467"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysBehavData.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1c51e4b151f010e5072610d1d85bb020"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HabituationTests.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e0f614980250a187cfafb88415fc5605"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysAllAnovas.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e2a71152bb6c273108d274242ef8fd26"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysIsExprSparseness.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="c86bad086124fc27836ed969dbe7d975"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysExampleHist.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="936ad1daf21ffbf358f6319841e9095e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysFigures1.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="91e65fe978da0b6a43663e4385ac23ea"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysFigures2.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="348729ec433b94ba269f2b6ea4f305b4"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="amyphysFigs.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="98d6bdc758baeb5265647e6da1132804"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ListDataSets.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1bd8cd695b0dd54acb01034bd35e8b7d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="VisRespFigs.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ebbb887f2753d2c617cb7545e48fb19d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysStimCodes.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5d91d5030e7e5ec8409fdfc5397b6f20"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="VisualRespTable.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="c9877fb473ce3836f04ad748eb9a84c5"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="baselinepval.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="b89f5561f368cb5645c53879680d596b"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysStimKindAnova4.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a933fe6548920ba3d907a0a3680ea789"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="exprPostHocHist.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="b3e0f982acffe5b90bef2447d80a8557"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysStimKindRate.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5cd943af31fed5491c4e4c25440876ed"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="stimKindPostHocHist.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="accb7093cb620ff41b8c59e5fc898d20"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysSubSparseness.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a83ceb36b4225251c52eca99b077006f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AnovaRespSummary.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="d0a0b9928dd3dccd5dd6d9a8130da222"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysSplitAnovas.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="41147b99ffbb4922dba718758bcc10a6"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysVisualPETH2.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="37bf210d232bab8282192427b931cb51"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysVisualPETH3.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="2e1ab5df589c58728eca9e78a3af51c6"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="stimKindPostHoc.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="765ec1d8722df7099cc95eb1bfc18311"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysDatasets.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="45fbff2007d9010a00ed3b19d2446722"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysVisualResponsiveness.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6efe57d8a8ed74495a8e8de1f8c6c87b"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AnatomyData_fn.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="33844d2c362944a398a0e2bf2d012c43"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysMonkeyStimRate.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="d1633367a345498737dea04fb6158d1f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AnatomyCodes.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1af01e5958dcfb6296118618a8b8e184"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysSubIdExprSparseness.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="9f950e6aa60f4211c052a68075ee7520"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AnovaRespByNucleus.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="4830f04bd23f21cf9674fbe526aff82a"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysBaselineRateBurst.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5b4911044349a113b9eeb24741d5e9af"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysVisualInfo.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="f9c0b718d36b8fb20d494e669dd4a21d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysCatSpec.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ed996c1131c7161f0f45d8a96835fac7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="VisualInfoSummary.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="00644b0b271173932414ba9a480b012b"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysVisualPETH.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e400b75ea4cae95b2598d465f3f76264"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysSelectAnovas.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="9b5ed44065332276d3cb92d0c96e54c8"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysStimSet.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1eb1be30191954ba25236c17bc9ab7a7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysStimRate.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6ea464b6d16366504b4d94d26c0b932a"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="18"
+   name="AmyphysDistMatrix.m"
+   text-time="2006-06-30T13:33:22.000000Z"
+   committed-date="2006-06-30T13:49:24.394339Z"
+   checksum="a7f509ee47ebefe39889a7eeb4e8b830"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-30T12:20:57.000000Z"
+   revision="18"/>
+<entry
+   committed-rev="1"
+   name="AmyphysParseTrials.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="58b601378ac058e2831d88a521c2ab09"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="shrieker_anatomy.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5e6548f215d72182453579b31b2a0f06"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysAnovasFinalNumbers.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e4f7742941253fe88a594e6738f89432"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysDoubles.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="79eac73b033fb9f3261c0b36edbbf956"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysCatTC.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ed996c1131c7161f0f45d8a96835fac7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysCellList_fn.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="bd99729b07b0afbbdc3dd7a91bc74d3d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysCategorySpecgram.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6efe57d8a8ed74495a8e8de1f8c6c87b"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="stimKindHist.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e02291acf40d92811cf8a477c78a3b17"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="totalRatioHist.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1463acfe342671a2ef075665da88fd24"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="VisualRespSummary.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="cc2780b7846fffd28946b566ed4beffa"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysIdFinalNumbers.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="373b30e5eba7b61c662f5c94c4df7fd0"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysIdExprSparseness.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="9f950e6aa60f4211c052a68075ee7520"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyphysLookupTables.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="aa2bf537260ba492c2503a5e9c1e27a7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AmyhphysDoubles.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="446ceb63c4d3df7f460f52ff80765dea"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AnovaRespTotalSummary.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="bb43a58a7f8f34f3abcb4e80319ae571"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+</wc-entries>

@@ -1,0 +1,38 @@
+
+Fs = 2083;
+TStart = -500;
+TEnd = 500;
+
+%  [RippleTime RippleWave] = RippleDetect(Restrict(EEGhc,sleep1Epoch));
+
+
+ 
+sweeps = tsdArray(length(S),1);
+
+
+for t = 1:length(RippleTime)
+
+	
+	isSpk = 0;
+
+	for i = 1:length(S)
+
+		is = intervalSet(RippleTime(t)/Fs*10000+TStart, RippleTime(t)/Fs*10000+TEnd);
+		if min(size(Restrict(S{i},is))) ~= 0
+%  			sweeps{i} = Restrict(S{i},is);
+			isSpk = i;
+		end		
+
+	end
+
+	if isSpk ~= 0
+		
+		figure(1), clf;
+		[fh, rasterAx, histAx] = RasterPETHRipples(RippleWave(t,:),S, RippleTime(t)/Fs*10000, TStart, TEnd)
+		%set(rasterAx,'title',['Ripple n°' num2str(t) '/' num2str(length(RippleTime))]);	
+
+		pause(2);
+
+	end
+
+end

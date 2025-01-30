@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-05-25T10:43:10.993826Z"
+   url="file:///home/battagli/svn/matlab/trunk/m2html/templates"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   name="blue"
+   kind="dir"/>
+<entry
+   name="frame"
+   kind="dir"/>
+</wc-entries>

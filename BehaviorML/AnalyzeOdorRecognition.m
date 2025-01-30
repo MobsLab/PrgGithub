@@ -1,0 +1,334 @@
+function [numF,Distance,MatOdor,BlockTime,PosWork]=AnalyzeOdorRecognition(filename);
+
+%% INPUTS
+freq=30; % Hz, default 30Hz
+BlockTime=30; % duration in sec of each time block for distance and explo, default 30s
+Docircle=0; % 1 if the environment is circular, 0 otherwise
+checkOdorLocationExplo=1; % 0 when automation is validated
+
+nCTRL=0;
+nVARI=1;
+nFIXA=1;
+OrderLabel={'CTRL','VARIANT','FIXED'}; %default {'CTRL','VARIANT','FIXED'}
+colori={'g','r','m'};
+
+%% INITIALISATION
+
+% anoying problems
+res=pwd;
+if isempty(strfind(res,'/')),mark='\'; else  mark='/';end
+
+if ~exist('filename','var')
+    filename=input('Enter filename : ','s');
+end
+if isempty(strfind(filename,mark))
+    nameFile=[res,mark,filename];
+    filenameTronc=filename;
+else
+    nameFile=filename;
+    index=strfind(filename,mark);
+    filenameTronc=filename(max(index)+1:end);
+end
+
+% load existing data if exists
+if exist([nameFile,mark,'OdorAnalysis.mat'],'file')
+    disp('Loading existing OdorAnalysis.mat for environment parameters...')
+    load([nameFile,mark,'OdorAnalysis'],'x','y','Docircle','OdorInfo','MatOdor','nCTRL','nVARI','nFIXA')
+end
+
+% Tracking offline done?
+try
+    load([nameFile,mark,'TrackingOFFline.mat'],'PosOFF','mask','ref');
+catch
+    try
+        load(nameFile,'PosOFF','mask','ref');
+    catch
+        error('TrackingOFFline is not done! Run LounchOfflineTracking.m !')
+    end
+end
+
+
+%% RESAMPLE POSOFF TO FREQUENCY freq
+disp(['Resampling PosOFF to ',num2str(freq),'Hz...'])
+PosOFF=PosOFF(~isnan(PosOFF(:,2)),:);
+TimeInt=min(PosOFF(:,1)):1/freq:max(PosOFF(:,1));
+
+Xint=interp1(PosOFF(:,1),PosOFF(:,2),TimeInt);
+Yint=interp1(PosOFF(:,1),PosOFF(:,3),TimeInt);
+
+PosWork=[TimeInt',Xint',Yint'];
+
+
+%% REFINE EXPLORATION AREA
+disp('Refining exploration area...')
+ok='n';
+while ~strcmp(ok,'y')
+    figure('Color',[ 1 1 1])
+    imagesc(mask); colormap gray
+    hold on, plot(PosOFF(:,2),PosOFF(:,3),'r')
+    hold on, plot(PosWork(:,2),PosWork(:,3))
+    title('Define environment edges')
+    
+    if Docircle
+        
+        try
+            saveX=x;saveY=y;
+        catch
+            title('Click on the center then on one point of the circle') ;
+            [y,x]=ginput(2);saveX=x;saveY=y;
+        end
+        xc=x(1);yc=y(1);
+        Rad=sqrt((y(2)-yc)^2+(x(2)-xc)^2);
+        [XGrid,YGrid]=meshgrid(1:size(ref,1),1:size(ref,2));
+        A=sqrt((YGrid-yc).*(YGrid-yc)+(XGrid-xc).*(XGrid-xc));
+        maskA=A';
+        maskA(find(maskA<=Rad))=0;
+        maskA(find(maskA>Rad))=1;
+        
+        imagesc(maskA); colormap gray
+        hold on, plot(PosOFF(:,2),PosOFF(:,3),'r')
+        hold on, plot(PosWork(:,2),PosWork(:,3))
+        
+        temp=[PosWork(:,1),PosWork(:,2)-yc,PosWork(:,3)-xc];
+        
+    else
+        try
+            saveX=x;saveY=y;
+        catch
+            [x,y]=ginput(2);saveX=x;saveY=y;
+        end
+        hold on, line([x(1) x(1) x(2) x(2) x(1)], [y(1) y(2) y(2) y(1) y(1)], 'Color','k')
+        temp=[PosWork(:,1),PosWork(:,2)-mean(x),PosWork(:,3)-mean(y)];
+    end
+    
+    ok=input('Are you satisfied with new environment edges (y/n)? ','s');
+    if strcmp(ok,'n'), clear maskA x y;end
+    close
+end
+
+PosWork=temp;
+x=x-mean(x); y=y-mean(y);
+
+
+%% ANALYZE EXLO IN CENTRAL ZONE
+disp('Analyzing exploration in central zone...')
+
+figure('Color',[ 1 1 1]), numF=gcf;
+subplot(2,2,1)
+plot(PosWork(:,2),PosWork(:,3))
+if Docircle==0
+    hold on, line([x(1) x(1) x(2) x(2) x(1)], [y(1) y(2) y(2) y(1) y(1)], 'Color','k')
+end
+title(filenameTronc)
+
+CentralPercVal=10:10:90;
+for i=1:length(CentralPercVal)
+    
+    CentralPerc=CentralPercVal(i); % percentage, default 50%
+    
+    if Docircle
+        insideCirc=find( (PosWork(:,2).*PosWork(:,2) + PosWork(:,3).*PosWork(:,3) ) <= CentralPerc*(Rad^2)/100);
+        PercTime(i)=length(insideCirc)/length(PosWork)*100;
+        if CentralPerc==50
+            hold on, plot(PosWork(insideCirc,2),PosWork(insideCirc,3),'r')
+            legend({'Path','50%central'}, 'Location','East')
+            disp(['   % time spent in central zone (50% surface)= ',num2str(PercTime(i))])
+        end
+    else
+        temp=realsqrt(CentralPerc*x(1)^2/100);
+        CentralX=[-temp;temp];
+        temp=realsqrt(CentralPerc*y(1)^2/100);
+        CentralY=[-temp;temp];
+        % percentage of time in central zone,
+        PercTime(i)=sum(abs(PosWork(:,2))<CentralX(2) & abs(PosWork(:,3))<CentralY(2))/length(PosWork)*100;
+        
+        % plot 50% central zone
+        if CentralPerc==50
+            hold on, line([CentralX(1) CentralX(1) CentralX(2) CentralX(2) CentralX(1)], [CentralY(1) CentralY(2) CentralY(2) CentralY(1) CentralY(1)], 'Color','m')
+            indxtit=strfind(filename,mark);
+            if isempty(indxtit), title(filename); else title(filename(max(indxtit):end));end
+            legend({'Path','edges','50%central'}, 'Location','East')
+            disp(['   % time spent in central zone (50% surface)= ',num2str(PercTime(i))])
+        end
+    end
+    
+end
+
+subplot(2,2,3),bar(CentralPercVal,PercTime)
+xlabel('central zone (% surface)')
+ylabel('% time spent in central zone')
+
+
+%% GET ODOR LOCATIONS
+disp('Getting odor locations...')
+subplot(2,2,2),
+imagesc(ref), colormap gray
+
+if Docircle
+    circli = rsmak('circle',Rad,[yc,xc]);
+    hold on, fnplt(circli,'Color','w')
+end
+title('Click on odor localization')
+
+if ~exist('OdorInfo','var')
+    try
+        OdorInfo=MatOdor(:,[3,4,1]);
+    catch
+        OdorInfo=[];
+        
+        % label CTRL = 1
+        for i=1:nCTRL
+            title('Click on CTRL odor location')
+            temp=ginput(1);
+            OdorInfo=[OdorInfo; [temp,1]];
+            hold on, plot(temp(1),temp(2),['+',colori{1}])
+        end
+        
+        % label VARI = 2
+        for i=1:nVARI
+            title('Click on VARIANT odor location')
+            temp=ginput(1);
+            OdorInfo=[OdorInfo; [temp,2]];
+            hold on, plot(temp(1),temp(2),['+',colori{2}])
+        end
+        % label FIXA = 3
+        for i=1:nFIXA
+            title('Click on FIXED odor location')
+            temp=ginput(1);
+            OdorInfo=[OdorInfo; [temp,3]];
+            hold on, plot(temp(1),temp(2),['+',colori{3}])
+            line([],[],'Color',colori{3})
+        end
+        
+    end
+end
+
+%% GET TIME SPENT WITHIN EACH ODOR LOCATION
+lengthRec=max(PosWork(:,1));
+Nblock=round(lengthRec/BlockTime);
+
+disp(['Getting time spent within each odor location, for the ',num2str(Nblock),' ',num2str(BlockTime),'s-blocks...'])
+
+
+
+%imagesc(ref),colormap gray
+if Docircle
+    hold on, plot(PosWork(:,2)+yc,PosWork(:,3)+xc,'k')
+else
+    hold on, plot(PosWork(:,2)+mean(saveX),PosWork(:,3)+mean(saveY),'k')
+end
+% size of odor location
+radii=min(realsqrt(diff(OdorInfo(:,1)).*diff(OdorInfo(:,1))+diff(OdorInfo(:,2)).*diff(OdorInfo(:,2))))/2;
+
+MatOdor=NaN(nCTRL+nVARI+nFIXA,Nblock+1);
+if checkOdorLocationExplo, figure('Color',[ 1 1 1]), numFcheck=gcf;end
+for i=1:(nCTRL+nVARI+nFIXA)
+    figure(numF),
+    hold on, plot(OdorInfo(i,1),OdorInfo(i,2),['+',colori{OdorInfo(i,3)}])
+    circli = rsmak('circle',radii,[OdorInfo(i,1),OdorInfo(i,2)]);
+    hold on, fnplt(circli,'Color',colori{OdorInfo(i,3)})
+    
+    OdorPercTime=NaN(1,Nblock);
+    for nn=1:Nblock
+        clear PosBlock insideCirc
+        PosBlock=PosWork((PosWork(:,1)>=round(lengthRec*(nn-1)/Nblock) & PosWork(:,1)<round(lengthRec*nn/Nblock)),:);
+        if Docircle
+            insideCirc=find( ((PosBlock(:,2)+yc-OdorInfo(i,1)).*(PosBlock(:,2)+yc-OdorInfo(i,1)) + (PosBlock(:,3)+xc-OdorInfo(i,2)).*(PosBlock(:,3)+xc-OdorInfo(i,2)) ) <= radii^2);
+        else
+            insideCirc=find( ((PosBlock(:,2)+mean(saveX)-OdorInfo(i,1)).*(PosBlock(:,2)+mean(saveX)-OdorInfo(i,1)) + (PosBlock(:,3)+mean(saveY)-OdorInfo(i,2)).*(PosBlock(:,3)+mean(saveY)-OdorInfo(i,2)) ) <= radii^2);
+        end
+        
+        OdorPercTime(nn)=length(insideCirc)/length(PosBlock(:,1))*100;
+        
+        % check for each block time
+        % -----------------------------------------------------------------
+        if checkOdorLocationExplo
+            figure(numFcheck), subplot(4,ceil(Nblock/3),nn),
+            hold on, plot(OdorInfo(i,1),OdorInfo(i,2),['+',colori{OdorInfo(i,3)}])
+            hold on, fnplt(circli,'Color',colori{OdorInfo(i,3)})
+            if Docircle,
+                if i==1
+                    hold on, plot(PosBlock(:,2)+yc,PosBlock(:,3)+xc,'b');
+                    title([num2str(BlockTime),'s x',num2str(nn)]);
+                end
+                hold on, plot(PosBlock(insideCirc,2)+yc,PosBlock(insideCirc,3)+xc,['.',colori{OdorInfo(i,3)}]);
+                xlim([min(PosWork(:,2)+yc),max(PosWork(:,2)+yc)]); ylim([min(PosWork(:,3)+xc),max(PosWork(:,3)+xc)]);
+            else
+                if i==1
+                    hold on, plot(PosBlock(:,2)+mean(saveX),PosBlock(:,3)+mean(saveY),'b');
+                    title([num2str(BlockTime),'s x',num2str(nn)]);
+                end
+                hold on, plot(PosBlock(insideCirc,2)+mean(saveX),PosBlock(insideCirc,3)+mean(saveY),['.',colori{OdorInfo(i,3)}]);
+                xlim([min(PosWork(:,2)+mean(saveX)),max(PosWork(:,2)+mean(saveX))]); ylim([min(PosWork(:,3)+mean(saveY)),max(PosWork(:,3)+mean(saveY))]);
+            end
+            axis off;
+            subplot(4,ceil(Nblock/3),Nblock+[2:ceil(Nblock/3)]),
+            hold on, text(nn/Nblock,i/(nCTRL+nVARI+nFIXA),num2str(floor(OdorPercTime(nn))))
+        end
+        % -----------------------------------------------------------------
+    end
+    
+    MatOdor(i,:)=[OdorInfo(i,3),OdorPercTime];
+    
+    
+    if checkOdorLocationExplo
+        figure(numFcheck), subplot(4,ceil(Nblock/3),Nblock+1),
+        hold on, plot(OdorInfo(i,1),OdorInfo(i,2),['+',colori{OdorInfo(i,3)}])
+        hold on, fnplt(circli,'Color',colori{OdorInfo(i,3)})
+        subplot(4,ceil(Nblock/3),Nblock+[2:ceil(Nblock/3)]), text(0,i/(nCTRL+nVARI+nFIXA),[OrderLabel{OdorInfo(i,3)},': '])
+        axis off; title('% time spent in each location, for each time block')
+    end
+    
+end
+figure(numF), title('r=VARIANT, m=FIXED, g=CTRL')
+
+% check for each block time (additional plotting)
+% -----------------------------------------------------------------
+if checkOdorLocationExplo
+    figure(numFcheck), subplot(4,ceil(Nblock/3),Nblock+1)
+    if Docircle,
+        hold on, plot(PosWork(:,2)+yc,PosWork(:,3)+xc,'k');
+        xlim([min(PosWork(:,2)+yc),max(PosWork(:,2)+yc)]); ylim([min(PosWork(:,3)+xc),max(PosWork(:,3)+xc)]);
+    else
+        hold on, plot(PosWork(:,2)+mean(saveX),PosWork(:,3)+mean(saveY),'k');
+        xlim([min(PosWork(:,2)+mean(saveX)),max(PosWork(:,2)+mean(saveX))]); ylim([min(PosWork(:,3)+mean(saveY)),max(PosWork(:,3)+mean(saveY))]);
+    end
+    axis off, title('r=VARIANT, m=FIXED, g=CTRL')
+    input('Check figure, Press enter to continue...')
+    close;
+end
+% -----------------------------------------------------------------
+
+
+%% DISTANCE TRAVELED
+disp('Analyzing distance traveled for each time block...')
+d=realsqrt(diff(PosWork(:,2)).*diff(PosWork(:,2))+diff(PosWork(:,3)).*diff(PosWork(:,3)));
+%index=1:BlockTime*freq:length(d)-BlockTime*freq;
+%Distance=NaN(1,length(index));
+% for i=1:length(index)
+% 	Distance(i)=sum(d(index(i):index(i)+BlockTime*freq));
+% end
+Distance=NaN(1,Nblock);
+for i=1:Nblock
+    Distance(i)=sum(d((i-1)*BlockTime*freq+1:min(i*BlockTime*freq,length(d))));
+end
+
+figure(numF), subplot(2,2,4)
+bar([1:Nblock]*BlockTime,Distance)
+title(['Run Distance per ',num2str(BlockTime),'s block'])
+disp(['Total Runned distance ',num2str(sum(Distance))])
+xlabel('time of recording')
+
+%% SAVE ANALYSIS
+disp('Saving Analysis in OdorAnalysis.mat...')
+x=saveX;y=saveY;
+save([nameFile,mark,'OdorAnalysis'],'x','y','PercTime','Distance','PosWork','MatOdor','OrderLabel','Docircle','OdorInfo','BlockTime','freq','nCTRL','nVARI','nFIXA');
+
+
+
+%% SAVE FIGURES
+
+saveFigure(numF,'Figure_OdorAnalysis',nameFile)
+%keyboard
+
+

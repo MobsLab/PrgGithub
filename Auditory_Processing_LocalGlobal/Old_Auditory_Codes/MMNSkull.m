@@ -1,0 +1,638 @@
+%%MMNSkull
+
+
+% cd /Users/karimbenchenane/Documents/Data/DataEnCours/MiceSetUp/MMN/DataMMN
+
+try
+    plotdetail;
+catch
+    
+plotdetail=0;
+end
+
+clear a
+clear b
+clear c
+clear d
+clear e
+clear f
+
+LFPnames{1}='Prefrontal Cortex, superfical layer';
+LFPnames{2}='Prefrontal Cortex, superfical layer';
+LFPnames{3}='Prefrontal Cortex, superfical layer';
+LFPnames{4}='Prefrontal Cortex, superfical layer';
+
+LFPnames{5}='Parietal Cortex, EEG';
+LFPnames{6}='Parietal Cortex, ECog';
+LFPnames{7}='Parietal Cortex, deep layer';
+LFPnames{8}='Parietal Cortex, deep layer';
+LFPnames{9}='Parietal Cortex, deep layer';
+
+LFPnames{10}='Auditory Cortex, EEG';
+LFPnames{11}='Auditory Cortex, ECog';
+LFPnames{12}='Auditory Cortex, deep layer';
+LFPnames{13}='Auditory Cortex, deep layer';
+LFPnames{14}='Auditory Cortex, superficial layer';
+LFPnames{15}='Auditory Cortex, superficial layer';
+
+%------------------------------------------------------------------------
+%%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+
+if 0
+    
+    
+
+
+                filenameLFP='LFPData';
+
+            if 1
+
+                try
+
+                        eval(['load ',filenameLFP]) 
+                        LFP{1};
+                catch
+
+                listLFP=[9:23];
+                    SetCurrentSession
+                            lfp=GetLFP('all');
+
+
+
+                  for i=1:length(listLFP)
+                        LFP{i}=tsd(lfp(:,1)*1E4,lfp(:,listLFP(i)+2));
+                        lfpnames{i}=i;
+                    end 
+
+            %         end
+
+
+
+
+                    LFP=tsdArray(LFP);
+
+            %        save LFPData LFP lfpnames listLFP
+            %         save LFPData -v7.3 LFP lfpnames listLFP
+
+                     eval(['save ',filenameLFP,' -v7.3 LFP lfpnames listLFP'])     
+
+
+                end
+
+            end
+
+
+
+
+
+            if 1
+                eval(['load ',filenameLFP]) 
+
+                filename='behavResources';
+
+
+                try
+
+                eval(['load ',filename])            
+                catch
+                SetCurrentSession
+
+
+                        evt=GetEvents('output','Descriptions');
+
+                        for i=1:length(evt)
+                        tpsEvt{i}=GetEvents(evt{i});
+                        end
+                                    try
+                        stim=GetEvents('0')*1E4;
+                        stim=tsd(stim,stim);
+                        catch
+                            stim=[];
+                                    end
+
+
+                eval(['save ',filename,' evt tpsEvt stim'])            
+
+                end
+
+
+                try
+
+
+                if evt{1}=='49'
+                tp1=tpsEvt{1};
+                good1=1;
+                elseif evt{2}=='49'
+                tp1=tpsEvt{2};
+                good1=2;
+                elseif evt{3}=='49'
+                tp1=tpsEvt{3};
+                good1=3;
+                end
+
+                ts1=ts(tp1*1E4);
+                eval(['save ',filename,' evt tpsEvt stim tp1 ts1 good1'])
+                %                 save behavResources evt tpsEvt stim tp1 ts1 good1
+                catch
+
+                tp1=[];
+                ts1=[];
+                good1=[];
+                eval(['save ',filename,' evt tpsEvt stim tp1 ts1 good1'])
+                %                 save behavResources evt tpsEvt stim tp1 ts1 good1
+                end
+
+
+                try
+                if evt{1}=='50'
+                tp2=tpsEvt{1};
+                good2=1;
+                elseif evt{2}=='50'
+                tp2=tpsEvt{2};
+                good2=2;
+                elseif evt{3}=='50'
+                tp2=tpsEvt{3};
+                good2=3;
+                end
+
+
+
+                ts2=ts(tp2*1E4);
+                eval(['save ',filename,' -Append evt tpsEvt stim tp2 ts2 good2'])
+                % save behavResources -Append evt tpsEvt stim tp2 ts2 good2
+                catch
+
+                tp2=[];
+                ts2=[];
+                good2=[];
+                eval(['save ',filename,' -Append evt tpsEvt stim tp2 ts2 good2'])
+                % save behavResources evt tpsEvt stim tp2 ts2 good2
+                end
+
+
+
+
+
+                try
+
+                if evt{1}=='66'
+                tpB=tpsEvt{1};
+                elseif evt{2}=='66'
+                tpB=tpsEvt{2};
+                elseif evt{3}=='66'
+                tpB=tpsEvt{3};
+                elseif evt{4}=='66'
+                tpB=tpsEvt{4};
+                end
+
+                tsB=ts(tpB*1E4);
+                eval(['save ',filename,' -Append tpB tsB'])                
+                %                 save behavResources -Append tpB tsB    
+
+                end
+
+                try
+
+                if evt{1}=='82'
+                tpR=tpsEvt{1};
+                elseif evt{2}=='82'
+                tpR=tpsEvt{2};
+                elseif evt{3}=='82'
+                tpR=tpsEvt{3};
+                elseif evt{4}=='82'
+                tpR=tpsEvt{4};
+                end
+
+                tsR=ts(tpR*1E4);
+
+                eval(['save ',filename,' -Append tpB tsB'])                
+
+                end
+
+
+
+            end             
+
+end
+
+
+
+%------------------------------------------------------------------------            
+%%identification Stim----------------------------------------------------
+%------------------------------------------------------------------------             
+             
+             
+% load LFPData1
+% load behavResources1
+% 
+% load LFPData2
+% load behavResources2
+
+% load LFPData3
+% load behavResources3
+
+
+id=diff(tp1);
+std=tp1(id>0.5);
+
+MMN=tp2;
+id2=diff(tp2);
+MMN=tp2(id2>0.5);
+
+
+
+
+
+std=ts(std*1E4);
+MMN=ts(MMN*1E4);
+
+ref=1;
+thLFP=2000;
+
+clear badEpoch
+badEpochUp=thresholdIntervals(LFP{ref},thLFP,'Direction','Above');
+badEpochDown=thresholdIntervals(LFP{ref},-thLFP,'Direction','Below');
+badEpoch=or(badEpochUp,badEpochDown);
+badEpoch=mergeCloseIntervals(badEpoch,2000);
+badEpoch=dropShortIntervals(badEpoch,1000);
+
+
+
+clear tdebtemp
+clear tfintemp
+for i=1:length(Start(badEpoch));
+tdebtemp(i)=Start(subset(badEpoch,i))-0.3E4;    
+tfintemp(i)=End(subset(badEpoch,i))+0.5E4;    
+end
+badEpoch=intervalSet(unique(tdebtemp),unique(tfintemp));
+badEpoch=mergeCloseIntervals(badEpoch,100);
+
+rg=Range(LFP{1});
+std=Restrict(std,intervalSet(rg(1),rg(end))-badEpoch);
+MMN=Restrict(MMN,intervalSet(rg(1),rg(end))-badEpoch);
+
+std=Range(std,'s');
+MMN=Range(MMN,'s');
+
+
+if 0
+LFPini=LFP;
+for i=1:length(LFP)
+% LFP{i}=FilterLFP(LFP{i},[1 100],1024);
+LFP{i}=CleanLFP(LFP{i},[-2000 2000]);
+end
+end
+
+%------------------------------------------------------------------------
+%%correction
+%------------------------------------------------------------------------
+
+clear std2
+clear MMN2
+
+
+
+
+if length(tp1)>length(tp2)
+    
+        disp(' ')
+    disp('XXy ')
+    disp(' ')      
+    
+    
+Idx=[];
+for i=1:length(MMN)
+    
+  Badstd=MMN(i)-std;
+  idx=find(Badstd>0&Badstd<0.4);
+  Idx=[Idx,idx]; 
+    
+end
+
+std2=std;
+std2(Idx)=[];
+
+Iddx=[];
+for i=1:length(std2)
+BE=std2(i)-tp1(tp1<std2(i));
+if min(BE)>0.4 
+Iddx=[Iddx,i]; 
+end
+end
+   
+std2(Iddx)=[];
+
+std=std2;
+
+
+else
+
+    disp(' ')
+    disp('YYx ')
+    disp(' ')        
+
+    
+    Idx=[];
+for i=1:length(std)
+    
+  BadMMN=std(i)-MMN;
+  
+  idx=find(BadMMN>0&BadMMN<0.5);
+  Idx=[Idx,idx]; 
+    
+end
+
+MMN2=MMN;
+MMN2(Idx)=[];
+
+Iddx=[];
+for i=1:length(MMN2)
+BE=MMN2(i)-tp2(tp2<MMN2(i));
+if min(BE)>0.4 
+Iddx=[Iddx,i]; 
+end
+end
+   
+MMN2(Iddx)=[];
+
+MMN=MMN2;
+
+end
+
+
+
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+
+if plotdetail
+
+figure('color',[1 1 1]),  
+subplot(2,1,1), hold on
+plot(Range(LFP{ref},'s'),Data(LFP{ref}),'color',[0.7 0.7 0.7])
+hold on, plot(Range(Restrict(LFP{ref},badEpoch),'s'),Data(Restrict(LFP{ref},badEpoch)),'b')
+
+hold on, plot(Range(ts(tpsEvt{1}*1E4),'s'),ones(length(ts(tpsEvt{1}*1E4)),1),'ko','markerfacecolor','k')
+hold on, plot(Range(ts(tpsEvt{2}*1E4),'s'),200*ones(length(ts(tpsEvt{2}*1E4)),1),'ro','markerfacecolor','r'), title([eval(['char(',evt{1},')']), ' & ', eval(['char(',evt{2},')'])])
+hold on, plot(Range(ts(std*1E4),'s'),400*ones(length(ts(std*1E4)),1),'go','markerfacecolor','g')
+
+subplot(2,1,2), hold on
+plot(Range(LFP{ref},'s'),Data(LFP{ref}),'color',[0.7 0.7 0.7])
+hold on, plot(Range(Restrict(LFP{ref},badEpoch),'s'),Data(Restrict(LFP{ref},badEpoch)),'b')
+try
+hold on, plot(Range(ts1,'s'),300*ones(length(ts1),1),'ko','markerfacecolor','k')
+end
+try
+hold on, plot(Range(ts2,'s'),400*ones(length(ts2),1),'ro','markerfacecolor','r')
+end
+try
+hold on, plot(Range(tsR,'s'),500*ones(length(tsR),1),'ko','markerfacecolor','y')
+end
+try
+    hold on, plot(Range(tsB,'s'),600*ones(length(tsB),1),'ko','markerfacecolor','c')
+end
+try
+    hold on, plot(Range(ts(std*1E4),'s'),700*ones(length(ts(std*1E4)),1),'ko','markerfacecolor','k')
+end
+try
+    hold on, plot(Range(ts(std2*1E4),'s'),900*ones(length(ts(std2*1E4)),1),'ko','markerfacecolor','m')
+end
+try
+    hold on, plot(Range(ts(MM22*1E4),'s'),900*ones(length(ts(MM22*1E4)),1),'ko','markerfacecolor','m')
+end
+try
+    hold on, plot(Range(ts(MMN*1E4),'s'),800*ones(length(ts(MMN*1E4)),1),'ko','markerfacecolor','r')
+end
+
+
+xlim([500 554])
+ylim([-1000 2000])
+
+title('std: kk     &    MMN: kr     (removed: km)')
+
+ax=0;
+ax=ax+10; subplot(2,1,1), xlim([ax ax+10]),subplot(2,1,2), xlim([ax ax+10])
+
+
+end
+
+
+
+
+if 0
+
+if 1
+
+
+    k=1;
+    figure('color',[1 1 1]),  hold on
+    for i=1:4
+    [a,b,c] = mETAverage(std*1E4,Range(LFP{i}),Data(LFP{i}),1,1000);
+    try
+    plot(c,a,'color',[k/4 0 (4-k)/4],'linewidth',1)
+    end
+    % plot(c,a-b,'color',[i/4 1 (4-i)/i],'linewidth',1)
+    % plot(c,a+b,'color',[i/4 1 (4-i)/i],'linewidth',1)
+    k=k+1;
+    end
+    yl=ylim;
+    line([0 0],[yl(1) yl(2)],'color','k')
+    title('Prefrontal Cortex')
+xlim([-50 300])
+
+
+    k=1;
+    figure('color',[1 1 1]),  hold on
+    for i=5:9
+    [a,b,c] = mETAverage(std*1E4,Range(LFP{i}),Data(LFP{i}),1,1000);
+    try
+    plot(c,a,'color',[k/5 0 (5-k)/5],'linewidth',1)
+    end
+    % plot(c,a-b,'color',[k/5 1 (5-k)/5],'linewidth',1)
+    % plot(c,a+b,'color',[k/5 1 (5-k)/5],'linewidth',1)
+    k=k+1;
+    end
+    [a,b,c] = mETAverage(std*1E4,Range(LFP{5}),Data(LFP{5}),1,1000);
+    try
+    plot(c,a,'color','k','linewidth',2)
+    end
+    [a,b,c] = mETAverage(std*1E4,Range(LFP{6}),Data(LFP{6}),1,1000);
+    try
+    plot(c,a,'color',[0.5 0 1],'linewidth',2)
+    end
+    yl=ylim;
+    line([0 0],[yl(1) yl(2)],'color','k')
+    title('Parietal Cortex')
+
+    xlim([-50 300])
+
+    
+    k=1;
+    figure('color',[1 1 1]),  hold on
+    for i=10:15
+    [a,b,c] = mETAverage(std*1E4,Range(LFP{i}),Data(LFP{i}),1,1000);
+    try
+    plot(c,a,'color',[k/6 0 (6-k)/6],'linewidth',1)
+    end
+    % plot(c,a-b,'color',[k/6 1 (6-k)/6],'linewidth',1)
+    % plot(c,a+b,'color',[k/6 1 (6-k)/6],'linewidth',1)
+    k=k+1;
+    end
+    [a,b,c] = mETAverage(std*1E4,Range(LFP{10}),Data(LFP{10}),1,1000);
+    try
+    plot(c,a,'color','k','linewidth',2)
+    end
+    [a,b,c] = mETAverage(std*1E4,Range(LFP{11}),Data(LFP{11}),1,1000);
+    try
+    plot(c,a,'color',[0.5 0 1],'linewidth',2)
+    end
+    yl=ylim;
+    line([0 0],[yl(1) yl(2)],'color','k')
+    title('Auditory Cortex')
+
+xlim([-50 300])
+
+
+else
+
+
+
+
+figure('color',[1 1 1]),  hold on
+
+
+[a,b,c] = mETAverage(std*1E4,Range(LFP{4}),Data(LFP{4}),1,1000);
+try
+plot(c,a,'color','r','linewidth',2)
+end
+yl=ylim;
+line([0 0],[yl(1) yl(2)],'color','k')
+title('Prefrontal Cortex, blue: EEG, black: EcoG, red: LFP superficial, magenta: LFP deep')
+
+xlim([-50 300])
+
+
+
+
+
+figure('color',[1 1 1]),  hold on
+
+[a,b,c] = mETAverage(std*1E4,Range(LFP{10}),Data(LFP{5}),1,1000);
+try
+plot(c,a,'color','k','linewidth',2)
+end
+[a,b,c] = mETAverage(std*1E4,Range(LFP{11}),Data(LFP{6}),1,1000);
+try
+plot(c,a,'color','b','linewidth',2)
+end
+[a,b,c] = mETAverage(std*1E4,Range(LFP{13}),Data(LFP{8}),1,1000);
+try
+plot(c,a,'color','m','linewidth',2)
+end
+yl=ylim;
+line([0 0],[yl(1) yl(2)],'color','k')
+title('Parietal Cortex, blue: EEG, black: EcoG, red: LFP superficial, magenta: LFP deep')
+
+xlim([-50 300])
+
+
+
+figure('color',[1 1 1]),  hold on
+
+[a,b,c] = mETAverage(std*1E4,Range(LFP{10}),Data(LFP{10}),1,1000);
+try
+plot(c,a,'color','k','linewidth',2)
+end
+[a,b,c] = mETAverage(std*1E4,Range(LFP{11}),Data(LFP{11}),1,1000);
+try
+plot(c,a,'color','b','linewidth',2)
+end
+[a,b,c] = mETAverage(std*1E4,Range(LFP{15}),Data(LFP{15}),1,1000);
+try
+plot(c,a,'color','r','linewidth',2)
+end
+[a,b,c] = mETAverage(std*1E4,Range(LFP{13}),Data(LFP{13}),1,1000);
+try
+plot(c,a,'color','m','linewidth',2)
+end
+yl=ylim;
+line([0 0],[yl(1) yl(2)],'color','k')
+title('Auditory Cortex, blue: EEG, black: EcoG, red: LFP superficial, magenta: LFP deep')
+
+xlim([-50 300])
+
+end
+
+
+end
+
+
+
+figure('color',[1 1 1]),  hold on
+
+
+% if length(std)>length(MMN)
+%     tps1=std;
+%     tps2=MMN;
+% else
+%     tps2=std;
+%     tps1=MMN;    
+% end
+
+
+    tps1=std;
+    tps2=MMN;
+
+for i=1:15
+    
+   subplot(5,3,i), hold on
+   
+   [a{i},b{i},c{i}] = mETAverage(tps1*1E4,Range(LFP{i}),Data(LFP{i}),1,1000);
+   [d{i},e{i},f{i}] = mETAverage(tps2*1E4,Range(LFP{i}),Data(LFP{i}),1,1000);
+   
+try
+plot(c{i},a{i},'color','k','linewidth',2)
+% plot(c,a+b,'color','k','linewidth',1)
+% plot(c,a-b,'color','k','linewidth',1)
+end
+yl=ylim;
+line([0 0],[yl(1) yl(2)],'color','k')
+
+
+try
+plot(f{i},d{i},'color','r','linewidth',2)
+% plot(f,d+e,'color','r','linewidth',1)
+% plot(f,d-e,'color','r','linewidth',1)
+end
+
+line([-50 400],[0 0],'color','k')
+
+try
+plot(f{i},d{i}-a{i},'color','b','linewidth',1)
+end
+
+yl=ylim;
+line([0 0],[yl(1) yl(2)],'color','k')
+
+
+
+xlim([-50 400])
+ylim([-300 300])
+
+title(LFPnames{i})
+end
+
+
+disp(' ')
+disp(['std, n=',num2str(length(std)),'; MMN, n=',num2str(length(MMN))])
+disp(' ')
+
+LFP=LFPini;
+
+% close all
+% for i=1:15
+% figure('color',[1 1 1]), [fh, rasterAx, histAx, matVal] = ImagePETH(LFP{i}, ts(MMN*1E4), -10000, +15000,'BinSize',500);
+% end
+
+

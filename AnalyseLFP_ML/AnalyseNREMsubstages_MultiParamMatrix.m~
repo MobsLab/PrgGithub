@@ -1,0 +1,420 @@
+
+res='/media/DataMOBsRAID/ProjetAstro/AnalyseTempEvolutionSlow/AnalyseNREMsubstages';
+FolderToSave='/home/mobsyoda/Dropbox/MOBs_ProjetBulbe/FIGURES/FigureNREMstages/AnalyMultiVar';
+
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+% <<<<<<<<<<<<<<<<<<<<< DIRECTORIES OF EXPE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Dir1=PathForExperimentsDeltaSleepNew('BASAL');
+Dir2=PathForExperimentsML('BASAL');
+Dir2=RestrictPathForExperiment(Dir2,'Group','WT');
+Dir=MergePathForExperiment(Dir1,Dir2);
+
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+% <<<<<<<<<<<<<<<<<<<<<<<<<<< INITIATE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+%load([res,'/AnalySubStagesML.mat'])
+load([res,'/AnalySubStagesMLSAV.mat'])
+Dir;
+disp('Loading AnalySubStagesML.mat...')
+doSI=1; %discard small sleep episods
+fdelta=[2 4]; % look PFCx and OB spectrum at this freq
+ftheta=[6 8]; % look PFCx and HPC spectrum at this freq
+
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+%% <<<<<<<<<<<<<<<<<<<<<< Define substages <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+disp('running DefineSubStages.m for all expe');
+try
+    load([res,'/AnalyseNREMaMultivar.mat']);MultMat;
+    disp(['AnalyseNREMaMultivar.mat already exists. Loaded.']);
+    
+catch
+    MultMat={};
+    for man=1:length(Dir.path)
+        
+        disp(' '); disp(Dir.path{man})
+        cd(Dir.path{man})
+        
+        % -----------------
+        op=MATepochs(man,1:end-1);
+        noise=MATepochs{man,end};
+        [MATEP,nameEpochs]=DefineSubStages(op,noise,1); % 1 to remove short sleep periods
+        
+        %nameEpochs: N1,N2,N3,REM,WAKE,SWS,SI,PFswa,OBswa,TOTSleep,WAKEnoise
+        %         N1=op{1};
+        %         N2=op{2};
+        %         N3=op{3};
+        %         REM=op{4};
+        %         WAKE=op{5};
+        %         SWS=op{6};
+        %         SI=op{7};
+        
+        % -----------------
+        try
+            SleepStages=[];
+            for n=1:5
+                epoch=MATEP{n};
+                if doSI, epoch=epoch-MATEP{7};end
+                SleepStages=[SleepStages; [ Start(epoch,'s'),Stop(epoch,'s'),n*ones(length(Start(epoch)),1)]];
+            end
+            SleepStages=sortrows(SleepStages,1);
+            smat=[SleepStages,[SleepStages(2:end,3);0],[0;SleepStages(1:end-1,3)]];   % start/stop/current/after/before
+            
+            % -----------------
+            Dpfc=MATOSCI{man,1};
+            rip=MATOSCI{man,2};
+            Spfc=MATOSCI{man,3};
+            
+            % -----------------
+            % load HPC Channel and spectrum
+            disp('Loading dHPC_deep SpectrumDataL, WAIT...')
+            clear channel Sp t f
+            load('ChannelsToAnalyse/dHPC_deep','channel');
+            eval(['load(''SpectrumDataL/Spectrum',num2str(channel),'.mat'',''Sp'',''t'',''f'')'])
+            HPCthetaz=tsd(t*1E4,zscore(mean(Sp(:,f>=ftheta(1) & f<ftheta(2)),2)));
+            
+            % -----------------
+            % load PFCx Channel and spectrum
+            disp('Loading PFCx_deep SpectrumDataL, WAIT...')
+            clear channel Sp t f
+            load('ChannelsToAnalyse/PFCx_deep','channel');
+            eval(['load(''SpectrumDataL/Spectrum',num2str(channel),'.mat'',''Sp'',''t'',''f'')'])
+            PFCdeltaz=tsd(t*1E4,zscore(mean(Sp(:,f>=fdelta(1) & f<fdelta(2)),2)));
+            PFCthetaz=tsd(t*1E4,zscore(mean(Sp(:,f>=ftheta(1) & f<ftheta(2)),2)));
+            
+            % -----------------
+            % load Bulb Channel and spectrum
+            disp('Loading Bulb_deep SpectrumDataL, WAIT...')
+            clear channel Sp t f
+            load('ChannelsToAnalyse/Bulb_deep','channel');
+            eval(['load(''SpectrumDataL/Spectrum',num2str(channel),'.mat'',''Sp'',''t'',''f'')'])
+            OBdeltaz=tsd(t*1E4,zscore(mean(Sp(:,f>=fdelta(1) & f<fdelta(2)),2)));
+            
+            % ------------------
+            % tsdZT
+            clear NewtsdZT
+            load('behavResources.mat','NewtsdZT'); 
+            try NewtsdZT; catch, keyboard;end
+            
+            for n=1:5
+                epoch=MATEP{n};
+                sta=Start(epoch,'s');
+                sto=Stop(epoch,'s');
+                
+                ZTh=Data(Restrict(NewtsdZT,Start(epoch)))/(3600*1E4);
+                
+                Mult=nan(length(sta),75);
+                for s=1:length(sta)
+                    %---------- current stage ----------
+                    Mult(s,1)=sto(s)-sta(s); % dur current stage
+                    Mult(s,2)=ZTh(s);% clock time (h) of current stage
+                    %spectrum
+                    Mult(s,3)=mean(Data(Restrict(HPCthetaz,subset(epoch,s))));% theta HPC current stage zscore
+                    Mult(s,4)=mean(Data(Restrict(PFCthetaz,subset(epoch,s))));% thetaPFCx current stage zscore
+                    Mult(s,5)=mean(Data(Restrict(PFCdeltaz,subset(epoch,s))));% slowPFCx current stage zscore
+                    Mult(s,6)=mean(Data(Restrict(OBdeltaz,subset(epoch,s))));% slowOB current stage zscore
+                    %linear regression slowPFCx
+                    x=Range(Restrict(PFCdeltaz,subset(epoch,s)),'s'); y=Data(Restrict(PFCdeltaz,subset(epoch,s)));
+                    pf= polyfit(x,y,1);[r,p]=corrcoef(x,y);
+                    Mult(s,7)= pf(1); %slope of increase slowPFCx current stage
+                    Mult(s,8)= r(1,2);%corr coeff of increase slowPFCx current stage
+                    Mult(s,9)= p(1,2);%pvalue of increase slowPFCx current stage
+                    
+
+                    %---------- 4s period before stage ----------
+                    try
+                        %spectrum
+                        I=intervalSet((sta(s)-5)*1E4,(sta(s)-1)*1E4); %window 5s to 1s before current stage
+                        Mult(s,10)=mean(Data(Restrict(HPCthetaz,I)));% theta HPC previous 4s zscore
+                        Mult(s,11)=mean(Data(Restrict(PFCthetaz,I)));% thetaPFCx previous 4s zscore
+                        Mult(s,12)=mean(Data(Restrict(PFCdeltaz,I)));% slowPFCx previous 4s zscore
+                        Mult(s,13)=mean(Data(Restrict(OBdeltaz,I)));% slowOB previous 4s zscore
+                        %linear regression slowPFCx
+                        x=Range(Restrict(PFCdeltaz,I),'s'); y=Data(Restrict(PFCdeltaz,I));
+                        pf= polyfit(x,y,1);[r,p]=corrcoef(x,y);
+                        Mult(s,14)= pf(1); %slope of increase slowPFCx previous 4s zscore
+                        Mult(s,15)= r(1,2);%corr coeff of increase slowPFCx previous 4s zscore
+                        Mult(s,16)= p(1,2);%pvalue of increase slowPFCx previous 4s zscore
+                    end
+                    
+                    %---------- passed current stage ----------
+                    Mult(s,17)=s-1;% nb passed current stage
+                    try
+                        Mult(s,18)=sum(sto(1:s-1)-sta(1:s-1));% tot dur passed current stage
+                        %spectrum
+                        I=intervalSet(sta(1:s-1)*1E4,sto(1:s-1)*1E4);
+                        Mult(s,19)=mean(Data(Restrict(HPCthetaz,I)));% theta HPC tot passed current stage zscore
+                        Mult(s,20)=mean(Data(Restrict(PFCthetaz,I)));% thetaPFCx tot passed current stage zscore
+                        Mult(s,21)=mean(Data(Restrict(PFCdeltaz,I)));% slowPFCx tot passed current stage zscore
+                        Mult(s,22)=mean(Data(Restrict(OBdeltaz,I)));% slowOB tot passed current stage zscore
+                    end
+                    
+                    try %---------- stage n-1 ----------
+                        ind=find(SleepStages(:,1)==sta(s))-1;
+                        Mult(s,23)=SleepStages(ind,3);% previous stage
+                        Mult(s,24)=diff(SleepStages(ind,1:2),1,2); % dur previous stage
+                        ind2=find(SleepStages(:,3)==Mult(s,12));
+                        Mult(s,25)=sum(diff(SleepStages(ind2(ind2<=ind),1:2),1,2));% tot dur previous stage
+                        Mult(s,26)=length(ind2(ind2<=ind));% tot nb previous stage
+                        %spectrum
+                        I=intervalSet(SleepStages(ind,1)*1E4,SleepStages(ind,2)*1E4);
+                        Mult(s,27)=mean(Data(Restrict(HPCthetaz,I)));% theta HPC previous stage zscore
+                        Mult(s,28)=mean(Data(Restrict(PFCthetaz,I)));% thetaPFCx previous stage zscore
+                        Mult(s,29)=mean(Data(Restrict(PFCdeltaz,I)));% slowPFCx previous stage zscore
+                        Mult(s,30)=mean(Data(Restrict(OBdeltaz,I)));% slowOB previous stage zscore
+                        %linear regression slowPFCx
+                        x=Range(Restrict(PFCdeltaz,I),'s'); y=Data(Restrict(PFCdeltaz,I));
+                        pf= polyfit(x,y,1);[r,p]=corrcoef(x,y);
+                        Mult(s,31)= pf(1); %slope of increase slowPFCx previous stage zscore
+                        Mult(s,32)= r(1,2);%corr coeff of increase slowPFCx previous stage zscore
+                        Mult(s,33)= p(1,2);%pvalue of increase slowPFCx previous stage zscore
+                    end
+                    
+                    try %---------- stage n-2 ----------
+                        ind=find(SleepStages(:,1)==sta(s))-2;
+                        Mult(s,34)=SleepStages(ind,3);% stage n-2
+                        Mult(s,35)=diff(SleepStages(ind,1:2),1,2); % dur stage n-2
+                        ind2=find(SleepStages(:,3)==Mult(s,20));
+                        Mult(s,36)=sum(diff(SleepStages(ind2(ind2<=ind),1:2),1,2));% tot dur stage n-2
+                        Mult(s,37)=length(ind2(ind2<=ind));% tot nb stage n-2
+                        %spectrum
+                        I=intervalSet(SleepStages(ind,1)*1E4,SleepStages(ind,2)*1E4);
+                        Mult(s,38)=mean(Data(Restrict(HPCthetaz,I)));% theta HPC stage n-2 zscore
+                        Mult(s,39)=mean(Data(Restrict(PFCthetaz,I)));% thetaPFCx stage n-2 zscore
+                        Mult(s,40)=mean(Data(Restrict(PFCdeltaz,I)));% slowPFCx stage n-2 zscore
+                        Mult(s,41)=mean(Data(Restrict(OBdeltaz,I)));% slowOB stage n-2 zscore
+                    end
+                    
+                    % all oscillations
+                    I=intervalSet(0,sta(s)*1E4);
+                    Mult(s,42)=length(Data(Restrict(Dpfc,I)));% nb total previous Delta
+                    Mult(s,43)=length(Data(Restrict(rip,I)));% nb total previous Ripples
+                    Mult(s,44)=length(Data(Restrict(Spfc,I)));% nb total previous Spindles
+                    
+                    % cum oscillations on previous periods
+                    tim=[5,10,30,60, 5*60, 10*60];% previous period in seconds
+                    for ti=1:6
+                        try
+                            I=intervalSet((sta(s)-tim(ti))*1E4,sta(s)*1E4);
+                            Mult(s,44+ti)=length(Data(Restrict(Dpfc,I)));% nb Delta in previous tim seconds
+                            Mult(s,50+ti)=length(Data(Restrict(rip,I)));% nb Ripples in previous tim seconds
+                            Mult(s,56+ti)=length(Data(Restrict(Spfc,I)));% nb Spindles in previous tim seconds
+                        end
+                    end
+                    
+                    try % oscillations specific to current stage
+                        I=intervalSet(sta(1:s-1)*1E4,sto(1:s-1)*1E4);
+                        Mult(s,63)=length(Data(Restrict(Dpfc,I)));% nb total previous Delta
+                        Mult(s,64)=length(Data(Restrict(rip,I)));% nb total previous Ripples
+                        Mult(s,65)=length(Data(Restrict(Spfc,I)));% nb total previous Spindles
+                    end
+                    
+                    % nb of passed transition
+                    for i=1:5% start/stop/current/after/before
+                        Mult(s,65+i)=length(find(smat(:,1)<sta(s) & smat(:,3)==n & smat(:,4)==i));% transition n->i
+                        Mult(s,70+i)=length(find(smat(:,1)<sta(s) & smat(:,3)==n & smat(:,5)==i));% transition i->n
+                    end
+                end
+                
+                MultMat{man,n}=Mult;
+            end
+        catch
+            disp('Problem: Matrix not defined for this experiment')
+        end
+    end
+    disp('Done');
+    save([res,'/AnalyseNREMaMultivar.mat'],'MultMat','fdelta','ftheta','Dir','doSI','nameEpochs')
+    
+end
+
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+%% <<<<<<<<<<<<<<<<<<<<<<<<<< Name all var <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+clear infoT info
+infoT={'1:9 = Current','10:16 = 4s before', '17:22,63:65 = total passed current','23:33 = n-1','34:41 = n-2',' ',...
+    '3:6,10:13,19:22,27:30,38:41 = spectrum','42:65 = delta/spindles/ripples',...
+    '66:75 = nb transition','7:9,14:16,31:33 = regression PFCx slow'};
+
+%---------- current stage ----------
+info{1}='dur current stage';
+info{2}='clock time (h) of current stage';
+info{3}='theta HPC current stage zscore';
+info{4}='thetaPFCx current stage zscore';
+info{5}='slowPFCx current stage zscore';
+info{6}='slowOB current stage zscore';
+info{7}='slope Evol slowPFCx current stage';
+info{8}='CorrCoeff Evol slowPFCx current stage';
+info{9}='pvalue Evol slowPFCx current stage';
+%---------- previous 4s ----------
+info{10}='theta HPC previous 4s zscore';
+info{11}='thetaPFCx previous 4s zscore';
+info{12}='slowPFCx previous 4s zscore';
+info{13}='slowOB previous 4s zscore';
+info{14}='slope Evol slowPFCx previous 4s zscore';
+info{15}='CorrCoeff Evol slowPFCx previous 4s zscore';
+info{16}='pvalue Evol slowPFCx previous 4s zscore';
+%---------- passed current stage ----------
+info{17}='nb passed current stage';
+info{18}='tot dur passed current stage';
+info{19}='theta HPC tot passed current stage zscore';
+info{20}='thetaPFCx tot passed current stage zscore';
+info{21}='slowPFCx tot passed current stage zscore';
+info{22}='slowOB tot passed current stage zscore';
+%---------- previous stage ----------
+info{23}='nature previous stage';
+info{24}='dur previous stage';
+info{25}='tot dur previous stage';
+info{26}='tot nb previous stage';
+info{27}='theta HPC previous stage zscore';
+info{28}='thetaPFCx previous stage zscore';
+info{29}='slowPFCx previous stage zscore';
+info{30}='slowOB previous stage zscore';
+info{31}='slope Evol slowPFCx previous stage zscore';
+info{32}='CorrCoeff Evol slowPFCx previous stage zscore';
+info{33}='pvalue Evol slowPFCx previous stage zscore';
+%---------- stage n-2 ----------
+info{34}='nature stage n-2';
+info{35}='dur stage n-2';
+info{36}='tot dur stage n-2';
+info{37}='tot nb stage n-2';
+info{38}='theta HPC stage n-2 zscore';
+info{39}='thetaPFCx stage n-2 zscore';
+info{40}='slowPFCx stage n-2 zscore';
+info{41}='slowOB stage n-2 zscore';
+%-------- all oscillations ------
+info{42}='nb total previous Delta';
+info{43}='nb total previous Ripples';
+info{44}='nb total previous Spindles';
+% cum oscillations on previous periods
+tim=[5,10,30,60, 5*60, 10*60];% previous period in seconds    
+for ti=1:6
+    info{44+ti}=['nb Delta in previous ',num2str(tim(ti)),'s'];
+    info{50+ti}=['nb Ripples in previous ',num2str(tim(ti)),'s'];
+    info{56+ti}=['nb Spindles in previous ',num2str(tim(ti)),'s'];
+end
+info{63}='nb total previous Delta';
+info{64}='nb total previous Ripples';
+info{65}='nb total previous Spindles';
+% -------- nb of passed transition ------
+for i=1:5% start/stop/current/after/before
+    info{65+i}=['nb transition stage -> ',nameEpochs{i}];
+    info{70+i}=['nb transition ',nameEpochs{i},' -> stage'];
+end
+info=info';
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+%% <<<<<<<<<<<<<<<<<<<<<<<< AnalysMultiVar <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+% <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+% see AnalysMultiVar_25022016.m from Karim
+
+dozscore=1;
+n=1;
+for man=1:length(Dir.path)
+    % rename info
+    tinfo=info;
+    for i=1:length(tinfo)
+        id=strfind(tinfo{i},'stage');
+        if ~isempty(id)
+            tinfo{i}=[tinfo{i}(1:id-1),nameEpochs{n},tinfo{i}(id+5:end)];
+        end
+        id=strfind(tinfo{i},' zscore');
+        if ~isempty(id)
+            tinfo{i}(id:id+6)=[];
+        end
+        id=strfind(tinfo{i},'passed current');
+        if ~isempty(id)
+            tinfo{i}(id+6:id+13)=[];
+        end
+        if i<10, tinfo{i}=[tinfo{i},'  ',num2str(i)]; else, tinfo{i}=[tinfo{i},' ',num2str(i)];end
+    end
+    
+    % get data current expe, clean and zscore
+    test=MultMat{man,n};
+    test(isinf(test))=0;
+    test(isnan(test))=0;
+    if dozscore, test=zscore(test);end
+    x=(test(:,1)); y=(test(:,2:end));
+    
+    % --------------------------------------------------------------------
+    if 0
+        % calculate corrcoef & pcacov
+        [r,p]=corrcoef(test);
+        id=find(~isnan(nanmean(r,2)));
+        r=r(id,id);
+        [V,L]=pcacov(r);
+        [BE,pc]=sort(V(:,1));
+        
+        % plot
+        figure('color',[1 1 1],'Unit','normalized','Position',[0.1 0.5 0.4 0.3]),
+        subplot(1,4,1:2),imagesc(id,id,r), title(['corrcoef ',nameEpochs{n}])
+        subplot(1,4,3), plot(L,'ko-'), title('principal component variances (latent)')
+        subplot(1,4,4), plot(V(:,1),'ko-');title('PCA coeff')
+        
+        figure('color',[1 1 1],'Unit','normalized','Position',[0.1 0.01 0.4 0.9]),
+        imagesc(r(pc,pc)), title(['pcacov ',nameEpochs{n}])
+        set(gca,'Xtick',1:size(r,1));set(gca,'XtickLabel',id(pc),'FontSize',6);
+        set(gca,'Ytick',1:size(r,1));set(gca,'YtickLabel',tinfo(id(pc)),'FontSize',6);
+    end
+    % --------------------------------------------------------------------
+    
+    %
+    [gl,dev,stats] = glmfit(y,x);
+    xfit = glmval(gl,y, 'identity');
+    figure('color',[1 1 1],'Unit','normalized','Position',[0.1 0.1 0.4 0.8]),
+    subplot(3,3,1), plot(x,xfit,'k.'), ylabel('predicted')
+    title(sprintf('fitted expe %1.3f',sqrt(sum((x-xfit).^2))/length(x)))
+    line([min(x),max(x)],[min(x),max(x)],'Color',[0.5 0.5 0.5])
+    
+    subplot(3,3,2), plot(stats.beta,'ko-','markerfacecolor','k')
+    id=find(abs(stats.beta)>3); title([Dir.path(man),{' '},Dir.name(man)])
+    hold on, plot(id,stats.beta(id),'go','markerfacecolor','g')
+    subplot(3,3,3), text(0,0.5,[{['DURATION of current ',nameEpochs{n},' predicted by:']};' ';tinfo(id)]);axis off
+    
+    % get expe from same or different mouse
+    Umice=unique(Dir.name); Umice(strcmp(Umice,Dir.name{man}))=[];
+    aid=1:length(Dir.path);
+    id=find(strcmp(Dir.name{man},Dir.name));
+    aid(id)=[];
+    id(id==man)=[];
+    a=0;i=1;
+    while a < 3
+        % get other expe, clean and zscore
+        try
+            test2=MultMat{id(i),n};
+            test2(isinf(test2))=0;
+            test2(isnan(test2))=0;
+            if dozscore, test2=zscore(test2); end
+            x2=(test2(:,1)); y2=(test2(:,2:end));
+            
+            xfit2 = glmval(gl,y2, 'identity');
+            subplot(3,3,4+a), plot(x2,xfit2,'k.'),ylabel('predicted')
+            title([Dir.name{id(i)},sprintf(', other expe %1.3f',sqrt(sum((x2-xfit2).^2))/length(x2))])
+            line([min(x2),max(x2)],[min(x2),max(x2)],'Color',[0.5 0.5 0.5])
+            a=a+1;
+        end
+        i=i+1;
+    end
+    
+    mi=Umice(randperm(length(Umice)));
+    a=0;i=1;
+    while a < 3
+        %get other expe, clean and zscore
+        try
+            test2=MultMat{min(find(strcmp(mi{i},Dir.name))),n};
+            test2(isinf(test2))=0;
+            test2(isnan(test2))=0;
+            if dozscore, test2=zscore(test2); end
+            x2=(test2(:,1)); y2=(test2(:,2:end));
+            
+            xfit2 = glmval(gl,y2, 'identity');
+            subplot(3,3,7+a), plot(x2,xfit2,'b.'),xlabel('real');ylabel('predicted')
+            title([mi{i},sprintf(' %1.3f',sqrt(sum((x2-xfit2).^2))/length(x2))])
+            line([min(x2),max(x2)],[min(x2),max(x2)],'Color',[0.5 0.5 0.5])
+            a=a+1;
+        end
+        i=i+1;
+    end
+    
+    % save Figure
+    saveFigure(gcf,['AnalyMultiVar',num2str(man),'-',Dir.name{man}],FolderToSave)
+end

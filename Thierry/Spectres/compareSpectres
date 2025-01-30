@@ -1,0 +1,110 @@
+% Liste des enregistrements mutants
+enregistrements_mutants = { 
+    '/media/mobs/DataMOBS203/Trami_TG1_TG2_TG3_TG7_BaselineSleep_240628_091858/M1', 
+    '/media/mobs/DataMOBS203/Trami_TG4_TG8_TG9_BaselineSleep_240704_093657/M8/', 
+    '/media/mobs/DataMOBS203/Trami_TG1_TG7_TG8_TG9_BaselineSleep_240711_090852/M7', 
+    '/media/mobs/DataMOBS203/Trami_TG1_TG7_TG8_TG9_BaselineSleep_240711_090852/M9' 
+};
+
+% Liste des enregistrements contrôles
+enregistrements_controles = { 
+    '/media/mobs/DataMOBS203/TG1_TG2_BaselineSleep_240531_095224/M2/', 
+    '/media/mobs/DataMOBS203/Trami_TG2_TG3_TG4_TG5_BaselineSleep_240709_093745/M3', 
+    '/media/mobs/DataMOBS203/Trami_TG4_TG8_TG9_BaselineSleep_240705_100948/M4', 
+    '/media/mobs/DataMOBS203/Trami_TG5_BaselineSleep_240718_093343' 
+};
+
+% Appel de la fonction de comparaison des spectres
+compareSpectres(enregistrements_mutants, enregistrements_controles);
+
+% Fonction principale de comparaison des spectres mutants vs contrôles
+function compareSpectres(enregistrements_mutants, enregistrements_controles)
+    % Analyse et compare les spectres des mutants et des contrôles
+
+    % Calcul des spectres pour les mutants
+    [f_all_subjects, mean_spectra_mutants, std_spectra_mutants] = analyserGroupe(enregistrements_mutants);
+
+    % Calcul des spectres pour les contrôles
+    [~, mean_spectra_controles, std_spectra_controles] = analyserGroupe(enregistrements_controles);
+
+    % Création de la figure pour les comparaisons
+    figure;
+    
+    % Tracé pour chaque type de spectre (Wake, f^a, log10(mean), log-log)
+    titles = {'Wake - mean', 'Wake - f^a \times mean', 'Wake - log10(mean)', 'Wake - log-log'};
+    y_labels = {'Power (normalized)', 'Power (normalized)', 'Power (dB)', 'Power (log-log)'};
+    
+    for k = 1:4
+        subplot(1, 4, k), hold on;
+        
+        % Affichage pour les mutants
+        fill_between(f_all_subjects, mean_spectra_mutants(:, k), std_spectra_mutants(:, k), 'r');
+        plot(f_all_subjects, mean_spectra_mutants(:, k), 'r', 'LineWidth', 2, 'DisplayName', 'Mutants');
+        
+        % Affichage pour les contrôles
+        fill_between(f_all_subjects, mean_spectra_controles(:, k), std_spectra_controles(:, k), 'k');
+        plot(f_all_subjects, mean_spectra_controles(:, k), 'k', 'LineWidth', 2, 'DisplayName', 'Contrôles');
+        
+        title(titles{k});
+        xlabel('Fréquence (Hz)');
+        ylabel(y_labels{k});
+        legend show;
+    end
+end
+
+% Fonction d'analyse d'un groupe d'enregistrements
+function [f_all_subjects, mean_spectra, std_spectra] = analyserGroupe(enregistrements)
+    % Analyse un groupe d'enregistrements et calcule les spectres moyens et l'écart-type.
+    
+    % Initialisation des variables
+    StsdSomCxdeepHM = cell(1, length(enregistrements));
+    periods = struct();
+    individual_spectra = [];
+
+    % Charger et générer les tsd et les périodes pour chaque enregistrement
+    for i = 1:length(enregistrements)
+        accelero_path = fullfile(enregistrements{i}, 'SleepScoring_Accelero.mat');
+        if exist(accelero_path, 'file')
+            load(accelero_path, 'Wake');  
+            periods(i).Wake = Wake;
+        else
+            error(['Fichier SleepScoring_Accelero.mat introuvable pour : ', enregistrements{i}]);
+        end
+
+        data_path = fullfile(enregistrements{i}, 'SpectrumDataH', 'SpectrumSomCxdeepH.mat');
+        if exist(data_path, 'file')
+            load(data_path, 't', 'Sp', 'f');
+            StsdSomCxdeepHM{i} = tsd(t * 1E4, Sp);
+            f_all_subjects = f;  % Fréquences
+        else
+            error(['Fichier de spectre introuvable : ', data_path]);
+        end
+    end
+
+    % Paramètre de normalisation
+    a = 2;
+
+    % Calcul des spectres pour chaque intervalle de traitement
+    for i = 1:length(enregistrements)
+        % Calcul des spectres avec différentes méthodes
+        spectra_wake = mean(Data(Restrict(StsdSomCxdeepHM{i}, periods(i).Wake)), 1);
+        spectra_fa = f_all_subjects.^a .* spectra_wake;
+        spectra_log = 10 * log10(spectra_wake);
+        spectra_loglog = 10 * log10(spectra_wake);
+
+        % Stockage des spectres calculés
+        individual_spectra(i, :, 1) = spectra_wake / max(spectra_wake);    % Normalisation par le max
+        individual_spectra(i, :, 2) = spectra_fa / max(spectra_fa);
+        individual_spectra(i, :, 3) = spectra_log / max(spectra_log);
+        individual_spectra(i, :, 4) = spectra_loglog / max(spectra_loglog);
+    end
+
+    % Calcul des moyennes et des écarts-types pour chaque méthode
+    mean_spectra = squeeze(mean(individual_spectra, 1));
+    std_spectra = squeeze(std(individual_spectra, 0, 1));
+end
+
+% Fonction utilitaire pour ajouter une zone d'ombre pour l'écart-type
+function fill_between(x, y_mean, y_std, color)
+    fill([x; flipud(x)], [y_mean + y_std; flipud(y_mean - y_std)], color, 'FaceAlpha', 0.3, 'EdgeColor', 'none');
+end

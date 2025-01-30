@@ -1,0 +1,81 @@
+%%%%load des spectrums et variables (avoir fait les spectres avant)
+
+load('LFPData/DigInfo2.mat')
+load('SleepScoring_OBGamma.mat')
+load('ChannelsToAnalyse/VLPO.mat')
+TTLEpoch = thresholdIntervals(DigTSD,0.99,'Direction','Above');
+TTLEpoch_merged = mergeCloseIntervals(TTLEpoch,1e4);
+
+for k = 1:length(Start(TTLEpoch_merged))
+LittleEpoch = subset(TTLEpoch_merged,k);
+Freq_Stim(k) = round(1./(median(diff(Start(and(TTLEpoch,LittleEpoch),'s')))));
+Time_Stim(k) = min(Start(and(TTLEpoch,LittleEpoch)));
+end
+
+
+events=Start(TTLEpoch_merged)/1E4;
+%%%%%%%%%
+%%Pour checker combien de Stilm par période
+
+%Nb de stim
+Stim=size(Start(TTLEpoch_merged))
+%Nb de stim pendant le REM
+StimREM=size(Start(and(TTLEpoch_merged,REMEpoch)))
+%Nb de stim pendant le SWS
+StimSWS=size(Start(and(TTLEpoch_merged,SWSEpoch)))
+%Nb de stim pendant Wake
+StimWAKE=size(Start(and(TTLEpoch_merged,Wake)))
+%Matrice contenant les 4 valeurs précédentes 
+MStim=[Stim StimREM StimSWS StimWAKE]
+
+%%%Pour le VLPO
+load('VLPO_Low_Spectrum')
+SpectroV=Spectro
+%%AveargeSpectre Stim REM (0)
+[MV,SV,tV]=AverageSpectrogram(tsd(SpectroV{2}*1E4,10*log10(SpectroV{1})),SpectroV{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+title('VLPO REM')
+%%AverageSpectre Stim SWS 
+[MV,SV,tV]=AverageSpectrogram(tsd(SpectroV{2}*1E4,10*log10(SpectroV{1})),SpectroV{3},Restrict(ts(events*1E4),SWSEpoch),500,300);
+title('VLPO SWS')
+%%AverageSpectre Stim Wake
+[MV,SV,tV]=AverageSpectrogram(tsd(SpectroV{2}*1E4,10*log10(SpectroV{1})),SpectroV{3},Restrict(ts(events*1E4),Wake),500,300);
+title('VLPO Wake')
+
+%%%Pour le bulbe
+load('Bulb_deep_Low_Spectrum.mat')
+SpectroBl=Spectro;
+%%AveargeSpectre Stim REM (0)
+[Mbl,Sbl,tbl]=AverageSpectrogram(tsd(SpectroBl{2}*1E4,10*log10(SpectroBl{1})),SpectroBl{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+title('Bulb REM')
+%%AverageSpectre Stim SWS 
+[Mbl,Sbl,tbl]=AverageSpectrogram(tsd(SpectroBl{2}*1E4,10*log10(SpectroBl{1})),SpectroBl{3},Restrict(ts(events*1E4),SWSEpoch),500,300);
+title('Bulb SWS')
+%%AverageSpectre Stim Wake
+[Mbl,Sbl,tbl]=AverageSpectrogram(tsd(SpectroBl{2}*1E4,10*log10(SpectroBl{1})),SpectroBl{3},Restrict(ts(events*1E4),Wake),500,300);
+title('Bulb Wake')
+
+%%%Pour le PFc
+load('PFCx_deep_Low_Spectrum.mat')
+SpectroP=Spectro;
+%%AveargeSpectre Stim REM (0)
+[MP,SP,tP]=AverageSpectrogram(tsd(SpectroP{2}*1E4,10*log10(SpectroP{1})),SpectroP{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+title('PFC REM')
+%%AverageSpectre Stim SWS 
+[MP,SP,tP]=AverageSpectrogram(tsd(SpectroP{2}*1E4,10*log10(SpectroP{1})),SpectroP{3},Restrict(ts(events*1E4),SWSEpoch),500,300);
+title('PFC SWS')
+%%AverageSpectre Stim Wake
+[MP,SP,tP]=AverageSpectrogram(tsd(SpectroP{2}*1E4,10*log10(SpectroP{1})),SpectroP{3},Restrict(ts(events*1E4),Wake),500,300);
+title('PFC Wake')
+
+%%%Pour l'HPC (à changer si le load est différent)
+load('dHPC_sup_Low_Spectrum')
+SpectroH=Spectro
+%%AveargeSpectre Stim REM (0)
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+title('HPC REM')
+%%AverageSpectre Stim SWS 
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),SWSEpoch),500,300);
+title('HPC SWS')
+%%AverageSpectre Stim Wake
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),Wake),500,300);
+title('HPC SWS')

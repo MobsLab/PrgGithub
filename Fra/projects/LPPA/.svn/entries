@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="15"
+   name=""
+   committed-date="2006-06-09T10:59:02.976581Z"
+   url="file:///home/battagli/svn/matlab/trunk/projects/LPPA"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="PfcHcCohgram.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="64262d23e987ee81b3a9402b1d8a374d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PfcHcSpecgramGlobal.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6856e7f87c906022f1a2bcc8d96112d5"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="12"
+   name="behavEpochs.m"
+   text-time="2006-06-06T06:42:17.000000Z"
+   committed-date="2006-06-05T20:43:38.210636Z"
+   checksum="d65dbfa1156e2ad4a69b59bd1b6a1ab6"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-06T06:42:16.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PfcHcEEGTraces2.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6405b2be40076c42e7c3314f7f8b1c1a"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PfcHcTrigCohgram2.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="3ee49ce030caf155a0ae51f3628b8e73"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PostRewardTimes.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="74f9452ffb44403b435e3ef27cd88990"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="13"
+   name="findDeltaEpochs.m"
+   text-time="2006-06-06T15:34:25.000000Z"
+   committed-date="2006-06-06T20:29:23.516627Z"
+   checksum="9430b3cd9229e07d6f4170389ef8aa1a"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="SpectrumTrial.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="c91ea16c328d850635ac2961074fd298"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="positionResources.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="4fc9951f1b2d9cf4a0f0d592a7ca98fb"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makePosterFigures.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="7ce9693b8a36bd3969eca3d69a7daace"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ShowSpectrumTrial.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="8129162009559666644a9c35e4c539fc"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="scatterPlaceFields.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6670e564791e6f79d4387088ef17d597"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="10"
+   name="basicPETH.m"
+   text-time="2006-06-06T06:42:17.000000Z"
+   committed-date="2006-06-05T15:42:33.030568Z"
+   checksum="95da3e6dfbe0fea3c01dfb05ca8b20de"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-06T06:42:17.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeSpikeData.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ad66568ad425747f649817e924ff99bb"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DisplayCohgram.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="996edd7bf56db5403d3a804d58a9cced"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="15"
+   name="LPPAReactRateBinned.m"
+   text-time="2006-06-07T15:50:05.000000Z"
+   committed-date="2006-06-09T10:59:02.976581Z"
+   checksum="67237789ab4f1b0f2ae5760dd90a915f"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="3"
+   name="leftrightPETH.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-27T13:21:27.549959Z"
+   checksum="4ad540640392c202cef3a18365ba334f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="14"
+   name="SleepSpecgramGlobal.m"
+   text-time="2006-06-06T20:35:55.000000Z"
+   committed-date="2006-06-06T20:35:32.089980Z"
+   checksum="21bcdbfd41db7fe9b50860b82c8ece2d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-06T20:35:55.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PfcHcCohgramByTrial.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="d83fa34e00a2b1df29c088d0077ad6fc"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="computeBinnedVelocity.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="0cfd9e0c0f868c0b04907c0439feaa81"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="SpectrumTrial2.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a2de706030f6cda9afe04b5deadfaaef"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PfcHcCohgramByPostTrial.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="76443ad45b504776314376ca6d72bc10"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PfcHcSpecgramTrials.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="b9638b4b64a53456132e604f07b56f55"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="3"
+   name="correctErrorPrevTrialPETH.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-27T13:21:27.549959Z"
+   checksum="ce45eb52aa0d404c5d7cfd1924b5534a"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="doSpectrum.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="66a9a704668e29ce48936ed1458698ee"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="15"
+   name="getEVLPPA.m"
+   text-time="2006-06-07T14:35:37.000000Z"
+   committed-date="2006-06-09T10:59:02.976581Z"
+   checksum="8d22c7d639144a9886115ea0f16d5f6e"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="13"
+   name="LPPAReactRate.m"
+   text-time="2006-06-06T17:38:50.000000Z"
+   committed-date="2006-06-06T20:29:23.516627Z"
+   checksum="fd293c31c906d6c203dd91a223ce5d20"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="spectrumTrial.m.bk"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="fdb0249be386beb712c8a7dad32a011f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="behaviorResources.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e2bdfc5737f66fa07600aa7629a53752"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="3"
+   name="correctErrorPETH.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-27T13:21:27.549959Z"
+   checksum="2e053c08aa9c857fa327304271c7fce0"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="15"
+   name="ReactRPairsLPPA.m"
+   text-time="2006-06-07T14:35:22.000000Z"
+   committed-date="2006-06-09T10:59:02.976581Z"
+   checksum="05b54a890f2a2126418b4d03ecd3aaa0"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="13"
+   name="basicFiringStats.m"
+   text-time="2006-06-06T16:41:52.000000Z"
+   committed-date="2006-06-06T20:29:23.516627Z"
+   checksum="9c52325e4cb3b69c77223680fc439637"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="15"
+   name="LPPAdoReactRateFig.m"
+   text-time="2006-06-07T17:39:13.000000Z"
+   committed-date="2006-06-09T10:59:02.976581Z"
+   checksum="626f64ce1f2cddd09c12d8861c5f1ec7"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="13"
+   name="LPPAReactRateDelta.m"
+   text-time="2006-06-06T17:52:20.000000Z"
+   committed-date="2006-06-06T20:29:23.516627Z"
+   checksum="38055e1b4e29a801b18d7dd640ab1422"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="HcPfcPowerCorrelation.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="cc559698f980b7f541ecba59094ba8f4"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PfcHcCohgramGlobal.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="64262d23e987ee81b3a9402b1d8a374d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DisplaySpeedThetaCoh.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="24e0d946deef963427bd1c26e97a35c2"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PfcHcEEGTraces.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a55a13161067e63503a5731bfffd8a91"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="10"
+   name="YMProcessPosFile.m"
+   text-time="2006-06-06T06:42:17.000000Z"
+   committed-date="2006-06-05T15:42:33.030568Z"
+   checksum="c956de3064954590ca2d77eb63f14972"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-06T06:42:17.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PfcHcTrigCohgram.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="55a74cab4f2285923985a51bf0d92088"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="5"
+   name="TODO"
+   text-time="2006-06-01T14:34:44.000000Z"
+   committed-date="2006-06-04T15:52:14.823163Z"
+   checksum="2964a9e3df8eb9ca81c7993f9eacc825"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="HcPfcPowerCorrelationTrials.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="36ddef4ea1032b140b964fb04c1debec"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="readRunsFile.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1a93cff9b31fdc0a85d7427ac56de5c9"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+</wc-entries>

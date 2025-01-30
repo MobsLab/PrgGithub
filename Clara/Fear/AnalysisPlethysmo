@@ -1,0 +1,12 @@
+
+
+sham=[280:290];
+bulb=[269:279];
+allmice=[sham,bulb];
+
+
+PathData='/media/DataMobs31/Plethysmo/Data respi/ext_downsampled/';
+
+for i=1:length(allmice)
+
+end

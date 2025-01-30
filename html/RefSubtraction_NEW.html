@@ -1,0 +1,983 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>RefSubtraction_NEW</title><meta name="generator" content="MATLAB 7.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-12-16"><meta name="DC.source" content="RefSubtraction_NEW.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">parametres</a></li><li><a href="#4">begin</a></li><li><a href="#6">Local support functions</a></li></ul></div><pre class="codeinput"><span class="comment">%RefSubtraction - for binary file: the values of specified channels will</span>
+<span class="comment">%                    be substracted by the values of the reference channel</span>
+<span class="comment">%                    and a copy of the original file will be saved</span>
+<span class="comment">%                    (if 'overwrite' is 1,no original file saved)</span>
+<span class="comment">%</span>
+<span class="comment">%  USAGE</span>
+<span class="comment">%</span>
+<span class="comment">%    RefSubtraction(filename, chnnels_to_treat, Reference_channel &lt;options&gt;)</span>
+<span class="comment">%</span>
+<span class="comment">%    filename           file to read</span>
+<span class="comment">%    chnnels_to_treat   channels to treat</span>
+<span class="comment">%    Reference_channel  the reference channel</span>
+<span class="comment">%    &lt;options&gt;      optional list of property-value pairs (see table below)</span>
+<span class="comment">%</span>
+<span class="comment">%    =========================================================================</span>
+<span class="comment">%     Properties    Values</span>
+<span class="comment">%    -------------------------------------------------------------------------</span>
+<span class="comment">%     'duration'    duration to read (in s) (default = Inf)</span>
+<span class="comment">%     'frequency'   sampling rate (in Hz) (default = 20kHz)</span>
+<span class="comment">%     'start'       position to start reading (in s) (default = 0)</span>
+<span class="comment">%     'nChannels'   number of data channels in the file (default = 32)</span>
+<span class="comment">%     'channels'    channels to read (default = all)</span>
+<span class="comment">%     'precision'   sample precision (default = 'int16')</span>
+<span class="comment">%     'overwrite'   if overwrite the original file.(default = 0, in this</span>
+<span class="comment">%                   case,a copy of original file will be saved with name:</span>
+<span class="comment">%                   filename_original.ext</span>
+<span class="comment">%    =========================================================================</span>
+
+<span class="comment">% This programme is base on the 'LoadBinary' wrote by Micha&euml;l Zugaro</span>
+<span class="comment">% Kejian, Laboratoires MOBS, ESPCI-ParisTech 08.04.2015</span>
+
+<span class="keyword">function</span> RefSubtraction(filename,nChannels,nSouris,varargin)
+</pre><pre class="codeinput"><span class="comment">%channels in neuroscope language</span>
+start = 0;
+precision = <span class="string">'int16'</span>;
+skip = 0;
+duration = Inf;
+frequency = 20000;
+overwrite=0; <span class="comment">%keeps original file called _original</span>
+<span class="comment">%chs_to_treat = [0:7]+1;</span>
+<span class="comment">%Ref=23+1;</span>
+<span class="comment">%filename='FEAR-Mouse-248-26032015.fil';</span>
+</pre><h2>parametres<a name="3"></a></h2><pre class="codeinput"><span class="comment">%addpath('c:\Kejian_workfile_0403_copydat\necessary_files');</span>
+
+<span class="comment">% Parse options</span>
+
+<span class="keyword">for</span> i=1:4:nSouris*4
+    indice=ceil(i/4);
+    output_name{indice}=varargin{i};
+    <span class="comment">%add 1 to conform to the notation in matlab</span>
+    chs_to_preceed{indice}=varargin{i+1}+1;
+    chs_ref{indice}=varargin{i+2}+1;
+    chs_to_keep{indice}=varargin{i+3}+1;
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> i = nSouris*4+1:2:length(varargin),
+    <span class="keyword">if</span> ~ischar(varargin{i}),
+        error([<span class="string">'Parameter '</span> num2str(i+3) <span class="string">' is not a property (type ''help &lt;a href="matlab:help RefSubtraction"&gt;RefSubtraction&lt;/a&gt;'' for details).'</span>]);
+    <span class="keyword">end</span>
+    <span class="keyword">switch</span>(lower(varargin{i})),
+        <span class="keyword">case</span> <span class="string">'duration'</span>,
+            duration = varargin{i+1};
+            <span class="keyword">if</span> ~isdscalar(duration,<span class="string">'&gt;=0'</span>),
+                error(<span class="string">'Incorrect value for property ''duration'' (type ''help &lt;a href="matlab:help RefSubtraction"&gt;RefSubtraction&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">case</span> <span class="string">'frequency'</span>,
+            frequency = varargin{i+1};
+            <span class="keyword">if</span> ~isdscalar(frequency,<span class="string">'&gt;0'</span>),
+                error(<span class="string">'Incorrect value for property ''frequency'' (type ''help &lt;a href="matlab:help RefSubtraction"&gt;RefSubtraction&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">case</span> <span class="string">'start'</span>,
+            start = varargin{i+1};
+            <span class="keyword">if</span> ~isdscalar(start),
+                error(<span class="string">'Incorrect value for property ''start'' (type ''help &lt;a href="matlab:help RefSubtraction"&gt;RefSubtraction&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> start &lt; 0, start = 0; <span class="keyword">end</span>
+        <span class="keyword">case</span> <span class="string">'precision'</span>,
+            precision = varargin{i+1};
+            <span class="keyword">if</span> ~isstring(precision),
+                error(<span class="string">'Incorrect value for property ''precision'' (type ''help &lt;a href="matlab:help RefSubtraction"&gt;RefSubtraction&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">case</span> <span class="string">'overwrite'</span>,
+            overwrite = varargin{i+1};
+            <span class="keyword">if</span> ~isdscalar(overwrite),
+                error(<span class="string">'Incorrect value for property ''overwrite'', (type ''help &lt;a href="matlab:help RefSubtraction"&gt;RefSubtraction&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">otherwise</span>,
+            error([<span class="string">'Unknown property '''</span> num2str(varargin{i}) <span class="string">''' (type ''help &lt;a href="matlab:help RefSubtraction"&gt;RefSubtraction&lt;/a&gt;'' for details).'</span>]);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+
+channels=[];
+<span class="comment">% load all channels, it's more efficient</span>
+<span class="keyword">if</span> isempty(channels),
+    channels = 1:nChannels;
+<span class="keyword">end</span>
+
+<span class="comment">% Check consistency between channel IDs and number of channels</span>
+<span class="keyword">if</span> any(channels&gt;nChannels),
+    error(<span class="string">'Cannot load specified channels (listed channel IDs inconsistent with total number of channels).'</span>);
+<span class="keyword">end</span>
+
+sizeInBytes = 0;
+<span class="keyword">switch</span> precision,
+    <span class="keyword">case</span> {<span class="string">'uchar'</span>,<span class="string">'unsigned char'</span>,<span class="string">'schar'</span>,<span class="string">'signed char'</span>,<span class="string">'int8'</span>,<span class="string">'integer*1'</span>,<span class="string">'uint8'</span>,<span class="string">'integer*1'</span>},
+        sizeInBytes = 1;
+    <span class="keyword">case</span> {<span class="string">'int16'</span>,<span class="string">'integer*2'</span>,<span class="string">'uint16'</span>,<span class="string">'integer*2'</span>},
+        sizeInBytes = 2;
+    <span class="keyword">case</span> {<span class="string">'int32'</span>,<span class="string">'integer*4'</span>,<span class="string">'uint32'</span>,<span class="string">'integer*4'</span>,<span class="string">'single'</span>,<span class="string">'real*4'</span>,<span class="string">'float32'</span>,<span class="string">'real*4'</span>},
+        sizeInBytes = 4;
+    <span class="keyword">case</span> {<span class="string">'int64'</span>,<span class="string">'integer*8'</span>,<span class="string">'uint64'</span>,<span class="string">'integer*8'</span>,<span class="string">'double'</span>,<span class="string">'real*8'</span>,<span class="string">'float64'</span>,<span class="string">'real*8'</span>},
+        sizeInBytes = 8;
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> ~exist(filename),
+    error([<span class="string">'File '''</span> filename <span class="string">''' not found.'</span>]);
+<span class="keyword">end</span>
+
+<span class="comment">% if overwrite ~=0 &amp; ~=1</span>
+<span class="comment">%     error('overwrite should be 0 or 1')</span>
+<span class="comment">% end</span>
+</pre><pre class="codeoutput">Input argument "nSouris" is undefined.
+
+Error in ==&gt; RefSubtraction_NEW at 51
+for i=1:4:nSouris*4
+</pre><h2>begin<a name="4"></a></h2><pre class="codeinput">tic
+
+[pathstr,name,ext]=fileparts(filename);
+
+
+<span class="keyword">if</span> overwrite == 0
+    fidR=fopen(filename,<span class="string">'r'</span>);
+    <span class="keyword">for</span> i=1:nSouris
+        fidW{i}=fopen(fullfile(pathstr,[output_name{i},<span class="string">'.new'</span>]),<span class="string">'w'</span>);
+        <span class="keyword">if</span> fidW{i} == -1
+            error([<span class="string">'Cannot write '</span>,fullfile(pathstr,[output_name{i},<span class="string">'_REF'</span>,num2str(Ref-1),ext]),<span class="string">'.'</span>]);
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">else</span>
+    fidR=fopen(filename,<span class="string">'r+'</span>);
+    fidW=fidR;
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> fidR == -1
+    error([<span class="string">'Cannot read '</span>,filename,<span class="string">'.'</span>]);
+<span class="keyword">end</span>
+
+
+
+<span class="comment">% Position file index for reading</span>
+start = floor(start*frequency)*nChannels*sizeInBytes;
+status = fseek(fidR,start,<span class="string">'bof'</span>);
+<span class="keyword">if</span> status ~= 0,
+    fclose(fidR);
+    <span class="keyword">if</span> overwrite==0 fclose(fidW); <span class="keyword">end</span>
+    error(<span class="string">'Could not start reading (possible reasons include trying to read past the end of the file).'</span>);
+<span class="keyword">end</span>
+
+
+<span class="comment">% determinate the real duration of the file</span>
+<span class="keyword">if</span> isinf(duration),
+    <span class="comment">% Determine number of samples when duration is 'inf'</span>
+    fileStart = ftell(fidR); <span class="comment">%start entred</span>
+    status = fseek(fidR,0,<span class="string">'eof'</span>); <span class="comment">%end</span>
+    <span class="keyword">if</span> status ~= 0,
+        fclose(fidR);
+        <span class="keyword">if</span> overwrite==0 fclose(fidW); <span class="keyword">end</span>
+        error(<span class="string">'Error reading the data file (possible reasons include trying to read past the end of the file).'</span>);
+    <span class="keyword">end</span>
+    fileStop = ftell(fidR);
+    nSamplesPerChannel = (fileStop-fileStart)/nChannels/sizeInBytes;
+    duration = nSamplesPerChannel/frequency;
+    frewind(fidR);
+    status = fseek(fidR,start,<span class="string">'bof'</span>);
+    <span class="keyword">if</span> status ~= 0,
+        fclose(fidR);
+        <span class="keyword">if</span> overwrite==0 fclose(fidW); <span class="keyword">end</span>
+        error(<span class="string">'Could not start reading (possible reasons include trying to read past the end of the file).'</span>);
+    <span class="keyword">end</span>
+<span class="keyword">else</span>
+    nSamplesPerChannel = round(frequency*duration);
+    <span class="keyword">if</span> nSamplesPerChannel ~= frequency*duration,
+        <span class="comment">%  		disp(['Warning: rounding duration (' num2str(duration,'%.15g') ' -&gt; ' num2str(nSamplesPerChannel/frequency,'%.15g') ')']);</span>
+        duration = nSamplesPerChannel/frequency;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+
+
+<span class="comment">% For large amounts of data, read chunk by chunk</span>
+
+maxSamplesPerChunk = 100000;
+nSamples = nChannels*nSamplesPerChannel;
+<span class="keyword">if</span> nSamples &gt; maxSamplesPerChunk,
+    <span class="comment">% Determine chunk duration and number of chunks</span>
+    nSamplesPerChunk = floor(maxSamplesPerChunk/nChannels)*nChannels;
+    durationPerChunk = nSamplesPerChunk/frequency/nChannels;
+    nChunks = floor(duration/durationPerChunk);
+    <span class="comment">% Read all chunks</span>
+    i = 1;
+    <span class="keyword">for</span> j = 1:nChunks,
+        d = LoadBinaryChunk(fidR,<span class="string">'frequency'</span>,frequency,<span class="string">'nChannels'</span>,nChannels,<span class="string">'channels'</span>,channels,<span class="string">'duration'</span>,durationPerChunk,<span class="string">'skip'</span>,skip);
+        [m,n] = size(d);
+        <span class="keyword">if</span> m == 0, <span class="keyword">break</span>; <span class="keyword">end</span>
+        d(:,chs_to_treat)=d(:,chs_to_treat)-d(:,Ref)*ones(1,length(chs_to_treat)); <span class="comment">% to have the same dimension by using a multiplication of ones</span>
+
+
+        fwrite(fidW,d',precision);
+    <span class="keyword">end</span>
+    <span class="comment">% If the data size is not a multiple of the chunk size, read the remainder</span>
+    remainder = duration - nChunks*durationPerChunk;
+    <span class="keyword">if</span> remainder ~= 0,
+        d = LoadBinaryChunk(fidR,<span class="string">'frequency'</span>,frequency,<span class="string">'nChannels'</span>,nChannels,<span class="string">'channels'</span>,channels,<span class="string">'duration'</span>,remainder,<span class="string">'skip'</span>,skip);
+        [m,n] = size(d);
+        <span class="keyword">if</span> m ~= 0,
+            d(:,chs_to_treat)=d(:,chs_to_treat)-d(:,Ref)*ones(1,length(chs_to_treat));
+
+            fwrite(fidW,d',precision);
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">else</span>
+    d = fread(fidR,[nChannels frequency*duration],precision);
+    d=d';
+    d(:,chs_to_treat)=d(:,chs_to_treat)-d(:,Ref)*ones(1,length(chs_to_treat));
+
+    fwrite(fidW,d',precision);
+<span class="keyword">end</span>
+
+<span class="comment">%close</span>
+fclose(fidR);
+<span class="keyword">if</span> overwrite==0 fclose(fidW); <span class="keyword">end</span>
+
+<span class="comment">%rename</span>
+<span class="keyword">if</span> overwrite == 0
+    <span class="keyword">if</span> exist(fullfile(pathstr,[name,<span class="string">'_original'</span>,ext]))~=2 <span class="comment">% if there is not already a copy file</span>
+        display(filename);
+        display(fullfile(pathstr,[name,<span class="string">'_original'</span>,ext]));
+        movefile(filename, fullfile(pathstr,[name,<span class="string">'_original'</span>,ext]));
+    <span class="keyword">end</span>
+    movefile(fullfile(pathstr,[name,<span class="string">'.new'</span>]),fullfile(pathstr,[name,ext]));
+<span class="keyword">end</span>
+
+display(<span class="string">'done!find the treated file at the same path'</span>);
+toc
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><h2>Local support functions<a name="6"></a></h2><pre class="codeinput"><span class="keyword">function</span> test = isdscalar(x,varargin)
+
+<span class="comment">% Check number of parameters</span>
+<span class="keyword">if</span> nargin &lt; 1,
+    error(<span class="string">'Incorrect number of parameters (type ''help &lt;a href="matlab:help isdscalar"&gt;isdscalar&lt;/a&gt;'' for details).'</span>);
+<span class="keyword">end</span>
+
+<span class="comment">% Test: double, scalar</span>
+test = isa(x,<span class="string">'double'</span>) &amp; isscalar(x);
+
+<span class="comment">% Ignore NaN</span>
+x = x(~isnan(x));
+
+<span class="comment">% Optional tests</span>
+<span class="keyword">for</span> i = 1:length(varargin),
+    <span class="keyword">try</span>
+        <span class="keyword">if</span> ~eval([<span class="string">'x'</span> varargin{i} <span class="string">';'</span>]), test = false; <span class="keyword">end</span>
+    <span class="keyword">catch</span> err
+        error([<span class="string">'Incorrect test '''</span> varargin{i} <span class="string">''' (type ''help &lt;a href="matlab:help isdscalar"&gt;isdscalar&lt;/a&gt;'' for details).'</span>]);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> test = isiscalar(x,varargin)
+
+<span class="comment">% Check number of parameters</span>
+<span class="keyword">if</span> nargin &lt; 1,
+    error(<span class="string">'Incorrect number of parameters (type ''help &lt;a href="matlab:help isiscalar"&gt;isiscalar&lt;/a&gt;'' for details).'</span>);
+<span class="keyword">end</span>
+
+<span class="comment">% Test: double, scalar</span>
+test = isa(x,<span class="string">'double'</span>) &amp; isscalar(x);
+
+<span class="comment">% Ignore NaN</span>
+x = x(~isnan(x));
+
+<span class="comment">% Test: integers?</span>
+test = test &amp; round(x)==x;
+
+<span class="comment">% Optional tests</span>
+<span class="keyword">for</span> i = 1:length(varargin),
+    <span class="keyword">try</span>
+        <span class="keyword">if</span> ~eval([<span class="string">'x'</span> varargin{i} <span class="string">';'</span>]), test = false; <span class="keyword">end</span>
+    <span class="keyword">catch</span> err
+        error([<span class="string">'Incorrect test '''</span> varargin{i} <span class="string">''' (type ''help &lt;a href="matlab:help isiscalar"&gt;isiscalar&lt;/a&gt;'' for details).'</span>]);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+
+<span class="keyword">function</span> test = isivector(x,varargin)
+
+<span class="comment">% Check number of parameters</span>
+<span class="keyword">if</span> nargin &lt; 1,
+    error(<span class="string">'Incorrect number of parameters (type ''help &lt;a href="matlab:help isivector"&gt;isivector&lt;/a&gt;'' for details).'</span>);
+<span class="keyword">end</span>
+
+<span class="comment">% Test: double, vector</span>
+test = isa(x,<span class="string">'double'</span>) &amp; isvector(x);
+
+<span class="comment">% Ignore NaNs</span>
+x = x(~isnan(x));
+
+<span class="comment">% Test: integers?</span>
+test = test &amp; all(round(x)==x);
+
+<span class="comment">% Optional tests</span>
+<span class="keyword">for</span> i = 1:length(varargin),
+    <span class="keyword">try</span>
+        <span class="keyword">if</span> varargin{i}(1) == <span class="string">'#'</span>,
+            <span class="keyword">if</span> length(x) ~= str2num(varargin{i}(2:end)), test = false; <span class="keyword">return</span>; <span class="keyword">end</span>
+        <span class="keyword">elseif</span> isstring(varargin{i},<span class="string">'&gt;'</span>,<span class="string">'&gt;='</span>,<span class="string">'&lt;'</span>,<span class="string">'&lt;='</span>),
+            dx = diff(x);
+            <span class="keyword">if</span> ~eval([<span class="string">'all(0'</span> varargin{i} <span class="string">'dx);'</span>]), test = false; <span class="keyword">return</span>; <span class="keyword">end</span>
+        <span class="keyword">else</span>
+            <span class="keyword">if</span> ~eval([<span class="string">'all(x'</span> varargin{i} <span class="string">');'</span>]), test = false; <span class="keyword">return</span>; <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">catch</span> err
+        error([<span class="string">'Incorrect test '''</span> varargin{i} <span class="string">''' (type ''help &lt;a href="matlab:help isivector"&gt;isivector&lt;/a&gt;'' for details).'</span>]);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+
+<span class="keyword">function</span> test = isstring(x,varargin)
+
+<span class="comment">% Check number of parameters</span>
+<span class="keyword">if</span> nargin &lt; 1,
+    error(<span class="string">'Incorrect number of parameters (type ''help &lt;a href="matlab:help isstring"&gt;isstring&lt;/a&gt;'' for details).'</span>);
+<span class="keyword">end</span>
+
+test = true;
+
+<span class="keyword">if</span> ~ischar(x),
+    test = false;
+    <span class="keyword">return</span>;
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> isempty(varargin), <span class="keyword">return</span>; <span class="keyword">end</span>
+
+<span class="keyword">for</span> i = 1:length(varargin),
+    <span class="keyword">if</span> strcmp(x,varargin{i}), <span class="keyword">return</span>; <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+test = false;
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> data = LoadBinaryChunk(fid,varargin)
+
+<span class="comment">% Default values</span>
+start = 0;
+fromCurrentIndex = true;
+nChannels = 1;
+precision = <span class="string">'int16'</span>;
+duration = 1;
+frequency = 20000;
+channels = [];
+
+<span class="keyword">if</span> nargin &lt; 1 | mod(length(varargin),2) ~= 0,
+    error(<span class="string">'Incorrect number of parameters (type ''help &lt;a href="matlab:help LoadBinaryChunk"&gt;LoadBinaryChunk&lt;/a&gt;'' for details).'</span>);
+<span class="keyword">end</span>
+
+<span class="comment">% Parse options</span>
+<span class="keyword">for</span> i = 1:2:length(varargin),
+    <span class="keyword">if</span> ~ischar(varargin{i}),
+        error([<span class="string">'Parameter '</span> num2str(i+3) <span class="string">' is not a property (type ''help &lt;a href="matlab:help LoadBinaryChunk"&gt;LoadBinaryChunk&lt;/a&gt;'' for details).'</span>]);
+    <span class="keyword">end</span>
+    <span class="keyword">switch</span>(lower(varargin{i})),
+        <span class="keyword">case</span> <span class="string">'duration'</span>,
+            duration = varargin{i+1};
+            <span class="keyword">if</span> ~isdscalar(duration,<span class="string">'&gt;=0'</span>),
+                error(<span class="string">'Incorrect value for property ''duration'' (type ''help &lt;a href="matlab:help LoadBinaryChunk"&gt;LoadBinaryChunk&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">case</span> <span class="string">'frequency'</span>,
+            frequency = varargin{i+1};
+            <span class="keyword">if</span> ~isdscalar(frequency,<span class="string">'&gt;0'</span>),
+                error(<span class="string">'Incorrect value for property ''frequency'' (type ''help &lt;a href="matlab:help LoadBinaryChunk"&gt;LoadBinaryChunk&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">case</span> <span class="string">'start'</span>,
+            start = varargin{i+1};
+            fromCurrentIndex = false;
+            <span class="keyword">if</span> ~isdscalar(start),
+                error(<span class="string">'Incorrect value for property ''start'' (type ''help &lt;a href="matlab:help LoadBinaryChunk"&gt;LoadBinaryChunk&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> start &lt; 0, start = 0; <span class="keyword">end</span>
+        <span class="keyword">case</span> <span class="string">'nchannels'</span>,
+            nChannels = varargin{i+1};
+            <span class="keyword">if</span> ~isiscalar(nChannels,<span class="string">'&gt;0'</span>),
+                error(<span class="string">'Incorrect value for property ''nChannels'' (type ''help &lt;a href="matlab:help LoadBinaryChunk"&gt;LoadBinaryChunk&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">case</span> <span class="string">'channels'</span>,
+            channels = varargin{i+1};
+            <span class="keyword">if</span> ~isivector(channels,<span class="string">'&gt;=0'</span>),
+                error(<span class="string">'Incorrect value for property ''channels'' (type ''help &lt;a href="matlab:help LoadBinaryChunk"&gt;LoadBinaryChunk&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">case</span> <span class="string">'precision'</span>,
+            precision = varargin{i+1};
+            <span class="keyword">if</span> ~isstring(precision),
+                error(<span class="string">'Incorrect value for property ''precision'' (type ''help &lt;a href="matlab:help LoadBinaryChunk"&gt;LoadBinaryChunk&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">case</span> <span class="string">'skip'</span>,
+            skip = varargin{i+1};
+            <span class="keyword">if</span> ~isiscalar(skip,<span class="string">'&gt;=0'</span>),
+                error(<span class="string">'Incorrect value for property ''skip'' (type ''help &lt;a href="matlab:help LoadBinaryChunk"&gt;LoadBinaryChunk&lt;/a&gt;'' for details).'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">otherwise</span>,
+            error([<span class="string">'Unknown property '''</span> num2str(varargin{i}) <span class="string">''' (type ''help &lt;a href="matlab:help LoadBinaryChunk"&gt;LoadBinaryChunk&lt;/a&gt;'' for details).'</span>]);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+sizeInBytes = 0;
+<span class="keyword">switch</span> precision,
+    <span class="keyword">case</span> {<span class="string">'uchar'</span>,<span class="string">'unsigned char'</span>,<span class="string">'schar'</span>,<span class="string">'signed char'</span>,<span class="string">'int8'</span>,<span class="string">'integer*1'</span>,<span class="string">'uint8'</span>,<span class="string">'integer*1'</span>},
+        sizeInBytes = 1;
+    <span class="keyword">case</span> {<span class="string">'int16'</span>,<span class="string">'integer*2'</span>,<span class="string">'uint16'</span>,<span class="string">'integer*2'</span>},
+        sizeInBytes = 2;
+    <span class="keyword">case</span> {<span class="string">'int32'</span>,<span class="string">'integer*4'</span>,<span class="string">'uint32'</span>,<span class="string">'integer*4'</span>,<span class="string">'single'</span>,<span class="string">'real*4'</span>,<span class="string">'float32'</span>,<span class="string">'real*4'</span>},
+        sizeInBytes = 4;
+    <span class="keyword">case</span> {<span class="string">'int64'</span>,<span class="string">'integer*8'</span>,<span class="string">'uint64'</span>,<span class="string">'integer*8'</span>,<span class="string">'double'</span>,<span class="string">'real*8'</span>,<span class="string">'float64'</span>,<span class="string">'real*8'</span>},
+        sizeInBytes = 8;
+<span class="keyword">end</span>
+
+<span class="comment">% Position file index for reading</span>
+<span class="keyword">if</span> ~fromCurrentIndex,
+    start = floor(start*frequency)*nChannels*sizeInBytes;
+    status = fseek(fid,start,<span class="string">'bof'</span>);
+    <span class="keyword">if</span> status ~= 0,
+        error(<span class="string">'Could not start reading (possible reasons include trying to read a closed file or past the end of the file).'</span>);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% Read data chunck</span>
+<span class="keyword">if</span> skip ~= 0,
+    data = fread(fid,[nChannels frequency*duration],precision,skip);
+<span class="keyword">else</span>
+    data = fread(fid,[nChannels frequency*duration],precision);
+<span class="keyword">end</span>;
+data=data';
+
+<span class="comment">% Keep only required channels</span>
+<span class="keyword">if</span> ~isempty(channels) &amp; ~isempty(data),
+    data = data(:,channels);
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.11<br></p></div><!--
+##### SOURCE BEGIN #####
+%RefSubtraction - for binary file: the values of specified channels will
+%                    be substracted by the values of the reference channel
+%                    and a copy of the original file will be saved
+%                    (if 'overwrite' is 1,no original file saved)
+%
+%  USAGE
+%
+%    RefSubtraction(filename, chnnels_to_treat, Reference_channel <options>)
+%
+%    filename           file to read
+%    chnnels_to_treat   channels to treat
+%    Reference_channel  the reference channel
+%    <options>      optional list of property-value pairs (see table below)
+%
+%    =========================================================================
+%     Properties    Values
+%    REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+%     'duration'    duration to read (in s) (default = Inf)
+%     'frequency'   sampling rate (in Hz) (default = 20kHz)
+%     'start'       position to start reading (in s) (default = 0)
+%     'nChannels'   number of data channels in the file (default = 32)
+%     'channels'    channels to read (default = all)
+%     'precision'   sample precision (default = 'int16')
+%     'overwrite'   if overwrite the original file.(default = 0, in this
+%                   case,a copy of original file will be saved with name:
+%                   filename_original.ext
+%    =========================================================================
+
+% This programme is base on the 'LoadBinary' wrote by Michaël Zugaro
+% Kejian, Laboratoires MOBS, ESPCI-ParisTech 08.04.2015
+
+function RefSubtraction(filename,nChannels,nSouris,varargin)
+%channels in neuroscope language
+start = 0;
+precision = 'int16';
+skip = 0;
+duration = Inf;
+frequency = 20000;
+overwrite=0; %keeps original file called _original
+%chs_to_treat = [0:7]+1;
+%Ref=23+1;
+%filename='FEAR-Mouse-248-26032015.fil';
+
+
+%% parametres
+
+%addpath('c:\Kejian_workfile_0403_copydat\necessary_files');
+
+% Parse options
+
+for i=1:4:nSouris*4
+    indice=ceil(i/4);
+    output_name{indice}=varargin{i};
+    %add 1 to conform to the notation in matlab
+    chs_to_preceed{indice}=varargin{i+1}+1;
+    chs_ref{indice}=varargin{i+2}+1;
+    chs_to_keep{indice}=varargin{i+3}+1;
+end
+
+for i = nSouris*4+1:2:length(varargin),
+    if ~ischar(varargin{i}),
+        error(['Parameter ' num2str(i+3) ' is not a property (type ''help <a href="matlab:help RefSubtraction">RefSubtraction</a>'' for details).']);
+    end
+    switch(lower(varargin{i})),
+        case 'duration',
+            duration = varargin{i+1};
+            if ~isdscalar(duration,'>=0'),
+                error('Incorrect value for property ''duration'' (type ''help <a href="matlab:help RefSubtraction">RefSubtraction</a>'' for details).');
+            end
+        case 'frequency',
+            frequency = varargin{i+1};
+            if ~isdscalar(frequency,'>0'),
+                error('Incorrect value for property ''frequency'' (type ''help <a href="matlab:help RefSubtraction">RefSubtraction</a>'' for details).');
+            end
+        case 'start',
+            start = varargin{i+1};
+            if ~isdscalar(start),
+                error('Incorrect value for property ''start'' (type ''help <a href="matlab:help RefSubtraction">RefSubtraction</a>'' for details).');
+            end
+            if start < 0, start = 0; end
+        case 'precision',
+            precision = varargin{i+1};
+            if ~isstring(precision),
+                error('Incorrect value for property ''precision'' (type ''help <a href="matlab:help RefSubtraction">RefSubtraction</a>'' for details).');
+            end
+        case 'overwrite',
+            overwrite = varargin{i+1};
+            if ~isdscalar(overwrite),
+                error('Incorrect value for property ''overwrite'', (type ''help <a href="matlab:help RefSubtraction">RefSubtraction</a>'' for details).');
+            end
+        otherwise,
+            error(['Unknown property ''' num2str(varargin{i}) ''' (type ''help <a href="matlab:help RefSubtraction">RefSubtraction</a>'' for details).']);
+    end
+end
+
+
+channels=[];
+% load all channels, it's more efficient
+if isempty(channels),
+    channels = 1:nChannels;
+end
+
+% Check consistency between channel IDs and number of channels
+if any(channels>nChannels),
+    error('Cannot load specified channels (listed channel IDs inconsistent with total number of channels).');
+end
+
+sizeInBytes = 0;
+switch precision,
+    case {'uchar','unsigned char','schar','signed char','int8','integer*1','uint8','integer*1'},
+        sizeInBytes = 1;
+    case {'int16','integer*2','uint16','integer*2'},
+        sizeInBytes = 2;
+    case {'int32','integer*4','uint32','integer*4','single','real*4','float32','real*4'},
+        sizeInBytes = 4;
+    case {'int64','integer*8','uint64','integer*8','double','real*8','float64','real*8'},
+        sizeInBytes = 8;
+end
+
+if ~exist(filename),
+    error(['File ''' filename ''' not found.']);
+end
+
+% if overwrite ~=0 & ~=1
+%     error('overwrite should be 0 or 1')
+% end
+
+
+%% begin
+tic
+
+[pathstr,name,ext]=fileparts(filename);
+
+
+if overwrite == 0
+    fidR=fopen(filename,'r');
+    for i=1:nSouris
+        fidW{i}=fopen(fullfile(pathstr,[output_name{i},'.new']),'w');
+        if fidW{i} == -1
+            error(['Cannot write ',fullfile(pathstr,[output_name{i},'_REF',num2str(Ref-1),ext]),'.']);
+        end
+    end
+else
+    fidR=fopen(filename,'r+');
+    fidW=fidR;
+end
+
+if fidR == -1
+    error(['Cannot read ',filename,'.']);
+end
+
+
+
+% Position file index for reading
+start = floor(start*frequency)*nChannels*sizeInBytes;
+status = fseek(fidR,start,'bof');
+if status ~= 0,
+    fclose(fidR);
+    if overwrite==0 fclose(fidW); end
+    error('Could not start reading (possible reasons include trying to read past the end of the file).');
+end
+
+
+% determinate the real duration of the file
+if isinf(duration),
+    % Determine number of samples when duration is 'inf'
+    fileStart = ftell(fidR); %start entred
+    status = fseek(fidR,0,'eof'); %end
+    if status ~= 0,
+        fclose(fidR);
+        if overwrite==0 fclose(fidW); end
+        error('Error reading the data file (possible reasons include trying to read past the end of the file).');
+    end
+    fileStop = ftell(fidR);
+    nSamplesPerChannel = (fileStop-fileStart)/nChannels/sizeInBytes;
+    duration = nSamplesPerChannel/frequency;
+    frewind(fidR);
+    status = fseek(fidR,start,'bof');
+    if status ~= 0,
+        fclose(fidR);
+        if overwrite==0 fclose(fidW); end
+        error('Could not start reading (possible reasons include trying to read past the end of the file).');
+    end
+else
+    nSamplesPerChannel = round(frequency*duration);
+    if nSamplesPerChannel ~= frequency*duration,
+        %  		disp(['Warning: rounding duration (' num2str(duration,'%.15g') ' -> ' num2str(nSamplesPerChannel/frequency,'%.15g') ')']);
+        duration = nSamplesPerChannel/frequency;
+    end
+end
+
+
+
+% For large amounts of data, read chunk by chunk
+
+maxSamplesPerChunk = 100000;
+nSamples = nChannels*nSamplesPerChannel;
+if nSamples > maxSamplesPerChunk,
+    % Determine chunk duration and number of chunks
+    nSamplesPerChunk = floor(maxSamplesPerChunk/nChannels)*nChannels;
+    durationPerChunk = nSamplesPerChunk/frequency/nChannels;
+    nChunks = floor(duration/durationPerChunk);
+    % Read all chunks
+    i = 1;
+    for j = 1:nChunks,
+        d = LoadBinaryChunk(fidR,'frequency',frequency,'nChannels',nChannels,'channels',channels,'duration',durationPerChunk,'skip',skip);
+        [m,n] = size(d);
+        if m == 0, break; end
+        d(:,chs_to_treat)=d(:,chs_to_treat)-d(:,Ref)*ones(1,length(chs_to_treat)); % to have the same dimension by using a multiplication of ones
+
+        
+        fwrite(fidW,d',precision);
+    end
+    % If the data size is not a multiple of the chunk size, read the remainder
+    remainder = duration - nChunks*durationPerChunk;
+    if remainder ~= 0,
+        d = LoadBinaryChunk(fidR,'frequency',frequency,'nChannels',nChannels,'channels',channels,'duration',remainder,'skip',skip);
+        [m,n] = size(d);
+        if m ~= 0,
+            d(:,chs_to_treat)=d(:,chs_to_treat)-d(:,Ref)*ones(1,length(chs_to_treat));
+
+            fwrite(fidW,d',precision);
+        end
+    end
+else
+    d = fread(fidR,[nChannels frequency*duration],precision);
+    d=d';
+    d(:,chs_to_treat)=d(:,chs_to_treat)-d(:,Ref)*ones(1,length(chs_to_treat));
+
+    fwrite(fidW,d',precision);
+end
+
+%close
+fclose(fidR);
+if overwrite==0 fclose(fidW); end
+
+%rename
+if overwrite == 0
+    if exist(fullfile(pathstr,[name,'_original',ext]))~=2 % if there is not already a copy file
+        display(filename);
+        display(fullfile(pathstr,[name,'_original',ext]));
+        movefile(filename, fullfile(pathstr,[name,'_original',ext]));
+    end
+    movefile(fullfile(pathstr,[name,'.new']),fullfile(pathstr,[name,ext]));
+end
+
+display('done!find the treated file at the same path');
+toc
+end
+
+
+
+%% Local support functions
+
+function test = isdscalar(x,varargin)
+
+% Check number of parameters
+if nargin < 1,
+    error('Incorrect number of parameters (type ''help <a href="matlab:help isdscalar">isdscalar</a>'' for details).');
+end
+
+% Test: double, scalar
+test = isa(x,'double') & isscalar(x);
+
+% Ignore NaN
+x = x(~isnan(x));
+
+% Optional tests
+for i = 1:length(varargin),
+    try
+        if ~eval(['x' varargin{i} ';']), test = false; end
+    catch err
+        error(['Incorrect test ''' varargin{i} ''' (type ''help <a href="matlab:help isdscalar">isdscalar</a>'' for details).']);
+    end
+end
+end
+
+function test = isiscalar(x,varargin)
+
+% Check number of parameters
+if nargin < 1,
+    error('Incorrect number of parameters (type ''help <a href="matlab:help isiscalar">isiscalar</a>'' for details).');
+end
+
+% Test: double, scalar
+test = isa(x,'double') & isscalar(x);
+
+% Ignore NaN
+x = x(~isnan(x));
+
+% Test: integers?
+test = test & round(x)==x;
+
+% Optional tests
+for i = 1:length(varargin),
+    try
+        if ~eval(['x' varargin{i} ';']), test = false; end
+    catch err
+        error(['Incorrect test ''' varargin{i} ''' (type ''help <a href="matlab:help isiscalar">isiscalar</a>'' for details).']);
+    end
+end
+end
+
+
+function test = isivector(x,varargin)
+
+% Check number of parameters
+if nargin < 1,
+    error('Incorrect number of parameters (type ''help <a href="matlab:help isivector">isivector</a>'' for details).');
+end
+
+% Test: double, vector
+test = isa(x,'double') & isvector(x);
+
+% Ignore NaNs
+x = x(~isnan(x));
+
+% Test: integers?
+test = test & all(round(x)==x);
+
+% Optional tests
+for i = 1:length(varargin),
+    try
+        if varargin{i}(1) == '#',
+            if length(x) ~= str2num(varargin{i}(2:end)), test = false; return; end
+        elseif isstring(varargin{i},'>','>=','<','<='),
+            dx = diff(x);
+            if ~eval(['all(0' varargin{i} 'dx);']), test = false; return; end
+        else
+            if ~eval(['all(x' varargin{i} ');']), test = false; return; end
+        end
+    catch err
+        error(['Incorrect test ''' varargin{i} ''' (type ''help <a href="matlab:help isivector">isivector</a>'' for details).']);
+    end
+end
+end
+
+
+function test = isstring(x,varargin)
+
+% Check number of parameters
+if nargin < 1,
+    error('Incorrect number of parameters (type ''help <a href="matlab:help isstring">isstring</a>'' for details).');
+end
+
+test = true;
+
+if ~ischar(x),
+    test = false;
+    return;
+end
+
+if isempty(varargin), return; end
+
+for i = 1:length(varargin),
+    if strcmp(x,varargin{i}), return; end
+end
+
+test = false;
+end
+
+function data = LoadBinaryChunk(fid,varargin)
+
+% Default values
+start = 0;
+fromCurrentIndex = true;
+nChannels = 1;
+precision = 'int16';
+duration = 1;
+frequency = 20000;
+channels = [];
+
+if nargin < 1 | mod(length(varargin),2) ~= 0,
+    error('Incorrect number of parameters (type ''help <a href="matlab:help LoadBinaryChunk">LoadBinaryChunk</a>'' for details).');
+end
+
+% Parse options
+for i = 1:2:length(varargin),
+    if ~ischar(varargin{i}),
+        error(['Parameter ' num2str(i+3) ' is not a property (type ''help <a href="matlab:help LoadBinaryChunk">LoadBinaryChunk</a>'' for details).']);
+    end
+    switch(lower(varargin{i})),
+        case 'duration',
+            duration = varargin{i+1};
+            if ~isdscalar(duration,'>=0'),
+                error('Incorrect value for property ''duration'' (type ''help <a href="matlab:help LoadBinaryChunk">LoadBinaryChunk</a>'' for details).');
+            end
+        case 'frequency',
+            frequency = varargin{i+1};
+            if ~isdscalar(frequency,'>0'),
+                error('Incorrect value for property ''frequency'' (type ''help <a href="matlab:help LoadBinaryChunk">LoadBinaryChunk</a>'' for details).');
+            end
+        case 'start',
+            start = varargin{i+1};
+            fromCurrentIndex = false;
+            if ~isdscalar(start),
+                error('Incorrect value for property ''start'' (type ''help <a href="matlab:help LoadBinaryChunk">LoadBinaryChunk</a>'' for details).');
+            end
+            if start < 0, start = 0; end
+        case 'nchannels',
+            nChannels = varargin{i+1};
+            if ~isiscalar(nChannels,'>0'),
+                error('Incorrect value for property ''nChannels'' (type ''help <a href="matlab:help LoadBinaryChunk">LoadBinaryChunk</a>'' for details).');
+            end
+        case 'channels',
+            channels = varargin{i+1};
+            if ~isivector(channels,'>=0'),
+                error('Incorrect value for property ''channels'' (type ''help <a href="matlab:help LoadBinaryChunk">LoadBinaryChunk</a>'' for details).');
+            end
+        case 'precision',
+            precision = varargin{i+1};
+            if ~isstring(precision),
+                error('Incorrect value for property ''precision'' (type ''help <a href="matlab:help LoadBinaryChunk">LoadBinaryChunk</a>'' for details).');
+            end
+        case 'skip',
+            skip = varargin{i+1};
+            if ~isiscalar(skip,'>=0'),
+                error('Incorrect value for property ''skip'' (type ''help <a href="matlab:help LoadBinaryChunk">LoadBinaryChunk</a>'' for details).');
+            end
+        otherwise,
+            error(['Unknown property ''' num2str(varargin{i}) ''' (type ''help <a href="matlab:help LoadBinaryChunk">LoadBinaryChunk</a>'' for details).']);
+    end
+end
+
+sizeInBytes = 0;
+switch precision,
+    case {'uchar','unsigned char','schar','signed char','int8','integer*1','uint8','integer*1'},
+        sizeInBytes = 1;
+    case {'int16','integer*2','uint16','integer*2'},
+        sizeInBytes = 2;
+    case {'int32','integer*4','uint32','integer*4','single','real*4','float32','real*4'},
+        sizeInBytes = 4;
+    case {'int64','integer*8','uint64','integer*8','double','real*8','float64','real*8'},
+        sizeInBytes = 8;
+end
+
+% Position file index for reading
+if ~fromCurrentIndex,
+    start = floor(start*frequency)*nChannels*sizeInBytes;
+    status = fseek(fid,start,'bof');
+    if status ~= 0,
+        error('Could not start reading (possible reasons include trying to read a closed file or past the end of the file).');
+    end
+end
+
+% Read data chunck
+if skip ~= 0,
+    data = fread(fid,[nChannels frequency*duration],precision,skip);
+else
+    data = fread(fid,[nChannels frequency*duration],precision);
+end;
+data=data';
+
+% Keep only required channels
+if ~isempty(channels) & ~isempty(data),
+    data = data(:,channels);
+end
+end
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,795 @@
+%  ParcoursCompLFPLastLR
+% -------------------------------------------------------------------------
+
+try
+    cd H:\Data_Astros_Field
+    catch
+    cd /Users/karimbenchenane/Documents/Data/Lisa/Data_Astros_Field
+end
+
+
+% if 1
+%     
+% %                 load ResultsCompLFPGood
+%                 load ResultsCompLFPCross
+% %                 load ResultsCompLFPSpectre
+% %                 load ResultsCompLFP                             
+% 
+% 
+% else
+% ATTENTION au end
+
+try 
+    
+            load ResultsCompLFPGood
+
+catch
+
+
+            binCrossT=[];
+            binCrossT2=[];
+            binCohrT=[];
+            binCohrT2=[];
+            cellnamesCross={};
+            cellnamesCohr={};
+            NomSuccess={};
+            successCross={};
+            successCohr={};
+            RlagZero=[];
+            binS1T=[];
+            binS2T=[];
+
+            a=1;
+            k=1;
+            j=1;
+
+            try 
+                freq;
+                catch
+                freq=10000;
+            end
+
+
+
+
+            listdir=dir;
+
+            for i=1:length(listdir)
+
+                    try
+                        cd H:\Data_Astros_Field
+                        catch
+                        cd /Users/karimbenchenane/Documents/Data/Lisa/Data_Astros_Field
+                    end
+
+
+                    if listdir(i).isdir==1&listdir(i).name(1)~='.'
+
+                            %  	disp('ok step 1')
+
+                                eval (['cd ',listdir(i).name])
+                %                 pwd
+                            %     cd (listdir(i).name)
+
+                                        nom=listdir(i).name;
+                                        le=length(listdir(i).name);
+            % -------------------------------------------------------------------------
+
+                                        NomSuccess{a}=nom;
+                                        disp(nom)  
+
+            %  ------------------------------------------------------------------------
+            % Coherence
+            % ------------------------------------------------------------------------
+                                    try
+
+                                            [C,CP,f,p,phi,S1,S2,f2]=CoherencyAstroFieldforLoopLR;
+                                                close all
+                                                disp('Coherency ok')
+
+                                            [binCohr,lCohr]=PoolData(C,f,[0:0.005:0.1]);
+                                            binCohrT=[binCohrT;binCohr];
+                                                disp('PoolData Coherency ok')
+
+                                            [binCohr2,lCohr2]=PoolData(CP,f,[0:0.005:0.1]);
+                                            binCohrT2=[binCohrT2;binCohr2];
+                                                disp('PoolData Coherency2 ok')
+
+                                            [binS1,lS1]=PoolData(S1(f2<0.1),f2(f2<0.1),[0:0.01:0.1]);
+                                            binS1T=[binS1T;binS1];
+                                                
+                                                
+                                            [binS2,lS2]=PoolData(S2(f2<0.1),f2(f2<0.1),[0:0.01:0.1]);
+                                            binS2T=[binS2T;binS2];
+                                                
+                                                
+                                                
+                                                successCohr{a}='yes';
+                                                cellnamesCohr{j}=nom;
+                                                j=j+1;
+
+                                    catch
+
+            %                            binCohr=[];          % je voudrais pouvoir ajouter une ligne vide...
+            %                            binCohr2=[];
+            %                            binCohrT=[binCohrT;binCohr];
+            %                            binCohrT2=[binCohrT2;binCohr2];
+
+                                         successCohr{a}='no';
+                                         
+                                         
+                                         
+                                    end
+
+            % 
+            % -------------------------------------------------------------------------
+            % CrossCorrelogramme
+            % ------------------------------------------------------------------------
+
+
+                                    try
+                                        % Analyse du croscorrelogramme:
+
+                                        [Cr,Cp,P,lags,CRm,CRM,r,p]=CorrAstroFieldforLoopLR;
+                                            close all
+                                            disp('Corr ok')
+                                        [binCross,lCross]=PoolData(Cr,lags,[-200:5:200]);
+                                            disp('PoolData Corr ok')
+                                        [binCross2,lCross2]=PoolData(Cp,lags,[-200:5:200]);
+                                            disp('PoolData Corr ok')
+
+                                        binCrossT=[binCrossT;binCross];
+                                        binCrossT2=[binCrossT2;binCross2];
+                                        RlagZero=[RlagZero;[r p]];
+                                            disp('Data added ok')
+
+                                        successCross{a}='yes';
+                                        cellnamesCross{k}=nom;
+                                        k=k+1;
+
+
+                                    catch
+                            %             
+            %                             binCross=[];        %comment ajouter un vecteur vide?
+            %                             binCross2=[];
+            %                             binCrossT=[binCrossT;binCross];
+            %                             binCrossT2=[binCrossT2;binCross2];
+%                                         RlagZero=[RlagZero;[0 0]];
+
+                                        successCross{a}='no';
+
+
+                                    end   
+
+            % ------------------------------------------------------------------------
+
+
+                          a=a+1;
+
+
+                    end
+            end
+
+            % ------------------------------------------------------------------------
+            % Sauvegarde:ResultsCompLFP
+            % ------------------------------------------------------------------------
+
+            try
+                cd H:\Data_Astros_Field
+            catch
+                cd /Users/karimbenchenane/Documents/Data/Lisa/Data_Astros_Field
+            end
+
+            save ResultsCompLFPGood cellnamesCross cellnamesCohr NomSuccess binS1T binS2T lS1 lS2 binCrossT binCrossT2 binCohrT binCohrT2 lCross lCross2 lCohr lCohr2 successCross successCohr RlagZero
+
+            % ------------------------------------------------------------------------
+            % -------------------------------------------------------------------------
+
+end
+
+
+
+% end
+
+
+
+% ------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+% NomSuccess
+
+
+
+fid = fopen('NomSuccess','w');
+
+for i=1:length(NomSuccess)
+    
+    fprintf(fid,'%s\r\n',num2str(NomSuccess{i}));
+
+end
+
+fclose(fid);
+% -------------------------------------------------------------------------
+% successCross
+fid = fopen('successCross','w');
+
+for i=1:length(successCross)
+    
+    fprintf(fid,'%s\r\n',num2str(successCross{i}));
+
+end
+
+fclose(fid);
+% -------------------------------------------------------------------------
+% successCohr
+fid = fopen('successCohr','w');
+
+for i=1:length(successCohr)
+    
+    fprintf(fid,'%s\r\n',num2str(successCohr{i}));
+
+end
+
+fclose(fid);
+% -------------------------------------------------------------------------
+% cellnamesCohr
+fid = fopen('cellnamesCohr','w');
+
+for i=1:length(cellnamesCohr)
+    
+    fprintf(fid,'%s\r\n',num2str(cellnamesCohr{i}));
+
+end
+
+fclose(fid);
+% -------------------------------------------------------------------------
+% cellnamesCross
+fid = fopen('cellnamesCross','w');
+
+for i=1:length(cellnamesCross)
+    
+    fprintf(fid,'%s\r\n',num2str(cellnamesCross{i}));
+
+end
+
+fclose(fid);
+% -----------------------------------------------------------------------
+
+% RlagZero:
+
+fid = fopen('RlagZero','w');
+
+for i=1:length(RlagZero)
+    
+    fprintf(fid,'%s\r\n',num2str(RlagZero(i,1)));
+
+end
+
+fclose(fid);
+% -----------------------------------------------------------------------
+% PlagZero
+
+fid = fopen('PlagZero','w');
+
+for i=1:length(RlagZero)
+    
+    fprintf(fid,'%s\r\n',num2str(RlagZero(i,2)));
+
+end
+
+fclose(fid);
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+
+% ------------------------------------------------------------------------
+% FIGURES FINALES
+% ------------------------------------------------------------------------
+try
+	cd H:\Data_Astros_Field
+catch
+    cd /Users/karimbenchenane/Documents/Data/Lisa/Data_Astros_Field
+end
+
+% figure, imagesc(lCross,[1:size(binCrossT,1)],binCrossT)
+% hold on, line([0 0],[0.5 size(binCrossT,1)+05],'Color','k','linewidth',2)
+% 
+% figure,plot(lCross,mean(binCrossT))
+% savefigure(1,'CrossCorrTotColor','H:\Data_Astros_Field')
+% savefigure(2,'CrossCorrTotMean','H:\Data_Astros_Field')
+
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+% Modification Karim-----------------------------------------------------
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+
+                        % ------------------------------------------------------------------------
+                        % ------------------------------------------------------------------------
+                        % Modification Karim
+                        % ------------------------------------------------------------------------
+                        % ------------------------------------------------------------------------
+
+                        smo=[0.001 1];
+                        binCrossTz=binCrossT;
+                        binCrossTz(isnan(binCrossTz))=0;
+                        binCrossTz=zscore(binCrossTz')';
+
+
+                        [MTz,MidTz]=max(binCrossTz');
+                        [mTz,midTz]=min(binCrossTz');
+                        [BE,id]=sort(lCross(MidTz));
+                        lCrossMz=lCross(MidTz);
+                        lCrossmz=lCross(midTz);
+
+                        % figure('color',[1 1 1])
+                        % imagesc(lCross,[1:size(binCrossTz,1)],binCrossTz(id,:))
+                        % hold on, line([0 0],[0.5 size(binCrossTz,1)+05],'Color','k','linewidth',2)
+                        % hold on, plot(lCrossMz(id), [1:size(binCrossT,1)],'ko','MarkerFaceColor','k')
+                        % hold on, plot(lCrossmz(id), [1:size(binCrossT,1)],'wo','MarkerFaceColor','w')
+
+
+                        % ------------------------------------------------------------------------
+
+                        binCrossTzs=SmoothDec(binCrossTz,smo);
+
+                        [MTzs,MidTzs]=max(binCrossTzs');
+                        [mTzs,midTzs]=min(binCrossTzs');
+                        [BE,ids]=sort(lCross(MidTzs));
+                        lCrossMzs=lCross(MidTzs);
+                        lCrossmzs=lCross(midTzs);
+
+
+                        % [MTzsP,MidTzsP]=max(binCrossTzs(:,lCross>0)');
+                        % [mTzsP,midTzsP]=min(binCrossTzs(:,lCross>0)');
+                        % [MTzsN,MidTzsN]=max(binCrossTzs(:,lCross<0)');
+                        % [mTzsN,midTzsN]=min(binCrossTzs(:,lCross<0)');
+                        % lCrossP=lCross(lCross>0);
+                        % lCrossN=lCross(lCross<0);
+                        % lCrossMzsP=lCrossP(MidTzsP);
+                        % lCrossmzsP=lCrossP(midTzsP);
+                        % lCrossMzsN=lCrossN(MidTzsN);
+                        % lCrossmzsN=lCrossN(midTzsN);
+
+
+                        % figure('color',[1 1 1])
+                        % imagesc(lCross,[1:size(binCrossTz,1)],binCrossTzs(ids,:))
+                        % hold on, line([0 0],[0.5 size(binCrossTz,1)+05],'Color','k','linewidth',2)
+                        % hold on, plot(lCrossMzs(ids), [1:size(binCrossT,1)],'ko','MarkerFaceColor','k')
+                        % hold on, plot(lCrossmzs(ids), [1:size(binCrossT,1)],'wo','MarkerFaceColor','w')
+
+                        % hold on, plot(lCrossMzsP(ids), [1:size(binCrossT,1)],'-ko','MarkerFaceColor','k','linewidth',2)
+                        % hold on, plot(lCrossmzsP(ids), [1:size(binCrossT,1)],'-wo','MarkerFaceColor','w','linewidth',2)
+                        % hold on, plot(lCrossMzsN(ids), [1:size(binCrossT,1)],'-ko','MarkerFaceColor','k','linewidth',2)
+                        % hold on, plot(lCrossmzsN(ids), [1:size(binCrossT,1)],'-wo','MarkerFaceColor','w','linewidth',2)
+                        % ------------------------------------------------------------------------
+
+
+
+
+
+                        for i=1:size(binCrossTz,1)
+
+                        dth = diff(binCrossTzs(ids(i),:));
+                        dth1 = [0 dth];
+                        dth2 = [dth 0];
+                        clear dth;
+
+                        thpeaks = lCross(find(dth1 > 0 & dth2 < 0));
+
+                        thpeaksP=thpeaks(find(thpeaks>0));
+                        thpeaksN=thpeaks(find(thpeaks<0));
+
+                        for z=1:length(thpeaksP)
+                        idxpeaksP(z)=find(lCross==thpeaksP(z));
+                        end
+
+                        for z=1:length(thpeaksN)
+                        idxpeaksN(z)=find(lCross==thpeaksN(z));
+                        end
+
+                        thpeaksP=thpeaksP(find(binCrossTzs(ids(i),idxpeaksP)>0));
+                        thpeaksN=thpeaksN(find(binCrossTzs(ids(i),idxpeaksN)>0));
+                        % 
+                        %     thpeaks=[thpeaksN,thpeaksP];
+
+                        if length(thpeaksP)==0
+                            thpeaksP=thpeaks(find(thpeaks>0));
+                        end
+
+                        if length(thpeaksN)==0
+                            thpeaksN=thpeaks(find(thpeaks<0));
+                        end
+
+                        clear idxpeaksP
+                        clear idxpeaksN
+
+                        thpeaksP=min(abs(thpeaksP));    
+                        thpeaksN=-min(abs(thpeaksN));
+
+                        M1=binCrossTzs(ids(i),find(lCross==thpeaksP));
+                        M2=binCrossTzs(ids(i),find(lCross==thpeaksN));
+
+                        % PMax(i)=lCross(find(binCrossTz(ids(i),:)==max(M1,M2)));
+                        [temp,idx]=min(abs([lCross(find(binCrossTzs(ids(i),:)==M1)),lCross(find(binCrossTzs(ids(i),:)==M2))]));
+                        Ppr0(i)=(-1)^(idx-1)*temp;
+
+
+
+                        thtrough = lCross(find(dth1 < 0 & dth2 > 0));
+
+                        thtroughP=thtrough(find(thtrough>0));
+                        thtroughN=thtrough(find(thtrough<0));
+
+                        for z=1:length(thtroughP)
+                        idxtroughP(z)=find(lCross==thtroughP(z));
+                        end
+
+                        for z=1:length(thtroughN)
+                        idxtroughN(z)=find(lCross==thtroughN(z));
+                        end
+
+                        thtroughP=thtroughP(find(binCrossTzs(ids(i),idxtroughP)<0));
+                        thtroughN=thtroughN(find(binCrossTzs(ids(i),idxtroughN)<0));
+
+                        if length(thtroughP)==0
+                            thtroughP=thtrough(find(thtrough>0));
+                        end
+
+                        if length(thtroughN)==0
+                            thtroughN=thtrough(find(thtrough<0));
+                        end
+
+                        %     thtrough=[thtroughN,thtroughP];
+
+                        clear idxtroughP
+                        clear idxtroughN    
+
+                        thtroughP=min(abs(thtroughP)); 
+                        thtroughN=-min(abs(thtroughN));
+
+                        M1=binCrossTzs(ids(i),find(lCross==thtroughP));
+                        M2=binCrossTzs(ids(i),find(lCross==thtroughN));
+
+                        % TMax(i)=lCross(find(binCrossTz(ids(i),:)==min(M1,M2)));
+
+                        [temp,idx]=min(abs([lCross(find(binCrossTzs(ids(i),:)==M1)),lCross(find(binCrossTzs(ids(i),:)==M2))]));
+                        Tpr0(i)=(-1)^(idx-1)*temp;
+
+
+                        %     hold on, plot(thpeaks, i*ones(length(thpeaks),1),'k.')
+                        %     hold on, plot(thtrough, i*ones(length(thtrough),1),'w.')
+
+                        % keyboard
+
+                        end
+
+                        [BE,indx]=sort(Ppr0);
+                        figure('color',[1 1 1])                             %FIGURE 1
+                        imagesc(lCross,[1:size(binCrossTz,1)],binCrossTzs(ids(indx),:))
+                        hold on, line([0 0],[0.5 size(binCrossTz,1)+05],'Color','k','linewidth',2)
+                        % hold on, plot(PMax, [1:size(binCrossTz,1)],'-ko','MarkerFaceColor','k','linewidth',2)
+                        hold on, plot(Ppr0(indx), [1:size(binCrossTz,1)],'-ko','MarkerFaceColor','k','linewidth',2)
+                        hold on, plot(Tpr0(indx), [1:size(binCrossTz,1)],'-wo','MarkerFaceColor','w','linewidth',2)
+
+                        
+                        IndexGlobal=ids(indx);
+                        
+                        % ------------------------------------------------------------------------
+                        % Observation des pic et creux de l'oscillation du cross-correlogramme
+                        % Important suivre le pic le plus proche de zero
+                        % (vrai decalage des oscillations) 
+                        % ATENTION
+                        % A regarder en fonction de la frequence de l'oscillation
+                        % ------------------------------------------------------------------------
+                        
+                        [idmat,Pmat,Tmat,matr]=ObsBinCohrT(binCrossT,1);    %FIGURE 2 and 3
+                        xlim([-100 100])
+                        figure('Color',[1 1 1])                             %FIGURE 4
+                        imagesc(lCross,[1:size(binCrossT2,1)],binCrossT2(idmat,:))
+                        hold on, line([0 0],[0.5 size(binCrossTz,1)+05],'Color','k','linewidth',2)
+                        hold on, plot(Pmat(idmat),[1:size(binCrossTz,1)],'-ko','MarkerFaceColor','k','linewidth',2)
+                        hold on, plot(Tmat(idmat),[1:size(binCrossTz,1)],'-wo','MarkerFaceColor','w','linewidth',2)
+                        xlim([-100 100])
+                        title('Significativity (green (p>0.05) -- Ranking according to the positive Peak the closest to zero')
+
+
+                        % ------------------------------------------------------------------------ 
+                        % Histogram des décalages des signaux
+                        % ------------------------------------------------------------------------ 
+                        
+                        Binnns=[-70:5:70];
+                        hp=hist(Ppr0,Binnns);
+                        ht=hist(Tpr0,Binnns);
+
+%%                      si tu veux que la courbe soit plus belle.......
+                        ss=3;
+                        hp=smooth(hp,ss);
+                        ht=smooth(ht,ss);   
+
+
+                        figure('Color',[1 1 1])                                %FIGURE 5
+                        a1=area(Binnns,hp);
+                        hold on, a2=area(Binnns,ht);
+                        set(a1,'FaceColor',[1 0.4 0.4])
+                        set(a2,'FaceColor',[0.4 0.4 1])
+                        alpha(0.8)
+                        ylh=ylim;
+                        hold on, line([0 0],[0 ylh(2)+0.5],'Color','k','linewidth',2)
+                        xlim([-100 100])
+                        title(['Median Peak: ',num2str(median(Ppr0)),',    Median trough: ',num2str(median(Tpr0)),',    Frequencey Cross-Corr: ',num2str(round(1/(mean(abs(Ppr0-Tpr0)))/2*1000)/1000),'Hz'])
+                        
+                        
+                        FreqCrossCorr=(abs(Ppr0-Tpr0))*2;
+                        FreqCrossCorr=1./(FreqCrossCorr);
+%                         figure('Color',[1 1 1])
+%                         plot(FreqCrossCorr)
+
+                        
+                        % ------------------------------------------------------------------------
+
+
+                        figure('color',[1 1 1])                                 %FIGURE 6
+                        plot(lCross,smooth(mean(binCrossTz),3))
+                        hold on, plot(lCross,mean(binCrossTzs),'r')
+                        yl=ylim;
+                        hold on, line([0 0],[yl(1) yl(2)],'Color','k','linewidth',2)
+                        hold on, line([-200 200],[0 0],'Color','k')
+                        
+                        
+% ------------------------------------------------------------------------
+%  methode utilisation xcorr----------------------------------------------                        
+%  petit programme pour comprendre la methode----------------------------- 
+% ------------------------------------------------------------------------
+                        
+                        
+% AmpNoisett=0;                           % try with different value of AmpNoisett (from 1 to 20)
+% dela=10;                                % try with different delays (en sec), default: 10s
+% freqtt=1;                               % sampling frequency (en Hz)
+% freqSinusoidtt=0.01;                    % frequency of the sinusoid (en Hz),  default: 0.01Hz
+% periodSinusoidtt=1/freqSinusoidtt;      % period of the sinusoid (en sec),    default: 100s
+% 
+% ttt=[1:1000];
+% Ftt=sin(ttt*2*pi*freqSinusoidtt)+AmpNoisett*randn(1,1000)/2;
+% Ytt=sin((ttt-dela)*2*pi*freqSinusoidtt)+AmpNoisett*randn(1,1000)/2;
+% figure('Color',[1 1 1])
+% subplot(2,1,1), plotyy(ttt,Ftt,ttt,Ytt)
+% title(['Ft bleu, Yt vert,   Frequency ',num2str(freqSinusoidtt),'Hz,  Yt follows Ft with delay (',num2str(dela),' sec)'])
+% [Ctt,lagtt,Ptt,CPMtt,CPmtt] = StatsXcorr(Ftt,Ytt,freqtt,100); % ref: F= field
+% subplot(2,1,2),  hold on
+% plot(lagtt,CPmtt,'Color',[0.4 0.4 0.4],'linewidth',2)
+% plot(lagtt,CPMtt,'Color',[0.4 0.4 0.4],'linewidth',2)
+% plot(lagtt,Ctt,'k','linewidth',2)
+% yltt=ylim;
+% hold on, line([0 0],[yltt(1) yltt(2)],'Color','r')
+% title(['Ft reference, Ratio noise/signal:',num2str(AmpNoisett)])
+% xlim([-200 200])
+
+
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+
+% FIGURE 7: CrossCorrTotColor
+figure, imagesc(lCross,[1:size(binCrossT,1)],binCrossT)
+hold on, line([0 0],[0.5 size(binCrossT,1)+05],'Color','k','linewidth',2)
+
+% savefigure(1,'CrossCorrTotColor','H:\Data_Astros_Field')
+% savefigure(2,'CrossCorrTotMean','H:\Data_Astros_Field')
+
+    num=gcf;
+    
+    set(num,'paperPositionMode','auto')
+
+    eval(['print -f',num2str(num),' -dpng ','CrossCorrTotColor','.png'])
+
+    eval(['print -f',num2str(num),' -painters',' -depsc2 ','CrossCorrTotColor','.eps'])
+    
+    
+% FIGURE 8: CrossCorrTotMean
+figure,plot(lCross,mean(binCrossT))
+
+    num=gcf;
+    
+    set(num,'paperPositionMode','auto')
+
+    eval(['print -f',num2str(num),' -dpng ','CrossCorrTotMean','.png'])
+
+    eval(['print -f',num2str(num),' -painters',' -depsc2 ','CrossCorrTotMean','.eps'])
+
+
+% close all
+
+
+% FIGURE 9: CrossCorrTotColor2
+figure, imagesc(lCross2,[1:size(binCrossT2,1)],binCrossT2)
+hold on, line([0 0],[0.5 size(binCrossT2,1)+0.5],'Color','k','linewidth',2)
+
+    num=gcf;
+
+% FIGURE 10: CrossCorrTotMean2
+figure,plot(lCross2,mean(binCrossT2))
+% savefigure (1,'CrossCorrTotColor2','H:\Data_Astros_Field')
+% savefigure (2,'CrossCorrTotMean2','H:\Data_Astros_Field')
+    
+    set(num,'paperPositionMode','auto')
+
+    eval(['print -f',num2str(num),' -dpng ','CrossCorrTotColor2','.png'])
+
+    eval(['print -f',num2str(num),' -painters',' -depsc2 ','CrossCorrTotColor2','.eps'])
+
+
+    set(num+1,'paperPositionMode','auto')
+
+    eval(['print -f',num2str(num+1),' -dpng ','CrossCorrTotMean2','.png'])
+
+    eval(['print -f',num2str(num+1),' -painters',' -depsc2 ','CrossCorrTotMean2','.eps'])
+
+
+% close all
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+% Coherence
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+
+
+% -------------------------------------------------------------------------
+% Without ligne 4
+% binCohrT=binCohrT([[1:3],[5:end]],:);
+% binCohrT2=binCohrT2([[1:3],[5:end]],:);
+% -------------------------------------------------------------------------
+
+
+% FIGURE 11: CoherencyTotColor
+figure, imagesc(lCohr,[1:size(binCohrT,1)],binCohrT)
+num=gcf;
+
+        set(num,'paperPositionMode','auto')
+
+        eval(['print -f',num2str(num),' -dpng ','CoherencyTotColor','.png'])
+
+        eval(['print -f',num2str(num),' -painters',' -depsc2 ','CoherencyTotColor','.eps'])
+
+% FIGURE 12: CoherencyTotMean
+figure,plot(lCohr,mean(binCohrT))
+% savefigure (1,'CoherencyTotColor','H:\Data_Astros_Field')
+% savefigure (2,'CoherencyTotMean','H:\Data_Astros_Field')
+
+
+        set(num+1,'paperPositionMode','auto')
+
+        eval(['print -f',num2str(num+1),' -dpng ','CoherencyTotMean','.png'])
+
+        eval(['print -f',num2str(num+1),' -painters',' -depsc2 ','CoherencyTotMean','.eps'])
+
+% close all
+
+
+
+figure, imagesc(lCohr2,[1:size(binCohrT2,1)],binCohrT2)
+num=gcf;
+figure,plot(lCohr2,mean(binCohrT2))
+% savefigure (1,'CoherencyTotColor2','H:\Data_Astros_Field')
+% savefigure (2,'CoherencyTotMean2','H:\Data_Astros_Field')
+
+    set(num,'paperPositionMode','auto')
+
+    eval(['print -f',num2str(num),' -dpng ','CoherencyTotColor2','.png'])
+
+    eval(['print -f',num2str(num),' -painters',' -depsc2 ','CoherencyTotColor2','.eps'])
+
+
+    set(num+1,'paperPositionMode','auto')
+
+    eval(['print -f',num2str(num+1),' -dpng ','CoherencyTotMean2','.png'])
+
+    eval(['print -f',num2str(num+1),' -painters',' -depsc2 ','CoherencyTotMean2','.eps'])
+
+% close all
+
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+
+
+
+for i=1:size(binS1T,1)
+    
+    binS1Tp(i,:)=10*log10(binS1T(i,:));
+%     binS1T(i,:)=binS1T(i,:)/max(binS1T(i,:));
+    binS2Tp(i,:)=10*log10(binS2T(i,:));
+%     binS2T(i,:)=binS2T(i,:)/max(binS2T(i,:));
+
+    binS1Tp2(i,:)=lS1.*binS1T(i,:);
+    binS2Tp2(i,:)=lS2.*binS2T(i,:);
+    binS1Tp2(i,:)=binS1Tp2(i,:)/max(binS1Tp2(i,:));
+    binS2Tp2(i,:)=binS2Tp2(i,:)/max(binS2Tp2(i,:));
+    
+end
+
+figure('Color',[1 1 1])
+subplot(2,2,1), imagesc(lS1,[1:size(binS1T,1)],zscore(binS1Tp')'), axis xy
+hold on, plot(lS1,6+3*mean(zscore(binS1Tp')'),'k','linewidth',2)
+subplot(2,2,3), imagesc(lS2,[1:size(binS1T,1)],zscore(binS2Tp')'), axis xy
+hold on, plot(lS2,6+3*mean(zscore(binS2Tp')'),'k','linewidth',2)
+
+% figure('Color',[1 1 1])
+% subplot(2,1,1), imagesc(lS1,[1:size(binS1T,1)],binS1Tp)
+% subplot(2,1,2), imagesc(lS2,[1:size(binS1T,1)],binS2Tp)
+
+% figure('Color',[1 1 1])
+subplot(2,2,2), imagesc(lS1,[1:size(binS1T,1)],binS1Tp2), axis xy
+hold on, plot(lS1,-2+15*mean(binS1Tp2),'k','linewidth',2)
+subplot(2,2,4), imagesc(lS2,[1:size(binS1T,1)],binS2Tp2), axis xy
+hold on, plot(lS2,-2+15*mean(binS2Tp2),'k','linewidth',2)
+
+% figure('Color',[1 1 1])
+% subplot(2,1,1), imagesc(lS1,[1:size(binS1T,1)],zscore(binS1T')')
+% subplot(2,1,2), imagesc(lS2,[1:size(binS1T,1)],zscore(binS2T')')
+
+
+[Ppr0(IndexGlobal)' Tpr0(IndexGlobal)' abs(Ppr0(IndexGlobal)')>abs(Tpr0(IndexGlobal)')]
+
+% -------------------------------------------------------------------------
+% %
+% -------------------------------------------------------------------------
+% Save Figures
+
+
+
+% set(1,'paperPositionMode','auto')
+%     eval(['print -f',num2str(1),' -dpng ','Fig1','.png'])
+%     eval(['print -f',num2str(1),' -painters',' -depsc2 ','Fig1','.eps'])
+% set(2,'paperPositionMode','auto')
+%     eval(['print -f',num2str(2),' -dpng ','Fig2','.png'])
+%     eval(['print -f',num2str(2),' -painters',' -depsc2 ','Fig2','.eps'])
+% set(3,'paperPositionMode','auto')
+%     eval(['print -f',num2str(3),' -dpng ','Fig3','.png'])
+%     eval(['print -f',num2str(3),' -painters',' -depsc2 ','Fig3','.eps'])
+% set(4,'paperPositionMode','auto')
+%     eval(['print -f',num2str(4),' -dpng ','Fig4','.png'])
+%     eval(['print -f',num2str(4),' -painters',' -depsc2 ','Fig4','.eps'])
+% set(5,'paperPositionMode','auto')
+%     eval(['print -f',num2str(5),' -dpng ','Fig5','.png'])
+%     eval(['print -f',num2str(5),' -painters',' -depsc2 ','Fig5','.eps'])
+% set(6,'paperPositionMode','auto')
+%     eval(['print -f',num2str(6),' -dpng ','Fig6','.png'])
+%     eval(['print -f',num2str(6),' -painters',' -depsc2 ','Fig6','.eps'])
+% set(7,'paperPositionMode','auto')
+%     eval(['print -f',num2str(7),' -dpng ','Fig7','.png'])
+%     eval(['print -f',num2str(7),' -painters',' -depsc2 ','Fig7','.eps'])
+% set(8,'paperPositionMode','auto')
+%     eval(['print -f',num2str(8),' -dpng ','Fig8','.png'])
+%     eval(['print -f',num2str(8),' -painters',' -depsc2 ','Fig8','.eps'])
+% set(9,'paperPositionMode','auto')
+%     eval(['print -f',num2str(9),' -dpng ','Fig9','.png'])
+%     eval(['print -f',num2str(9),' -painters',' -depsc2 ','Fig9','.eps'])
+% set(10,'paperPositionMode','auto')
+%     eval(['print -f',num2str(10),' -dpng ','Fig10','.png'])
+%     eval(['print -f',num2str(10),' -painters',' -depsc2 ','Fig10','.eps'])
+% set(11,'paperPositionMode','auto')
+%     eval(['print -f',num2str(11),' -dpng ','Fig11','.png'])
+%     eval(['print -f',num2str(11),' -painters',' -depsc2 ','Fig11','.eps'])
+% set(12,'paperPositionMode','auto')
+%     eval(['print -f',num2str(12),' -dpng ','Fig12','.png'])
+%     eval(['print -f',num2str(12),' -painters',' -depsc2 ','Fig12','.eps'])
+% set(13,'paperPositionMode','auto')
+%     eval(['print -f',num2str(13),' -dpng ','Fig13','.png'])
+%     eval(['print -f',num2str(13),' -painters',' -depsc2 ','Fig13','.eps'])
+% set(14,'paperPositionMode','auto')
+%     eval(['print -f',num2str(14),' -dpng ','Fig14','.png'])
+%     eval(['print -f',num2str(14),' -painters',' -depsc2 ','Fig14','.eps'])
+% set(15,'paperPositionMode','auto')
+%     eval(['print -f',num2str(15),' -dpng ','Fig15','.png']) 
+%     eval(['print -f',num2str(15),' -painters',' -depsc2 ','Fig15','.eps'])

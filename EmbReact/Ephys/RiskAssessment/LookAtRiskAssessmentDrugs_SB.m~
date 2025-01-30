@@ -1,0 +1,283 @@
+clear all
+clear ZoneTime
+BefTime=12*1e4;
+TimeForInterpol=[0:0.01:BefTime*2/1e4];
+StepBackFromStart=0.5*1e4;
+
+SessTypes={'TestPost','UMazeCond','TestPost_EyeShock','UMazeCond_EyeShock','UMazeCondBlockedShock_EyeShock','UMazeCondBlockedSafe_EyeShock'};
+
+SessTypes={ 'HabituationBlockedShock_PreDrug' 'HabituationBlockedSafe_PreDrug',...
+    'TestPre_PreDrug' 'UMazeCondExplo_PreDrug' 'UMazeCondBlockedShock_PreDrug' 'UMazeCondBlockedSafe_PreDrug',...
+    'UMazeCondExplo_PostDrug' 'UMazeCondBlockedShock_PostDrug' 'UMazeCondBlockedSafe_PostDrug',...
+    'TestPost_PostDrug'  'ExtinctionBlockedShock_PostDrug' 'ExtinctionBlockedSafe_PostDrug'};
+
+SessTypes = {'UMazeCondExplo_PostDrug' 'UMazeCondBlockedShock_PostDrug' 'UMazeCondBlockedSafe_PostDrug',...
+    'TestPost_PostDrug'  'ExtinctionBlockedShock_PostDrug' 'ExtinctionBlockedSafe_PostDrug'};
+
+clear RiskAssess
+for ss=1:length(SessTypes)
+    
+    Files=PathForExperimentsEmbReact(SessTypes{ss});
+    MouseToAvoid=[560,117,431,795,875]; % mice with noisy data to exclude
+    Files=RemoveElementsFromDir(Files,'nmouse',MouseToAvoid);
+    disp(SessTypes{ss})
+    
+    for mm=1:length(Files.path)
+        
+        RiskAssess.(SessTypes{ss}).ToSafeMov{mm}=[];RiskAssess.(SessTypes{ss}).ToSafeType{mm}=[];RiskAssess.(SessTypes{ss}).ToSafePos{mm}=[];
+        RiskAssess.(SessTypes{ss}).ToShockMov{mm}=[];RiskAssess.(SessTypes{ss}).ToShockType{mm}=[];RiskAssess.(SessTypes{ss}).ToShockPos{mm}=[];
+        RiskAssess.(SessTypes{ss}).ToShockEKG{mm}=[]; RiskAssess.(SessTypes{ss}).ToSafeEKG{mm}=[];
+        RiskAssess.(SessTypes{ss}).NumEventsShock{mm} = [];
+        RiskAssess.(SessTypes{ss}).NumEventsSafe{mm} = [];
+        
+        for c=1:length(Files.path{mm})
+            disp(Files.path{mm}{c})
+            cd(Files.path{mm}{c})
+            
+            load('ExpeInfo.mat')
+            RiskAssess.(SessTypes{ss}).MouseNum{mm} = ExpeInfo.nmouse;
+            RiskAssess.(SessTypes{ss}).DRUG{mm} = ExpeInfo.DrugInjected;
+            
+            clear Behav
+            load('behavResources_SB.mat')
+            
+            
+            clear EKG
+            if exist('HeartBeatInfo.mat')>0
+                load('HeartBeatInfo.mat')
+            end
+            
+            load('ChannelsToAnalyse/Bulb_deep.mat')
+            load(['LFPData/LFP',num2str(channel),'.mat'])
+            
+            SmooDiffLinDist=tsd(Range(Behav.LinearDist),[0;diff(runmean(Data(Behav.LinearDist),20))]);
+            
+            RiskAssess.(SessTypes{ss}).NumEventsShock{mm}=[RiskAssess.(SessTypes{ss}).NumEventsShock{mm},sum(Behav.RAUser.ToShock>0)];
+            RiskAssess.(SessTypes{ss}).NumEventsSafe{mm}=[RiskAssess.(SessTypes{ss}).NumEventsSafe{mm},sum(Behav.RAUser.ToSafe>0)];
+            
+            % Shock
+            if sum(Behav.RAUser.ToShock)>0
+                % Trigger on the null derivative (to realign as
+                % well as possible)
+                GoodEvents = find(Behav.RAUser.ToShock>0);
+                
+                EpToUse=subset(Behav.RAEpoch.ToShock,GoodEvents);
+                
+                tpsRA=Start(EpToUse);
+                
+                for t=1:length(tpsRA)
+                    if (tpsRA(t)+BefTime)<max(Range(LFP))
+                        LitEp=intervalSet(tpsRA(t)-BefTime,tpsRA(t)+BefTime);
+                        dattemp=interp1(Range(Restrict(Behav.Vtsd,LitEp))-Start(LitEp),Data(Restrict(Behav.Vtsd,LitEp)),TimeForInterpol*1e4);
+                        RiskAssess.(SessTypes{ss}).ToShockMov{mm}=[RiskAssess.(SessTypes{ss}).ToShockMov{mm};dattemp];
+                        
+                        dattemp=interp1(Range(Restrict(Behav.LinearDist,LitEp))-Start(LitEp),Data(Restrict(Behav.LinearDist,LitEp)),TimeForInterpol*1e4);
+                        RiskAssess.(SessTypes{ss}).ToShockPos{mm}=[RiskAssess.(SessTypes{ss}).ToShockPos{mm};dattemp];
+                        
+                        RiskAssess.(SessTypes{ss}).ToShockType{mm}=[RiskAssess.(SessTypes{ss}).ToShockType{mm},Behav.RAUser.ToShock(GoodEvents(t))];
+                        
+                        if exist('EKG')>0
+                            dattemp=interp1(Range(Restrict(EKG.HBRate,LitEp))-Start(LitEp),Data(Restrict(EKG.HBRate,LitEp)),TimeForInterpol*1e4);
+                            RiskAssess.(SessTypes{ss}).ToShockEKG{mm}=[RiskAssess.(SessTypes{ss}).ToShockEKG{mm};dattemp];
+                        else
+                            RiskAssess.(SessTypes{ss}).ToShockEKG{mm} = nan(1,length(TimeForInterpol));
+                            
+                        end
+                        
+                    end
+                end
+            else
+                RiskAssess.(SessTypes{ss}).ToShockPos{mm}  = [RiskAssess.(SessTypes{ss}).ToShockPos{mm};nan(1,length(TimeForInterpol))];
+                RiskAssess.(SessTypes{ss}).ToShockMov{mm} = [RiskAssess.(SessTypes{ss}).ToShockMov{mm};nan(1,length(TimeForInterpol))];
+                RiskAssess.(SessTypes{ss}).ToShockEKG{mm} = [RiskAssess.(SessTypes{ss}).ToShockEKG{mm} ;nan(1,length(TimeForInterpol))];
+                
+            end
+            
+            
+            % Safe
+            if sum(Behav.RAUser.ToSafe)>0
+                GoodEvents = find(Behav.RAUser.ToSafe>0);
+                EpToUse=subset(Behav.RAEpoch.ToSafe,GoodEvents);
+                
+                tpsRA=Start(EpToUse);
+                
+                for t=1:length(tpsRA)
+                    if (tpsRA(t)+BefTime)<max(Range(LFP))
+                        LitEp=intervalSet(tpsRA(t)-BefTime,tpsRA(t)+BefTime);
+                        
+                        dattemp=interp1(Range(Restrict(Behav.Vtsd,LitEp))-Start(LitEp),Data(Restrict(Behav.Vtsd,LitEp)),TimeForInterpol*1e4);
+                        RiskAssess.(SessTypes{ss}).ToSafeMov{mm}=[ RiskAssess.(SessTypes{ss}).ToSafeMov{mm};dattemp];
+                        
+                        dattemp=interp1(Range(Restrict(Behav.LinearDist,LitEp))-Start(LitEp),Data(Restrict(Behav.LinearDist,LitEp)),TimeForInterpol*1e4);
+                        RiskAssess.(SessTypes{ss}).ToSafePos{mm}=[RiskAssess.(SessTypes{ss}).ToSafePos{mm};dattemp];
+                        
+                        RiskAssess.(SessTypes{ss}).ToSafeType{mm}=[RiskAssess.(SessTypes{ss}).ToSafeType{mm},Behav.RAUser.ToSafe(GoodEvents(t))];
+                        
+                        if exist('EKG')>0
+                            dattemp=interp1(Range(Restrict(EKG.HBRate,LitEp))-Start(LitEp),Data(Restrict(EKG.HBRate,LitEp)),TimeForInterpol*1e4);
+                            RiskAssess.(SessTypes{ss}).ToSafeEKG{mm}=[RiskAssess.(SessTypes{ss}).ToSafeEKG{mm};dattemp];
+                        else
+                            RiskAssess.(SessTypes{ss}).ToSafeEKG{mm} = nan(1,length(TimeForInterpol));
+                            
+                        end
+                    end
+                end
+            else
+                RiskAssess.(SessTypes{ss}).ToSafePos{mm}  = [RiskAssess.(SessTypes{ss}).ToSafePos{mm};nan(1,length(TimeForInterpol))];
+                RiskAssess.(SessTypes{ss}).ToSafeMov{mm} = [RiskAssess.(SessTypes{ss}).ToSafeMov{mm};nan(1,length(TimeForInterpol))];
+                RiskAssess.(SessTypes{ss}).ToSafeEKG{mm} = [RiskAssess.(SessTypes{ss}).ToSafeEKG{mm};nan(1,length(TimeForInterpol))];
+                
+            end
+        end
+        
+    end
+    cd /media/DataMOBsRAIDN/ProjectEmbReact/Figures/RiskAssessment
+    save(['RiskAssessMatDrugsBis.mat'],'RiskAssess','-v7.3')
+end
+
+    cd /media/DataMOBsRAIDN/ProjectEmbReact/Figures/RiskAssessment
+DrugTypes = {'SAL','MDZ','FLX','FLXCHRONIC'};
+load(['RiskAssessMatDrugsBis.mat'],'RiskAssess')
+
+for ss=1:length(SessTypes)
+    
+    for dd = 1:length(DrugTypes)
+        NumEvents.(SessTypes{ss}).(DrugTypes{dd}) = [];
+        Movement.(SessTypes{ss}).(DrugTypes{dd}) = [];
+        Position.(SessTypes{ss}).(DrugTypes{dd}) = [];
+        HeartRate.(SessTypes{ss}).(DrugTypes{dd}) = [];
+        AllMiceNums.(SessTypes{ss}).(DrugTypes{dd}) = [];
+
+    end
+    RiskAssess.(SessTypes{ss}).DRUG{end} = 'SAL';
+    for mm = 1:length(RiskAssess.(SessTypes{ss}).DRUG)
+        if not(strcmp(RiskAssess.(SessTypes{ss}).DRUG{mm},'FLX-Ineff'))
+            if ss>=11 & length(RiskAssess.(SessTypes{ss}).NumEventsShock{mm})==2
+                RiskAssess.(SessTypes{ss}).NumEventsShock{mm} = [RiskAssess.(SessTypes{ss}).NumEventsShock{mm},NaN,NaN];
+            elseif ss>=11 & length(RiskAssess.(SessTypes{ss}).NumEventsShock{mm})==3
+                RiskAssess.(SessTypes{ss}).NumEventsShock{mm} = [RiskAssess.(SessTypes{ss}).NumEventsShock{mm},NaN];
+            end
+            NumEvents.(SessTypes{ss}).(RiskAssess.(SessTypes{ss}).DRUG{mm}) = [NumEvents.(SessTypes{ss}).(RiskAssess.(SessTypes{ss}).DRUG{mm});nansum(RiskAssess.(SessTypes{ss}).NumEventsShock{mm})];
+            Movement.(SessTypes{ss}).(RiskAssess.(SessTypes{ss}).DRUG{mm}) =[Movement.(SessTypes{ss}).(RiskAssess.(SessTypes{ss}).DRUG{mm});nanmean(RiskAssess.(SessTypes{ss}).ToShockMov{mm},1)];
+            Position.(SessTypes{ss}).(RiskAssess.(SessTypes{ss}).DRUG{mm}) =[Position.(SessTypes{ss}).(RiskAssess.(SessTypes{ss}).DRUG{mm});nanmean(RiskAssess.(SessTypes{ss}).ToShockPos{mm},1)];
+            HeartRate.(SessTypes{ss}).(RiskAssess.(SessTypes{ss}).DRUG{mm}) =[HeartRate.(SessTypes{ss}).(RiskAssess.(SessTypes{ss}).DRUG{mm});nanmean(RiskAssess.(SessTypes{ss}).ToShockEKG{mm},1)];
+            AllMiceNums.(SessTypes{ss}).(RiskAssess.(SessTypes{ss}).DRUG{mm}) =[AllMiceNums.(SessTypes{ss}).(RiskAssess.(SessTypes{ss}).DRUG{mm});(RiskAssess.(SessTypes{ss}).MouseNum{mm})];
+
+        end
+    end
+end
+
+SessTypesPostDrug = {'UMazeCondExplo_PostDrug' 'UMazeCondBlockedShock_PostDrug' 'UMazeCondBlockedSafe_PostDrug',...
+    'TestPost_PostDrug'  'ExtinctionBlockedShock_PostDrug' 'ExtinctionBlockedSafe_PostDrug'};
+
+SessTypesPreDrug = {'UMazeCondExplo_PreDrug' 'UMazeCondBlockedShock_PreDrug' 'UMazeCondBlockedSafe_PreDrug'};
+
+for dd = 1:length(DrugTypes)
+    AllNumEvents.(DrugTypes{dd}) = [];
+    AllMovEvents.(DrugTypes{dd}) = [];
+    AllPosEvents.(DrugTypes{dd}) = [];
+    AllHREvents.(DrugTypes{dd}) = [];
+    
+end
+
+for dd = 1:length(DrugTypes)
+    for mm = 1:length(NumEvents.(SessTypes{1}).(DrugTypes{dd}))
+        clear tempNum tempMov tempPos tempHR
+        for ss=1:length(SessTypesPostDrug)
+            tempNum(ss,:) = NumEvents.(SessTypesPostDrug{ss}).(DrugTypes{dd})(mm);
+            tempMov(ss,:) = Movement.(SessTypesPostDrug{ss}).(DrugTypes{dd})(mm,:);
+            tempPos(ss,:) = Position.(SessTypesPostDrug{ss}).(DrugTypes{dd})(mm,:);
+            tempHR(ss,:) = HeartRate.(SessTypesPostDrug{ss}).(DrugTypes{dd})(mm,:);
+        end
+        AllNumEvents.(DrugTypes{dd})(mm)= nansum(tempNum);
+        AllMovEvents.(DrugTypes{dd})(mm,:)= nanmean(tempMov);
+        AllPosEvents.(DrugTypes{dd})(mm,:)= nanmean(tempPos);
+        AllHREvents.(DrugTypes{dd})(mm,:)= nanmean(tempHR);
+        
+    end
+end
+
+figure
+Cols2 = {[0.6 0.6 0.6],[0.6 1 0.6],[1 0.8 1],[0.6 0.4 0.6]};
+A = {(AllNumEvents.SAL),(AllNumEvents.FLX),(AllNumEvents.MDZ),AllNumEvents.FLXCHRONIC};
+MakeSpreadAndBoxPlot_SB(A,Cols2,1:4)
+xlim([0.5 3.5])
+set(gca,'LineWidth',2,'FontSize',10,'XTick',[1:4],'XTickLabel',{'Sal','Mdz','Flx-Ac','Flx-Chr'})
+ylabel('Number of RA')
+
+figure
+for dd = 1:4
+    subplot(231)
+    g = shadedErrorBar(TimeForInterpol-12,nanmean(AllMovEvents.(DrugTypes{dd})),stdError(AllMovEvents.(DrugTypes{dd})));
+    set(g.patch,'FaceColor',Cols2{dd},'FaceAlpha',0.5)
+    set(g.mainLine,'Color',Cols2{dd},'linewidth',2), hold on
+        box off
+    set(gca,'LineWidth',2,'FontSize',10)
+    xlabel('Time to RA')
+    ylabel('Speed cm/s')
+    xlim([-11 11])
+    line([0 0],ylim,'linewidth',2,'color','k')
+
+    subplot(232)
+    g = shadedErrorBar(TimeForInterpol-12,nanmean(AllPosEvents.(DrugTypes{dd})),stdError(AllPosEvents.(DrugTypes{dd})));
+    set(g.patch,'FaceColor',Cols2{dd},'FaceAlpha',0.5)
+    set(g.mainLine,'Color',Cols2{dd},'linewidth',2), hold on
+        box off
+    set(gca,'LineWidth',2,'FontSize',10)
+    xlabel('Time to RA')
+    ylabel('LinPos')
+    xlim([-11 11])
+    line([0 0],ylim,'linewidth',2,'color','k')
+
+    subplot(233)
+    g = shadedErrorBar(TimeForInterpol-12,nanmean(AllHREvents.(DrugTypes{dd})),stdError(AllHREvents.(DrugTypes{dd})));
+    set(g.patch,'FaceColor',Cols2{dd},'FaceAlpha',0.5)
+    set(g.mainLine,'Color',Cols2{dd},'linewidth',2), hold on
+    box off
+    set(gca,'LineWidth',2,'FontSize',10)
+    xlabel('Time to RA')
+    ylabel('HR (Hz)')
+    xlim([-11 11])
+    line([0 0],ylim,'linewidth',2,'color','k')
+end
+
+subplot(234)
+A = {nanmean(AllMovEvents.SAL(:,1200:1500)'),...
+    nanmean(AllMovEvents.FLX(:,1200:1500)'),nanmean(AllMovEvents.MDZ(:,1200:1500)')};
+MakeSpreadAndBoxPlot_SB(A,Cols2,1:3)
+xlim([0.5 3.5])
+set(gca,'LineWidth',2,'FontSize',10,'XTick',[1:3],'XTickLabel',{'SAL','FLX','MDZ'})
+ylabel('FlightSpeed')
+
+subplot(235)
+A = {nanmin(AllPosEvents.SAL(:,900:1600)'),...
+    nanmin(AllPosEvents.FLX(:,900:1600)'),nanmin(AllPosEvents.MDZ(:,900:1600)')};
+MakeSpreadAndBoxPlot_SB(A,Cols2,1:3)
+xlim([0.5 3.5])
+set(gca,'LineWidth',2,'FontSize',10,'XTick',[1:3],'XTickLabel',{'SAL','FLX','MDZ'})
+ylabel('RA Position')
+
+subplot(236)
+A = {nanmean(AllHREvents.SAL(:,100:750)'),...
+    nanmean(AllHREvents.FLX(:,100:750)'),nanmean(AllHREvents.MDZ(:,100:750)')};
+MakeSpreadAndBoxPlot_SB(A,Cols2,1:3)
+xlim([0.5 3.5])
+set(gca,'LineWidth',2,'FontSize',10,'XTick',[1:3],'XTickLabel',{'SAL','FLX','MDZ'})
+ylabel('HR (Hz)')
+
+figure
+for dd = 1:4
+    A = nanmean(AllMovEvents.(DrugTypes{dd}));
+    A(isnan(A)) = nanmean(A);
+    plot(TimeForInterpol-12,runmean(A),stdError(AllMovEvents.(DrugTypes{dd})));
+    set(g.patch,'FaceColor',Cols2{dd},'FaceAlpha',0.5)
+    set(g.mainLine,'Color',Cols2{dd},'linewidth',2), hold on
+        box off
+    set(gca,'LineWidth',2,'FontSize',10)
+    xlabel('Time to RA')
+    ylabel('Speed cm/s')
+    xlim([-11 11])
+    line([0 0],ylim,'linewidth',2,'color','k')
+end
+
+

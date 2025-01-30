@@ -1,0 +1,85 @@
+%% INPUTS
+nPhase=3;
+StepI=20; %time in sec
+d_ob=2; % distance to object (cm)
+PercExcluOnObj=50;% remove if 50% of the animal is inside OdorZone
+freqresample=20; %hz
+res=pwd; if isempty(strfind(res,'/')),mark='\'; else  mark='/';end
+
+
+%% RELOAD file
+folder_name=input('Enter file Phase 0 to Analyze : ','s');
+Tempreload=load([folder_name,mark,'AroundOdor.mat']);
+OdorInfo=Tempreload.OdorInfo;
+load([res,mark,'NameExpeToAnalyze.mat']);
+
+if exist('NameExpeToAnalyze','var')
+    for nam=1:length(NameExpeToAnalyze)
+        
+        for ph=1:nPhase, ListOfPhases{ph}=['Phase',num2str(ph-1)];end
+        for ph=1:nPhase
+            fctPhase=ph;
+            nPh=str2num(ListOfPhases{fctPhase}(length(ListOfPhases{fctPhase})));
+            
+            % --------------- load file phase ---------------
+            filename=folder_name;
+            filename(strfind(folder_name,'Phase'):strfind(folder_name,'Phase')+5)=ListOfPhases{fctPhase};
+            ok=0;n=0;
+            length_end=length(filename(max(strfind(filename,'-')):end));
+            while n<9 && ok==0
+                n=n+1; numRec=['0',num2str(n)];
+                folderPhase=filename;
+                folderPhase(length(filename)-length_end-1:length(filename)-length_end)=numRec;
+                try tempn=load([folderPhase,mark,'InfoTracking.mat'],'ref');ok=1;end
+            end
+            disp(['        ',ListOfPhases{fctPhase},': ',folderPhase(max(strfind(folderPhase,mark)):end)]);
+            
+            
+            % ------------- LOAD DATA from Phase --------------
+            Tempreload=load([folderPhase,mark,'AroundOdor.mat']);
+            Name_CaractSniff=Tempreload.Name_CaractSniff;
+            CS=Tempreload.CaractSniff;
+            
+            
+            
+            for n_step=1:floor(max(CS(:,1))/StepI)
+                
+                Mat=[];
+                for od=1:length(OdorInfo(:,3))
+                    % restrict to all conditions
+                    indexTS=find(CS(:,1)>(n_step-1)*StepI & CS(:,1)<n_step*StepI & CS(:,4)==OdorInfo(od,3) & CS(:,3)==d_ob & CS(:,6)<PercExcluOnObj);
+                    % Odor Loc
+                    Mat(od,1:3)=[nMouse, nPh, OdorInfo(od,3)];
+                    
+                    % resample Sniff at freqresample Hz
+                    timeWanted=1:1/freqresample:max(CS(indexTS,1));
+                    try
+                        sniffresample=interp1(CS(indexTS,1),CS(indexTS,6),timeWanted);
+                        % mean Time In Sniff
+                        tempTSD=tsd(1E4*timeWanted',sniffresample');
+                        SniffEpoch=thresholdIntervals(tempTSD,10^(-10),'Direction','Above');
+                    catch
+                        SniffEpoch=intervalSet([],[]);
+                    end
+                    
+                    if ~isempty(Stop(SniffEpoch,'s')),
+                        Mat(od,4)=nanmean(Stop(SniffEpoch,'s')-Start(SniffEpoch,'s'));
+                        Mat(od,5)=nansum(Stop(SniffEpoch,'s')-Start(SniffEpoch,'s'));
+                    else
+                        Mat(od,4)=0;
+                        Mat(od,5)=0;
+                    end
+                    Mat(od,6)=length(Stop(SniffEpoch,'s'));
+                    
+                end
+                
+                % Mouse - Phase - OdorLoc - meanTimeInSniff  - sum in sniff- sumPresence
+                try tempMat=MatExpe{dob,n_step}; catch, tempMat=[];end
+                MatExpe{dob,n_step}=[tempMat; MatExpeTemp];
+            end
+        end
+        % --------------------------------------------------
+        disp('-> Done')
+        
+    end
+end

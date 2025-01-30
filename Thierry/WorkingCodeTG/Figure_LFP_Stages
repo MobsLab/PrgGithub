@@ -1,0 +1,50 @@
+%load LFP
+load SleepScoring_OBGamma.mat
+figure(1)
+subplot(3,2,1)
+plot(Range(LFP,'s'),Data(LFP),'k')
+hold on, plot(Range(Restrict(LFP, REMEpoch), 's'),Data(Restrict(LFP, REMEpoch)),'g.','markersize', 3)
+title('REM without Noise')
+subplot(3,2,3)
+plot(Range(LFP,'s'),Data(LFP),'k')
+hold on, plot(Range(Restrict(LFP, SWSEpoch), 's'),Data(Restrict(LFP, SWSEpoch)),'r.','markersize', 3)
+title('SWS without Noise')
+subplot(3,2,5)
+plot(Range(LFP,'s'),Data(LFP),'k')
+hold on, plot(Range(Restrict(LFP, Wake), 's'),Data(Restrict(LFP, Wake)),'b.','markersize', 3)
+title('Wake without Noise')
+subplot(3,2,2)
+plot(Range(LFP,'s'),Data(LFP),'k')
+hold on, plot(Range(Restrict(LFP, REMEpochWiNoise), 's'),Data(Restrict(LFP, REMEpochWiNoise)),'g.','markersize', 3)
+title('REM with Noise')
+subplot(3,2,4)
+plot(Range(LFP,'s'),Data(LFP),'k')
+hold on, plot(Range(Restrict(LFP, SWSEpochWiNoise), 's'),Data(Restrict(LFP, SWSEpochWiNoise)),'r.','markersize', 3)
+title('SWS with Noise')
+subplot(3,2,6)
+plot(Range(LFP,'s'),Data(LFP),'k')
+hold on, plot(Range(Restrict(LFP, WakeWiNoise), 's'),Data(Restrict(LFP, WakeWiNoise)),b.','markersize', 3)
+title('Wake with Noise')
+
+%%%%
+figure(2)
+subplot(2,1,1)
+plot(Range(LFP,'s'),Data(LFP),'k')
+hold on, plot(Range(Restrict(LFP, REMEpoch), 's'),Data(Restrict(LFP, REMEpoch)),'g.','markersize', 3)
+hold on, plot(Range(Restrict(LFP, SWSEpoch), 's'),Data(Restrict(LFP, SWSEpoch)),'r.','markersize', 3)
+hold on, plot(Range(Restrict(LFP, Wake), 's'),Data(Restrict(LFP, Wake)),'b.','markersize', 3)
+title('REM, SWS, Wake without Noise')
+subplot(2,1,2)
+plot(Range(LFP,'s'),Data(LFP),'k')
+hold on, plot(Range(Restrict(LFP, REMEpochWiNoise), 's'),Data(Restrict(LFP, REMEpochWiNoise)),'g.','markersize', 3)
+hold on, plot(Range(Restrict(LFP, SWSEpochWiNoise), 's'),Data(Restrict(LFP, SWSEpochWiNoise)),'r.','markersize', 3)
+hold on, plot(Range(Restrict(LFP, WakeWiNoise), 's'),Data(Restrict(LFP, WakeWiNoise)),'b.','markersize', 3)
+title('REM, SWS, Wake with Noise')
+
+
+
+% Wake=WakeWiNoise-TotalNoiseEpoch
+% SWS=SWSEpochWiNoise-TotalNoiseEpoch
+% REM=REMEpochWiNoise-TotalNoiseEpoch
+
+

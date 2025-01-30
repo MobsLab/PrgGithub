@@ -1,0 +1,167 @@
+
+cd F:\EnCours\ManuP
+load MDC45544_ALL
+
+params.Fs=781.3232;
+params.trialave=0;
+params.err=[1,0.05];
+params.pad=0;
+params.fpass=[8 30];
+movingwin=[1,0.01];
+params.tapers=[3 5];
+
+
+lfp1=tsd([1:length(LFP1)]'/params.Fs*10000,LFP1);
+lfp2=tsd([1:length(LFP2)]'/params.Fs*10000,LFP2);
+lfp3=tsd([1:length(LFP3)]'/params.Fs*10000,LFP3);
+
+S{1}=tsd(CH1_Temp1_flag1*10000,CH1_Temp1_flag1*10000);
+S{2}=tsd(CH2_Temp1_flag1*10000,CH2_Temp1_flag1*10000);
+S{3}=tsd(CH3_T1_9_flag1*10000,CH3_T1_9_flag1*10000);
+S=tsdArray(S);
+
+RE=REPTouch*10000;
+SE=SEATouch*10000;
+C1=COR1*10000;
+C=COR*10000;
+I=IC*10000;
+
+
+deb=-20000;
+fin=20000;
+
+Correct1=intervalSet(C1+deb,C1+fin);
+Correct=intervalSet(C+deb,C+fin);
+InCorrect=intervalSet(I+deb,I+fin);
+
+Sea=intervalSet(SE+deb,SE+fin);
+Rep=intervalSet(RE+deb,RE+fin);
+
+SeaC=intersect(Sea,Correct);
+
+
+% [C,phi,S12,S1,S2,t,f]=cohgramc(Data(Restrict(lfp1,Correct1)),Data(Restrict(lfp2,Correct1)),movingwin,params);
+% 
+% figure
+% subplot(4,1,1), imagesc(t,f,log(S1')), axis xy
+% subplot(4,1,2), imagesc(t,f,log(S2')), axis xy
+% subplot(4,1,3), imagesc(t,f,phi'), axis xy
+% subplot(4,1,4), imagesc(t,f,C'), axis xy
+% 
+% [R,P]=corrcoef([S1,S2]);
+% figure, imagesc(2*f,2*f,R), axis xy
+
+Filt=[14 18];
+FilB1=FilterChoiceF(lfp1,Filt);
+FilB2=FilterChoiceF(lfp2,Filt);
+FilB3=FilterChoiceF(lfp3,Filt);
+
+[phaseTsd, phB1] = firingPhaseHilbert(FilB1, S) ;
+[phaseTsd, phB2] = firingPhaseHilbert(FilB2, S) ;
+[phaseTsd, phB3] = firingPhaseHilbert(FilB3, S) ;
+
+% i=2;
+% Epoch=Correct;
+% figure, 
+% subplot(1,3,1), JustPoltMod(Data(Restrict(phB1{i},Epoch)),20)
+% subplot(1,3,2), JustPoltMod(Data(Restrict(phB2{i},Epoch)),20)
+% subplot(1,3,3), JustPoltMod(Data(Restrict(phB3{i},Epoch)),20)
+% Epoch=Correct1;
+% figure, 
+% subplot(1,3,1), JustPoltMod(Data(Restrict(phB1{i},Epoch)),20)
+% subplot(1,3,2), JustPoltMod(Data(Restrict(phB2{i},Epoch)),20)
+% subplot(1,3,3), JustPoltMod(Data(Restrict(phB3{i},Epoch)),20)
+% 
+% Epoch=InCorrect;
+% figure, 
+% subplot(1,3,1), JustPoltMod(Data(Restrict(phB1{i},Epoch)),20)
+% subplot(1,3,2), JustPoltMod(Data(Restrict(phB2{i},Epoch)),20)
+% subplot(1,3,3), JustPoltMod(Data(Restrict(phB3{i},Epoch)),20)
+
+% tps=Range(lfp1);
+% Epoch=intervalSet(0,tps(end));
+% 
+% figure, 
+% subplot(1,3,1), JustPoltMod(Data(Restrict(phB1{1},Epoch)),20)
+% subplot(1,3,2), JustPoltMod(Data(Restrict(phB2{1},Epoch)),20)
+% subplot(1,3,3), JustPoltMod(Data(Restrict(phB3{1},Epoch)),20)
+% 
+% figure, 
+% subplot(1,3,1), JustPoltMod(Data(Restrict(phB1{2},Epoch)),20)
+% subplot(1,3,2), JustPoltMod(Data(Restrict(phB2{2},Epoch)),20)
+% subplot(1,3,3), JustPoltMod(Data(Restrict(phB3{2},Epoch)),20)
+% 
+% figure, 
+% subplot(1,3,1), JustPoltMod(Data(Restrict(phB3{1},Epoch)),20)
+% subplot(1,3,2), JustPoltMod(Data(Restrict(phB3{2},Epoch)),20)
+% subplot(1,3,3), JustPoltMod(Data(Restrict(phB3{3},Epoch)),20)
+
+
+
+% figure, RasterPETH(S{2}, ts(C*10000), -40000, +40000,'BinSize',1000);
+% 
+% 
+% 
+% 
+% n=1;
+% m=1;
+% 
+% [C,B] = CrossCorr(Range(Restrict(S{n},Epoch)),Range(Restrict(S{m},Epoch)),3,100);
+% C(find(B==0))=0;
+% figure, bar(B,C)
+
+
+
+% scatter(Range(Restrict(S{1},Epoch),'s'), 20*ones(length(Range(Restrict(S{1},Epoch),'s')),1), 30,Data(Restrict(phB{1},Epoch)), 'filled')
+
+
+% [phase,amplitude,unwrapped,filtered] = Phase([Range(Restrict(EEG,mazeEpoch)),Data(Restrict(EEG,mazeEpoch))],'passband',[60 80]);
+% 			Amplitude=tsd(amplitude(:,1),amplitude(:,2));
+
+Ph{1}=phB1{1};
+Ph{2}=phB1{2};
+Ph{3}=phB1{3};
+Ph{4}=phB2{1};
+Ph{5}=phB2{2};
+Ph{6}=phB2{3};
+Ph{7}=phB3{1};
+Ph{8}=phB3{2};
+Ph{9}=phB3{3};
+Ph=tsdArray(Ph);
+
+% nBins=10;
+% i=3;
+% 
+% deb=-20000;
+% fin=0;
+% 
+% Correct1=intervalSet(C1+deb,C1+fin);
+% Correct=intervalSet(C+deb,C+fin);
+% InCorrect=intervalSet(I+deb,I+fin);
+% 
+% Epoch=InCorrect;
+% figure(1),clf 
+% subplot(3,1,1), JustPoltMod(Data(Restrict(Ph{i},Epoch)),nBins)
+% Epoch=Correct1;
+% subplot(3,1,2), JustPoltMod(Data(Restrict(Ph{i},Epoch)),nBins)
+% Epoch=Correct;
+% subplot(3,1,3), JustPoltMod(Data(Restrict(Ph{i},Epoch)),nBins)
+% 
+% 
+% 
+% deb=0;
+% fin=20000;
+% 
+% Correct1=intervalSet(C1+deb,C1+fin);
+% Correct=intervalSet(C+deb,C+fin);
+% InCorrect=intervalSet(I+deb,I+fin);
+% 
+% Epoch=InCorrect;
+% figure(2), clf
+% subplot(3,1,1), JustPoltMod(Data(Restrict(Ph{i},Epoch)),nBins)
+% Epoch=Correct1;
+% subplot(3,1,2), JustPoltMod(Data(Restrict(Ph{i},Epoch)),nBins)
+% Epoch=Correct;
+% subplot(3,1,3), JustPoltMod(Data(Restrict(Ph{i},Epoch)),nBins)
+
+

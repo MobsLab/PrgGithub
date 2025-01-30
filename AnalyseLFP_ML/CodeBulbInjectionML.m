@@ -1,0 +1,643 @@
+%CodeBulbInjectionML
+%warning off
+
+
+% summury
+% ----------------------- INPUTS ------------------------------------------
+
+% ----------------------- INITIALISATION ----------------------------------
+% --------- Initiate Figures 
+% --------- Creating ArrousalStates.txt
+
+% ---------------------- DIRECTORIES --------------------------------------
+% --------- All experiments to analys (Add if needed)
+% --------- All experiment on the effect "Effect"
+
+% ---------------------- SPECTROGRAM PER MANIPE ---------------------------
+% --------- Define iWT et iKO
+% --------- load injection Epochs
+% --------- AnalyEpochs  (PRE VEH DRUG)
+% --------- Load Spectro 
+% --------- Disp row lfp 
+
+% -------------------- for each nameEpoch ---------------------------------
+% --------- Load Epoch
+%---------- plot spectro 
+%---------- plot intraindividual variability
+
+% --------------------- DISLPAY POOLED DATA -------------------------------
+
+% --------------------- SAVE FIGURES --------------------------------------
+
+
+
+ErasePreviousAnalysis='n';
+SaveFig=1;
+EraseFig=0;
+supposednameLFPA={'LFPbulb' 'LFPCx' 'EEGCx' 'LFPpfc' 'EEGpfc' 'LFPThAu' 'LFPhpc'}; 
+
+
+
+%% --------------------------- INPUTS -------------------------------------
+%  ------------------------------------------------------------------------
+disp(' ')
+disp('* * * * * * Spectral analysis of Injection Experiments. * * * * * * ')
+disp(' ')
+
+try
+    load('Inputs.mat');
+    Effect; nameEpoch; res; NoiseRemove; nameFolderSave;plotSpectro; plotVarIntra; plotRowLFP; LFPAchannelChoice; channels;Effectnum;VarIntraEpoch;Drug;
+    NewInputs=input('Inputs.mat already exists. Do you want to redefine inputs? (y/n) : ','s'); if NewInputs=='y', error; end
+catch
+    NewInputs='y';
+    disp('List of experiment :')
+    load('/media/DataMOBs/ProjetDPCPX/ListeManipe.mat')
+    for i=1:length(ListeManipe.manipe)
+        disp([num2str(i),'- ',ListeManipe.manipe{i}])
+    end
+    Effectnum=input('     * Indicate number of experiments to analyse (e.g. [1 5]) : ');
+    if isequal(intersect(Effectnum,1:3),1:3), Effect='DPCPXall'; Drug='DPCPX';
+    elseif isequal(Effectnum,1:2) || isequal(Effectnum,[1:2,5]), Effect='DPCPXold';Drug='DPCPX';
+    elseif isequal(Effectnum,3) || isequal(Effectnum,[3,5]), Effect='DPCPXnew';Drug='DPCPX';
+    elseif isequal(Effectnum,4) || isequal(Effectnum,[4,5]), Effect='CP';Drug='CP';
+    else Effect=ListeManipe.manipe{Effectnum(1)};
+    end
+    if ismember(5,Effectnum),Effect=[Effect,'-B'];end
+    
+    %     if strcmp(Effect,'CP')
+    %         cd('/media/DataMOBs/ProjetCannabinoids/AnalyseCP')
+    %     elseif strcmp(Effect,'DPCPX')
+    %         cd('/media/DataMOBs/ProjetDPCPX/AnalyseDPCPX')
+    %     elseif strcmp(Effect,'LPS')
+    %         cd('/media/DataMOBs/ProjetLPS/AnalyseLPS')
+    %     end
+    res=pwd;
+    
+    nameEpoch=input('     * Indicate states (e.g. {''REM'' ''SWS'' ''Wake''}): ');
+    
+    NoiseRemove=input('     * Ground & Weird noise should be removed? (y/n): ','s');
+    while sum(strcmp({'y','n'},NoiseRemove))==0; NoiseRemove=input('     Ground & Weird noise should be removed? (y/n): ','s');  end
+    
+    if SaveFig
+        nameFolderSave=input('     * Enter Folder where figures should be saved: ','s');
+        if exist([res,'/',nameFolderSave],'dir')==0
+            mkdir(res,nameFolderSave)
+        end
+    end
+    
+    for i=1:length(supposednameLFPA), disp([num2str(i),' - ',supposednameLFPA{i}]);end
+    LFPAchannelChoice=input('     * Indicate number of THE chosen Brain structure to analyse : ');
+    
+    plotSpectro=input('     * Do you want to display the whole spectrogram for each condition? (y/n) : ','s');
+    plotVarIntra=input('     * Do you want to display the intraIndividual variability? (y/n) : ','s');
+    if plotVarIntra=='y', VarIntraEpoch=input('            Which epoch (SWS, REM or Wake)? ','s'); else VarIntraEpoch={};end
+    plotRowLFP=input('     * Do you want to display Low scale <5Hz LFP? (y/n) : ','s');
+    if plotRowLFP=='y', channels=input('            Which channel do you want to compare (e.g [1 2])?: ');else channels=[];end
+    
+    disp('... Creating Inputs.mat with the just given information.')
+    save Inputs Effect Drug VarIntraEpoch Effectnum nameEpoch res NoiseRemove nameFolderSave plotSpectro plotVarIntra plotRowLFP LFPAchannelChoice channels
+    
+end
+
+%% ----------------------- INITIALISATION ---------------------------------
+% -------------------------------------------------------------------------
+
+disp(' ')
+disp(['* * * * * * ','Effect ',Effect,' - Channel ',supposednameLFPA{LFPAchannelChoice},' * * * * * * '])
+disp(' ')
+
+if NoiseRemove, NoiseRemovename={'-RMnoise'}; else NoiseRemovename={''}; end
+
+% --------- Initiate Figures -----------
+color={'k','r','b','m','g','y','c',};
+
+typop={'-' '--' ':'};
+
+scrsz = get(0,'ScreenSize');
+for nn=1:length(nameEpoch),
+    figure('color',[1 1 1],'Position',[2 scrsz(4) scrsz(3) scrsz(4)]),
+    FF{nn}=gcf;
+    for i=1:6
+        namelegendFF{nn,i}={};
+    end
+    
+end
+
+% --------- Creating ArrousalStates.txt -----------
+if NewInputs=='y', disp(['... Creating MeanSp-',Effect,'-ArrousalStates','.txt'])
+    file=fopen(['MeanSp-',Effect,'-ArrousalStates','.txt'],'w'); Date=date;
+    fprintf(file,'%s\n',['* * * * * * Analyse of ',Date,' on Effect ',Effect,' * * * * * * ']);
+    fprintf(file,'%s\n','  '); fprintf(file,'%s\n','supposednameLFPA :');
+    for i=1:length(supposednameLFPA), fprintf(file,'%s\n',['- ',supposednameLFPA{i}]);end
+    fprintf(file,'%s\n','  '); fprintf(file,'%s\n',['NoiseRemove (y/n): ',NoiseRemove]);
+    fprintf(file,'%s\n','  '); fprintf(file,'%s\n',['Save Figures in ',res,'/',nameFolderSave]);fprintf(file,'%s\n','  ');fprintf(file,'%s\n','  ');
+else disp(['... MeanSp-',Effect,'-ArrousalStates','.txt already exists.']);
+end
+
+%% ---------------------- DIRECTORIES -------------------------------------
+% -------------------------------------------------------------------------
+try
+    load([res,'/Analyse',Effect,'.mat'],'numDir','Dir');
+    Dir.path;Dir.group;Dir.manipe;numDir;
+catch
+    ErasePreviousAnalysis='y';Dir.path=[];Dir.manipe=[];
+end
+
+if ErasePreviousAnalysis=='y'
+    disp('... Creating general directories.')
+    load('/media/DataMOBs/ProjetDPCPX/ListeManipe.mat')
+    % -- All experiments to analys (Add if needed) --
+    % ------------------------------------------------------
+    for i=Effectnum
+        tempPath=ListeManipe.Path{i};
+        for j=1:length(tempPath)
+            Dir.path=[Dir.path,tempPath(j)];
+            Dir.manipe=[Dir.manipe,ListeManipe.manipe(i)];
+        end
+    end
+
+    for i=1:length(Dir.path)
+        % Dir.manipe
+%         try
+%             clear Manipe
+%             load([Dir.path{i},'/AnalyBulb.mat'],'Manipe')
+%             Dir.manipe{i}=Manipe;
+%         catch
+%             disp(['Problem, manipe not define for ',Dir.path{i}(end-16:end)])
+%             Manipe=input('   Give name of manipe (e.g. DPCPX, VEHDPCPX, CP or Basal) : ','s');
+%             Dir.manipe{i}=Manipe;
+%             try save([Dir.path{i},'/AnalyBulb.mat'],'-v7.3','-append','Manipe')
+%             catch, save([Dir.path{i},'/AnalyBulb.mat'],'-v7.3','Manipe')
+%             end
+%         end
+        % Dir.group
+        if isempty(strfind(Dir.path{i},'Mouse051'))==0 || isempty(strfind(Dir.path{i},'Mouse060'))==0 || isempty(strfind(Dir.path{i},'Mouse061'))==0
+            Dir.group{i}={'WT'};
+        elseif isempty(strfind(Dir.path{i},'Mouse047'))==0 || isempty(strfind(Dir.path{i},'Mouse052'))==0 || isempty(strfind(Dir.path{i},'Mouse054'))==0
+            Dir.group{i}={'KO'};
+        else
+            disp(['Define WT or KO for ',Dir.path{i}(end-16:end-8)])
+            keyboard
+        end
+    end
+    
+    % ------- All experiment on the effect "Effect" ------
+    % ------------------------------------------------------
+    
+    disp(['... Creating directories for the ',Effect,' experiment.'])
+%     numDir=[];
+%     for i=1:length(Dir.path)
+%         
+%         if strcmp(Effect,'CP') && strcmp(Dir.manipe{i},'CP')
+%             numDir=[numDir,i];
+%         elseif strcmp(Effect,'Basal')
+%             numDir=[numDir,i]; %il faudra faire attention a prendre que les période pre
+%         elseif strcmp(Effect,'DPCPX') && isempty(strfind(Dir.manipe{i},'DPCPX'))==0 % les 'VEHDPCPX' seront inclus
+%             numDir=[numDir,i];
+%         end
+%         
+%     end
+ numDir=1:length(Dir.path);
+    save([res,'/Analyse',Effect,'.mat'],'numDir','Dir');
+else
+    disp(['... Using existing directories for the ',Effect,' experiment.'])
+end
+
+for i=1:length(Dir.path)
+    try
+       clear GndNoiseEpoch
+       load([Dir.path{i},'/StateEpoch.mat'],'GndNoiseEpoch') 
+       Start(GndNoiseEpoch);
+    catch
+        cd(Dir.path{i}); close all
+        error('play sleep scoring for Noise Epoch')
+    end
+end
+
+% additional figure initiation
+if plotVarIntra
+    cccolor={'m','b','k'};
+    for i=1:length(Dir.path), Dir.num(i)=str2num(Dir.path{i}(end-10:end-9));end
+    UVarIntra=unique(Dir.num);
+    for i=1:length(UVarIntra),
+        UuVarIntra(i,1:length(find(Dir.num==UVarIntra(i))))=find(Dir.num==UVarIntra(i));
+        figure('color',[1 1 1],'Position',[2 scrsz(4) scrsz(3) scrsz(4)]), FH(i)=gcf;
+    end
+end
+%% -------------------- SPECTROGRAM PER MANIPE ----------------------------
+%  ------------------------------------------------------------------------
+
+InjName={'BASE' 'VEHI' 'DRUG'};saveAnaly=1;
+try 
+	load([res,'/MeanSp',Effect,supposednameLFPA{LFPAchannelChoice},NoiseRemovename{:}(2:end),'.mat'],'meanSp','poolf','iKO','iWT','textTemp')
+    %load([res,'/MeanSp',Effect,supposednameLFPA{LFPAchannelChoice},NoiseRemovename{:}(2:end),'.mat'],'meanSp','poolf','textTemp')
+    meanSp; poolf; iKO; iWT;
+    if ErasePreviousAnalysis=='n'
+        runNewAnalysis='n';
+        disp('... Using existing meanSp.')
+        if plotSpectro=='y' || plotVarIntra=='y' || plotRowLFP=='y',runNewAnalysis='y'; saveAnaly=0;end
+    end
+catch
+    runNewAnalysis='y';
+end
+if saveAnaly==0, for nn=1:length(nameEpoch), close(FF{nn});end;end
+
+if runNewAnalysis=='y'
+    
+    for nn=1:length(nameEpoch), for Inj=1:length(InjName), meanSp{nn,Inj}=[]; end; end
+    poolf={};
+    textTemp={};
+    iKO=[];iWT=[];
+    
+    for man=numDir
+        if plotSpectro=='y', figure('color',[1 1 1],'Position',[2 scrsz(4) scrsz(3) scrsz(4)]), FG{man}=gcf;end
+        disp(' ');
+        disp(['* * * * *  Manipe ',Dir.manipe{man},', ',Dir.group{man}{:},Dir.path{man}(end-11:end),'  * * * * *'])
+        if NewInputs=='y',fprintf(file,'%s\n',' ');
+            fprintf(file,'%s\n',['* * * * *  Manipe ',Dir.manipe{man},', ',Dir.group{man}{:},Dir.path{man}(end-11:end),'  * * * * *']);end
+        cd(Dir.path{man})
+        
+        % ------ Define iWT et iKO ---------
+        % ----------------------------------
+        
+        if strcmp(Dir.group{man}{:},'KO')
+            iKO=[iKO,man];
+        elseif strcmp(Dir.group{man}{:},'WT')
+            iWT=[iWT,man];
+        end
+        textTemp{man}=[Dir.group{man}{:},Dir.path{man}(end-11:end)];
+        
+        % ------------ load injection Epochs ------------
+        % -----------------------------------------------
+        
+        clear('PreEpoch','VEHEpoch','PostEpoch','DrugEpoch','POSTEpoch',[Drug,'Epoch'])
+        try
+            load('behavResources.mat','PreEpoch',[Drug,'Epoch'],'VEHEpoch');
+            eval(['DrugEpoch=',Drug,'Epoch;'])
+            Start(PreEpoch); Start(DrugEpoch); Start(VEHEpoch);
+            
+        catch
+            
+            if strcmp(Dir.manipe{man},'Basal')
+                load('behavResources.mat','PreEpoch');
+                VEHEpoch=intervalSet([],[]);
+                eval([Drug,'Epoch=intervalSet([],[]);'])
+                
+            else
+                if strcmp(Dir.manipe{man},Drug)
+                    load('behavResources.mat','PreEpoch','PostEpoch','POSTEpoch')
+                    try eval([Drug,'Epoch=PostEpoch;']); catch, eval([Drug,'Epoch=POSTEpoch;']); end
+                    VEHEpoch=intervalSet([],[]);
+                elseif strcmp(Dir.manipe{man},['VEH',Drug])
+                    load('behavResources.mat','PreEpoch','PostEpoch','POSTEpoch')
+                    try VEHEpoch=PostEpoch; catch, VEHEpoch=POSTEpoch; end
+                    eval([Drug,'Epoch=intervalSet([],[]);'])
+                else
+                    disp(['Problem: ',Dir.manipe{man},' and ',Drug,' are not compatible...'])
+                end
+            end
+            
+            eval(['DrugEpoch=',Drug,'Epoch;'])
+            save('behavResources.mat','-append',[Drug,'Epoch'],'VEHEpoch')
+        end
+        
+        try
+            Start(PreEpoch); Start(DrugEpoch); Start(VEHEpoch);
+        catch
+            error('Problem Epochs')
+        end
+        
+        
+        % ---------------------------------------------------------------------
+        % ---------------------- AnalyEpochs  (PRE VEH DRUG)-----------------
+        %   correspond a Pre Veh Drug (intervalSet peut etre vide) en colonne
+        %                et a REM SWS Wake Wake-nosie en ligne
+        
+        clear('AnalyEpochs',['AnalyEpochs',NoiseRemovename{:}(2:end)],'AllnamesEpoch')
+        try
+            load([Dir.path{man},'/AnalyBulb.mat'],['AnalyEpochs',NoiseRemovename{:}(2:end)],'AllnamesEpoch')
+            eval(['AnalyEpochs=AnalyEpochs',NoiseRemovename{:}(2:end),';']);
+            Start(AnalyEpochs{3,1}); AllnamesEpoch;
+            try load('StateEpoch.mat',WeirdNoiseEpoch); WeirdNoiseEpoch; catch, WeirdNoiseEpoch=intervalSet([],[]); save StateEpoch -append WeirdNoiseEpoch; end
+        catch
+            disp(['... Creating AnalyEpochs',NoiseRemovename{:}(2:end)])
+            
+            clear NoiseEpoch GndNoiseEpoch WeirdNoiseEpoch
+            load([Dir.path{man},'/StateEpoch.mat'],'GndNoiseEpoch','NoiseEpoch','WeirdNoiseEpoch')
+            AllnamesEpoch={'REM','SWS','Mov'};
+            try WeirdNoiseEpoch; catch, WeirdNoiseEpoch=intervalSet([],[]);end
+            if NoiseRemove==0, GndNoiseEpoch=intervalSet([],[]); WeirdNoiseEpoch=intervalSet([],[]);end
+            
+            for nn=1:length(AllnamesEpoch)
+                clear epoch
+                load('StateEpoch.mat',[AllnamesEpoch{nn},'Epoch'])
+                eval(['epoch=',AllnamesEpoch{nn},'Epoch;']); 
+                AnalyEpochs{nn,1}=and(PreEpoch,epoch)-NoiseEpoch-GndNoiseEpoch-WeirdNoiseEpoch;
+                AnalyEpochs{nn,2}=and(VEHEpoch,epoch)-NoiseEpoch-GndNoiseEpoch-WeirdNoiseEpoch;
+                eval(['AnalyEpochs{nn,3}=and(',Drug,'Epoch,epoch)-NoiseEpoch-GndNoiseEpoch-WeirdNoiseEpoch;']);
+            end
+            eval(['AnalyEpochs',NoiseRemovename{:}(2:end),'=AnalyEpochs;']);
+            save([Dir.path{man},'/AnalyBulb.mat'],'-v7.3','-append',['AnalyEpochs',NoiseRemovename{:}(2:end)],'AllnamesEpoch','InjName')
+        end
+        
+        
+        
+        % --------- Load Spectro -----------
+        % ----------------------------------
+        if LFPAchannelChoice==7
+            load([Dir.path{man},'/StateEpoch.mat'],'Spectro')
+            TempSp=Spectro{1}; Tempt=Spectro{2}; poolf{man}=Spectro{3};
+            clear Spectro
+            movingwin=[3 0.2];
+        else
+            try
+                load([Dir.path{man},'/AnalyBulb.mat'],'Sp','t','f','movingwin')
+                TempSp=Sp{LFPAchannelChoice}; Tempt=t{LFPAchannelChoice}; poolf{man}=f{LFPAchannelChoice};
+                clear Sp t f
+                try movingwin; catch, disp('movingwin not found, using previous one.');end
+            catch
+                disp(['     No spectro for ',Dir.group{man}{:},Dir.path{man}(end-11:end)])
+                error('        CodeBulbML2 needs to be played. Type: clear; CodeBulbML2')
+            end
+        end
+        
+        % --------- Disp row lfp -----------
+        % ----------------------------------
+        if plotRowLFP=='y'
+            disp(' '); disp('... Plotting Row LFP')            
+            figure('color',[1 1 1],'Position',[2 scrsz(4) scrsz(3) scrsz(4)]); FJ{man}=gcf; clear LFPA
+            try
+                load([Dir.path{man},'/AnalyBulb.mat'],'LFPA'); 
+                load([Dir.path{man},'/StateEpoch.mat'],'SWSEpoch','NoiseEpoch','GndNoiseEpoch','WeirdNoiseEpoch'); SWSEpoch=SWSEpoch-NoiseEpoch-GndNoiseEpoch-WeirdNoiseEpoch;
+                load([Dir.path{man},'/behavResources.mat'],[Drug,'Epoch'],'VEHEpoch','PreEpoch'); eval(['epoch=',Drug,'Epoch;']);
+                pasSlow=20; freqSlow=[1,5];
+                epochsStart(1)=sum(Stop(and(SWSEpoch,PreEpoch),'s')-Start(and(SWSEpoch,PreEpoch),'s'));
+                epochsStart(2)=sum(Stop(and(SWSEpoch,VEHEpoch),'s')-Start(and(SWSEpoch,VEHEpoch),'s'));
+                epochsStart(3)=sum(Stop(and(SWSEpoch,epoch),'s')-Start(and(SWSEpoch,epoch),'s'));
+                
+                legendTemp=[];
+                for i=channels
+                    disp(['compute ',supposednameLFPA{i}]);
+                    clear LFP Slow rgSlow FilSlow HilSlow
+                    if i==length(LFPA)+1
+                        load([Dir.path{man},'/LFPdHPC.mat'],'LFP'); LFP=LFP{1};
+                    else
+                        LFP=LFPA{i};
+                    end
+                    
+                    FilSlow=FilterLFP(Restrict(LFP,SWSEpoch),freqSlow,2048);
+                    rgSlow=[1:length(Data(FilSlow))]/length(Data(FilSlow))*sum(epochsStart);
+                    %rgSlow=rgSlow(1:pasSlow:end);
+                    
+                    LFPSlow=Data(FilSlow);
+                    %LFPSlow=SmoothDec(LFPSlow(1:pasSlow:end),50);
+                    
+                    if isempty(LFPSlow)==0
+                        legendTemp=[legendTemp,supposednameLFPA(i)];
+                        if i==1, hold on, subplot(2,1,1), plot(rgSlow,LFPSlow/2-(length(legendTemp)-1)*3E3,color{i})
+                        else hold on, subplot(2,1,1), plot(rgSlow,LFPSlow-(length(legendTemp)-1)*3E3,color{i})
+                        end
+                        rgSlow=rgSlow(1:pasSlow:end);
+                        HilSlow=hilbert(Data(FilSlow));
+                        HilSlow=abs(HilSlow);%HilSlow(HilSlow<100)=100;
+                        HilSlow=SmoothDec(HilSlow(1:pasSlow:end),50);
+                        hold on, subplot(2,1,2), plot(rgSlow,HilSlow-(length(legendTemp)-1)*8E2,color{i})
+                    end
+                    TempFilSlow{i}=FilSlow; TempHilSlow{i}=HilSlow;
+                end
+                clear LFPA
+                subplot(2,1,1), legend(legendTemp); xlim([0,max(rgSlow)]);
+                hold on,  line([cumsum((Stop(SWSEpoch,'s')-Start(SWSEpoch,'s'))) cumsum((Stop(SWSEpoch,'s')-Start(SWSEpoch,'s')))],[-length(legendTemp)*3E3 -length(legendTemp)*3E3+1E3],'color','k','linewidth',0.5);
+                title([Dir.group{man}{:},Dir.path{man}(end-11:end),' - LFP during SWS (smooth step=',num2str(pasSlow),', filter=[',num2str(freqSlow(1)),',',num2str(2*freqSlow(2)),'])'])
+                subplot(2,1,2), xlim([0,max(rgSlow)]);
+                if epochsStart(2)~=0, hold on,  line([epochsStart(1) epochsStart(1)],[(1-length(legendTemp))*8E2 4E3],'color','b','linewidth',2);text(epochsStart(1),4E3,'VEHICULE','color','b');end
+                if epochsStart(3)~=0, hold on,  line([epochsStart(2)+epochsStart(1) epochsStart(2)+epochsStart(1)],[(1-length(legendTemp))*8E2 4E3],'color','r','linewidth',2);text(epochsStart(2)+epochsStart(1),4E3,Drug,'color','r');end
+                title(['Hilbert Transform of LFP (smooth step=',num2str(pasSlow),', f=[',num2str(freqSlow(1)),',',num2str(freqSlow(2)),'])'])
+            catch
+                disp('Problem with row lfp display');
+            end
+        end
+        
+        
+        
+        
+        % -------------------- for each nameEpoch -----------------------------
+        % ---------------------------------------------------------------------
+        
+        if plotSpectro=='n' && plotVarIntra=='n' && plotRowLFP=='y' && saveAnaly==0;
+            disp('Skipping Analyse');
+        else
+            for nn=1:length(nameEpoch)
+                
+                % ----------- Load Epoch -----------
+                % ----------------------------------
+                
+                if NewInputs=='y', disp(['          ** ',nameEpoch{nn},' **']);
+                    fprintf(file,'%s\n',['          ** ',nameEpoch{nn},' **']);end
+                
+                iepoch=find(strcmp(AllnamesEpoch,nameEpoch{nn}));
+                if strcmp(nameEpoch{nn},'Wake'), iepoch=find(strcmp(AllnamesEpoch,'Mov'));end
+                
+                for Inj=1:length(InjName)
+                    
+                    if NewInputs=='y',
+                        disp([InjName{Inj},': ',num2str(floor(sum(Stop(AnalyEpochs{iepoch,Inj},'s')-Start(AnalyEpochs{iepoch,Inj},'s')))),'s'])
+                        fprintf(file,'%s\n',[InjName{Inj},': ',num2str(floor(sum(Stop(AnalyEpochs{iepoch,Inj},'s')-Start(AnalyEpochs{iepoch,Inj},'s')))),'s']);end
+                    try
+                        sta=Start(AnalyEpochs{iepoch,Inj},'s');
+                        stp=Stop(AnalyEpochs{iepoch,Inj},'s');
+                        TempDispSp=[];TempDispt=[];
+                        
+                        for ss=1:length(sta)
+                            I=find(Tempt>=sta(ss) & Tempt<stp(ss));
+                            TempDispSp=[TempDispSp;TempSp(I,:)];
+                            if isempty(TempDispt), tmax=0; else tmax=max(TempDispt); end
+                            TempDispt=[TempDispt,tmax+[1:length(I)]*movingwin(2)];
+                        end
+                        
+                        poolTemp=meanSp{nn,Inj};
+                        poolTemp(man,1:size(TempDispSp,2))=mean(10*log10(TempDispSp));
+                        meanSp{nn,Inj}=poolTemp;
+                        
+                        %------------------- plot spectro ---------------------
+                        if plotSpectro=='y'
+                            try figure(FG{man}), subplot(length(InjName),length(nameEpoch),(Inj-1)*length(InjName)+nn), imagesc(TempDispt,poolf{man},10*log10(TempDispSp')), axis xy, caxis([20 70]),
+                                ylabel(InjName{Inj}); xlabel([nameEpoch{nn},NoiseRemovename{:}]); xlim([0,500]);
+                                if (Inj-1)*length(InjName)+nn==2, title([Drug,' * ',supposednameLFPA{LFPAchannelChoice},' 500s spectrogram * ',Dir.group{man}{:},Dir.path{man}(end-11:end)]);end
+                            catch, disp('Problem Spectro display')
+                            end
+                        end
+                        
+                        %----------- plot intraindividual variability ---------
+                        if plotVarIntra=='y' && strcmp(nameEpoch{nn},VarIntraEpoch)
+                            legendTemp=[];
+                            [i,j]=find(UuVarIntra==man);
+                            try figure(FH(i)), subplot(length(InjName),sum(UuVarIntra(i,:)~=0),sum(UuVarIntra(i,:)~=0)*(Inj-1)+j)
+                                for i=1:3
+                                    hold on, plot(poolf{man},mean(10*log10(TempDispSp(floor((i-1)*length(TempDispt)/3)+1:floor(i*length(TempDispt)/3),:))),cccolor{i},'linewidth',2),
+                                    legendTemp=[legendTemp,{['period ',num2str(i),' -',num2str(floor(sum(Stop(AnalyEpochs{iepoch,Inj},'s')-Start(AnalyEpochs{iepoch,Inj},'s'))/3)),'s']}];
+                                end
+                                ylabel(InjName{Inj}); xlabel([Dir.group{man}{:},Dir.path{man}(end-11:end)]);legend(legendTemp); ylim([30,70]);
+                            catch
+                                %keyboard
+                            end
+                        end
+                        
+                    catch
+                        disp('Problem with Spectrogram ');
+                        keyboard
+                    end
+                    
+                    clear TempDispSp TempDispt
+                end
+            end
+            clear TempSp Tempt
+        end
+    end
+    
+    % save meanSp 
+    if saveAnaly
+        disp(' ');disp(['... Saving meanSp in ','MeanSp',Effect,supposednameLFPA{LFPAchannelChoice},NoiseRemovename{:}(2:end),'.mat'])
+        save([res,'/MeanSp',Effect,supposednameLFPA{LFPAchannelChoice},NoiseRemovename{:}(2:end),'.mat'],'meanSp','poolf','iKO','iWT','textTemp')
+    end
+end
+
+
+%% --------------------- DISLPAY POOLED DATA ------------------------------
+%  ------------------------------------------------------------------------
+textFig={'' '' ''};
+if saveAnaly
+    for nn=1:length(nameEpoch)
+        yylim=[40 50];
+        figure(FF{nn}), hold on,
+        % figrue FF:  PRE-VEH , VEH-POST , PRE-VEH-POST WT , PRE-VEH-POST KO
+        
+        for Inj=1:length(InjName)
+            
+            poolTemp=meanSp{nn,Inj};
+            
+            for grup=1:2
+                
+                if grup==1, grupi=iWT;
+                else grupi=iKO;
+                end
+                
+                gruppool=poolTemp(grupi,:);
+                grupi=grupi(isnan(gruppool(:,1))==0 & gruppool(:,1)~=0);
+                gruppool=gruppool(isnan(gruppool(:,1))==0 & gruppool(:,1)~=0,:);
+                
+                textFigTemp=textTemp(grupi);
+                textFig{nn}=[textFig{nn},InjName{Inj},textFigTemp(isnan(gruppool(:,1))==0 & gruppool(:,1)~=0)];
+                ok=0;
+                while ok<2
+                    
+                    % choose place on figure
+                    if ok==0
+                        SubFig=3+grup; ok=ok+1; ccolor=color{2+Inj};
+                        subplot(2,3,SubFig); title([nameEpoch{nn},'- ',supposednameLFPA{LFPAchannelChoice},NoiseRemovename{:},'. ',Dir.group{grupi(1)}{:},' mice only. basal/Vehicule/Drug'])
+                    else
+                        SubFig=Inj;ok=ok+1; ccolor=color{grup};
+                        subplot(2,3,SubFig); title([nameEpoch{nn},'- ',supposednameLFPA{LFPAchannelChoice},NoiseRemovename{:},'. WT versus KO ',InjName{Inj},'.'])
+                    end
+                    
+                    % plot mean and SEM of spectro
+                    try
+                        hold on, plot(poolf{grupi(1)},mean(gruppool,1),ccolor,'linewidth',2),caxis([27.3 80.4]),
+                        yylim=[min(yylim(1),min(min(gruppool))),max(yylim(2),max(max(gruppool)))]; ylim([yylim(1) yylim(2)]);
+                        
+                        if size(gruppool,1)>1
+                            hold on, plot(poolf{grupi(1)},mean(gruppool,1)+stdError(gruppool),ccolor)
+                            hold on, plot(poolf{grupi(1)},mean(gruppool,1)-stdError(gruppool),ccolor),caxis([27.3 80.4]),ylim([yylim(1) yylim(2)]);
+                            namelegendFF{nn,SubFig}=[namelegendFF{nn,SubFig},{['mean ',InjName{Inj},'-',Dir.group{grupi(1)}{:}] '+sem' '-sem'}];
+                        else
+                            namelegendFF{nn,SubFig}=[namelegendFF{nn,SubFig},{['mean ',InjName{Inj},'-',Dir.group{grupi(1)}{:}]}];
+                        end
+                    catch
+                        disp(['Problem display ',Dir.group{grupi(1)}{:}])
+                    end
+                    
+                end
+                
+                clear gruppool
+            end
+        end
+        
+        clear poolTemp
+    end
+    
+    % --- Add legend and text on figures ---
+    % --------------------------------------
+    for nn=1:length(nameEpoch)
+        for i=1:5
+            figure(FF{nn}), subplot(2,3,i), hold on,
+            legend(namelegendFF{nn,i})
+        end
+        subplot(2,3,6), xlim([0,1]), text(0.5,0.5, textFig{nn}), axis off
+    end
+end
+
+
+%% ------------------------ SAVE FIGURES ----------------------------------
+% -------------------------------------------------------------------------
+
+if SaveFig
+    disp(['... Saving figures in ',nameFolderSave,'.'])
+    
+    if plotSpectro=='y'
+        disp('              Figure spectrogram')
+        ok=input('Are you satisfied with the color scale of spectrogram (caxis=[30,70])? y/n :','s');
+        while ok~='y', caxisIn=input('Enter new caxis (e.g. [20 60]): '); 
+            for man=numDir, 
+                for i=1:length(InjName)*length(nameEpoch), figure(FG{man}), subplot(length(InjName),length(nameEpoch),i),caxis(caxisIn);end
+            end
+            ok=input('Are you satisfied with the color scale of spectrogram? y/n :','s');
+        end
+        for man=numDir
+            nameFigSpectro=['Spectro-',Dir.group{man}{:},Dir.path{man}(end-11:end),'-',supposednameLFPA{LFPAchannelChoice},NoiseRemovename{:}];
+            saveFigure(FG{man},nameFigSpectro,[res,'/',nameFolderSave])
+        end
+    end
+    
+    if plotVarIntra=='y' 
+        disp('              Figure Individual variability')
+        ok=input('Are you satisfied with the yaxis scale of spectrogram (ylim=[20,70])? y/n :','s');
+        while ok~='y', caxisIn=input('Enter new yaxis (e.g. [20 60]): '); 
+            for h=FH, figure(h)
+                for i=1:length(InjName)*sum(UuVarIntra(FH==h,:)~=0), subplot(length(InjName),sum(UuVarIntra(FH==h,:)~=0),i),ylim([caxisIn(1),caxisIn(2)]);end
+            end
+            ok=input('Are you satisfied with the yaxis scale of spectrogram ? y/n :','s');
+        end
+        for h=FH, nameFigSpectro=['Mouse',num2str(UVarIntra(FH==h)),'-IntraVariabilitySpectro',VarIntraEpoch,'-',supposednameLFPA{LFPAchannelChoice},NoiseRemovename{:}];
+            saveFigure(h,nameFigSpectro,[res,'/',nameFolderSave]);
+        end
+    end
+    
+    if plotRowLFP=='y'
+        for man=numDir,
+            nameFigSpectro=['RowLFP-',Dir.group{man}{:},Dir.path{man}(end-11:end),'-Inf',num2str(freqSlow(2)),'Hz'];
+            saveFigure(FJ{man},nameFigSpectro,[res,'/',nameFolderSave])
+        end
+    end
+    
+    if saveAnaly
+        for nn=1:length(nameEpoch)
+            nameFig=[Effect,'-FreqSpectr-',nameEpoch{nn},'-',supposednameLFPA{LFPAchannelChoice},NoiseRemovename{:}];
+            
+            if EraseFig==0
+                ok=exist([res,'/',nameFolderSave,'/',nameFig,'.png'],'file');
+                while ok==2
+                    nameFig=[nameFig,'Bis'];
+                    ok=exist([res,'/',nameFolderSave,'/',nameFig,'.png'],'file');
+                end
+            end
+            
+            saveFigure(FF{nn},nameFig,[res,'/',nameFolderSave])
+        end
+    end
+end
+
+
+
+
+%% termniation
+cd(res)

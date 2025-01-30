@@ -1,0 +1,91 @@
+function A = goLightDarkPETH(A)
+
+fontSize = 12;
+A = getResource(A, 'CellNames');
+A = getResource(A, 'SpikeData');
+
+A= getResource(A, 'TrialOutcome');
+trialOutcome = trialOutcome{1};
+
+A = getResource(A, 'StartTrial');
+startTrial = startTrial{1};
+
+A = getResource(A, 'LightRecord');
+lightRecord = lightRecord{1};
+
+A = getResource(A, 'GoodCells');
+
+S = S(find(goodCells{1}));
+
+[success, message, messageid] = mkdir(parent_dir(A), 'PETHs');
+
+pethdir = [parent_dir(A), filesep 'PETHs'];
+[p,ds,e] = fileparts(current_dir(A));
+
+side = Data(trialOutcome);
+lite = Data(lightRecord);
+
+liteSide = ~xor(side,lite);
+goLite = find(liteSide == 1);
+goDark = find(liteSide == 0);
+
+for i = 1:length(S)
+
+%      figure(1), clf
+%      [fh1, rasterAx1, histAx1] = RasterPETH(S{i}, subset(startTrial, goLite), -50000, 100000, ...
+%          'Markers', { subset(trialOutcome, goLite)} , ...
+%          'MarkerTypes',{ 'r.' }, 'MarkerSize', 20, 'BinSize', 200);
+%  
+%      title([cellnames{i} ' start Go Light'], 'interpreter', 'none', ...
+%          'FontSize', fontSize, 'FontName', 'Verdana' );
+%      set(rasterAx1, 'FontSize', fontSize, 'FontName', 'Verdana');
+%      set(histAx1, 'FontSize', fontSize, 'FontName', 'Verdana');
+%  
+%  
+%      figure(2), clf
+%      [fh2, rasterAx2, histAx2] = RasterPETH(S{i}, subset(startTrial, goDark), -50000, 100000, ...
+%          'Markers', {subset(trialOutcome, goDark) }, ...
+%          'MarkerTypes',{ 'r.' }, 'MarkerSize', 20, 'BinSize', 200);
+%      title([cellnames{i} ' start go Dark'], 'interpreter', 'none', ...
+%          'FontSize', fontSize, 'FontName', 'Verdana');
+%      set(rasterAx2, 'FontSize', fontSize, 'FontName', 'Verdana');
+%      set(histAx2, 'FontSize', fontSize, 'FontName', 'Verdana');
+%      setSameAxisLim({histAx1, histAx2}, 'y');
+%      setSameAxisLim({rasterAx1, rasterAx2}, 'y');
+%  
+%      integerTicks(histAx1, 'y');
+%      integerTicks(histAx2, 'y');
+%      saveas(fh1, [pethdir filesep ds '_' cellnames{i} 'startGoLightPETH'], 'png');
+%      saveas(fh2, [pethdir filesep ds '_' cellnames{i} 'startGoDarkPETH'], 'png');
+
+    figure(1), clf
+    [fh1, rasterAx1, histAx1] = RasterPETH(S{i}, subset(trialOutcome, goLite), -100000, 50000, ...
+        'Markers', { subset(startTrial, goLite)} , ...
+        'MarkerTypes',{ 'r.' }, 'MarkerSize', 20, 'BinSize', 200);
+
+    title([cellnames{i} ' end Go Light'], 'interpreter', 'none', ...
+        'FontSize', fontSize, 'FontName', 'Verdana' );
+    set(rasterAx1, 'FontSize', fontSize, 'FontName', 'Verdana');
+    set(histAx1, 'FontSize', fontSize, 'FontName', 'Verdana');
+
+
+    figure(2), clf
+    [fh2, rasterAx2, histAx2] = RasterPETH(S{i}, subset(trialOutcome, goDark), -100000, 50000, ...
+        'Markers', {subset(startTrial, goDark) }, ...
+        'MarkerTypes',{ 'r.' }, 'MarkerSize', 20, 'BinSize', 200);
+    title([cellnames{i} ' end go Dark'], 'interpreter', 'none', ...
+        'FontSize', fontSize, 'FontName', 'Verdana');
+    set(rasterAx2, 'FontSize', fontSize, 'FontName', 'Verdana');
+    set(histAx2, 'FontSize', fontSize, 'FontName', 'Verdana');
+    setSameAxisLim({histAx1, histAx2}, 'y');
+    setSameAxisLim({rasterAx1, rasterAx2}, 'y');
+
+    integerTicks(histAx1, 'y');
+    integerTicks(histAx2, 'y');
+    saveas(fh1, [pethdir filesep ds '_' cellnames{i} 'trialOutcomeGoLightPETH'], 'png');
+    saveas(fh2, [pethdir filesep ds '_' cellnames{i} 'trialOutcomeGoDarkPETH'], 'png');
+
+
+
+end
+

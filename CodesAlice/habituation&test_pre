@@ -1,0 +1,70 @@
+Filename564={
+   '/media/DataMOBS65/EmbReact_Eyeshock/Mouse564/20170706/ProjectEmbReact_M564_20170706_Habituation'
+ %  '/media/DataMOBS65/EmbReact_Eyeshock/Mouse564/20170706/ProjectEmbReact_M564_20170706_TestPre/TestPre1'
+  % '/media/DataMOBS65/EmbReact_Eyeshock/Mouse564/20170706/ProjectEmbReact_M564_20170706_TestPre/TestPre2'
+  % '/media/DataMOBS65/EmbReact_Eyeshock/Mouse564/20170706/ProjectEmbReact_M564_20170706_TestPre/TestPre3'
+  % '/media/DataMOBS65/EmbReact_Eyeshock/Mouse564/20170706/ProjectEmbReact_M564_20170706_TestPre/TestPre4'
+}
+
+Filename565={
+   '/media/DataMOBS65/EmbReact_Eyeshock/Mouse565/20170726/ProjectEmbReact_M565_20170726_Habituation'
+ %  '/media/DataMOBS65/EmbReact_Eyeshock/Mouse565/20170706/ProjectEmbReact_M565_20170706_TestPre/TestPre1'
+ %  '/media/DataMOBS65/EmbReact_Eyeshock/Mouse565/20170706/ProjectEmbReact_M565_20170706_TestPre/TestPre2'
+ %  '/media/DataMOBS65/EmbReact_Eyeshock/Mouse565/20170706/ProjectEmbReact_M565_20170706_TestPre/TestPre3'
+ %  '/media/DataMOBS65/EmbReact_Eyeshock/Mouse565/20170706/ProjectEmbReact_M565_20170706_TestPre/TestPre4'
+}
+
+Filename560={
+   '/media/DataMOBS65/EmbReact_Eyeshock/Mouse560/20170706/ProjectEmbReact_M560_20170706_Habituation'
+ %  '/media/DataMOBS65/EmbReact_Eyeshock/Mouse560/20170706/ProjectEmbReact_M560_20170706_TestPre/TestPre1'
+ %  '/media/DataMOBS65/EmbReact_Eyeshock/Mouse560/20170706/ProjectEmbReact_M560_20170706_TestPre/TestPre2'
+  % '/media/DataMOBS65/EmbReact_Eyeshock/Mouse560/20170706/ProjectEmbReact_M560_20170706_TestPre/TestPre3'
+  % '/media/DataMOBS65/EmbReact_Eyeshock/Mouse560/20170706/ProjectEmbReact_M560_20170706_TestPre/TestPre4'
+}
+
+figure    
+for ff=1:length(Filename564)
+    cd(Filename564{ff})
+    load('behavResources.mat')
+    Xtsd564=tsd(PosMat(:,1)*1e4,PosMat(:,2));
+    Ytsd564=tsd(PosMat(:,1)*1e4,PosMat(:,3));
+
+    plot(Data(Xtsd564),Data(Ytsd564)) % toute la trajectoire
+    title('Mouse 564')
+    hold on
+    %plot(Data(Restrict(Ytsd,ZoneEpoch{1})),Data(Restrict(Xtsd,ZoneEpoch{1}))) % seulement une zone
+    %   plot(Data(Restrict(Ytsd,FreezeEpoch)),Data(Restrict(Xtsd,FreezeEpoch)),'.') % seulement une zone
+    
+end
+cd ..
+
+figure
+for ff=1:length(Filename565)
+    cd(Filename565{ff})
+    load('behavResources.mat')
+    Xtsd565=tsd(PosMat(:,1)*1e4,PosMat(:,2));
+    Ytsd565=tsd(PosMat(:,1)*1e4,PosMat(:,3));
+
+    plot(Data(Xtsd565),Data(Ytsd565)) % toute la trajectoire
+    title('Mouse 565')
+    hold on
+    %plot(Data(Restrict(Ytsd,ZoneEpoch{1})),Data(Restrict(Xtsd,ZoneEpoch{1}))) % seulement une zone
+    %   plot(Data(Restrict(Ytsd,FreezeEpoch)),Data(Restrict(Xtsd,FreezeEpoch)),'.') % seulement une zone
+    
+end
+cd ..
+
+figure
+for ff=1:length(Filename560)
+    cd(Filename560{ff})
+    load('behavResources.mat')
+    Xtsd560=tsd(PosMat(:,1)*1e4,PosMat(:,2));
+    Ytsd560=tsd(PosMat(:,1)*1e4,PosMat(:,3));
+
+    plot(Data(Xtsd560),Data(Ytsd560)) % toute la trajectoire
+    title('Mouse 560')
+    hold on
+    %plot(Data(Restrict(Ytsd,ZoneEpoch{1})),Data(Restrict(Xtsd,ZoneEpoch{1}))) % seulement une zone
+    %   plot(Data(Restrict(Ytsd,FreezeEpoch)),Data(Restrict(Xtsd,FreezeEpoch)),'.') % seulement une zone
+    
+end

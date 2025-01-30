@@ -1,0 +1,24 @@
+function NyuFenMatlabBash(jobName, OwnerEmail, matlab_command)
+% function run_batch_script(jobName, owner, matlab_command)
+% creates and submits to Nyu Fen a simple batch script with a matlab
+% command.
+
+fname = fullfile('~/', sprintf('%s.sh','run_matlab.bash'));
+fid = fopen(fname,'w');
+if fid==-1,
+   error('Could not open file %s for writing.',fname);
+end
+
+fprintf(fid, sprintf('###################### run_matlab_tmp.bash ################################\n'));
+fprintf(fid, sprintf('#!/bin/bash\n\n'));
+fprintf(fid, sprintf('#$ -M %s\n',OwnerEmail));
+fprintf(fid, sprintf('#$ -cwd\n'));
+fprintf(fid, sprintf('#$ -V\n'));
+fprintf(fid, sprintf('#$ -S /bin/bash\n\n'));
+fprintf(fid, sprintf('/usr/local/bin/matlab -nojvm -nodisplay -nodesktop -r "%s; quit;"\n',matlab_command));
+fprintf(fid, sprintf('###########################################################################\n'));
+
+fclose(fid);
+
+% run external command
+system(sprintf('qsub %s;',fname));

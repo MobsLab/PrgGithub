@@ -1,0 +1,91 @@
+%Script to lounch tracking on every files
+
+%be in /media/DataMOBs16/ProjetBULB
+
+
+%% INITIALISATION
+res=pwd;
+lis=dir(res);
+
+if isempty(strfind(res,'/')),mark='\'; else mark='/';end
+
+
+%% SCREEN FOR UNDONE OFFLINE TRACKING
+for i=3:length(lis)
+    
+    if length() strcmp(lis(i).name(1:5),'Mouse')
+        disp('           * * * * * ')
+        listi=dir([res,mark,lis(i).name]);
+        
+        for j=3:length(listi)
+            disp([lis(i).name,'  -  ',listi(j).name])
+            
+            listiji=dir([res,mark,lis(i).name,mark,listi(j).name]);
+            
+            for k=3:length(listiji)
+                
+                filenamej=[res,mark,lis(i).name,mark,listi(j).name,mark,listiji(k).name];
+                clear PosOFF
+                % --------------------------------------------------
+                % if TrackingOFFline does not exist, do it
+                try
+                    load([filenamej,mark,'TrackingOFFline.mat'],'PosOFF')
+                    PosOFF;
+                    disp([listiji(k).name,' --> done'])
+                    
+                catch
+                    disp(listiji(k).name)
+                    ok=0;
+                    while ok~=1
+                        try
+                            % case to use previously used parameters
+                            if ok==2
+                                clear filename ref mask BW_threshold smaller_object_size shape_ratio
+                                load([filenamej,mark,'Temp.mat']);
+                                
+                                if strcmp(filenamej(end-3:end),'.avi') || strcmp(filenamej(end-3:end),'.wmv')
+                                    Trackin_offline_OnVideo(filenamej);
+                                else
+                                    Trackin_offline_OnFrames(filename,ref,mask,BW_threshold,smaller_object_size,shape_ratio);
+                                end
+                                % else
+                            else
+                                if strcmp(filenamej(end-3:end),'.avi') || strcmp(filenamej(end-3:end),'.wmv')
+                                    Trackin_offline_OnVideo(filenamej);
+                                else
+                                    Trackin_offline_OnFrames(filenamej);
+                                end
+                            end
+                            
+                            % --------------------------
+                            % continue tracking offline?
+                            choice2=questdlg('Satisfied with offline tracking? ','Try again?','Yes','No','Load Temp','Yes');
+                            switch choice2
+                                case 'Yes'
+                                    ok=1;
+                                case 'Load Temp'
+                                    ok=2;
+                            end
+                            close all
+                        catch
+                            choice2=questdlg('Abandon this file? ','FAILED','Yes','No','GoIntoFolder','No');
+                            switch choice2
+                                case 'Yes'
+                                    ok=1;
+                                    disp([listiji(k).name,' --> aborted!'])
+                                case 'GoIntoFolder'
+                                    cd(filenamej);keyboard
+                                    cd(res)
+                                    ok=1;
+                            end
+                            close all
+                        end
+                    end
+                    disp([listiji(k).name,' --> done'])
+                end
+            end
+        end
+    end
+    
+end
+

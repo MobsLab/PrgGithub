@@ -1,0 +1,275 @@
+res=pwd;
+load([res,'/LFPData/LFP',num2str(0)]);
+
+%---------------------------------------------------
+%---------------------------------------------------
+DACDig=input('is it a digital or a analog input ? (Dig=0/DAC=1)');
+
+if DACDig==0
+    clear signalTone tpsTone 
+    signalTone=Data(LFP);
+    tpsTone=Range(LFP);
+    
+    %---------------------------------------------------
+    A=find(signalTone>54); % remove all signal > 54 (noise)
+    signalTone(A)=[];
+    tpsTone(A)=[];
+    A=find(signalTone<0); % remove all signal < 30 (basal)
+    signalTone(A)=[];
+    tpsTone(A)=[];
+    
+    %---------------------------------------------------
+    % selection of Digital Input 6
+    %---------------------------------------------------
+    SignalEvt6=signalTone;
+    TempsEvt6=tpsTone;
+    
+    A=find(SignalEvt6<30); % keep only Event 5 signal (which reach 50)
+    SignalEvt6(A)=[];
+    TempsEvt6(A)=[];
+    Event6a=[];
+    
+    a=1;
+    B=find(SignalEvt6==32);
+    
+    for i=1:length(B)-1
+        if mean(SignalEvt6(B(i):B(i+1)))>30
+            if mean(SignalEvt6(B(i):B(i+1)))<35
+                Event6a(a,1)=TempsEvt6(B(i));
+                a=a+1;
+            end
+        end
+    end
+    
+    a=1;
+    Event6=[];
+    for i=1:length(Event6a)-1
+        if Event6a(i+1)-Event6a(i)>10000
+            Event6(a,1)=Event6a(i+1);
+            a=a+1;
+        end
+    end
+    
+    %---------------------------------------------------
+    % selection of Digital Input 5
+    %---------------------------------------------------
+    SignalEvt5=signalTone;
+    TempsEvt5=tpsTone;
+    
+    A=find(SignalEvt5<12); % keep only EVent 5 signal (which reach 50)
+    SignalEvt5(A)=[];
+    TempsEvt5(A)=[];
+    Event5a=[];
+    
+    a=1;
+    B=find(SignalEvt5==16);
+    
+    for i=1:length(B)-1
+        if mean(SignalEvt5(B(i):B(i+1)))>14
+            if mean(SignalEvt5(B(i):B(i+1)))<17
+                Event5a(a,1)=TempsEvt5(B(i));
+                a=a+1;
+            end
+        end
+    end
+    
+    a=1;
+    Event5=[];
+    for i=1:length(Event5a)-1
+        if Event5a(i+1)-Event5a(i)>10000
+            Event5(a,1)=Event5a(i+1);
+            a=a+1;
+        end
+    end
+    
+    %---------------------------------------------------
+    % selection of Digital Input 4
+    %---------------------------------------------------
+    SignalEvt4=signalTone;
+    TempsEvt4=tpsTone;
+    
+    A=find(SignalEvt4<6); % keep only Event 5 signal (which reach 50)
+    SignalEvt4(A)=[];
+    TempsEvt4(A)=[];
+    Event4a=[];
+    
+    a=1;
+    B=find(SignalEvt4==8);
+    
+    for i=1:length(B)-1
+        if mean(SignalEvt4(B(i):B(i+1)))>7
+            if mean(SignalEvt4(B(i):B(i+1)))<9
+                Event4a(a,1)=TempsEvt4(B(i));
+                a=a+1;
+            end
+        end
+    end
+    
+    a=1;
+    Event4=[];
+    for i=1:length(Event4a)-1
+        if Event4a(i+1)-Event4a(i)>1000
+            Event4(a,1)=Event4a(i+1);
+            a=a+1;
+        end
+    end
+    
+    
+    %---------------------------------------------------
+    % selection of Digital Input 3
+    %---------------------------------------------------
+    SignalEvt3=signalTone;
+    TempsEvt3=tpsTone;
+    
+    A=find(SignalEvt3<3); % keep only Event 5 signal (which reach 50)
+    SignalEvt3(A)=[];
+    TempsEvt3(A)=[];
+    Event3a=[];
+    
+    a=1;
+    B=find(SignalEvt3==4);
+    
+    for i=1:length(B)-1
+        if mean(SignalEvt3(B(i):B(i+1)))>3.5
+            if mean(SignalEvt3(B(i):B(i+1)))<4.5
+                Event3a(a,1)=TempsEvt3(B(i));
+                a=a+1;
+            end
+        end
+    end
+    
+    a=1;
+    Event3=[];
+    for i=1:length(Event3a)-1
+        if Event3a(i+1)-Event3a(i)>1000
+            Event3(a,1)=Event3a(i+1);
+            a=a+1;
+        end
+    end
+    
+    %---------------------------------------------------
+    % selection of Digital Input 2
+    %---------------------------------------------------
+    SignalEvt2=signalTone;
+    TempsEvt2=tpsTone;
+    
+    A=find(SignalEvt2<1.2); % keep only Event 5 signal (which reach 50)
+    SignalEvt2(A)=[];
+    TempsEvt2(A)=[];
+    Event2a=[];
+    
+    a=1;
+    B=find(SignalEvt2==2);
+    
+    for i=1:length(B)-1
+        if mean(SignalEvt2(B(i):B(i+1)))>1.8
+            if mean(SignalEvt2(B(i):B(i+1)))<2.2
+                Event2a(a,1)=TempsEvt2(B(i));
+                a=a+1;
+            end
+        end
+    end
+    
+    a=1;
+    Event2=[];
+    for i=1:length(Event2a)-1
+        if Event2a(i+1)-Event2a(i)>1000
+            Event2(a,1)=Event2a(i);
+            a=a+1;
+        end
+    end
+    
+    %---------------------------------------------------
+    % selection of Digital Input 1
+    %---------------------------------------------------
+    SignalEvt1=signalTone;
+    TempsEvt1=tpsTone;
+    
+    A=find(SignalEvt1<0.5); % keep only Event 5 signal (which reach 50)
+    SignalEvt1(A)=[];
+    TempsEvt1(A)=[];
+    Event1a=[];
+    
+    a=1;
+    B=find(SignalEvt1==1);
+    for i=1:length(B)-1
+        if B(i+1)-B(i)<1.1
+            C(a,1)=B(i);
+            a=a+1;
+        end
+    end
+    
+    a=1;
+    for i=1:length(C)-1
+        if mean(SignalEvt1(C(i):C(i+1)))==1
+            Event1a(a,1)=TempsEvt1(C(i));
+            a=a+1;
+        end
+    end
+    
+    a=1;
+    Event1=[];
+    for i=1:length(Event1a)-1
+        if Event1a(i+1)-Event1a(i)>1000
+            Event1(a,1)=Event1a(i);
+            a=a+1;
+        end
+    end
+    %---------------------------------------------------
+    
+    %---------------------------------------------------
+    figure, plot(Range(LFP,'s'),Data(LFP),'k')
+    hold on, plot(Event1/1E4,1,'ro','markerfacecolor','r');
+    hold on, plot(Event2/1E4,2,'bo','markerfacecolor','b');
+    hold on, plot(Event3/1E4,4,'go','markerfacecolor','g');
+    hold on, plot(Event4/1E4,8,'co','markerfacecolor','c');
+    hold on, plot(Event5/1E4,17,'ko','markerfacecolor','k');
+    hold on, plot(Event6/1E4,32,'yo','markerfacecolor','y');
+    hold on, axis([Event1(1)/1E4-10 tpsTone(length(tpsTone))/1E4 0 40])
+    %---------------------------------------------------
+    
+    %-------------------------------------------------------------
+    save EventIntanDIGin Event1 Event2 Event3 Event4 Event5 Event6
+    %-------------------------------------------------------------
+    
+elseif DACDig==1
+    
+    clear signalTone tpsTone 
+    signalTone=Data(LFP);
+    tpsTone=Range(LFP);
+    
+    %---------------------------------------------------
+    A=find(signalTone>-10000); % remove all signal > -1000 (noise)
+    signalTone(A)=[];
+    tpsTone(A)=[];
+    A=find(signalTone<-230000); % remove all signal < -2000 (basal)
+    signalTone(A)=[];
+    tpsTone(A)=[];
+    A=find(signalTone>-22000); % keep only Event 6 signal (which reach 50)
+    
+    Event6=[];
+    a=1;
+    for j=1:length(A)-1
+        if A(j+1)-A(j)>1000;
+            Event6(a,1)=tpsTone(A(j+1));
+            a=a+1;
+        end
+    end
+    Event6(a,1)=tpsTone(A(j));
+    
+    %---------------------------------------------------
+    figure, plot(Range(LFP,'s'),Data(LFP),'k')
+    hold on, plot(Event6/1E4,-10000,'ro','markerfacecolor','r');
+    %---------------------------------------------------
+    
+    %---------------------------------------------------
+    save EventIntanDAC Event6
+    %---------------------------------------------------
+    
+end
+
+
+
+
+
+

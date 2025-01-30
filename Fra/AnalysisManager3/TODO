@@ -1,0 +1,16 @@
+take analysis running code out of constructor
+
+do getResource for multiple datasets DONE
+
+do getResource with uncell option 
+
+do matching/compatibility function for resource compatibility
+
+add last modified field to resources DONE
+
+make little gui resource browsing/editing toolkit
+
+add complete mode for Analysis Runs DONE
+
+revise documentation
+

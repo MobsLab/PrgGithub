@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="11"
+   name=""
+   committed-date="2006-06-05T15:43:32.457573Z"
+   url="file:///home/battagli/svn/matlab/trunk/ext"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   prop-time="2006-06-06T06:42:19.000000Z"
+   revision="17"/>
+<entry
+   name="chronux"
+   kind="dir"/>
+<entry
+   name="Isomap"
+   kind="dir"/>
+</wc-entries>

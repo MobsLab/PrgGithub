@@ -1,0 +1,727 @@
+function [numF,filename]=TimeAroundOdor_object_onlineLAST(~,~)
+
+%% INPUTS
+flashEnd=0;
+colori={'g','r','c'};
+scrsz = get(0,'ScreenSize');
+% global
+clear global fctPhase ListOfPhases folder_name 
+clear global name_folder tempLoad imageRef MatSum
+clear global Ratio_IMAonREAL OdorInfo ObjInfo maskobj
+clear global WhereInFrames enableTrack 
+global vid
+global name_folder
+global tempLoad
+global imageRef
+global nPhase
+global nCTRL
+global nVARI 
+global nFIXE
+global d_obj
+global rad_obj
+%global OrderLabel
+global Ratio_IMAonREAL
+global OdorInfo
+global ObjInfo
+global maskobj
+global enableTrack
+%global MatSum
+global ZoneOdor
+global intermed
+global num_exp
+global BW_threshold2;
+global smaller_object_size2;
+global shape_ratio2;
+global n_AutoStop
+
+intermed=load('InfoTrackingTemp.mat');
+imageRef=intermed.ref;
+vid=intermed.vid;
+BW_threshold2=intermed.BW_threshold;
+smaller_object_size2=intermed.smaller_object_size;
+shape_ratio2=intermed.shape_ratio;
+b_default=intermed.b_default;
+c_default=intermed.c_default;
+e_default=intermed.e_default;
+
+
+% INITIATE
+CircularObj=1; % 1 if object is circular
+color_on = [ 0 0 0];    
+color_off = [1 1 1];
+OrderLabel={'CTRL','VARIANT','FIXED'}; %default {'CTRL','VARIANT','FIXED'}
+PercExclu=[20 35 50 65 80]; % of animal size
+StepTime=15; % in sec for time step analysis
+frame_rate = 10;
+prefac0=0;
+num_exp=0;
+
+% anoying problems
+res=pwd;
+if isempty(strfind(res,'/')),mark='\'; else  mark='/';end
+
+t=clock;
+jour=num2str(t(3));if length(jour)==1, jour=cat(2,'0',jour);end
+mois=num2str(t(2));if length(mois)==1, mois=cat(2,'0',mois);end
+annee=num2str(t(1));
+TodayIs=[jour mois annee];
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% graphical interface n�1 with all the pushbuttons
+
+ Fig_Odor=figure('units','normalized','position',[0.15 0.1 0.8 0.8],...
+            'numbertitle','off','name','Define Odor Locations','menubar','none','tag','figure Odor');
+        set(Fig_Odor,'Color',color_on);
+        
+        maskbutton(1)= uicontrol(Fig_Odor,'style','pushbutton',...
+            'units','normalized','position',[0.01 0.85 0.1 0.05],...
+            'string','INPUTS EXPE','callback', @giv_inputs);
+        set(maskbutton(1),'enable','on','FontWeight','bold')
+        
+        maskbutton(2)= uicontrol(Fig_Odor,'style','pushbutton',...
+            'units','normalized','position',[0.01 0.7 0.1 0.05],...
+            'string','1- Real Distance','callback', @Real_distance);
+        set(maskbutton(2),'enable','off')
+        
+        maskbutton(3)= uicontrol(Fig_Odor,'style','pushbutton',...
+            'units','normalized','position',[0.01 0.55 0.1 0.05],...
+            'string','2- Odor Location','callback', @Odor_Location);
+        set(maskbutton(3),'enable','off')
+        
+        maskbutton(4)= uicontrol(Fig_Odor,'style','pushbutton',...
+            'units','normalized','position',[0.025 0.51 0.08 0.03],...
+            'string','Mask Objects','callback', @Mask_object);
+        set(maskbutton(4),'enable','off')
+        
+        maskbutton(5)= uicontrol(Fig_Odor,'style','pushbutton',...
+            'units','normalized','position',[0.01 0.4 0.1 0.05],...
+            'string','3- Start Phase','callback', @start_Phase);
+        set(maskbutton(5),'enable','off')
+  
+        maskbutton(6)= uicontrol(Fig_Odor,'style','pushbutton',...
+            'units','normalized','position',[0.025 0.32 0.08 0.03],...
+            'string','Track + Sniff','callback', @Track_sniff);
+        set(maskbutton(6),'enable','off')
+        
+        maskbutton(9)= uicontrol(Fig_Odor,'style','pushbutton',...
+            'units','normalized','position',[0.025 0.28 0.04 0.03],...
+            'string','Count Down','callback', @Count_Down);
+        set(maskbutton(9),'enable','off')
+        
+        maskbutton(7)= uicontrol(Fig_Odor,'style','pushbutton',...
+            'units','normalized','position',[0.025 0.22 0.08 0.03],...
+            'string','Stop tracking','callback', @stop_Phase);
+        set(maskbutton(7),'enable','off')
+        
+        maskbutton(8)= uicontrol(Fig_Odor,'style','pushbutton',...
+            'units','normalized','position',[0.01 0.1 0.1 0.05],...
+            'string','STOP / CLOSE','callback', @quit);
+        set(maskbutton(8),'enable','on','FontWeight','bold')
+        
+        inputDisplay(1)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.15 0.05 0.5 0.02],'string','Filename = TO DEFINE');
+        inputDisplay(2)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.25 0.95 0.1 0.02],'string',['nb phase = ',num2str(nPhase)]);
+        inputDisplay(3)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.4 0.95 0.1 0.02],'string',['nCTRL = ',num2str(nCTRL)]);
+        inputDisplay(4)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.4 0.92 0.1 0.02],'string',['nVARI = ',num2str(nVARI)]);
+        inputDisplay(5)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.4 0.89 0.1 0.02],'string',['nFIXE = ',num2str(nFIXE)]);        
+        inputDisplay(6)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.25 0.92 0.1 0.02],'string',['d from obj = ',num2str(d_obj),'cm']); 
+        inputDisplay(7)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.025 0.36 0.08 0.03],'string','Phase = ?','FontSize',12);
+        inputDisplay(8)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.25 0.89 0.1 0.02],'string','Size obj (rad, cm) = ?','FontSize',12);
+        for bi=1:8, set(inputDisplay(bi),'BackgroundColor',color_on,'ForegroundColor','w','FontWeight','bold');end
+   
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CALLED FUNCTIONS
+
+% -----------------------------------------------------------------
+%% function to quit the programm
+    function quit(obj,event)
+        delete(Fig_Odor)
+        %delete(FigGuiReg)
+    end
+
+% -----------------------------------------------------------------
+%% Ask for all inputs and display
+    function giv_inputs(obj,event)
+        
+        % DEFINE INPUTS FOR THE EXPE
+        if isempty(nVARI) && isempty(nFIXE) && isempty(rad_obj)
+            nCTRL=0; nVARI=1; nFIXE=1; nPhase=2; % default values
+            d_obj=2; rad_obj=2;% distance from odor object to include
+        end
+        defAns={num2str(nPhase) num2str(nCTRL) num2str(nVARI) num2str(nFIXE) num2str(d_obj) num2str(rad_obj) };
+        prompt = {'nb phase','nCTRL','nVARI','nFIXE','d from obj (cm)','size obj (radius, cm)'};
+        dlg_title = 'Change parameters for Odor Recognition task:';
+        answer = inputdlg(prompt,dlg_title,1,defAns);
+       
+        nPhase = str2num(answer{1});
+        nCTRL = str2num(answer{2});
+        nVARI = str2num(answer{3});
+        nFIXE = str2num(answer{4});
+        d_obj = str2num(answer{5});
+        rad_obj = str2num(answer{6});
+        set(inputDisplay(2),'string',['nb phase = ',num2str(nPhase)]);
+        set(inputDisplay(3),'string',['nCTRL = ',num2str(nCTRL)]);
+        set(inputDisplay(4),'string',['nVARI = ',num2str(nVARI)]);
+        set(inputDisplay(5),'string',['nFIXE = ',num2str(nFIXE)]);        
+        set(inputDisplay(6),'string',['d from obj = ',num2str(d_obj),'cm']); 
+        set(inputDisplay(8),'string',['radius obj = ',num2str(rad_obj),'cm']); 
+        
+        set(maskbutton(2),'enable','on','FontWeight','bold')
+        disp(' ');disp('-------------------- New Expe ---------------------');
+        save([res,mark,'TempAroundOdorON.mat'],'nPhase','nCTRL','nVARI','nFIXE','d_obj','rad_obj','OrderLabel','PercExclu','CircularObj','imageRef');
+    end
+
+% -----------------------------------------------------------------
+%% Ask for all inputs and display
+    function Real_distance(obj,event)
+        
+        figure(Fig_Odor), subplot(2,2,[1,3]), 
+        imagesc(imageRef); colormap gray; axis image
+        title('Click on two points to define a distance','Color','w')
+        for j=1:2
+            [x,y]=ginput(1);
+            hold on, plot(x,y,'+r')
+            x1(j)=x; y1(j)=y;
+        end
+        line(x1,y1,'Color','r','Linewidth',2)
+
+        answer = inputdlg({'Enter real distance (cm):'},'Define Real distance',1,{'45'});
+        text(mean(x1)+10,mean(y1)+10,[answer{1},' cm'],'Color','r')
+        
+        d_xy=sqrt((diff(x1)^2+diff(y1)^2));
+        Ratio_IMAonREAL=d_xy/str2num(answer{1});
+       
+        title(' do 2-')
+        hold on, line([10 20]*Ratio_IMAonREAL,[10 10],'Color','k','Linewidth',3)
+        text(15*Ratio_IMAonREAL,15,'10 cm','Color','k')
+        set(maskbutton(3),'enable','on','FontWeight','bold') 
+        Ratio_IMAonREAL=Ratio_IMAonREAL;
+        save([res,mark,'TempAroundOdorON.mat'],'-append','Ratio_IMAonREAL');
+    end
+
+
+% -----------------------------------------------------------------
+%% Click on odor locations
+
+    function Odor_Location(obj,event)
+        
+        % -------------------
+        % Reload everything
+        temp=load([res,mark,'TempAroundOdorON.mat']);
+        Ratio_IMAonREAL=temp.Ratio_IMAonREAL;
+        rad_obj=temp.rad_obj;
+        
+        figure(Fig_Odor), subplot(2,2,[1,3]), imagesc(imageRef),axis image
+        line([10 20]*Ratio_IMAonREAL,[10 10],'Color','k','Linewidth',3)
+        text(15*Ratio_IMAonREAL,15,'10 cm','Color','k')
+        
+        OdorInfo=[];a=0;
+        for OL=1:length(OrderLabel)
+            if strcmp(OrderLabel{OL}(1:4),'VARI')
+                nbOD=nVARI;
+            elseif strcmp(OrderLabel{OL}(1:4),'CTRL')
+                nbOD=nCTRL;
+            elseif strcmp(OrderLabel{OL}(1:4),'FIXE')
+                nbOD=nFIXE;
+            end
+            
+            for od=1:nbOD
+                title(['Click on ',OrderLabel{OL},' odor location','Color','w']) 
+                temp=ginput(1); a=a+1;
+                OdorInfo=[OdorInfo; [temp,OL]];
+                hold on, plot(temp(1),temp(2),['+',colori{OL}])
+                text(temp(1)+2,temp(2)+2,OrderLabel{OL}(1:4),'Color',colori{OL});
+                circli = rsmak('circle',d_obj*Ratio_IMAonREAL,[OdorInfo(a,1),OdorInfo(a,2)]);
+                hold on, fnplt(circli,'Color',colori{OdorInfo(a,3)})
+            end
+        end
+        
+        OdorInfo(:,4)=ones(size(OdorInfo(:,1)))*(d_obj+rad_obj)*Ratio_IMAonREAL;
+        
+        % odor zone and mask obj
+        ZoneOdor=zeros(size(imageRef));
+        maskobj=zeros(size(imageRef));
+        for od=1:size(OdorInfo,1)
+            figure, imagesc(imageRef);
+            %ZoneOdor
+            hobj = imellipse(gca, [OdorInfo(od,1)-OdorInfo(od,4) OdorInfo(od,2)-OdorInfo(od,4) 2*OdorInfo(od,4) 2*OdorInfo(od,4)]);
+            BW = createMask(hobj);
+            ZoneOdor=ZoneOdor+BW*od;
+            %maskobj
+            hobj = imellipse(gca, [OdorInfo(od,1)-rad_obj*Ratio_IMAonREAL OdorInfo(od,2)-rad_obj*Ratio_IMAonREAL 2*rad_obj*Ratio_IMAonREAL 2*rad_obj*Ratio_IMAonREAL]);
+            BW = createMask(hobj);
+            maskobj=maskobj+BW;
+            close;
+        end
+        
+        % display circles
+        for ob=1:size(OdorInfo,1)
+            hold on, plot(OdorInfo(ob,1),OdorInfo(ob,2),['+',colori{OdorInfo(ob,3)}])
+            %text(OdorInfo(ob,1)+2,OdorInfo(ob,2)+2,OrderLabel{OdorInfo(ob,3)}(1:4),'Color',colori{OdorInfo(ob,3)});
+            circli = rsmak('circle',OdorInfo(ob,4),[OdorInfo(ob,1),OdorInfo(ob,2)]);
+            hold on, fnplt(circli,'Color',colori{OdorInfo(ob,3)})
+        end
+        
+        set(maskbutton(5),'enable','on','FontWeight','bold')
+        
+        OdorInfo=OdorInfo;
+        
+        save([res,mark,'TempAroundOdorON.mat'],'-append','OdorInfo','ZoneOdor','maskobj');
+    end
+
+% -----------------------------------------------------------------
+%% mask objects
+    function Mask_object(obj,event)
+        
+        ref2=imageRef;
+        mask=ones(size(imageRef));
+        % display masked figure
+        figure(Fig_Odor), subplot(2,2,2), hold off, imagesc(ref2),axis image
+        ObjInfo=[];
+        for j=1:(nVARI+nCTRL+nFIXE)
+            title(['Define object ',num2str(j),'to remove mounting on'],'Color','w')
+            if CircularObj
+                hobj = imellipse;
+                vert = getVertices(hobj);
+                ObjInfo(j,1)= min(vert(:,1))+(max(vert(:,1))-min(vert(:,1)))/2;
+                ObjInfo(j,2)= min(vert(:,2))+(max(vert(:,2))-min(vert(:,2)))/2;
+                ObjInfo(j,3)= max((max(vert(:,1))-min(vert(:,1))),(max(vert(:,2))-min(vert(:,2))))/2;
+                BW =  createMask(hobj);
+            else
+                [x1,y1,BW,y2]=roipoly(ref2);
+                ObjInfo(j,1)= min(x1)+(max(x1)-min(x1))/2;
+                ObjInfo(j,2)= min(y1)+(max(y1)-min(y1))/2;
+                ObjInfo(j,3)= max((max(x1)-min(x1)),(max(y1)-min(y1)))/2;
+            end
+            maskint=uint8(BW);
+            maskint=uint8(-(double(maskint)-1));
+            mask=uint8(double(mask).*double(maskint));
+            ref2((find(mask==0)))=0;
+            figure(Fig_Odor), subplot(2,2,2), imagesc(ref2),axis image
+        end
+        maskobj=zeros(size(imageRef));
+        maskobj((find(mask==0)))=1;
+        
+        % OdorInfo= x y odorType radius
+        for ob=1:size(ObjInfo,1)   
+            [valminimi,minimi]=min(abs(OdorInfo(:,1)-ObjInfo(ob,1))+abs(OdorInfo(:,2)-ObjInfo(ob,2)));
+            OdorInfo(minimi,4)=ObjInfo(ob,3)+d_obj*Ratio_IMAonREAL;
+        end
+        % harmonise object zones
+        maxdist=max(OdorInfo(:,4)); 
+        OdorInfo(:,4)=ones(length(OdorInfo(:,4)),1)*maxdist;
+        
+        % final display, masked
+        figure(Fig_Odor), subplot(2,2,[1,3]), imagesc(imageRef),axis image
+        line([10 20]*Ratio_IMAonREAL,[10 10],'Color','k','Linewidth',3)
+        text(15*Ratio_IMAonREAL,15,'10 cm','Color','k')
+        for od=1:size(OdorInfo,1)
+            hold on, plot(OdorInfo(od,1),OdorInfo(od,2),['+',colori{OdorInfo(od,3)}])
+            text(OdorInfo(od,1)+2,OdorInfo(od,2)+2,OrderLabel{OdorInfo(od,3)}(1:4),'Color',colori{OdorInfo(od,3)});
+            circli = rsmak('circle',OdorInfo(od,4),[OdorInfo(od,1),OdorInfo(od,2)]);
+            hold on, fnplt(circli,'Color',colori{OdorInfo(od,3)})
+        end
+        OdorInfo=OdorInfo;
+        ObjInfo=ObjInfo;
+        maskobj=maskobj;
+        save([res,mark,'TempAroundOdorON.mat'],'-append','OdorInfo','ObjInfo','maskobj');
+    end
+
+% -----------------------------------------------------------------
+%% Interface of analysis
+    function start_Phase(obj,event)
+        num_exp=0;
+        % prompt to ask inputs
+        % ----------------------
+        prompt = {'Project','Name Exp','Mouse n','Day n','Phase n','Length Acquisition (s)'};
+        if exist([res,mark,'default_values.mat'],'file')
+            temp=load([res,mark,'default_values.mat']);
+            default_values=temp.default_values;
+        else
+            default_values = {'BULB' 'OdorRecognition' '1','1','0','360'};
+        end
+        try 
+            answer = inputdlg(prompt,'Inputs',1,default_values);
+        catch
+            default_values = {'BULB' 'OdorRecognition' '1','1','0','360'};
+            answer = inputdlg(prompt,'Inputs',1,default_values);
+        end
+        
+        default_values=answer;
+        save([res,mark,'default_values.mat'],'default_values')
+        
+        name_proj=answer(1);
+        name_exp=answer(2);
+        n_mouse=str2double(answer(3));
+        n_day=str2double(answer(4));
+        n_ph=str2double(answer(5));
+        n_AutoStop=str2double(answer(6));
+        set(inputDisplay(7),'string',['Phase ',answer{5}]);
+        
+        % create folder to save tracking and analysis
+        % ----------------------
+        prefix=[name_proj{:} '-Mouse-' num2str(n_mouse) '-' TodayIs '-'];
+        listDir=dir(res); nameFolders={};
+        for li=1:length(listDir), try nameFolders{li}=listDir(li).name(1:length(prefix)+2);end; end
+        
+        % add number to prevent erasing file
+        last_experiment=0; ok=0;
+        while ok~=1
+            last_experiment=last_experiment+1;
+            prefac=num2str(last_experiment);
+            if length(prefac)==1, prefac=cat(2,'0',prefac);end
+            
+            if sum(strcmp(nameFolders,[prefix prefac]))==0
+                name_folder = [prefix prefac '-' name_exp{:} 'Day' num2str(n_day) 'Phase' num2str(n_ph)];
+                mkdir(name_folder);
+                ok=1;
+            end
+        end
+        set(inputDisplay(1),'string',['Filename ',name_folder]);
+        set(maskbutton(6),'enable','on','FontWeight','bold')
+        set(maskbutton(9),'enable','on','FontWeight','bold')
+        name_folder=name_folder;
+        disp(name_folder)
+        
+        % save info in AroundOdorON
+        % ----------------------
+        save([res,mark,'TempAroundOdorON.mat'],'-append','OdorInfo','Ratio_IMAonREAL','ObjInfo','maskobj','ZoneOdor','name_folder','n_AutoStop')
+        
+        % reset MatSum and else in TempAroundOdorON
+        MatSum=[]; Nsniff=[]; 
+        save([res,mark,'TempAroundOdorON.mat'],'-append','MatSum','Nsniff');
+        pause(0.1)
+  
+    end
+
+% -----------------------------------------------------------------
+%% Count_Down before Track_sniff
+    function Count_Down(obj,event)
+        answer = inputdlg({'Count down duration (s)'},'Enter count down duration',1,{'20'});
+        CDdur=str2num(answer{1});
+        chronoshow=uicontrol('style','edit', 'units','normalized','position',[0.065 0.26 0.04 0.05],...
+            'string',num2str(floor(0)),'ForegroundColor','g','BackgroundColor','k');
+        tdeb = clock;
+        t1 = clock;
+        while etime(t1,tdeb)< CDdur
+            t1 = clock;
+            set(chronoshow,'string',num2str(floor(etime(t1,tdeb))));
+            pause(0.5)
+        end
+        Track_sniff;
+    end
+% -----------------------------------------------------------------
+%% track mouse
+    function Track_sniff(obj,event)
+        disp('   Begining tracking...')
+        guireg_fig=OnlineGuiReglage;
+        num_exp=num_exp+1;
+        % interface
+        for bit=1:6
+            set(maskbutton(bit),'enable','off','FontWeight','normal')
+        end
+        enableTrack=1;
+        set(maskbutton(7),'enable','on','FontWeight','bold')
+        
+        % -------------------
+        % reload everything
+        tempLoad=load([res,mark,'TempAroundOdorON.mat']);
+        oneZoneOdor=tempLoad.ZoneOdor;
+        oneZoneOdor(oneZoneOdor>1)=1;
+        imageRef=tempLoad.imageRef;
+        OdorInfo=tempLoad.OdorInfo;
+        Ratio_IMAonREAL=tempLoad.Ratio_IMAonREAL;
+        maskobj=tempLoad.maskobj;
+        n_AutoStop=tempLoad.n_AutoStop;
+        name_folder=tempLoad.name_folder;
+
+        % -------------------
+        % display zone
+        
+        figure(Fig_Odor), subplot(2,2,[1,3]),
+        htrack = imagesc(imageRef);axis image;
+        line([10 20]*Ratio_IMAonREAL,[10 10],'Color','k','Linewidth',3)
+        text(15*Ratio_IMAonREAL,15,'10 cm','Color','k')
+        title('ACQUISITION ON')
+        g=plot(0,0,'m+');
+        
+        figure(Fig_Odor), subplot(2,2,2),
+        htrack2 = imagesc(zeros(size((imageRef))));axis image;caxis([0 1])
+        title('tracking online','Color','w')
+        
+        figure(Fig_Odor), subplot(2,2,4),
+        htrack3 = imagesc(zeros(size((imageRef))));axis image;caxis([0 1])
+        title('sniff detect','Color','w')
+        
+        indexsi={[1,3],4};
+        for si=1:length(indexsi)
+            figure(Fig_Odor), subplot(2,2,indexsi{si}),
+            for ob=1:size(OdorInfo,1)
+                hold on, plot(OdorInfo(ob,1),OdorInfo(ob,2),['+',colori{OdorInfo(ob,3)}])
+                if si==1, text(OdorInfo(ob,1)+2,OdorInfo(ob,2)+2,OrderLabel{OdorInfo(ob,3)}(1:4),'Color',colori{OdorInfo(ob,3)});end
+                circli = rsmak('circle',OdorInfo(ob,4),[OdorInfo(ob,1),OdorInfo(ob,2)]);
+                hold on, fnplt(circli,'Color',colori{OdorInfo(ob,3)})
+            end
+        end
+        
+        % display chrono
+        chronoshow=uicontrol('style','edit', 'units','normalized','position',[0.065 0.26 0.04 0.05],...
+            'string',num2str(floor(0)),'ForegroundColor','g','BackgroundColor','k');
+        time_image = 1/frame_rate;
+
+        
+        % -----------------------------------------------------------------
+        % ---------------------- INITIATE TRACKING ------------------------
+        n=1;
+        num_fr=1;
+        for pep=1:length(PercExclu)
+            MatSum{pep}=zeros(size(imageRef));
+        end
+        
+        prefac0=char; for ii=1:4-length(num2str(num_exp)), prefac0=cat(2,prefac0,'0'); end
+        Fname=['F' TodayIs '-' prefac0 num2str(num_exp)];
+        mkdir([name_folder mark Fname]);
+        disp(['   ',Fname]);
+        
+        tDeb = clock;
+        timeDeb = tDeb(4)*60*60+tDeb(5)*60+tDeb(6);
+        PosMat=[];
+        while enableTrack
+                % ---------------------------------------------------------
+                % update chrono
+                t1 = clock;
+                chrono=(t1(4)*60*60+t1(5)*60+t1(6))-timeDeb;
+                set(chronoshow,'string',num2str(floor(chrono)));
+            
+                %Active la cam�ra et Envoie l'image dans le workspace
+                %trigger(vid);
+                IM=getsnapshot(vid);
+                set(htrack,'Cdata',IM);
+
+                % ---------------------------------------------------------
+                % --------------------- TREAT IMAGE -----------------------
+                % Substract reference image
+                subimage = (imageRef-IM);
+                subimage = uint8(double(subimage).*double(intermed.mask));
+                
+                % Convert the resulting grayscale image into a binary image.
+                diff_im = im2bw(subimage,BW_threshold2);
+                % Remove all the objects less large than smaller_object_size
+                diff_im = bwareaopen(diff_im,smaller_object_size2);
+                % Label all the connected components in the image.
+                bw = logical(diff_im); %CHANGED
+                
+                % ---------------------------------------------------------
+                % --------------------- FIND MOUSE ------------------------
+                % We get a set of properties for each labeled region.
+                stats = regionprops( bw, 'Centroid','MajorAxisLength','MinorAxisLength');
+                centroids = cat(1, stats.Centroid);
+                maj = cat(1, stats.MajorAxisLength);
+                mini = cat(1, stats.MinorAxisLength);
+                rap=maj./mini;
+                centroids=centroids(rap<shape_ratio2,:); %CHANGED
+                
+                % ---------------------------------------------------------
+                % display video, mouse position and save in posmat
+                set(htrack2,'Cdata',diff_im);
+                if size(centroids) == [1 2]
+                    set(g,'Xdata',centroids(1),'YData',centroids(2))
+                    PosMat(num_fr,1)=chrono;
+                    PosMat(num_fr,2)=centroids(1);
+                    PosMat(num_fr,3)=centroids(2);
+                else
+                    set(g,'Xdata',0,'YData',0)
+                    PosMat(num_fr,:)=[chrono;NaN;NaN;NaN];
+                end
+
+
+                % ---------------------------------------------------------
+                % --------------------- DETECT SNIFF ----------------------
+
+                % include point near object
+                CountMat=zeros(1,length(PercExclu));
+                for pep=1:length(PercExclu)
+                    if sum(sum(diff_im.*oneZoneOdor)) < sum(sum(diff_im))*PercExclu(pep)/100
+                        tempMat=MatSum{pep};
+                        MatSum{pep}=tempMat+diff_im.*abs(maskobj-1);
+                        CountMat(pep)=1;
+                    end
+                end
+                if CountMat(1)==1
+                    imageTrav=diff_im*0.3+diff_im.*oneZoneOdor*0.7-diff_im.*maskobj;
+                    PosMat(num_fr,4)=1;
+                else
+                    imageTrav=zeros(size(diff_im));
+                    PosMat(num_fr,4)=0;
+                end
+                set(htrack3,'Cdata',imageTrav);
+                
+                num_fr=num_fr+1;
+                
+                % ---------------------------------------------------------
+                % --------------------- SAVE FRAMES -----------------------
+                %hold off
+                datas.image = IM;
+                datas.time = t1;
+                
+                % save frame
+
+                prefac1=char; for ii=1:6-length(num2str(n)), prefac1=cat(2,prefac1,'0');end
+                save([ name_folder mark Fname mark 'frame' prefac1 sprintf('%0.5g',n)],'datas');
+                n = n+1;
+            t2 = clock; 
+            if etime(t2,tDeb)> n_AutoStop+0.99
+                stop_Phase;
+            end
+            pause(time_image-etime(t2,t1));
+        end
+        %ask number of sniff
+        answer = inputdlg({'Nb sniff VARIANT','Nb sniff FIXED'},'Enter number of sniffs',1,{'0','0'});
+        Nsniff=[2,str2num(answer{1}); 3,str2num(answer{2})];
+        
+        save([name_folder,mark,Fname,mark,'PosMat.mat'],'PosMat');
+        save([res,mark,'InfoTrackingTemp.mat'],'-append','PosMat','frame_rate');
+        save([res,mark,'TempAroundOdorON.mat'],'-append','MatSum','Nsniff') ;
+        pause(4)
+        try copyfile([res,mark,'TempAroundOdorON.mat'],[name_folder,mark,'AroundOdorON.mat']); catch; keyboard;end
+        try copyfile([res,mark,'InfoTrackingTemp.mat'],[name_folder,mark,'InfoTracking.mat']); catch; keyboard;end
+        pause(4)
+        try copyfile([name_folder,mark,'InfoTracking.mat'],[name_folder,mark,Fname,mark,'InfoTracking.mat']);end
+        try copyfile([name_folder,mark,'AroundOdorON.mat'],[name_folder,mark,Fname,mark,'AroundOdorON.mat']);end
+        
+        close(guireg_fig)
+        
+    end
+
+% -----------------------------------------------------------------
+%% stop tracking
+    function stop_Phase(obj,event)
+        if flashEnd
+            for bit=1:3
+                set(Fig_Odor,'Color',color_off);
+                pause(0.05)
+                set(Fig_Odor,'Color',color_on);
+                pause(0.05)
+            end
+        else
+            pause(0.05)
+        end
+        figure(Fig_Odor), subplot(2,2,[1 3]), title('ACQUISITION STOPPED')
+        enableTrack=0;
+        for bit=1:6
+            set(maskbutton(bit),'enable','on','FontWeight','bold')
+        end
+        set(maskbutton(7),'enable','off','FontWeight','normal')
+    end
+
+% -----------------------------------------------------------------
+%% OnlineGuiReglage
+    function guireg_fig=OnlineGuiReglage(obj,event);
+        
+        % function guireg_fig=OnlineGuiReglage(obj,event);
+        % let online control of paramteres for image treatments
+        
+        if ~exist('typical_size','var'), typical_size=300;end
+        typical_rapport=10;
+        
+        guireg_fig=figure('units','normalized',...
+            'position',[0.1 0.1 0.15 0.6],...
+            'numbertitle','off',...
+            'name','Online Mouse Tracking : Setting Parameters',...
+            'menubar','none',...
+            'tag','figure reglage');
+        set(guireg_fig,'Color',color_on);
+        
+        hand(2)=uicontrol(guireg_fig,'style','pushbutton',...
+            'units','normalized',...
+            'position',[0.01 0.9 0.8 0.05],...
+            'string','Stop for Manual Inputs',...
+            'tag','init',...
+            'callback', @enterManual);
+        
+        text1=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.05 0.85 0.25 0.03],...
+            'string','seuil couleur');
+        
+        text2=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.4 0.85 0.25 0.03],...
+            'string','seuil objets');
+        
+        text3=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.7 0.85 0.25 0.03],...
+            'string','rapport axes');
+        
+        slider_seuil = uicontrol(guireg_fig,'style','slider',...
+            'units','normalized',...
+            'position',[0.05 0.1 0.15 0.7],...
+            'callback', @seuil);
+        set(slider_seuil,'Value',BW_threshold2);
+        
+        slider_small=uicontrol(guireg_fig,'style','slider',...
+            'units','normalized',...
+            'position',[0.4 0.1 0.15 0.7],...
+            'callback', @elimination);
+        set(slider_small,'Value',smaller_object_size2/typical_size);
+        
+        slider_rapport = uicontrol(guireg_fig,'style','slider',...
+            'units','normalized',...
+            'position',[0.7 0.1 0.15 0.7],...
+            'callback', @rapport);
+        set(slider_rapport,'Value',shape_ratio2/typical_rapport);
+        
+        
+        text5=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.05 0.05 0.25 0.03],...
+            'string',num2str(BW_threshold2));
+        
+        
+        text6=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.4 0.05 0.25 0.03],...
+            'string',num2str(smaller_object_size2));
+        
+        
+        text4=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.7 0.05 0.25 0.03],...
+            'string',num2str(shape_ratio2));
+        
+        
+        
+        function seuil(obj,event)
+            
+            BW_threshold2 = get(slider_seuil, 'value');
+            set(text5,'string',num2str(BW_threshold2))
+            disp([' New BW_threshold=',num2str(BW_threshold2)])
+        end
+        %get threshold value
+        function elimination(obj,event)
+            smaller_object_size2 = round(get(slider_small,'value')*typical_size);
+            set(text6,'string',num2str(smaller_object_size2))
+            disp(['   New smaller_object_size=',num2str(smaller_object_size2)])
+        end
+        function rapport(obj,event)
+            shape_ratio2 = (get(slider_rapport,'value')*typical_rapport);
+            set(text4,'string',num2str(shape_ratio2))
+            disp(['     New shape_ratio=',num2str(shape_ratio2)])
+        end
+        
+        function enterManual(obj,event)
+            defAns={num2str(BW_threshold2) num2str(smaller_object_size2) num2str(shape_ratio2)};
+            prompt = {'BW_threshold','smaller_object_size','shape_ratio'};
+            dlg_title = 'Change parameters for offline tracking:';
+            answer = inputdlg(prompt,dlg_title,1,defAns);
+            BW_threshold2=str2num(answer{1});
+            smaller_object_size2=str2num(answer{2});
+            shape_ratio2=str2num(answer{3});
+            
+            set(slider_seuil,'Value',BW_threshold2);
+            set(slider_small,'Value',smaller_object_size2/typical_size);
+            set(slider_rapport,'Value',shape_ratio2/typical_rapport);
+        end
+    end
+
+end

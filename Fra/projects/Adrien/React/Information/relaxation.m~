@@ -1,0 +1,41 @@
+function relaxation = relaxation(dist)
+
+nbCells=  size(dist,1);
+max_Iter = 5;
+p = zeros(2,nbCells);
+p_tmp = p;
+
+for i=1:nbCells
+
+	p{i} = {[25*rand+50;25*rand+50]};
+
+end
+
+for t=1:max_Iter 
+	
+	for i=1:nbCells
+	
+		pi = p(:,i);
+		fi = 0;
+
+		for j=1:nbCells
+			
+			pj = p(:,j);		
+			normPij = sqrt((pi(1)^2+pj(1)^2) + (pi(1)^2+pj(1)^2));
+			fi = fi + (1 - dist(i,j)/normPij)*(pj-pi);
+
+		end
+	
+		p_tmp(:,i) = pi + fi/nbCells;		
+
+	end
+	
+	p = p_tmp;
+	
+	figure(1),clf
+	scatter(p(1,:),p(2,:));
+	pause(3)
+
+end
+
+relaxation = p;

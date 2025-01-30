@@ -1,0 +1,298 @@
+
+%%%%
+voie=cell(1,7);
+voie{1}='21';
+voie{2}='23';
+voie{3}='20';
+voie{4}='22';
+voie{5}='31';
+voie{6}='29';
+voie{7}='24';
+
+for v=1:7
+    v
+    load (strcat('/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse051/20130110/BULB-Mouse-51-10012013/LFPData/LFP',voie{v},'.mat'))
+    LFPtest=ResampleTSD(LFP,250);
+    
+        std1=1.5; %peak frequencies
+    smoothfact=10; %smooth frequency
+    std2=1;% times domain
+    std2_high=2; %times domain  - at least one peak
+    std3=1; %freq domain
+    std4=2; %entropy
+    peak_no_single_freq=3;
+    peak_no_multi_freq=3;
+    inter_freq_interval=0.25;
+    min_spindle_length=0.4;
+    min_num_peaks_freq=1;
+    min_num_peaks=2;
+    min_num_peaks_high=0;
+    min_inter_spindle=0.3;
+    min_num_peaks_ent=1;
+    
+    Peak fct
+    Epoch=SWSEpoch-GndNoiseEpoch-NoiseEpoch;
+    globalvar_sq=std(Data(Restrict(LFPtest, Epoch)).^2);
+    globalmean_sq=mean(Data(Restrict(LFPtest, Epoch)).^2);
+    [tpeaks,tDeltaP2,tDeltaT2,t,brst]=FindExtremPeaks(LFPtest,std1,Epoch);
+    plot(Range(LFP), Data(LFP))
+    hold on
+    scatter(Range(tDeltaP2),Data(tDeltaP2)*100+3000, 50,(Data(tDeltaP2)))
+    scatter(Range(tDeltaT2),Data(tDeltaT2)*100+3000, 50,(Data(tDeltaT2)))
+    
+    
+    find 3 consecutive peaks
+    alltimes=[Range(tDeltaT2,'s') ;Range(tDeltaP2,'s')];
+    allfreq=[Data(tDeltaT2) ;Data(tDeltaP2)];
+    
+    time_freq_bef=[alltimes allfreq];
+    time_freq_after=[];
+    for j=1:10
+        time_freq_int=time_freq_bef(time_freq_bef(:,2)==2*j+1,:);
+        time_freq_int_sorted=sort(time_freq_int,1);
+        brst = burstinfo_2(time_freq_int_sorted(:,1), 1/(2*j+1),inf,peak_no_single_freq);
+        Epoch=intervalSet(brst.t_start, brst.t_end);
+        time_freq_rest=tsd(time_freq_int_sorted(:,1),time_freq_int_sorted(:,2));
+        time_freq_rest=Restrict(time_freq_rest, Epoch);
+        time_freq_after=[time_freq_after ; [Range(time_freq_rest) Data(time_freq_rest)]];
+    end
+    merge across freq
+    time_freq_all=sortrows(time_freq_after,1);
+    brst_all_freq = burstinfo_2(time_freq_all(:,1), inter_freq_interval,inf,peak_no_multi_freq);
+    display(strcat('number of ROI', num2str(length(brst_all_freq.start))));
+    
+    get rid of shorties
+    brst_all_freq.t_start=brst_all_freq.t_start(brst_all_freq.dur>min_spindle_length);
+    brst_all_freq.t_end=brst_all_freq.t_end(brst_all_freq.dur>min_spindle_length);
+    brst_all_freq.n=brst_all_freq.n(brst_all_freq.dur>min_spindle_length);
+    brst_all_freq.dur=brst_all_freq.dur(brst_all_freq.dur>min_spindle_length);
+    display(strcat('number of ROI after elimination of short events', num2str(length(brst_all_freq.start))));
+    
+    
+    Epoch=intervalSet(brst_all_freq.t_start, brst_all_freq.t_end);
+    time_freq_final_rest=tsd(time_freq_all(:,1),time_freq_all(:,2));
+    time_freq_final_rest=Restrict(time_freq_final_rest, Epoch);
+    time_freq_final=[Range(time_freq_final_rest) Data(time_freq_final_rest)];
+    
+        plot(Range(LFP), Data(LFP))
+     hold on
+     scatter(time_freq_bef(:,1)*10000,time_freq_bef(:,2)*100+3000,'r')
+     scatter(time_freq_after(:,1)*10000,time_freq_after(:,2)*100+5000,'k')
+     scatter(time_freq_final(:,1)*10000,time_freq_final(:,2)*100+7000,'g')
+     a=0;
+    
+     a=a+1; xlim([a*0.5e6 0.5e6*(a+1)])
+    
+    
+    target=4; %seconds
+    nopeak=[];
+    get rid of 1/f sections and too small amplitudes
+    for k=2:length(brst_all_freq.t_start)-1
+        k
+        Fs=1/median(diff(Range(LFPtest,'s')));
+        interval=brst_all_freq.t_end(k)-brst_all_freq.t_start(k);
+        if interval<target
+            up=(target-interval)/2;
+            down=(target-interval)/2;
+            if (brst_all_freq.t_end(k)+up)>brst_all_freq.t_start(k+1)
+                up=(brst_all_freq.t_start(k+1)-brst_all_freq.t_end(k))/2;
+            end
+            if (brst_all_freq.t_start(k)-down)<brst_all_freq.t_end(k-1)
+                down=min(updown,(brst_all_freq.t_start(k)-brst_all_freq.t_end(k-1))/2);
+            end
+            Epoch=intervalSet((brst_all_freq.t_start(k)-down)*10000,(brst_all_freq.t_end(k)+up)*10000);
+        else
+            Epoch=intervalSet(brst_all_freq.t_start(k)*10000,brst_all_freq.t_end(k)*10000);
+        end
+        y=Data(Restrict(LFPtest,Epoch));
+        time=Range(Restrict(LFPtest,Epoch));
+        y=y-mean(y);
+        L=length(y);
+        NFFT=2^nextpow2(L);
+        Y = fft(y,NFFT)/L;
+        f = Fs/2*linspace(0,1,NFFT/2);
+        pow=f'.*abs(Y(1:NFFT/2)*2);
+        ind1=find(f>22, 1, 'first');
+        ind2=find(f>60, 1, 'first');
+        pow=pow(1:ind2);
+        smoothpow=smooth(pow,smoothfact);
+        f=f(1:ind2);
+        var=mean(smoothpow)+std3*std(smoothpow);
+        
+        finding peaks in frequency domain
+        deriv_freq=diff(smoothpow(1:ind1))';
+        deriv1_freq = [deriv_freq 0];
+        deriv2_freq = [0 deriv_freq];
+        PeaksIdx_freq = find(deriv1_freq < 0 & deriv2_freq > 0);
+        Peaks_freq = smoothpow(PeaksIdx_freq);
+        PeaksTime_freq=f(PeaksIdx_freq);
+        PeaksTime_freq=PeaksTime_freq(Peaks_freq>var);
+        Peaks_freq=Peaks_freq(Peaks_freq>var);
+        
+        finding peaks in time domain
+        Epochsq=intervalSet(brst_all_freq.t_start(k)*10000,brst_all_freq.t_end(k)*10000);
+        ysq=Data(Restrict(LFPtest,Epochsq));
+        timesq=Range(Restrict(LFPtest,Epochsq));
+        ysq=ysq'.^2;
+        deriv_time=diff(ysq);
+        deriv1_time = [deriv_time 0];
+        deriv2_time = [0 deriv_time];
+        PeaksIdx_time = find(deriv1_time < 0 & deriv2_time > 0);
+        Peaks_time = ysq(PeaksIdx_time);
+        PeaksTime_time=timesq(PeaksIdx_time);
+        
+        
+        PeaksTime_time=PeaksTime_time(Peaks_time>(globalvar_sq*std2+globalmean_sq));
+        Peaks_time=Peaks_time(Peaks_time>(globalvar_sq*std2+globalmean_sq));
+        Peaks_time_high=Peaks_time(Peaks_time>(globalvar_sq*std2_high+globalmean_sq));
+        
+        is there a change in entropy?
+        time_pe=Range(Restrict(entropy_21_6,Epochsq),'s');
+        deriv_pe=diff(pe');
+        deriv1_pe = [deriv_pe 0];
+        deriv2_pe = [0 deriv_pe];
+        PeaksIdx_pe = find(deriv1_pe > 0 & deriv2_pe < 0);
+        Peaks_val_pe=pe(PeaksIdx_pe);
+        PeaksIdx_high_pe=PeaksIdx_pe(Peaks_val_pe<(mean_entropy_21_6-std4*std_entropy_21_6));
+                
+        
+        if size(Peaks_freq,2)>min_num_peaks_freq & size(Peaks_time,2)>min_num_peaks & size(Peaks_time_high,2)>min_num_peaks_high & size(PeaksIdx_high_pe,2)>min_num_peaks_ent
+            nopeak=[nopeak k];
+              change=[];
+       y=Data(Restrict(LFPtest,Epoch));
+        time=Range(Restrict(LFPtest,Epoch),'s');
+        ysq_long=y.^2;
+        thresholded = ysq_long > globalvar_sq*std2+globalmean_sq;
+        start = find(diff(thresholded)>0);
+        stop = find(diff(thresholded)<0);
+        if thresholded(1)==1
+            epoch_init=Start(Epoch);
+            Epoch=intervalSet(brst_all_freq.tend(k-1),epoch_init(1));
+            time=Range(Restrict(LFPtest,Epoch),'s');
+            y=Data(Restrict(LFPtest,Epoch));
+            ysq_long=y.^2;
+            thresholded = ysq_long > globalvar_sq*std2+globalmean_sq;
+            if thresholded(1)==1
+                if length(start)==0
+                    start(1)=brst_all_freq.t_start(k);
+                else
+                    start=[brst_all_freq.t_start(k) start];
+                end
+            else
+                if length(start)==0
+                    change(1)=1;
+                    start(1)=time(find(diff(thresholded>0),1,'last'));
+                else
+                    start=[time(find(diff(thresholded>0),1,'last')) start];
+                end
+                
+            end
+        end
+        
+        if thresholded(end)==1
+                        epoch_init=Start(Epoch);
+            Epoch=intervalSet(epoch_init(end),brst_all_freq.t_start(k+1));
+            y=Data(Restrict(LFPtest,Epoch));
+            time=Range(Restrict(LFPtest,Epoch),'s');
+            ysq_long=y.^2;
+            thresholded = ysq_long > globalvar_sq*std2+globalmean_sq;
+            if thresholded(end)==1
+                                if length(stop)==0;
+                    stop(1)=brst_all_freq.t_end(k);
+                else
+                    stop=[stop brst_all_freq.t_end(k)];
+                end
+            else
+                if length(stop)==0
+                    change(2)=1;
+                    stop(1)=time(find(diff(thresholded>0),1,'first'));
+                else
+                    stop=[stop time(find(diff(thresholded>0),1,'first'))];
+                end
+                
+            end
+        end
+        
+        if length(start)>1
+            ignore too short intervals
+            for kk=1:length(start)
+                if stop(kk)-start(kk)<0.2
+                    stop(kk)=NaN;
+                    start(kk)=NaN;
+                end
+            end
+            for kk=1:length(start)-1
+                if start(kk+1)-stop(kk)<0.2
+                    stop(kk)=NaN;
+                    start(kk+1)=NaN;
+                end
+            end
+            start=start(~isnan(start));
+            stop=start(~isnan(stop));
+        end
+        
+               
+          
+            brst_all_freq.t_start=[brst_all_freq.t_start(1:k-1) start brst_all_freq.t_start(k+length(start))];
+            brst_all_freq.t_end=[brst_all_freq.t_end(1:k-1) stop brst_all_freq.t_end(k+length(stop))];
+        end  
+        
+       figure(1)
+        clf(1)
+        subplot(1,2,1)
+        plot(time,y)
+        hold on
+        scatter(time_freq_final(:,1)*10000,zeros(1,length(time_freq_final(:,1))), 50,'c')
+        scatter(PeaksTime_time,sqrt(Peaks_time),'g')
+        xlim([time(1) time(end)])
+        hold on
+        plot(brst_all_freq.t_start(k)*10000,0,'.','color','r','linewidth',5)
+        plot(brst_all_freq.t_end(k)*10000,0,'.','color','r','linewidth',5)
+        subplot(1,2,2)
+        pow=pow(1:300);
+        f=f(1:300);
+        plot(f,pow)
+        xlim([0 50])
+        hold on
+        plot(f,smoothpow,'r','linewidth',3)
+        plot(f,ones(length(f))*1*var,'k')
+        plot(f,ones(length(f))*2*var,'c')
+        scatter(PeaksTime_freq,Peaks_freq)
+        pause
+    end
+    
+    display(strcat('number of ROI after frequency, aplitude and entropy cleaning', num2str(length(nopeak))));
+    
+    brst_all_freq_nonoise.t_start=brst_all_freq.t_start(nopeak);
+    brst_all_freq_nonoise.t_end=brst_all_freq.t_end(nopeak);
+    brst_all_freq_nonoise.tdur=  brst_all_freq_nonoise.t_end-  brst_all_freq_nonoise.t_start
+    brst_all_feq_nonoise.t_middle = zeros(length(brst_all_freq_nonoise.t_start),1);
+    for n=1:brst_all_freq_nonoise.t_start
+  brst.t_middle(n) = median(t_spk(brst.i_start(n):brst.i_end(n)));
+    end
+
+
+    Epoch=intervalSet(brst_all_freq_nonoise.t_start, brst_all_freq_nonoise.t_end);
+    time_freq_final_rest=tsd(time_freq_final(:,1),time_freq_final(:,2));
+    time_freq_final_rest=Restrict(time_freq_final_rest, Epoch);
+    time_freq_final=[Range(time_freq_final_rest) Data(time_freq_final_rest)];
+    
+    clear event1
+    event1.time=[ brst_all_freq_nonoise.t_start  brst_all_freq_nonoise.t_end ]';
+    event1.time=event1.time(:);
+    
+    for i=1:length(brst_all_freq_nonoise.t_start)
+        event1.time(i)=brst_all_freq_nonoise.t_start(i);
+        event1.time(i+1)=brst_all_freq_nonoise.t_start(i);
+        event1.description{i}='spinstart';
+        event1.description{i+1}='spinstop';
+        
+    end
+    SaveEvents(strcat('Sophie_spindles.evt.s', voie{v}),event1)
+        
+    
+end
+
+
+
+

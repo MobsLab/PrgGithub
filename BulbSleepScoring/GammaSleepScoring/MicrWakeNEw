@@ -1,0 +1,114 @@
+%% New code for microarousals
+
+EMGmice;
+
+%% OB microawakenings
+% Look at EMG activity distribution
+for mm=1:m
+    cd (filename{mm,1})
+    load('StateEpochEMGSB.mat','EMGData','EMG_thresh','SWSEpoch','REMEpoch')
+    load('TransLimsEMG.mat')
+    TotalEpoch=intervalSet(0,max(Range(EMGData)));
+    Wake=thresholdIntervals(EMGData,EMG_thresh);
+    Sleep=thresholdIntervals(EMGData,X1,'Direction','Below');
+    Sleep=mergeCloseIntervals(Sleep,15*1e4);
+    IsMA=[];
+    for k=1:length(Start(Wake))
+        IsMA(k)=length(Range(Restrict(EMGData,And(Sleep,subset(Wake,k)))))==length(Range(Restrict(EMGData,subset(Wake,k))));
+    end
+    MicroWake=subset(Wake,find(IsMA));
+    MicroWake=mergeCloseIntervals(MicroWake,5*1e4);
+    
+    load('StateEpochSB.mat','smooth_ghi','gamma_thresh')
+    GammWake=thresholdIntervals(smooth_ghi,gamma_thresh);
+    GammaAgree=[];
+    for k=1:length(Start(MicroWake))
+        GammaAgree(k)=length(Range(Restrict(EMGData,And(subset(MicroWake,k),GammWake))))*(mean(diff(Range(smooth_ghi))));
+    end
+    
+    clear AllSp
+    load('H_Low_Spectrum.mat')
+    Sptsd=tsd(Spectro{2}*1e4,Spectro{1});
+    kkk=1;kk=1;
+    for k=1:length(Start(MicroWake))
+        tempEp=intervalSet(Start(subset(MicroWake,k))-5*1e4,Start(subset(MicroWake,k))+5*1e4);
+        if sum(Stop(And(tempEp,REMEpoch))-Start(And(tempEp,REMEpoch)))>sum(Stop(And(tempEp,SWSEpoch))-Start(And(tempEp,SWSEpoch)))
+            if GammaAgree/1e4>1
+                AllSpRA{kk}=Data(Restrict(Sptsd,tempEp));
+            else
+                AllSpRD{kk}=Data(Restrict(Sptsd,tempEp));
+            end
+            kk=kk+1;
+        else
+            if GammaAgree/1e4>1
+                AllSpSA{kkk}=Data(Restrict(Sptsd,tempEp));
+            else
+                AllSpS{kkk}=Data(Restrict(Sptsd,tempEp));
+            end
+            kkk=kkk+1;
+        end
+    end
+    MeanAllSp1=zeros(50,263);
+    for i=1:kk-1
+          MeanAllSp1=MeanAllSp1+AllSp1{i} ;
+    end
+        MeanAllSp2=zeros(50,263);
+    for i=1:kkk-1
+          MeanAllSp2=MeanAllSp2+AllSp2{i} ;
+    end
+
+    load('StateEpochSB.mat','SWSEpoch','REMEpoch','Wake','smooth_ghi','gamma_thresh')
+    % Get microarousals absed on gamma
+    Sleep=Or(SWSEpoch,REMEpoch);
+    MicroWake=SandwichEpoch(Wake,Sleep,10*1e4,15*1e4);
+    MicroWake=intervalSet(Start(MicroWake)-5*1e4,Stop(MicroWake));
+    % Look at Gamma and EMG power during these MAs
+    maxonGamma=[];meanonGamma=[];
+    for kk=1:length(Start(MicroWake))
+        maxonGamma(kk,1)=max(Data(Restrict(EMGData,subset(MicroWake,kk))));
+        maxonGamma(kk,2)=max(Data(Restrict(smooth_ghi,subset(MicroWake,kk))));
+        meanonGamma(kk,1)=mean(Data(Restrict(EMGData,subset(MicroWake,kk))));
+        meanonGamma(kk,2)=mean(Data(Restrict(smooth_ghi,subset(MicroWake,kk))));
+    end
+    
+    
+    load('StateEpochEMGSB.mat','SWSEpoch','REMEpoch','Wake','EMG_thresh')
+    % Get microarousals based on EMG
+    Sleep=Or(SWSEpoch,REMEpoch);
+    MicroWake=SandwichEpoch(Wake,Sleep,10*1e4,15*1e4);
+    MicroWake=intervalSet(Start(MicroWake)-5*1e4,Stop(MicroWake));
+    % Look at Gamma and EMG power during these MAs
+    maxonEMG=[];meanonEMG=[];
+    for kk=1:length(Start(MicroWake))
+        maxonEMG(kk,1)=max(Data(Restrict(EMGData,subset(MicroWake,kk))));
+        maxonEMG(kk,2)=max(Data(Restrict(smooth_ghi,subset(MicroWake,kk))));
+        meanonEMG(kk,1)=mean(Data(Restrict(EMGData,subset(MicroWake,kk))));
+        meanonEMG(kk,2)=mean(Data(Restrict(smooth_ghi,subset(MicroWake,kk))));
+    end
+    
+    % Plot
+    fig=figure;
+    subplot(121)
+    [Y,X]=hist(log(Data(EMGData)),1000);
+    plot(X,Y/max(Y),'k'), hold on
+    plot(log(maxonEMG(:,1)),0.9,'.k')
+    plot(log(meanonEMG(:,1)),0.85,'*k')
+    plot(log(maxonGamma(:,1)),0.6,'.r')
+    plot(log(meanonGamma(:,1)),0.55,'*r')
+    line(log([EMG_thresh EMG_thresh]),[0 1],'color','k')
+    title(strcat('EMG - ',num2str(length(meanonEMG)),'MAs'))
+    subplot(122)
+    [Y,X]=hist(log(Data(smooth_ghi)),1000);
+    plot(X,Y/max(Y),'r'), hold on
+    plot(log(maxonEMG(:,2)),0.9,'.k')
+    plot(log(meanonEMG(:,2)),0.85,'*k')
+    plot(log(maxonGamma(:,2)),0.6,'.r')
+    plot(log(meanonGamma(:,2)),0.55,'*r')
+    line(log([gamma_thresh gamma_thresh]),[0 1],'color','r')
+    title(strcat('Gamma - ',num2str(length(maxonGamma)),'MAs'))
+    
+    saveas(fig,['/media/DataMOBSSlSc/SleepScoringMice/CompEMGMice/MADistributions',num2str(mm),'.fig'])
+    saveas(fig,['/media/DataMOBSSlSc/SleepScoringMice/CompEMGMice/MADistributions',num2str(mm),'.eps'])
+    
+    
+end

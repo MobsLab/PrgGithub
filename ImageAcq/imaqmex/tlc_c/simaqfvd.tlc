@@ -1,0 +1,125 @@
+%% $RCSfile: simaqfvd.tlc,v $
+%% $Revision: 1.1.6.5 $ 
+%% $Date: 2011/04/16 06:37:20 $
+%%
+%% Copyright 2006-2011 The MathWorks, Inc.
+%%
+%% Abstract: Performs video input using an image acquisition device.
+
+%implements simaqfvd "C"
+
+%include "imaqlib.tlc"
+
+%% Function: BlockTypeSetup ==============================================
+%function BlockTypeSetup(block, system) void
+
+    %<LibAddToCommonIncludes("simaqruntime.h")>
+    %<LibAddToCommonIncludes("simaqutil_api.h")>
+    
+%endfunction %% BlockTypeSetup
+
+%% Function: BlockInstanceSetup ==============================================
+%%
+%function BlockInstanceSetup(block, system) void
+
+    %if !Accelerator && !IsModelReferenceSimTarget()
+        %openfile errMsg
+
+The From Video Device block from Image Acquisition Toolbox does not support Rapid Accelerator mode or Code Generation. 
+The block supports only Normal and Simulink Accelerator mode. 
+        %closefile errMsg
+    
+        %<LibBlockReportError(block, errMsg)>
+    %endif
+
+  %assign nPorts            = SFcnParamSettings.NumberOfPorts
+  %assign portWidth         = SFcnParamSettings.PortWidth
+  %assign dataType          = SFcnParamSettings.DataType
+  %assign objConstructor    = SFcnParamSettings.ObjectConstructor
+  %assign hwTriggerEnabled  = SFcnParamSettings.HWTriggerEnabled
+  %assign blockHandle       = SFcnParamSettings.BlockHandle
+  %assign videoFormat       = SFcnParamSettings.VideoFormat
+  %assign cameraFile        = SFcnParamSettings.CameraFile
+  %assign videoSource       = SFcnParamSettings.VideoSource
+  %assign roiPosition       = SFcnParamSettings.ROIPosition
+  %assign triggerConfiguration = SFcnParamSettings.TriggerConfiguration
+  %%
+
+  %assign block = block + nPorts + portWidth + dataType + objConstructor ...
+  + hwTriggerEnabled + blockHandle + videoFormat + cameraFile + videoSource ...
+  + roiPosition + triggerConfiguration
+
+%endfunction %% BlockInstanceSetup
+
+
+%% Function: Start ==========================================================
+%%
+%function Start(block, system) Output
+{
+    /* Image Acquisition From Video Device Block (%<ParamSettings.FunctionName>) - '%<Name>' - Start */
+    
+    /* Access the requested subsystem. */
+    void* imaqSys = exIMAQCreateFVDSystem("%<blockHandle>", "%<objConstructor>", "%<videoFormat>", "%<cameraFile>", "%<videoSource>", "%<roiPosition>", %<hwTriggerEnabled>, 
+	    	             "%<triggerConfiguration>", %<nPorts>, "%<dataType>", %<portWidth>);
+	    	             
+    /* Cache the pointer to the subsystem. */
+    %<LibBlockDWork(IMAQObject, "", "", 0)> = imaqSys;
+
+    /* Start frame acquisition. */
+    if ( !exIMAQStartSystem( imaqSys )  ){
+        const char* errMsg = exIMAQGetLastError( imaqSys );
+        %<RTMSetErrStat("errMsg")>;
+        %<RTMSetStopRequested(1)>;
+        return;   
+    }
+}
+%endfunction %% Start
+
+
+%% Function: Outputs ==========================================================
+%%
+%function Outputs(block, system) Output
+{
+    /* Image Acquisition From Video Device Block (%<ParamSettings.FunctionName>) - '%<Name>' - Outputs */
+    
+    /* Access the pointer to the data output function. */
+    void* imaqSys = %<LibBlockDWork(IMAQObject, "", "", 0)>;
+    
+    /* Create a local array of pointers to the output signals. */
+    void* outPortAddr[%<nPorts>];
+    %foreach portIndex = %<nPorts>
+    outPortAddr[%<portIndex>] = (void*)%<LibBlockOutputSignalAddr(portIndex, "", "", 0)>;
+    %endforeach
+    
+    /* Access the acquired frame. */
+    if ( !exIMAQAcquireData( imaqSys, outPortAddr )  ){
+        const char* errMsg = exIMAQGetLastError( imaqSys );
+        %<RTMSetErrStat("errMsg")>;
+        %<RTMSetStopRequested(1)>;
+        return;   
+    }
+}
+%endfunction %% Outputs
+
+
+%% Function: Update ==========================================================
+%%
+%function Update(block, system) Output
+
+%endfunction %% Update
+
+
+%% Function: Terminate ==========================================================
+%%
+%function Terminate(block, system) Output
+{
+    /* Image Acquisition From Video Device Block (%<ParamSettings.FunctionName>) - '%<Name>' - Terminate */
+    
+    /* Terminate the device communication. */
+    if (%<LibBlockDWork(IMAQObject, "", "", 0)> != NULL){
+        exIMAQTerminateSystem( %<LibBlockDWork(IMAQObject, "", "", 0)> );
+    }
+}
+%endfunction %% Terminate
+
+%% [EOF] simaqfvd.tlc

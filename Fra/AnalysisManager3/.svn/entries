@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="39"
+   name=""
+   committed-date="2006-09-13T12:12:06.298439Z"
+   url="svn+ssh://uvavpn/home/battagli/svn/matlab/branches/AnalysisManager"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   repos="svn+ssh://uvavpn/home/battagli/svn/matlab"
+   prop-time="2006-09-23T15:05:49.000000Z"
+   revision="50"/>
+<entry
+   committed-rev="39"
+   name="unlockResources.m"
+   text-time="2006-09-23T15:05:49.000000Z"
+   committed-date="2006-09-13T12:12:06.298439Z"
+   checksum="cd4d626fcb3f89577fbd2565e3922aad"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   name="@Analysis"
+   kind="dir"/>
+<entry
+   committed-rev="39"
+   name="TODO"
+   text-time="2006-09-23T15:05:49.000000Z"
+   committed-date="2006-09-13T12:12:06.298439Z"
+   checksum="11f9285aa1e14b4f94631a17e8b33ceb"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   name="@Resource"
+   kind="dir"/>
+<entry
+   committed-rev="1"
+   name="Contents.m"
+   text-time="2006-09-23T15:05:49.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="24e8dcd576cc87d1151cd0a305ca8807"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="1"
+   name="analysis_framework_plan.txt"
+   text-time="2006-09-23T15:05:49.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="8f244b869b11f7ee1f4f3e76b5c72b71"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:49.000000Z"/>
+<entry
+   committed-rev="39"
+   name="initResources.m"
+   text-time="2006-09-23T15:05:49.000000Z"
+   committed-date="2006-09-13T12:12:06.298439Z"
+   checksum="d5815d810db3b1b27f43445c5e0dcc06"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:49.000000Z"/>
+<entry
+   name="AnalysisManager"
+   kind="dir"
+   schedule="delete"/>
+</wc-entries>

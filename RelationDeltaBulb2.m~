@@ -1,0 +1,162 @@
+%RelationDeltaBulb2
+
+
+tit='Bulb';
+
+del=2000;
+
+a=1;
+NameDir={'PLETHYSMO' 'BASAL'};
+
+
+for i=1:length(NameDir)
+Dir=PathForExperimentsML(NameDir{i}); Dir=PathForExperimentsML(NameDir{i});
+for man=1:length(Dir.path)
+cd(Dir.path{man})
+
+disp(' ')
+disp(Dir.name{man})
+disp(Dir.path{man})
+
+ try
+
+    clear tref
+    clear tDeltaT2
+    clear Rip
+    
+%-----------------------------------------------------------------------    
+%-----------------------------------------------------------------------    
+%     load DeltaPFCx
+    load DeltaPaCx
+    try
+    load behavResources
+    tref=Range(Restrict(tDeltaT2,PreEpoch),'s');
+    catch
+    tref=Range(tDeltaT2,'s');    
+    end
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+
+%     load SpindlesRipples Rip
+%     treftsd=tsd(Rip(:,2)*1E4,Rip);
+      try
+        tref=Range(treftsd,'s');
+      catch
+          
+      end
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+    clear channel
+    clear InfoLFP
+    load LFPData/InfoLFP
+    
+    clear listBulb
+    clear listBulbDepth
+    
+    listBulb=InfoLFP.channel(strcmp(InfoLFP.structure,tit));
+    listBulbDepth=InfoLFP.depth(strcmp(InfoLFP.structure,tit));
+    
+    clear id
+    [BE,id]=sort(listBulbDepth);
+    clear ch1
+    clear ch2
+    
+    ch1=listBulb(id(2));
+    ch2=listBulb(id(end));
+    
+
+%     load ChannelsToAnalyse/Bulb_deep.mat
+%     eval(['load LFPData/LFP',num2str(channel),'.mat'])
+    clear LFP
+    eval(['load LFPData/LFP',num2str(ch1),'.mat'])
+    
+    D{a}=PlotRipRaw(LFP,tref,del);close
+
+%     clear channel
+%     load ChannelsToAnalyse/Bulb_sup.mat
+%     eval(['load LFPData/LFP',num2str(channel),'.mat'])
+    
+    clear LFP
+    eval(['load LFPData/LFP',num2str(ch2),'.mat'])
+    
+    S{a}=PlotRipRaw(LFP,tref,del);close
+
+    N{a}=[Dir.name{man},' ',Dir.group{man}];
+    
+    a=a+1;
+
+
+end
+ end
+end
+
+
+
+
+
+k=1;
+j=1;
+for i=1:length(N)
+    if N{i}(end)=='T'
+    listWT(k)=i;
+    k=k+1;
+    else
+    listKO(j)=i;    
+    j=j+1;
+    end
+end
+
+
+
+
+    
+
+    sWT=[];
+    for i=listWT
+        try
+    sWT=[sWT;S{i}(:,2)'];
+        end
+    end
+    
+    sKO=[];
+    for i=listKO
+        try
+    sKO=[sKO;S{i}(:,2)'];
+        end
+    end
+    
+
+
+    figure('color',[1 1 1]), 
+    plot(mean(sWT),'k','linewidth',2), hold on, 
+    plot(mean(sWT)+stdError(sWT),'k','linewidth',1)
+    plot(mean(sWT)-stdError(sWT),'k','linewidth',1)    
+    plot(mean(sKO),'r','linewidth',2)
+    plot(mean(sKO)+stdError(sKO),'r','linewidth',1)   
+    plot(mean(sKO)-stdError(sKO),'r','linewidth',1)  
+    title(tit)
+
+    dWT=[];
+    for i=listWT
+        try
+    dWT=[dWT;D{i}(:,2)'];
+        end
+    end
+    
+    dKO=[];
+    for i=listKO
+    try
+        dKO=[dKO;D{i}(:,2)'];
+    end
+    end
+
+    figure('color',[1 1 1]), 
+    plot(mean(dWT),'k','linewidth',2), hold on, 
+    plot(mean(dWT)+stdError(dWT),'k','linewidth',1)
+    plot(mean(dWT)-stdError(dWT),'k','linewidth',1)    
+    plot(mean(dKO),'r','linewidth',2)
+    plot(mean(dKO)+stdError(dKO),'r','linewidth',1)   
+    plot(mean(dKO)-stdError(dKO),'r','linewidth',1)   
+    title(tit)
+
+

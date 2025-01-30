@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-05-25T10:43:10.993826Z"
+   url="file:///home/battagli/svn/matlab/trunk/projects/ReactRateHippo"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="DIRACSleepACG.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="7688fb3dfe990e9a987feecbbbb03e9e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="GlobReactRate_hc.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e911fd3cfcbb1886d6e1614c0f0968d4"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="hyper5summary.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a0bb748218a9209be2e2090b0538fcce"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACPhasePlaceCells.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="4de48645fbf28be7342acb43f9b06cfc"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReactRateNetworkSim.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="172371c53ff4f614fcf9db4cfa1a56f6"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="compute_maze_sections.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="337fcbabe6b9d6c1f7e2cabf2e73d849"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AnalyzeSims.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="22c095bf6280961d7d6acc6203b92bc2"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="RunSims.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="27fa1a0f9c999fe2e13ba6d83c0f7484"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReactRPairs2.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="c110082c8fc5e9cfb57da2f0b85f5d89"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReactRateSimPlots.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="55a8bd982c7123929ca6a65a5ff60f58"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="Hyper5SimpleMeasuresReact.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="2a996357b811efefa6b8b6a77851f95f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReactRPairsHyper5.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="52a01eaf33785fd23e1b26bce32013e3"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="Hyper5TimeCourse.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="89a59ce699fde578bfac4705f996ac9c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReactCVScatterPlot.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e5d421bceb83ec1bbabe45d4a7bafe93"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="Hyper5ArmTimes.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="0c8a267fc2240d221c25fff6325ab034"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="GlobReactRate.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="62abddd7eb2e2dd42c165edfe17d727f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AverageSleepACG.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1a87a1c143571eb1065cca5719b52862"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReactRPairs.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="3a31724853e455899e942fccbacd74a0"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReactRateNetworkSim2.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="37979aec59900ef280e46dff40d4389f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACSimpleMeasuresReact.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="f3cdfc859b91a8375d54f4d704fa854c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="CRAMSimpleMeasuresReact.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e790f61e1cd6955611861413ffcb39f0"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReactR.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="beb38d9520d5208c17fdc93004961a8d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AnalyzeSims2.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5cf8e8f94d5b7f81a6214fe776ae6872"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACTimeCourse.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="0513021b40b9ebcc55c32ccc580dd696"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="CRAMTimeCourse.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="40b7f022f908eab51fca968d9751ba98"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="AnalyzeSims3.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="0a0e0848af2404999d0e1dfece466b2c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReactRPairsCRAM.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a0ff4d2d77ac3fbaf363263f1fa660d1"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="RunSims2.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="4fc91e927435bdcf446d59bfadd04cae"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+</wc-entries>

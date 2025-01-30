@@ -1,0 +1,37 @@
+% Copy Behavior.mat to file plethysmo ManipDec15BulbectomiePlethysmo
+
+shammice=[280:290];
+bulbmice=[269:279];
+expgroup={shammice,bulbmice};
+groupname={'sham','bulb'};
+
+%datalocation='server'; 
+%manipname='ManipDec15BulbectomiePlethysmo';
+
+
+for g=1:2
+    group=expgroup{g};
+    for mousenb=1:length(group)
+        m=group(mousenb);
+        % copy Behavior.mat
+        PathBehav=['/media/DataMOBsRAID/ProjetAversion/ManipDec15BulbectomiePlethysmo/M' num2str(m) '/20151217/FEAR-Mouse-' num2str(m) '-17122015-01-EXTpleth/'];
+        cd(PathBehav)
+        load('Behavior.mat')
+        try
+        PathPlethysmo=['/media/DataMobs31/Plethysmo/Data respi/ext_downsampled/M' num2str(m) '/' num2str(m) '-TestPlethy-171215/'];
+        cd(PathPlethysmo)
+        catch
+        PathPlethysmo=['/media/DataMobs31/Plethysmo/Data respi/ext_downsampled/M' num2str(m) '/' num2str(m) '-TestPlethy-231215/'];
+        cd(PathPlethysmo)
+        end
+        save('Behavior.mat','PosMat','Movtsd','mask','FreezeEpoch')
+        clear PosMat Movtsd FreezeEpoch mask
+    end
+end
+
+
+
+% /media/DataMobs31/Plethysmo/Data respi/ext_downsampled/M270/M270-TestPlethy-171215/
+% /media/DataMobs31/Plethysmo/Data respi/ext_downsampled/M275/M275-TestPlethy-231215/
+
+/media/DataMOBsRAID/ProjetAversion/ManipDec15BulbectomiePlethysmo/M280/20151217/FEAR-Mouse-280-17122015-01-EXTpleth/

@@ -1,0 +1,12 @@
+function M = spkcorrcoef(S,binSize,is)
+
+%  M = SPKCORRCOEF(A,epoch,binSize)
+%  this function computes correlations coefficients matrix of 
+%  spikes split in bins of *binSize* for interval *is*
+
+
+A = getResource(A,'SpikeData');
+
+Sr = Restrict(S,is);
+Q = MakeQfromS(Sr);
+M = full(nancorrcoef(zTransform(Data(Q))));

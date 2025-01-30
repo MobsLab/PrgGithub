@@ -1,0 +1,104 @@
+
+%AnalysisICSS-Mouse-29-03022012
+
+if 0
+close all
+clear
+cd /media/HardBackUp/DataSauvegarde/Mouse029/20120203/ICSS-Mouse-29-03022012
+
+        load behavResources
+        load SpikeData
+        
+        for kki=2:length(S)
+            PlaceCellTrig=kki;
+            namePlaceCellTrig=cellnames{kki};
+            endSleep=tpsfin{4}*1E4;
+            staSleep=tpsdeb{4}*1E4;
+            EpochPlaceCellTrig=intervalSet(staSleep,endSleep);
+            %save PlaceCellTrig PlaceCellTrig EpochPlaceCellTrig namePlaceCellTrig
+            MFBburst=0;
+            num=1;
+            %load PlaceCellTrig PlaceCellTrig EpochPlaceCellTrig namePlaceCellTrig
+            namePlaceCellTrig
+            choicTh=5;ControlStimMFBRipplesSleep
+            close all
+        
+        end
+end
+
+        
+  cd     /media/HardBackUp/DataSauvegarde/Mouse029/20120203/ICSS-Mouse-29-03022012  
+i=1;        
+for k=1:length(S)
+try
+eval(['load ResAnalysisSPWRStimCtrl',num2str(k)])    
+
+R(i,1)=NbStimREM; 
+R(i,2)=NbStimSWS;  
+R(i,3)=PercStimTheta;  
+R(i,4)=PercStimSWS; 
+R(i,5)=PercStimRiplpes; 
+R(i,6)=NbSpikeRipples; 
+R(i,7)=NombreRipples; 
+R(i,8)=NombreSpikes; 
+R(i,9)=DurationPeriod; 
+R(i,10)=NbRipplesWithSpikes; 
+R(i,11)=OccurenceBefore; 
+R(i,12)=FreqBefore;
+i=i+1;
+end
+end       
+        
+      
+
+Ti2{1}='NbStimREM' ;
+Ti2{2}='NbStimSWS' ;
+Ti2{3}='PercStimTheta' ;  
+Ti2{4}='PercStimSWS' ;
+Ti2{5}='PercStimRiplpes' ;
+Ti2{6}='NbSpikeRipples' ;
+Ti2{7}='NombreRipples' ;
+Ti2{8}='NombreSpikes' ;
+Ti2{9}='DurationPeriod' ;
+Ti2{10}='NbRipplesWithSpikes' ;  
+Ti2{11}='OccurenceBefore' ;
+Ti2{12}='FreqBefore' ;  
+
+
+for a=[5:12]
+    for b=a+1:12
+        figure('color',[1 1 1]), hold on
+ plot(R(:,a),R(:,b),'ko','markerfacecolor','k')
+ plot(R(35-1,a),R(35-1,b),'ro','markerfacecolor','r')
+ plot(R(25-1,a),R(25-1,b),'ko','markerfacecolor','w')
+  plot(R(find(Celltypes==0)-1,a),R(find(Celltypes==0)-1,b),'ko','markerfacecolor','c')
+ title([num2str(a), ' ',Ti2{a},' vs. ',num2str(b),' ',Ti2{b}]), xlabel(Ti2{a}), ylabel(Ti2{b})
+    end
+end
+
+ figure('color',[1 1 1]), hold on, t=1;
+for a=[5:12]
+    for b=a+1:12
+        if b~=9&a~=9&b~=7&a~=7
+
+             subplot(4,4,t), hold on
+             plot(log(R(:,a)),log(R(:,b)),'ko','markerfacecolor','k')
+             plot(log(R(35-1,a)),log(R(35-1,b)),'ro','markerfacecolor','r')
+             plot(log(R(25-1,a)),log(R(25-1,b)),'ko','markerfacecolor','w')
+              plot(log(R(find(Celltypes==0)-1,a)),log(R(find(Celltypes==0)-1,b)),'ko','markerfacecolor','c')
+            % title([num2str(a), ' ',Ti2{a},' vs. ',num2str(b),' ',Ti2{b}]), 
+             xlabel(Ti2{a}), ylabel(Ti2{b})
+             t=t+1;
+        end
+    end
+end
+
+        
+a=10; b=12; c=7; 
+
+hold on, 
+plot(R(:,10)./R(:,7),R(:,12),'ko','markerfacecolor','k'), 
+plot(R(35,a)./R(35,c),R(35,b),'ro','markerfacecolor','r')
+title([Ti2{a},' vs. ',Ti2{b}]), xlabel(Ti2{a}), ylabel(Ti2{b})
+ 
+        

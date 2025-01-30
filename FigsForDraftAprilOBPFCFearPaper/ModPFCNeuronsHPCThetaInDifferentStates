@@ -1,0 +1,20 @@
+[Dir,KeepFirstSessionOnly,CtrlEphys]=GetRightSessionsFor4HzPaper('CtrlAllDataSpikes')
+ThreshRun=5;
+
+StartEp=intervalSet(0,120*1e4);
+for k=1:length(KeepFirstSessionOnly)
+    cd(Dir.path{KeepFirstSessionOnly(k)})
+    %load('FilteredLFP/MiniMaxiLFPHPC1.mat')
+    load('behavResources.mat')
+    RunEp=thresholdIntervals(Movtsd,ThreshRun,'Direction','Above');
+    RunEp=dropShortIntervals(RunEp,3*1e4);
+    DurRun=Stop(RunEp,'s')-Start(RunEp,'s');
+    CumSumDurRun=cumsum(DurRun);
+    Lim1=find(CumSumDurRun>120,1,'first');
+    Lim2=find(CumSumDurRun>(max(CumSumDurRun)-120),1,'first');
+    Ep{1}=and(RunEp,StartEp);
+    Ep{2}=subset(RunEp,1:Lim1);
+    Ep{3}=and(RunEp,Lim2:length(DurRun));
+    
+    
+end

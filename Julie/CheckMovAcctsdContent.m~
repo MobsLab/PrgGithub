@@ -1,0 +1,54 @@
+% CheckMovAcctsdContent.m
+% 25.10.2017
+% aims at understanding Movtsd variable
+% conclusion : the variable computed by makeDataBulbe is correct
+% the figure shows explains why we use diff((MX.*MX+MY.*MY+MZ.*MZ))
+% 
+sav=0;
+cd /media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse543/20170727-EXT24-laser13
+load('LFPData/InfoLFP.mat')
+load behavResources Movtsd %MovAcctsd MovAccSmotsd 
+
+cha=InfoLFP.channel(strcmp(InfoLFP.structure,'Accelero'));
+
+clear X Y Z
+disp('... Loading LFP.mat (wait!)')
+X=load(['LFPData/LFP',num2str(cha(1)),'.mat'],'LFP');
+Y=load(['LFPData/LFP',num2str(cha(2)),'.mat'],'LFP');
+Z=load(['LFPData/LFP',num2str(cha(3)),'.mat'],'LFP');
+
+MX=Data(X.LFP);
+MY=Data(Y.LFP);
+MZ=Data(Z.LFP);
+Rg=Range(X.LFP);
+Acc=MX.*MX+MY.*MY+MZ.*MZ;
+Acc_sqrt=sqrt(MX.*MX+MY.*MY+MZ.*MZ);
+disp('... DownSampling at 50Hz');
+Acc_sqrttsd=tsd(Rg(1:25:end),double(Acc_sqrt(1:25:end)));
+
+
+
+MovAcctsd=tsd(Rg(1:25:end),double(abs([0;diff(Acc(1:25:end))])));
+MovAcc_sqrttsd=tsd(Rg(1:25:end),double(abs([0;diff(Acc_sqrt(1:25:end))])));
+
+Movtsd=tsd(double(Range(Movtsd)),double(Data(Movtsd)));
+
+figure('Color',[1 1 1]), hold on
+plot(Range(MovAcctsd,'s'),abs(Data(MovAcctsd)),'b')
+YL=ylim; hold on, 
+plot(Range(Movtsd,'s'),rescale(Data(Movtsd),YL(1),YL(2)),'r');
+plot(Range(Acc_sqrttsd,'s'),rescale(Data(Acc_sqrttsd),YL(1),YL(2)),'g');
+legend('MovAcctsd (diff((MX.*MX+MY.*MY+MZ.*MZ))','Movtsd','sqrt(MX.*MX+MY.*MY+MZ.*MZ)')
+xlabel('Rq : working with sum of square instead of sqrt does not change anything')
+title('this explains why we use diff((MX.*MX+MY.*MY+MZ.*MZ))')
+if sav
+    saveas(gcf,CheckMovAcctsdContent.fig')
+    
+end
+
+if 0
+figure
+plot(Range(MovAcc_sqrttsd,'s'),abs(Data(MovAcc_sqrttsd)),'k')
+hold on, 
+plot(Range(MovAcctsd,'s'),abs(Data(MovAcctsd)),'b')
+end

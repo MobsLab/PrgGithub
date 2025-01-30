@@ -1,0 +1,136 @@
+%CorrFreezingActivity 
+
+sav=0;
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Nov15
+manipname='ManipNov15Bulbectomie';
+hab='grille';
+period='FullPeriod'; % SoundOnly ou FullPeriod
+freezTh=1.5;
+corridor=5;
+type='Spearman';
+% type='Pearson';
+
+%%%%%%%%%%%%%%%%%%%%%%%%% FEB 2015
+% hyperactivity data
+% cd /media/DataMOBsRAID/ProjetAversion/ManipFeb15Bulbectomie/hyperactivity
+% load Hyperactivity_5.mat
+% StepNameHyp=StepName;
+% 
+% % freezing data
+% cd /media/DataMOBsRAID/ProjetAversion/ManipFeb15Bulbectomie/SoundOnly
+% load shamAllMiceBilan_1_envC.mat
+% bilanSham=bilan;
+% load bulbAllMiceBilan_1_envC.mat
+% bilanBulb=bilan;
+% StepNameFreeze=StepName;
+
+%%%%%%%%%%%%%%%%%%%%%%%%% DEC 2014
+% 
+% % hyperactivity data
+% cd /media/DataMOBsRAID/ProjetAversion/ManipDec14Bulbectomie/hyperactivty
+% load Hyperactivity_5.mat
+% StepNameHyp=StepName;
+% 
+% 
+% cd /media/DataMOBsRAID/ProjetAversion/ManipDec14Bulbectomie/FreezingSoundOnly
+% load shamAllMiceBilan_1_envA.mat
+% bilanSham=bilan;
+% load bulbAllMiceBilan_1_envA.mat
+% bilanBulb=bilan;
+% StepNameFreeze=StepName;
+
+
+
+% hyperactivity data
+try 
+    cd (['/media/DataMOBsRAID/ProjetAversion/' manipname '/hyperactivity']);
+catch
+    cd (['/media/DataMOBsRAID/ProjetAversion/' manipname '/Hyperactivity']);
+end
+load (['Hyperactivity_' num2str(corridor) '.mat'])
+StepNameHyp=StepName;
+
+
+cd (['/media/DataMOBsRAID/ProjetAversion/' manipname '/Freezing' period])
+load(['shamAllMiceBilan_' num2str(freezTh) '_' hab '.mat'])
+bilanSham=bilan;
+load(['bulbAllMiceBilan_' num2str(freezTh) '_' hab '.mat'])
+bilanBulb=bilan;
+StepNameFreeze=StepName;
+
+NbStepHypToLookAT=4;
+
+Gpcolor={[0.7 0.7 0.7], 'k'};
+period='FullPeriod';%need to put it here again since bulbAllMiceBilan_1.5_grille.mat contains a  variable called period
+ParamList={'TotalDistanceTable','TotalTimeTable', 'StopNbTable','PercentTimePeriphTable','MeanDistFromTheCenterTable','NbEntriesCenterNormTable'};
+for k=1:length(ParamList)
+figure('Position', [2300 500  1200  967])
+
+    for j=1:NbStepHypToLookAT % j : post, 6d, 3wk
+
+        
+        stepH=StepNameHyp{j};
+        eval(['H1=',ParamList{k},'{1,1}(:, j);']);
+        eval(['H2=',ParamList{k},'{1,2}(:, j);']);
+
+
+        for i=1:length(StepNameFreeze)-1 % COND EXTenvC EXTenvB
+            stepF=StepNameFreeze{i+1};
+            %F1=mean(bilanSham{1,i}, 2); % mean on columns : one value for the coditioning session (alternative :derniere(s) colonne(s)
+            F1=bilanSham{1,i+1}(:,3); % 4 = end of the COND session
+
+            %F2=mean(bilanBulb{1,i}, 2);
+            F2=bilanBulb{1,i+1}(:,3);
+
+            %subplot(3,3,3*(j-2)+i-1)
+            subplot(NbStepHypToLookAT,3,3*(j-1)+i)
+            scatter(H1,F1,'MarkerFaceColor', Gpcolor{1},'MarkerEdgeColor', 'k'), hold on
+            scatter(H2,F2,'MarkerFaceColor', Gpcolor{2},'MarkerEdgeColor', 'k')
+
+            %ylabel([ParamList{k}(1:(end-5)) ' ' stepH])
+            ylabel(stepH)
+            if j==1 &&i==1% if j==2 &&i==2
+                text(-0.5,1.2, ParamList{k}(1:(end-5)),'units', 'normalized')
+                text(-0.5,1,type,'units', 'normalized')
+            end
+            [r1,p1]=corr(H1,F1,'type',type);
+            [r2,p2]=corr(H2,F2,'type',type);
+            [r,p]=corr([H1;H2],[F1;F2],'type',type);
+
+             title([ 'sham p ' sprintf('%.2f',(p1)) ' / bulb p ' sprintf('%.2f',(p2)) '/ all p ' sprintf('%.2f',(p))]);
+
+            
+%             if p1(1,2)<0.05 ||p2(1,2)<0.05 
+%                 text(XL(2)*0.9, YL(2)*0.1, '*','Color','r','FontSize', 20)
+%             end
+            if p1<0.1
+                pf1= polyfit(H1,F1,1);
+                line([min(H1),max(H1)],pf1(2)+[min(H1),max(H1)]*pf1(1),'Color',Gpcolor{1},'Linewidth',1)
+                if p1<0.05
+                    line([min(H1),max(H1)],pf1(2)+[min(H1),max(H1)]*pf1(1),'Color',Gpcolor{1},'Linewidth',2)
+                end
+            end
+            if p2<0.1
+                pf2= polyfit(H2,F2,1);
+                line([min(H2),max(H2)],pf2(2)+[min(H2),max(H2)]*pf2(1),'Color',Gpcolor{2},'Linewidth',1)
+                if p2<0.05                    
+                    line([min(H2),max(H2)],pf2(2)+[min(H2),max(H2)]*pf2(1),'Color',Gpcolor{2},'Linewidth',2)
+                end
+            end
+                %[r,p]=corrcoef(x,y);
+                %li=[max(xlim),max(ylim),min(xlim)];
+                %text(li(1)*0.1+li(3), li(2), sprintf('r=%0.1f, p=%0.3f',r(1,2),p(1,2)),'Color',colori(6-i,:))
+            if j==NbStepHypToLookAT
+                xlabel(stepF)
+            end
+            set(gcf, 'Name', ParamList{k}(1:end-5))
+        end
+    end
+    legend('sham', 'bulb')
+    if sav
+        saveFigure (gcf,[ ParamList{k} '_corr'], ['/media/DataMOBsRAID/ProjetAversion/' manipname '/Freezing' period ])
+        saveas (gcf, ['/media/DataMOBsRAID/ProjetAversion/' manipname '/Freezing' period '/' ParamList{k} '_corr.fig'])
+    end
+end
+
+%xlabel('Percent of freezing')

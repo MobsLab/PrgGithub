@@ -1,0 +1,207 @@
+function RespiModulatesEvents_ML(NameStructure,NameEvent,FreqRespi,saveFig,plo)
+
+% inputs:
+% NameStructure = struct and depth, default 'PaCxDeep'
+% NameEvent = among {'Spindles' 'Ripples' 'DeltaWaves'}
+% FreqRespi = default [2.5,3.2]Hz;
+% saveFig = 1 to save figures 
+% plo = 1 to plot figures, default=0
+
+
+%% check inputs
+if ~exist('NameStructure','var') 
+    NameStructure='PaCxSup';
+end
+if ~exist('NameEvent','var') || sum(strcmp(NameEvent,{'Spindles' 'Ripples' 'DeltaWaves'}))~=1
+    NameEvent='Spindles';
+end
+if ~exist('FreqRespi','var') || ~isequal(size(FreqRespi),[1,2])
+    FreqRespi=[2.3 3];
+end
+if ~exist('saveFig','var')
+    saveFig=0;
+end
+if ~exist('plo','var')
+    plo=0;
+end
+
+% manual inputs
+Filparam=1024;
+
+
+
+%% initialization
+scrsz = get(0,'ScreenSize');
+SpecifySpindles={'Tot','High','Low','ULow'};
+Dir=PathForExperimentsML('PLETHYSMO');
+Strains=unique(Dir.group);
+MiceNames=unique(Dir.name);
+res=pwd;
+
+if strcmp(NameEvent,'Spindles')
+    Evt='Spi';
+elseif strcmp(NameEvent,'DeltaWaves')
+    Evt='SWA';
+end
+
+
+ANALYNAME=[NameEvent,NameStructure,'-Respi'];
+saveFolder=['/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Analyse_RespiSpindles/Respi',num2str(FreqRespi(1)),'-',num2str(FreqRespi(2)),'Hz'];
+if ~exist(saveFolder,'dir')
+    mkdir(saveFolder)
+end
+
+MatrixGroup=nan(length(Dir.path),2);
+
+
+%% compute
+try
+    load([saveFolder,'/',ANALYNAME])
+    MatrixVal; MatrixGroup; MatrixPh; RespiEpoch; Dir; FreqRespi;
+    disp(['Loading ',ANALYNAME,'.mat ...'])
+    
+catch
+    for man=1:length(Dir.path)
+        
+        disp(' ')
+        disp(Dir.name{man})
+        cd(Dir.path{man});
+        
+        
+        % -------------------------------------------------
+        % ----------- Load Respi and freq epoch ------------
+        clear  RespiTSD Frequency RespiEpoch
+        load LFPData RespiTSD Frequency
+        
+        RespiEpoch1=thresholdIntervals(Frequency,FreqRespi(1),'Direction','Above');
+        RespiEpoch2=thresholdIntervals(Frequency,FreqRespi(2),'Direction','Below');
+        RespiEpoch=and(RespiEpoch1,RespiEpoch2);
+        FilRespi=FilterLFP(RespiTSD,FreqRespi,Filparam);
+        
+        
+        % ----------------------------------------------
+        % ----------- Load requested events ------------
+        for spec=1:length(SpecifySpindles)
+            
+            clear Events TSevents nevt ph mu Kappa pval
+            try
+                load(['Spindles',NameStructure,'.mat'],[Evt,SpecifySpindles{spec}]);
+                eval(['Events=',Evt,SpecifySpindles{spec},';'])
+                TSevents=ts(Events(:,2)*1E4); % time of peaks
+                nevt=size(Events,1);
+            catch
+                if spec==1, disp(['missing Spindles',NameStructure,'.mat']);end
+            end
+            
+            
+            % ----------------------------------------------
+            % ---------- Calcul modulation Respi ----------
+            try
+                if ~isempty(Range(TSevents))
+                    
+                    [ph,mu, Kappa, pval]=ModulationTheta(TSevents,FilRespi,RespiEpoch,10); close
+                    disp([NameEvent,SpecifySpindles{spec},' ',NameStructure,': n=',num2str(nevt),' mu=',num2str(mu),', K=',num2str(Kappa),', p=',num2str(pval)])
+                    
+                    MatrixPh{man,spec}=ph;
+                    try temp=MatrixVal{spec};catch, temp=[];end
+                    temp(man,1:4)=[nevt, mu, Kappa, pval];
+                    MatrixVal{spec}=temp;
+                    MatrixGroup(man,:)=[find(strcmp(Strains,Dir.group{man})),find(strcmp(MiceNames,Dir.name{man}))];
+                    
+                end
+            catch
+                disp('Failed at ModulationTheta.m')
+            end
+            
+        end
+        
+    end
+    
+    save([saveFolder,'/',ANALYNAME],'MatrixVal','MatrixGroup','MatrixPh','RespiEpoch','Dir','FreqRespi')
+    disp(['Saving in ',ANALYNAME])
+end
+cd(res)
+
+
+%% display individual data
+if plo
+    for spec=1:length(SpecifySpindles)
+        figure('Color',[1 1 1],'position',scrsz); numF1=gcf;
+        figure('Color',[1 1 1],'position',scrsz); numF2=gcf;
+        
+        %temp=MatrixVal{spec};
+        for man=1:length(Dir.path)
+            
+            try ph=MatrixPh{man,spec};end
+            
+            figure(numF1)
+            subplot(round(sqrt(length(Dir.path))),ceil(sqrt(length(Dir.path))),man),
+            try JustPoltMod(Data(ph{1}),15); xlabel([Dir.name{man},' Phase(rad)']);
+                ylabel(['% ',Evt,SpecifySpindles{spec}]);end
+            
+            figure(numF2)
+            subplot(round(sqrt(length(Dir.path))),ceil(sqrt(length(Dir.path))),man),
+            try rose(Data(ph{1})); xlabel([Dir.name{man},' ',Evt,SpecifySpindles{spec}])
+                title(['Modulation Respi [',num2str(FreqRespi(1)),'-',num2str(FreqRespi(2)),']Hz']);end
+            
+        end
+    end
+end
+
+
+
+%% pool same mice
+
+for spec=1:length(SpecifySpindles)
+    temp=MatrixVal{spec};
+    Mat_strain=nan(length(MiceNames),1);
+    for uu=1:length(MiceNames)
+        index=find(MatrixGroup(:,2)==uu);
+        if ~isempty(index)
+            try 
+                Mat_temp(uu,1:4)=nanmean(temp(index,1:4),1);
+             Mat_strain(uu)=unique(MatrixGroup(index,1));
+            end
+        end
+    end
+    Mat_Val{spec}=Mat_temp;
+end
+
+%% display pooled strains
+
+figure('Color',[1 1 1]), numF=gcf;
+namedisplay={'N' 'mu' 'Kappa' 'pval'};
+
+for i=1:4
+
+    A=nan(2,length(SpecifySpindles));clear stdA
+    for spec=1:length(SpecifySpindles)
+        temp=Mat_Val{spec};
+        A(1,spec)=nanmean(temp(Mat_strain==1,i),1);
+        A(2,spec)=nanmean(temp(Mat_strain==2,i),1);
+        try
+            stdA(1,spec)=stdError(temp(Mat_strain==1,i));
+            stdA(2,spec)=stdError(temp(Mat_strain==2,i));
+        end
+    end
+    
+    subplot(2,2,i), 
+    try
+        bar(A');
+        set(gca,'xticklabel',SpecifySpindles)
+        
+        set(gca,'xtick',[1:length(SpecifySpindles)])
+        try hold on, errorbar([1:length(SpecifySpindles)]-0.15,A(1,:),stdA(1,:),'k+');end
+        try hold on, errorbar([1:length(SpecifySpindles)]+0.15,A(2,:),stdA(2,:),'k+');end
+        
+        legend([{[Strains{1},' (n=',num2str(sum(Mat_strain==1)),')']} {[Strains{2},' (n=',num2str(sum(Mat_strain==2)),')']}]);
+        title([NameEvent,NameStructure,'-Respi [',num2str(FreqRespi(1)),'-',num2str(FreqRespi(2)),']Hz']);colormap summer;
+        ylabel(namedisplay{i});
+    end
+    
+end
+%% saveFigures
+
+if saveFig
+    saveFigure(numF,ANALYNAME,saveFolder);
+end

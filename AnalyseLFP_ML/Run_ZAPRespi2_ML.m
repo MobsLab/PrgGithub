@@ -1,0 +1,297 @@
+function Run_ZAPRespi2_ML(State,TypeFreq)
+
+%% Inputs
+if ~exist('State','var')
+    State='SWSEpoch';% 'REMEpoch' 'MovEpoch' (default 'SWS')
+end
+if ~exist('TypeFreq','var')
+    TypeFreq='Delta';%'LowGamma';'HighGamma';
+end
+RespiRangePeriod=50*[1:15]; % ms
+
+struct_name={'Respi' 'Bulb_deep' 'PFCx_deep' 'PaCx_deep' 'dHPC_deep'};
+%struct_name={'Respi' 'Bulb_deep'};
+plo=1;
+pval=0.005;
+colori={'b','r','k'};
+%scrsz = get(0,'ScreenSize');
+ scrsz =[750 280 1000 600];
+% ------------------------
+if strcmp(TypeFreq,'Delta')
+    PowerTest=0;
+    Freqq=0;
+elseif strcmp(TypeFreq,'LowGamma')
+    Freqq=[30 60];
+    PowerTest=1; % ZAPRespi2 done on power of spectrum (PowerTest=1) instead of raw or filtered data
+elseif strcmp(TypeFreq,'HighGamma')   
+    Freqq=[60 120];
+    PowerTest=1;
+end
+
+if PowerTest
+    factt=2E4;
+    fac=1E2;
+else
+    factt=1;
+    fac=2E4;
+end
+
+%% Init
+Dir=PathForExperimentsML('PLETHYSMO');
+Strains=unique(Dir.group);
+nameFolderSave='/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/AnalyseZAPRespi';
+if ~exist(nameFolderSave,'dir')
+    mkdir(nameFolderSave);
+end
+ANALYNAME=['AnalyZAPRespi',State,TypeFreq];
+try
+    clear NbRespi Mt tpsT Namemanipe MouseStrain NbRespi PeriodRespi
+    load([nameFolderSave,'/',ANALYNAME,'.mat'],'Mt','tpsT','Namemanipe','MouseStrain','NbRespi','PeriodRespi');
+    Mt;tpsT;Namemanipe;NbRespi;PeriodRespi;
+    disp(['loading ',ANALYNAME,'.mat'])
+catch
+    Mt={};Namemanipe={};tpsT={};NbRespi={}; PeriodRespi={};
+    for man=1:length(Dir.path)
+        disp(['   * * * ',Dir.name{man},' * * * '])
+        
+        Nsouris=str2num(Dir.name{man}(6:end));
+        MouseStrain(Nsouris)=find(strcmp(Dir.group{man},Strains));
+%         cd(Dir.path{man});
+        try
+            %[Mt,tpsT,PeriodRespi,NbRespi,Namemanipe]=ZAPRespi2(Nsouris,Mt,tpsT,NbRespi,PeriodRespi,Namemanipe,State,Freqq);
+            [Mt,tpsT,PeriodRespi,NbRespi,Namemanipe,NameStructAnaly]=ZAPRespiML(Dir.path{man},Nsouris,Mt,tpsT,NbRespi,PeriodRespi,State,Freqq);
+        catch
+            disp('PROBLEM!!!'); keyboard
+        end
+            
+        close all;
+    end
+    save([nameFolderSave,'/',ANALYNAME],'Mt','tpsT','Namemanipe','NameStructAnaly','MouseStrain','NbRespi','PeriodRespi');
+end
+
+
+%%
+figure('color',[1 1 1],'position',scrsz), numF=gcf;
+
+for struct_ind=1:length(struct_name), MatrixData{struct_ind}=[];end
+if plo, for gg=1:length(Strains), figure('color',[1 1 1],'position',scrsz), numF_sc(gg)=gcf; end;end
+
+for struct_ind=1:length(struct_name)
+    disp(struct_name{struct_ind})
+
+    for gg=1:length(Strains)
+        figure(numF), subplot(length(Strains),length(struct_name),(gg-1)*length(struct_name)+struct_ind), hold on
+                        
+        tempInd=find(MouseStrain==gg);
+        
+        for i=1:15
+            
+            try
+                % get all data
+                
+                comptNbRespi=0;
+                a=1;
+                while isempty(Mt{tempInd(a+1),struct_ind,i}) || sum(isnan(Mt{tempInd(a+1),struct_ind,i}))~=0
+                    a=a+1;
+                end
+                m=Mt{tempInd(a+1),struct_ind,i};
+                comptNbRespi=comptNbRespi+length(NbRespi{tempInd(a+1),i});
+                compt=1;
+                
+                for i_tempInd=a:length(tempInd)
+                    if ~isempty(Mt{tempInd(i_tempInd),struct_ind,i}) && sum(isnan(Mt{tempInd(i_tempInd),struct_ind,i}))==0
+                        compt=compt+1;
+                        m=m+Mt{tempInd(i_tempInd),struct_ind,i};
+                        comptNbRespi=comptNbRespi+length(NbRespi{tempInd(i_tempInd),i});
+                    end
+                end
+                m=m/compt;
+                
+                a=1; tps=tpsT{tempInd(a),struct_ind,i};
+                while size(tps)~=size(m)
+                    a=a+1;
+                    tps=tpsT{tempInd(a),struct_ind,i};
+                end
+                
+                %disp([num2str(i),') nbtrace=',num2str(comptNbRespi)])
+                if comptNbRespi>40
+                    if struct_ind==1,
+                        plot(tps,50*i+2E5*m,'color',[0 i/16 (16-i)/16],'linewidth',2)
+                        xlim([-1000 1000]), ylim([0 50*(i+1)])
+                        line([0 750],[0 800],'color','k','linewidth',2)
+                        line([0 0],[50*(i+1) 50*(i+1)],'color',[0.7 0.7 0.7],'linewidth',2)
+                    else
+                        plot(tps,i/5E3+m/factt,'color',[0 i/16 (16-i)/16],'linewidth',2)
+                        line([0 750],[ 0 3/1E3],'color','k','linewidth',2)
+                        line([10 10],[0 3/1E3 ],'color',[0.7 0.7 0.7],'linewidth',2)
+                        xlim([-1000 1000]), ylim([0 3.5/1E3])
+                    end
+                else
+                    disp('Nb data <40 : no display');
+                end
+                
+                MatrixData{struct_ind}(i,:)=m;
+            catch
+                try MatrixData{struct_ind}(i,:)=nan(length(m),1);catch, keyboard;end
+            end
+            
+        end
+        
+        title([Strains{gg},'-',struct_name{struct_ind}])
+        xlabel([State,' - ',TypeFreq])
+        
+        
+        % -----------------------------------------------------------------
+        % -------------------------- QUANTIF ------------------------------
+        
+        smo=50;
+        tempSmoMatrixData=[];
+        tempZSmoMatrixData=[];
+        for i=1:15
+            tempZSmoMatrixData(i,:)=rescale(zscore(smooth(MatrixData{struct_ind}(i,:),smo))',-1,1);
+            tempSmoMatrixData(i,:)=rescale(smooth(MatrixData{struct_ind}(i,:),100)',-1,1);
+        end
+        
+        if  struct_ind==1
+            temp=tempZSmoMatrixData;
+            temp(abs(temp)<0.5)=0;
+            temp(abs(temp)>0.5)=1;
+            mask{gg}=temp;
+        else
+            for i=1:15
+                mask2=mask{gg}(i,:);
+                temp=MatrixData{struct_ind}(i,:);
+                R(1,i)=(nanstd(temp(mask2==1))-nanstd(temp(mask2==0)))./nanstd(temp(mask2==0))*100;
+                temp=tempZSmoMatrixData(i,:);
+                R(2,i)=(nanstd(temp(mask2==1))-nanstd(temp(mask2==0)))./nanstd(temp(mask2==0))*100;
+                temp=tempSmoMatrixData(i,:);
+                R(3,i)=(nanstd(temp(mask2==1))-nanstd(temp(mask2==0)))./nanstd(temp(mask2==0))*100;
+            end
+        end
+        % -----------------------------------------------------------------
+        
+        if plo
+            lim=1:15;
+            figure(numF_sc(gg)), 
+            subplot(3,length(struct_name),struct_ind), 
+            imagesc(tps,50*lim,MatrixData{struct_ind}),
+            %if  struct_ind~=1, hold on, plot(R(1,:)*20-1E3,50*lim,'k','linewidth',2);end
+            axis xy
+            xlabel('time (ms)'); ylabel('Breathing period (ms)');
+            title([struct_name{struct_ind},' ',Strains{gg}])
+            
+            subplot(3,length(struct_name),length(struct_name)+struct_ind), 
+            imagesc(tps,50*lim,tempZSmoMatrixData), 
+            %if  struct_ind~=1, hold on, plot(R(2,:)*20-1E3,50*lim,'k','linewidth',2);end
+            axis xy
+            if struct_ind==1, title(['rescale(zscore(smooth(Row,',num2str(smo),'))'',-1,1)']);end
+            
+            subplot(3,length(struct_name),2*length(struct_name)+struct_ind), 
+            imagesc(tps,50*lim,tempSmoMatrixData), 
+            %if  struct_ind~=1, hold on, plot(R(3,:)*20-1E3,50*lim,'k','linewidth',2);end
+            axis xy
+            if struct_ind==1, title('rescale(smooth(Row,100)'',-1,1)');end
+        end
+        %keyboard
+        clear R1 R2 R2 temp tempSmoMatrixData tempZSmoMatrixData mask2
+    end
+    
+end
+
+% save figures
+if 1
+    saveFigure(numF,ANALYNAME,nameFolderSave);
+    if plo, 
+        for gg=1:length(Strains)
+            saveFigure(numF_sc(gg),[ANALYNAME,'imagesc',Strains{gg}],nameFolderSave);
+        end
+    end
+end
+
+
+
+
+
+
+
+
+%%  analy Karim 15/10/2013
+
+
+if 0
+
+
+load('/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse060/20130503/SpectrumDataL/Spectrum6.mat')
+SLtsd=tsd(t*1E4,Sp);
+
+[r,p]=corrcoef([Data(SLtsd)]);
+figure, imagesc(f,f,r), axis xy
+
+Low=10*log10(Data(SLtsd)');
+lowfreq=mean(Low(f>2&f<4,:));
+middlefreq=mean(Low(f>12&f<16,:));
+
+
+
+
+load('/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse060/20130503/SpectrumDataH/Spectrum6.mat')
+SHtsd=tsd(t*1E4,Sp);
+
+[r,p]=corrcoef([Data(SHtsd)]);
+figure, imagesc(f,f,r), axis xy
+
+High=10*log10(Data(SHtsd)');
+
+middleHigh=mean(High(f>40&f<60,:));
+Highfreq=mean(High(f>90&f<130,:));
+t2=t;
+
+
+ temp=tsd(t*1E4,SmoothDec(middleHigh,5));
+ middleHigh=Data(Restrict(ResampleTSd(temp,5),SLtsd));
+ 
+temp=tsd(t*1E4,SmoothDec(Highfreq,5));
+Highfreq=Data(Restrict(ResampleTSD(temp,5),SLtsd));
+
+
+load('/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse060/20130503/SpectrumDataL/Spectrum6.mat')
+FilRespiH=FilterLFP(RespiTSD,[1 6],128);
+FilRespiL=FilterLFP(RespiTSD,[10 20],128);
+powH=tsd(Range(FilRespiH),SmoothDec(abs(hilbert(Data(FilRespiH))),5));
+powL=tsd(Range(FilRespiL),SmoothDec(abs(hilbert(Data(FilRespiL))),5));
+
+figure, plot(t, zscore(lowfreq))
+hold on, plot(t, zscore(middlefreq),'r')
+hold on, plot(t, zscore(middleHigh),'c','linewidth',1)
+hold on, plot(t, zscore(Highfreq),'m','linewidth',1)
+hold on, plot(t, zscore(Data(Restrict(powL,SLtsd))),'k','linewidth',2)
+hold on, plot(t, zscore(Data(Restrict(powH,SLtsd))),'color',[0.6 0.6 0.6],'linewidth',2)
+
+
+FilRespi=FilterLFP(RespiTSD,[0.1 20],128);
+
+A{1}=zscore(lowfreq)';
+A{2}=zscore(middlefreq)';
+A{3}=zscore(middleHigh);
+A{4}=zscore(Highfreq);
+A{5}=zscore(Data(Restrict(powL,SLtsd)));
+A{6}=zscore(Data(Restrict(powH,SLtsd)));
+A{7}=zscore(Data(Restrict(FilRespi,SLtsd)));
+
+ [r,p]=corrcoef([A{1} A{2} A{3} A{4} A{5} A{6} A{6}]);
+figure, imagesc(r), axis xy
+
+
+
+
+a=1;
+figure, 
+for i=1:7
+    for j=1:7
+        [C,lag] = xcorr(A{i},A{j},'coeff');
+subplot(7,7,MatXY(i,j,7)), plot(lag/Fs,C), yl=ylim; hold on, line([0 0],yl,'color','r'), xlim([-10 10])%, xlim([lag(1) lag(end)]/Fs)
+a=a+1;
+    end
+end
+
+end

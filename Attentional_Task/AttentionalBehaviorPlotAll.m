@@ -1,0 +1,267 @@
+% ------------------------------------------------------------
+% ------------------------------------------------------------
+% >>>>>>>>>>>>>>>>>>>>>>>>  Figures <<<<<<<<<<<<<<<<<<<<<<<<<<
+% ------------------------------------------------------------
+% ------------------------------------------------------------
+
+clear all
+directoryName=('/media/DataMOBsG/AttentionalNosePoke');
+cd([directoryName])
+load M130; load M133; load M142; load M143; 
+
+% -----------------------------------------------------------------------------------------------------------
+%                                             First Poke
+% -----------------------------------------------------------------------------------------------------------
+FirstPoke_5sec=[MeanFirstPokeM130(1,1);MeanFirstPokeM133(1,1);MeanFirstPokeM142(1,1);MeanFirstPokeM143(1,1)];
+FirstPoke_1sec=[MeanFirstPokeM130(1,2);MeanFirstPokeM133(1,2);MeanFirstPokeM142(1,2);MeanFirstPokeM143(1,2)];
+FirstPoke_500ms=[mean([MeanFirstPokeM130(1,3);MeanFirstPokeM130(1,4)]);mean([MeanFirstPokeM133(1,3);MeanFirstPokeM133(1,4)]);MeanFirstPokeM142(1,3);MeanFirstPokeM143(1,3)];
+FirstPoke_100ms=[MeanFirstPokeM130(1,5);MeanFirstPokeM133(1,5);MeanFirstPokeM142(1,4);MeanFirstPokeM143(1,4)];
+FirstPoke_Gen=[mean([MeanFirstPokeM130(1,6);MeanFirstPokeM130(1,7)]);mean([MeanFirstPokeM133(1,6);MeanFirstPokeM133(1,7)]);MeanFirstPokeM142(1,5);MeanFirstPokeM143(1,5)];
+FirstPoke_All=[FirstPoke_5sec,FirstPoke_1sec,FirstPoke_500ms,FirstPoke_100ms,FirstPoke_Gen];
+
+PlotErrorBar5(FirstPoke_All(:,1),FirstPoke_All(:,2),FirstPoke_All(:,3),FirstPoke_All(:,4),FirstPoke_All(:,5))
+hold on, title('First Poke Time')
+ylabel('time (s)')
+set(gca,'xticklabel',{'5sec','1sec','500ms','100ms','Generalization'},'xtick',1:5)
+
+
+% -----------------------------------------------------------------------------------------------------------
+%                                             Nombre de Poke
+% -----------------------------------------------------------------------------------------------------------
+PokeEvt_5sec=[PokeEvtM130(1,1);PokeEvtM133(1,1);PokeEvtM142(1,1);PokeEvtM143(1,1)];
+PokeEvt_1sec=[PokeEvtM130(2,1);PokeEvtM133(2,1);PokeEvtM142(2,1);PokeEvtM143(2,1)];
+PokeEvt_500ms=[mean([PokeEvtM130(3,1);PokeEvtM130(4,1)]);mean([PokeEvtM133(3,1);PokeEvtM133(4,1)]);PokeEvtM142(3,1);PokeEvtM143(3,1)];
+PokeEvt_100ms=[PokeEvtM130(5,1);PokeEvtM133(5,1);PokeEvtM142(4,1);PokeEvtM143(4,1)];
+PokeEvt_Gen=[mean([PokeEvtM130(6,1);PokeEvtM130(7,1)]);mean([PokeEvtM133(6,1);PokeEvtM133(7,1)]);PokeEvtM142(5,1);PokeEvtM143(5,1)];
+PokeEvt_All=[PokeEvt_5sec,PokeEvt_1sec,PokeEvt_500ms,PokeEvt_100ms,PokeEvt_Gen];
+
+PlotErrorBar5(PokeEvt_All(:,1),PokeEvt_All(:,2),PokeEvt_All(:,3),PokeEvt_All(:,4),PokeEvt_All(:,5))
+hold on, title('total number of pokes')
+ylabel('%')
+set(gca,'xticklabel',{'5sec','1sec','500ms','100ms','Generalization'},'xtick',1:5)
+
+
+% -----------------------------------------------------------------------------------------------------------
+%                                             Taux de réussite (règle 1)
+% -----------------------------------------------------------------------------------------------------------
+PercReward_5sec=[PercRewardM130(1,1);PercRewardM133(1,1);PercRewardM142(1,1);PercRewardM143(1,1)];
+PercReward_1sec=[PercRewardM130(2,1);PercRewardM133(2,1);PercRewardM142(2,1);PercRewardM143(2,1)];
+PercReward_500ms=[mean([PercRewardM130(3,1);PercRewardM130(4,1)]);mean([PercRewardM133(3,1);PercRewardM133(4,1)]);PercRewardM142(3,1);PercRewardM143(3,1)];
+PercReward_100ms=[PercRewardM130(5,1);PercRewardM133(5,1);PercRewardM142(4,1);PercRewardM143(4,1)];
+PercReward_Gen=[mean([PercRewardM130(6,1);PercRewardM130(7,1)]);mean([PercRewardM133(6,1);PercRewardM133(7,1)]);PercRewardM142(5,1);PercRewardM143(5,1)];
+PercReward_All=[PercReward_5sec,PercReward_1sec,PercReward_500ms,PercReward_100ms,PercReward_Gen];
+
+PlotErrorBar5(PercReward_All(:,1),PercReward_All(:,2),PercReward_All(:,3),PercReward_All(:,4),PercReward_All(:,5))
+hold on, title('Percentage of successfull tones')
+ylabel('%')
+set(gca,'xticklabel',{'5sec','1sec','500ms','100ms','Generalization'},'xtick',1:5)
+
+
+% -----------------------------------------------------------------------------------------------------------
+%                                             Taux de réussite (règle 2)
+% -----------------------------------------------------------------------------------------------------------
+SuccesRule2_5sec=[SuccesRule2M130(1,1);SuccesRule2M133(1,1);SuccesRule2M142(1,1);SuccesRule2M143(1,1)];
+SuccesRule2_1sec=[SuccesRule2M130(2,1);SuccesRule2M133(2,1);SuccesRule2M142(2,1);SuccesRule2M143(2,1)];
+SuccesRule2_500ms=[mean([SuccesRule2M130(3,1);SuccesRule2M130(4,1)]);mean([SuccesRule2M133(3,1);SuccesRule2M133(4,1)]);SuccesRule2M142(3,1);SuccesRule2M143(3,1)];
+SuccesRule2_100ms=[SuccesRule2M130(5,1);SuccesRule2M133(5,1);SuccesRule2M142(4,1);SuccesRule2M143(4,1)];
+SuccesRule2_Gen=[mean([SuccesRule2M130(6,1);SuccesRule2M130(7,1)]);mean([SuccesRule2M133(6,1);SuccesRule2M133(7,1)]);SuccesRule2M142(5,1);SuccesRule2M143(5,1)];
+
+SuccesRule2_All=[SuccesRule2_5sec,SuccesRule2_1sec,SuccesRule2_500ms,SuccesRule2_100ms,SuccesRule2_Gen];
+
+PlotErrorBar5(SuccesRule2_All(:,1),SuccesRule2_All(:,2),SuccesRule2_All(:,3),SuccesRule2_All(:,4),SuccesRule2_All(:,5))
+hold on, title('Poke occurence probability during non-rewarding windows')
+ylabel('%')
+set(gca,'xticklabel',{'5sec','1sec','500ms','100ms','Generalization'},'xtick',1:5)
+
+% -----------------------------------------------------------------------------------------------------------
+%                                        Time between two successive tones
+% -----------------------------------------------------------------------------------------------------------
+Time2Tone_5sec=[Time2ToneM130(1,1);Time2ToneM133(1,1);Time2ToneM142(1,1);Time2ToneM143(1,1)];
+Time2Tone_1sec=[Time2ToneM130(2,1);Time2ToneM133(2,1);Time2ToneM142(2,1);Time2ToneM143(2,1)];
+Time2Tone_500ms=[mean([Time2ToneM130(3,1);Time2ToneM130(4,1)]);mean([Time2ToneM133(3,1);Time2ToneM133(4,1)]);Time2ToneM142(3,1);Time2ToneM143(3,1)];
+Time2Tone_100ms=[Time2ToneM130(5,1);Time2ToneM133(5,1);Time2ToneM142(4,1);Time2ToneM143(4,1)];
+Time2Tone_Gen=[mean([Time2ToneM130(6,1);Time2ToneM130(7,1)]);mean([Time2ToneM133(6,1);Time2ToneM133(7,1)]);Time2ToneM142(5,1);Time2ToneM143(5,1)];
+
+Time2Tone_All=[Time2Tone_5sec,Time2Tone_1sec,Time2Tone_500ms,Time2Tone_100ms,Time2Tone_Gen];
+
+PlotErrorBar5(Time2Tone_All(:,1),Time2Tone_All(:,2),Time2Tone_All(:,3),Time2Tone_All(:,4),Time2Tone_All(:,5))
+hold on, title('Time between two successie poke (min=20s)')
+ylabel('time (s)')
+set(gca,'xticklabel',{'5sec','1sec','500ms','100ms','Generalization'},'xtick',1:5)
+
+% -----------------------------------------------------------------------------------------------------------
+%                                   Number of tone necessary to reach the 80% limit
+% -----------------------------------------------------------------------------------------------------------
+BeforeSucessPerc_5sec=[BeforeSucessPercM130(1,1);BeforeSucessPercM133(1,1);BeforeSucessPercM142(1,1);BeforeSucessPercM143(1,1)];
+BeforeSucessPerc_1sec=[BeforeSucessPercM130(2,1);BeforeSucessPercM133(2,1);BeforeSucessPercM142(2,1);BeforeSucessPercM143(2,1)];
+BeforeSucessPerc_500ms=[mean([BeforeSucessPercM130(3,1);BeforeSucessPercM130(4,1)]);mean([BeforeSucessPercM133(3,1);BeforeSucessPercM133(4,1)]);BeforeSucessPercM142(3,1);BeforeSucessPercM143(2,1)];
+BeforeSucessPerc_100ms=[BeforeSucessPercM130(5,1);BeforeSucessPercM133(5,1);BeforeSucessPercM142(4,1);BeforeSucessPercM143(3,1)];
+BeforeSucessPerc_Gen=[mean([BeforeSucessPercM130(6,1);BeforeSucessPercM130(7,1)]);mean([BeforeSucessPercM133(6,1);BeforeSucessPercM133(7,1)]);BeforeSucessPercM142(5,1);BeforeSucessPercM143(4,1)];
+
+BeforeSucessPerc_All=[BeforeSucessPerc_5sec,BeforeSucessPerc_1sec,BeforeSucessPerc_500ms,BeforeSucessPerc_100ms,BeforeSucessPerc_Gen];
+
+PlotErrorBar5(BeforeSucessPerc_All(:,1),BeforeSucessPerc_All(:,2),BeforeSucessPerc_All(:,3),BeforeSucessPerc_All(:,4),BeforeSucessPerc_All(:,5))
+hold on, title('Number of tone necessary to reach the 80% limit')
+ylabel('time (s)')
+set(gca,'xticklabel',{'5sec','1sec','500ms','100ms','Generalization'},'xtick',1:5)
+
+% -----------------------------------------------------------------------------------------------------------
+%                                         Intra-Session: taux de reussite
+% -----------------------------------------------------------------------------------------------------------
+IntraSessionPerc_5sec=[IntraSessionPercM130(1,1:2);IntraSessionPercM133(1,1:2);IntraSessionPercM142(1,1:2);IntraSessionPercM143(1,1:2)];
+IntraSessionPerc_1sec=[IntraSessionPercM130(2,1:2);IntraSessionPercM133(2,1:2);IntraSessionPercM142(2,1:2);IntraSessionPercM143(2,1:2)];
+IntraSessionPerc_500ms=[IntraSessionPercM130(3,1:2);IntraSessionPercM133(3,1:2);IntraSessionPercM142(3,1:2);IntraSessionPercM143(3,1:2)];
+IntraSessionPerc_100ms=[IntraSessionPercM130(4,1:2);IntraSessionPercM133(4,1:2);IntraSessionPercM142(4,1:2);IntraSessionPercM143(4,1:2)];
+IntraSessionPerc_Gen=[IntraSessionPercM130(5,1:2);IntraSessionPercM133(5,1:2);IntraSessionPercM142(5,1:2);IntraSessionPercM143(5,1:2)];
+
+figure,
+hold on, subplot(5,1,1),PlotErrorBar2(IntraSessionPerc_5sec(:,1),IntraSessionPerc_5sec(:,2),0)
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 120])
+hold on, subplot(5,1,2),PlotErrorBar2(IntraSessionPerc_1sec(:,1),IntraSessionPerc_1sec(:,2),0)
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 120])
+hold on, subplot(5,1,3),PlotErrorBar2(IntraSessionPerc_500ms(:,1),IntraSessionPerc_500ms(:,2),0)
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 120])
+hold on, subplot(5,1,4),PlotErrorBar2(IntraSessionPerc_100ms(:,1),IntraSessionPerc_100ms(:,2),0)
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 120])
+hold on, subplot(5,1,5),PlotErrorBar2(IntraSessionPerc_Gen(:,1),IntraSessionPerc_Gen(:,2),0)
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 120])
+
+% -----------------------------------------------------------------------------------------------------------
+%                                         Intra-Session: FirstPokeTime
+% -----------------------------------------------------------------------------------------------------------
+IntraSessionFirstPoke_5sec=[IntraSessionFirstPokeM130(1,1:2);IntraSessionFirstPokeM133(1,1:2);IntraSessionFirstPokeM142(1,1:2);IntraSessionFirstPokeM143(1,1:2)];
+IntraSessionFirstPoke_1sec=[IntraSessionFirstPokeM130(2,1:2);IntraSessionFirstPokeM133(2,1:2);IntraSessionFirstPokeM142(2,1:2);IntraSessionFirstPokeM143(2,1:2)];
+IntraSessionFirstPoke_500ms=[IntraSessionFirstPokeM130(3,1:2);IntraSessionFirstPokeM133(3,1:2);IntraSessionFirstPokeM142(3,1:2);IntraSessionFirstPokeM143(3,1:2)];
+IntraSessionFirstPoke_100ms=[IntraSessionFirstPokeM130(5,1:2);IntraSessionFirstPokeM133(5,1:2);IntraSessionFirstPokeM142(4,1:2);IntraSessionFirstPokeM143(4,1:2)];
+IntraSessionFirstPoke_Gen=[IntraSessionFirstPokeM130(6,1:2);IntraSessionFirstPokeM133(6,1:2);IntraSessionFirstPokeM142(5,1:2);IntraSessionFirstPokeM143(5,1:2)];
+
+figure,
+hold on, subplot(5,1,1),PlotErrorBar2(IntraSessionFirstPoke_5sec(:,1),IntraSessionFirstPoke_5sec(:,2),0)
+hold on, title('First Poke Time')
+ylabel('time (s)')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,2),PlotErrorBar2(IntraSessionFirstPoke_1sec(:,1),IntraSessionFirstPoke_1sec(:,2),0)
+hold on, title('First Poke Time')
+ylabel('time (s)')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,3),PlotErrorBar2(IntraSessionFirstPoke_500ms(:,1),IntraSessionFirstPoke_500ms(:,2),0)
+hold on, title('First Poke Time')
+ylabel('time (s)')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,4),PlotErrorBar2(IntraSessionFirstPoke_100ms(:,1),IntraSessionFirstPoke_100ms(:,2),0)
+hold on, title('First Poke Time')
+ylabel('time (s)')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,5),PlotErrorBar2(IntraSessionFirstPoke_Gen(:,1),IntraSessionFirstPoke_Gen(:,2),0)
+hold on, title('First Poke Time')
+ylabel('time (s)')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+
+
+
+% -----------------------------------------------------------------------------------------------------------
+%                                         Intra-Session: Succes Rule n°2
+% -----------------------------------------------------------------------------------------------------------
+IntraSessionRule2_5sec=[IntraSessionRule2M130(1,1:2);IntraSessionRule2M133(1,1:2);IntraSessionRule2M142(1,1:2);IntraSessionRule2M143(1,1:2)];
+IntraSessionRule2_1sec=[IntraSessionRule2M130(2,1:2);IntraSessionRule2M133(2,1:2);IntraSessionRule2M142(2,1:2);IntraSessionRule2M143(2,1:2)];
+IntraSessionRule2_500ms=[IntraSessionRule2M130(3,1:2);IntraSessionRule2M133(3,1:2);IntraSessionRule2M142(3,1:2);IntraSessionRule2M143(3,1:2)];
+IntraSessionRule2_100ms=[IntraSessionRule2M130(5,1:2);IntraSessionRule2M133(5,1:2);IntraSessionRule2M142(4,1:2);IntraSessionRule2M143(4,1:2)];
+IntraSessionRule2_Gen=[IntraSessionRule2M130(6,1:2);IntraSessionRule2M133(6,1:2);IntraSessionRule2M142(5,1:2);IntraSessionRule2M143(5,1:2)];
+
+figure,
+hold on, subplot(5,1,1),PlotErrorBar2(IntraSessionRule2_5sec(:,1),IntraSessionRule2_5sec(:,2),0)
+hold on, title('Poke occurence probability during non-rewarding windows')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,2),PlotErrorBar2(IntraSessionRule2_1sec(:,1),IntraSessionRule2_1sec(:,2),0)
+hold on, title('Poke occurence probability during non-rewarding windows')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,3),PlotErrorBar2(IntraSessionRule2_500ms(:,1),IntraSessionRule2_500ms(:,2),0)
+hold on, title('Poke occurence probability during non-rewarding windows')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,4),PlotErrorBar2(IntraSessionRule2_100ms(:,1),IntraSessionRule2_100ms(:,2),0)
+hold on, title('Poke occurence probability during non-rewarding windows')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,5),PlotErrorBar2(IntraSessionRule2_Gen(:,1),IntraSessionRule2_Gen(:,2),0)
+hold on, title('Poke occurence probability during non-rewarding windows')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+
+
+% -----------------------------------------------------------------------------------------------------------
+%                                         Intra-Session: Time between two tones                                      
+% -----------------------------------------------------------------------------------------------------------
+IntraSessionTime2Tone_5sec=[IntraSessionTime2ToneM130(1,1:2);IntraSessionTime2ToneM133(1,1:2);IntraSessionTime2ToneM142(1,1:2);IntraSessionTime2ToneM143(1,1:2)];
+IntraSessionTime2Tone_1sec=[IntraSessionTime2ToneM130(2,1:2);IntraSessionTime2ToneM133(2,1:2);IntraSessionTime2ToneM142(2,1:2);IntraSessionTime2ToneM143(2,1:2)];
+IntraSessionTime2Tone_500ms=[IntraSessionTime2ToneM130(3,1:2);IntraSessionTime2ToneM133(3,1:2);IntraSessionTime2ToneM142(3,1:2);IntraSessionTime2ToneM143(3,1:2)];
+IntraSessionTime2Tone_100ms=[IntraSessionTime2ToneM130(5,1:2);IntraSessionTime2ToneM133(5,1:2);IntraSessionTime2ToneM142(4,1:2);IntraSessionTime2ToneM143(4,1:2)];
+IntraSessionTime2Tone_Gen=[IntraSessionTime2ToneM130(6,1:2);IntraSessionTime2ToneM133(6,1:2);IntraSessionTime2ToneM142(5,1:2);IntraSessionTime2ToneM143(5,1:2)];
+
+figure,
+hold on, subplot(5,1,1),PlotErrorBar2(IntraSessionRule2_5sec(:,1),IntraSessionRule2_5sec(:,2),0)
+hold on, title('Time between two tones')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,2),PlotErrorBar2(IntraSessionRule2_1sec(:,1),IntraSessionRule2_1sec(:,2),0)
+hold on, title('Time between two tones')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,3),PlotErrorBar2(IntraSessionRule2_500ms(:,1),IntraSessionRule2_500ms(:,2),0)
+hold on, title('Time between two tones')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,4),PlotErrorBar2(IntraSessionRule2_100ms(:,1),IntraSessionRule2_100ms(:,2),0)
+hold on, title('Time between two tones')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+hold on, subplot(5,1,5),PlotErrorBar2(IntraSessionRule2_Gen(:,1),IntraSessionRule2_Gen(:,2),0)
+hold on, title('Time between two tones')
+set(gca,'xticklabel',{'Begining','End'},'xtick',1:2),ylim([0 20])
+
+
+% -----------------------------------------------------------------------------------------------------------
+%                                         Generalization                                      
+% -----------------------------------------------------------------------------------------------------------
+
+clear all
+directoryName=('/media/DataMOBsG/AttentionalNosePoke');
+cd([directoryName])
+load GeneralizationAll
+
+FirstPoke_5kHz=[MeanFirstPoke_M130(1,1);MeanFirstPoke_M133(1,1);MeanFirstPoke_M142(1,1);MeanFirstPoke_M143(1,1)];
+FirstPoke_10kHz=[MeanFirstPoke_M130(2,1);MeanFirstPoke_M133(2,1);MeanFirstPoke_M142(2,1);MeanFirstPoke_M143(2,1)];
+FirstPoke_12kHz=[MeanFirstPoke_M130(3,1);MeanFirstPoke_M133(3,1);MeanFirstPoke_M142(3,1);MeanFirstPoke_M143(3,1)];
+FirstPoke_15kHz=[MeanFirstPoke_M130(4,1);MeanFirstPoke_M133(4,1);MeanFirstPoke_M142(4,1);MeanFirstPoke_M143(4,1)];
+FirstPoke_20kHz=[MeanFirstPoke_M130(5,1);MeanFirstPoke_M133(5,1);MeanFirstPoke_M142(5,1);MeanFirstPoke_M143(5,1)];
+FirstPoke_25kHz=[MeanFirstPoke_M130(6,1);MeanFirstPoke_M133(6,1);MeanFirstPoke_M142(6,1);MeanFirstPoke_M143(6,1)];
+FirstPoke_30kHz=[MeanFirstPoke_M130(7,1);MeanFirstPoke_M133(7,1);MeanFirstPoke_M142(7,1);MeanFirstPoke_M143(7,1)];
+
+FirstPoke_AllFq=[FirstPoke_5kHz,FirstPoke_10kHz,FirstPoke_12kHz,FirstPoke_15kHz,FirstPoke_20kHz,FirstPoke_25kHz,FirstPoke_30kHz];
+
+
+PlotErrorBar4(FirstPoke_AllFq(:,3),FirstPoke_AllFq(:,1),FirstPoke_AllFq(:,2),FirstPoke_AllFq(:,4))
+hold on, title('First Poke time')
+set(gca,'xticklabel',{'12kHz','5kHz','10kHz','15kHz'},'xtick',1:4)
+
+PlotErrorBar4(FirstPoke_AllFq(:,3),FirstPoke_AllFq(:,5),FirstPoke_AllFq(:,6),FirstPoke_AllFq(:,7))
+hold on, title('First Poke time')
+set(gca,'xticklabel',{'12kHz','20kHz','25kHz','30kHz'},'xtick',1:4)
+
+% ------------------------------------------------------------
+% ------------------------------------------------------------
+PercRwd_5kHz=[PercReward_M130(1,1);PercReward_M133(1,1);PercReward_M142(1,1);PercReward_M143(1,1)];
+PercRwd_10kHz=[PercReward_M130(2,1);PercReward_M133(2,1);PercReward_M142(2,1);PercReward_M143(2,1)];
+PercRwd_12kHz=[PercReward_M130(3,1);PercReward_M133(3,1);PercReward_M142(3,1);PercReward_M143(3,1)];
+PercRwd_15kHz=[PercReward_M130(4,1);PercReward_M133(4,1);PercReward_M142(4,1);PercReward_M143(4,1)];
+PercRwd_20kHz=[PercReward_M130(5,1);PercReward_M133(5,1);PercReward_M142(5,1);PercReward_M143(5,1)];
+PercRwd_25kHz=[PercReward_M130(6,1);PercReward_M133(6,1);PercReward_M142(6,1);PercReward_M143(6,1)];
+PercRwd_30kHz=[PercReward_M130(7,1);PercReward_M133(7,1);PercReward_M142(7,1);PercReward_M143(7,1)];
+
+PercRwd_AllFq=[PercRwd_5kHz,PercRwd_10kHz,PercRwd_12kHz,PercRwd_15kHz,PercRwd_20kHz,PercRwd_25kHz,PercRwd_30kHz];
+
+PlotErrorBar4(PercRwd_AllFq(:,3),PercRwd_AllFq(:,1),PercRwd_AllFq(:,2),PercRwd_AllFq(:,4))
+hold on, title('Percentage of tone followaed by a fats poke')
+set(gca,'xticklabel',{'12kHz','5kHz','10kHz','15kHz'},'xtick',1:4)
+
+PlotErrorBar4(PercRwd_AllFq(:,3),PercRwd_AllFq(:,5),PercRwd_AllFq(:,6),PercRwd_AllFq(:,7))
+hold on, title('Percentage of tone followaed by a fats poke')
+set(gca,'xticklabel',{'12kHz','20kHz','25kHz','30kHz'},'xtick',1:4)
+
+% ------------------------------------------------------------
+% ------------------------------------------------------------
+
+

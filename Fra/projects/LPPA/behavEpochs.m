@@ -1,0 +1,61 @@
+function A = behavEpochs(A)
+
+A = getResource(A, 'PosPhiD');
+phiD = phiD{1};
+A = getResource(A, 'PosPhiL');
+phiL = phiL{1};
+A = getResource(A, 'PosPhiR');
+phiR = phiR{1};
+A = getResource(A, 'PosXS');
+XS = XS{1};
+A = getResource(A, 'PosYS');
+YS = YS{1};
+
+A = registerResource(A, 'Sleep1Epoch', 'cell', {1,1}, ...
+    'sleep1Epoch', ['intervalSet for the sleep 1 epoch']);
+
+A = registerResource(A, 'Sleep2Epoch', 'cell', {1,1}, ...
+    'sleep2Epoch', ['intervalSet for the sleep 2 epoch']);
+
+A = registerResource(A, 'MazeEpoch', 'cell', {1,1}, ...
+    'mazeEpoch', ['intervalSet for the sleep 2 epoch']);
+
+
+
+mazeStart = min([min(Range(phiD)) min(Range(phiL)) min(Range(phiR))]);
+mazeEnd = max([max(Range(phiD)), max(Range(phiL)), max(Range(phiR))]);
+
+mazeEpoch= intervalSet(mazeStart, mazeEnd);
+sleep1Epoch = intervalSet(0, max(min(Range(XS))+eps, mazeStart-120*10000));
+
+
+[p,dset,e] = fileparts(current_dir(A));
+
+tr = 1;
+eegfname = [dset 'eeg' num2str(tr) '.mat'];
+cd(current_dir(A));
+if exist([eegfname '.gz'])
+    display(['unzipping file ' eegfname]);
+    eval(['!gunzip ' eegfname '.gz']);
+end
+
+
+load(eegfname)
+cd(parent_dir(A));
+eval(['EEG = EEG' num2str(tr), ';']);
+eval(['clear EEG' num2str(tr) ';']);
+%maxTime = EndTime(EEG);
+maxTime = max(max(Range(XS), EndTime(EEG)));
+
+mazeEnd = mazeEnd + 120*10000;
+
+if (mazeEnd<maxTime)
+	sleep2Epoch = intervalSet(mazeEnd, maxTime );
+else
+	sleep2Epoch = intervalSet;
+end;
+
+
+
+
+A = saveAllResources(A);

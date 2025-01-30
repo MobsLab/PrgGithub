@@ -1,0 +1,328 @@
+% DistributionRespiFrequency
+% proportion of time spent in different frequencies
+% spectre of respi signal and integer
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% INITIALISATION VARIABLES
+
+% load paths of experiments
+Dir=PathForExperimentsML('PLETHYSMO');
+strains=unique(Dir.group);
+MiceNames=unique(Dir.name);
+res='/media/DataMOBsRAID/ProjetAstro/AnalyseOBsubstages/AnalysesOB';
+FreqRange=[0 15];
+argHist=100; % histogram argument (default 100)
+smofact=1; % smoothing factor (default 3)
+nameStateEpoch={'ThetaMovEpoch','MovEpoch','SWSEpoch','REMEpoch','SniffEpoch','BasalBreathEpoch'};  
+Analyname='AnalyseOBsubstages-Respi.mat';
+
+% spectrogram params
+params.Fs=100;params.trialave=0;
+params.err=[1 0.0500];params.pad=2;
+params.fpass=FreqRange;params.tapers=[3 5]; % default [3 5]
+movingwin=[3 0.2]; % default [3 0.2]
+         
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% COMPUTE MEAN FREQUANCY FOR ALL EXPE
+try
+    clear InfoRespi
+    load([res,'/',Analyname]);InfoRespi;
+    disp([Analyname,'already exists... Loaded'])
+catch
+    %
+    for nn=1:length(nameStateEpoch)
+        TimeDistrib{nn}=nan(length(Dir.path),argHist);
+        SpTVAll{nn}=[];
+        SpRespiAll{nn}=[];
+        InfoDistrib{nn}=nan(length(Dir.path),2);
+        InfoRespi{nn}=nan(length(Dir.path),2);
+        InfoTV{nn}=nan(length(Dir.path),2);
+    end
+    for man=1:length(Dir.path)
+        
+        clear tempMatff tempMatRespi tempMatTV tempMatInt
+        
+        disp(' ');disp(Dir.path{man});cd(Dir.path{man});
+        
+        % ---------------------------------------------------------------------
+        % load respi info
+        disp('... Loading Respi info and calculating spectro')
+        clear  Frequency RespiTSD TidalVolume
+        load([Dir.path{man},'/LFPData.mat'],'RespiTSD','Frequency','TidalVolume')
+        
+        % RespiTSD spectrum
+        disp('         spectrum RespiTSD');
+        clear Sp_Respi t_Respi DataRespi RangeRespi
+        RangeRespi=Range(RespiTSD); RangeRespi=RangeRespi(1:10:end);
+        DataRespi=Data(RespiTSD); DataRespi=DataRespi(1:10:end);
+        [Sp_Respi,t_Respi,f_Respi]=mtspecgramc(DataRespi,movingwin,params);
+        
+        %     % RespiTSD integer spectrum
+        %     try
+        %         Range(IntegRespi);
+        %     catch
+        %         disp('... Computing and saving IntegRespi')
+        %         IntegRespi=DataRespi(1)*(RangeRespi(2)-RangeRespi(1));
+        %         for rr=2:length(RangeRespi)
+        %             IntegRespi(rr)=IntegRespi(rr-1)+DataRespi(rr-1)*(RangeRespi(rr)-RangeRespi(rr-1));
+        %         end
+        %         save([Dir.path{man},'/LFPData.mat'],'-append','IntegRespi')
+        %     end
+        %     disp('         spectrum IntegRespi');
+        %     [Sp_IntRespi,t_IntRespi,f_IntRespi]=mtspecgramc(IntegRespi,movingwin,params);
+        %
+        % TidalVolume spectrum
+        %     clear Sp_TV t_TV ContinuDataTV RangeTV DataTV
+        %     RangeTV=Range(TidalVolume);
+        %     DataTV=Data(TidalVolume);
+        %     ContinuDataTV = interp1(RangeTV,DataTV,RangeRespi);
+        %     disp('         spectrum TidalVolume');
+        %     [Sp_TV,t_TV,f_TV]=mtspecgramc(ContinuDataTV,movingwin,params);
+        
+        % freq preallocation
+        clear Freqffinf Freqffsup xindex
+        Freqffinf=thresholdIntervals(Frequency,FreqRange(1),'Direction','Above');
+        Freqffsup=thresholdIntervals(Frequency,FreqRange(2),'Direction','Below');
+        xindex=[FreqRange(1):(FreqRange(2)-FreqRange(1))/(argHist-1):FreqRange(2)];
+        
+        % ---------------------------------------------------------------------
+        % load epochs
+        disp('... Loading epochs and restricting spectrum')
+        clear NoiseEpoch GndNoiseEpoch WeirdEpoch epoch
+        clear MovEpoch SWSEpoch REMEpoch ThetaMovEpoch ThetaEpoch SniffEpoch BasalBreathEpoch
+        load([Dir.path{man},'/StateEpoch.mat'],'NoiseEpoch','GndNoiseEpoch','WeirdNoiseEpoch')
+        load([Dir.path{man},'/StateEpoch.mat'],'MovEpoch','SWSEpoch','REMEpoch','ThetaEpoch','SniffEpoch','BasalBreathEpoch')
+        
+        try 
+            SniffEpoch;
+        catch
+            % FindRespiAndMovEpochs.M
+            SniffFreq=[4.5 10];
+            BasalBrethFreq=[2 4];
+            % Sniff
+            Freqffinf=thresholdIntervals(Frequency,SniffFreq(1),'Direction','Above');
+            Freqffsup=thresholdIntervals(Frequency,SniffFreq(2),'Direction','Below');
+            SniffEpoch=and(Freqffinf,Freqffsup);
+            % Basal
+            Freqffinf=thresholdIntervals(Frequency,BasalBrethFreq(1),'Direction','Above');
+            Freqffsup=thresholdIntervals(Frequency,BasalBrethFreq(2),'Direction','Below');
+            BasalBreathEpoch=and(Freqffinf,Freqffsup);
+            % saving
+            save([Dir.path{man},'/StateEpoch.mat'],'-append','SniffEpoch','BasalBreathEpoch','SniffFreq','BasalBrethFreq')
+        end
+        
+        % ---------------------------------------------------------------------
+        % compute per epoch
+        for nn=1:length(nameStateEpoch)
+            
+            % construct epoch+ case ThetaMovEpoch
+            if strcmp(nameStateEpoch{nn},'ThetaMovEpoch')
+                try
+                    epoch=and(MovEpoch,ThetaEpoch)-NoiseEpoch-GndNoiseEpoch-WeirdNoiseEpoch;
+                catch
+                    epoch=intervalSet([],[]);
+                end
+            else
+                eval(['epoch=',nameStateEpoch{nn},'-NoiseEpoch-GndNoiseEpoch-WeirdNoiseEpoch;'])
+            end
+            
+            
+            % -- distribution frequency --
+            tempMatff=TimeDistrib{nn};
+            ffepoch=and(and(Freqffsup,Freqffinf),epoch);
+            if isempty(Start(ffepoch))==0
+                EpochFreq=Restrict(Frequency,ffepoch);
+                [Da]=hist(Data(EpochFreq),xindex);
+                
+                tempMatff(man,:)=Da;
+                TimeDistrib{nn}=tempMatff;
+                InfoDistrib{nn}(man,:)=[find(strcmp(strains,Dir.group{man})),str2num(Dir.name{man}(strfind(Dir.name{man},'Mouse')+5:end))];
+            end
+            
+            % -- spectra --
+            try
+                tempMatRespi=SpRespiAll{nn};
+                [t_RespiEp, Sp_RespiEp]=SpectroEpochML(Sp_Respi,t_Respi,f_Respi,epoch,0);
+                SpRespiAll{nn}=[tempMatRespi;Sp_RespiEp];
+                InfoRespi{nn}(man,:)=[find(strcmp(strains,Dir.group{man})),str2num(Dir.name{man}(strfind(Dir.name{man},'Mouse')+5:end))];
+            end
+            %          try
+            %              tempMatInt=SpIntAll{nn};
+            %              [t_IntRespiEp, Sp_IntRespiEp]=SpectroEpochML(Sp_IntRespi,t_IntRespi,f_IntRespi,epoch,0);
+            %              SpIntAll{nn}=[tempMatInt;Sp_IntRespiEp];
+            %          end
+            try
+                tempMatTV=SpTVAll{nn};
+                [t_TVEp, Sp_TVEp]=SpectroEpochML(Sp_TV,t_TV,f_TV,epoch,0);
+                SpTVAll{nn}=[tempMatTV;Sp_TVEp];
+                InfoTV{nn}(man,:)=[find(strcmp(strains,Dir.group{man})),str2num(Dir.name{man}(strfind(Dir.name{man},'Mouse')+5:end))];
+            end
+        end
+        
+    end
+    %save
+    save([res,'/',Analyname],'TimeDistrib','SpTVAll','SpRespiAll','InfoDistrib','InfoRespi','InfoTV',...
+        'Dir','FreqRange','argHist','smofact','nameStateEpoch','params','movingwin','xindex')
+end
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% POOL DATA FROM SAME MICE
+
+nameParams={'TimeDistrib','SpRespiAll','SpTVAll'};
+nameInfoParams={'InfoDistrib','InfoRespi','InfoTV'};
+for nn=1:length(nameStateEpoch)
+    MiceNames=unique([InfoDistrib{nn}(:,2);InfoRespi{nn}(:,2);InfoTV{nn}(:,2)]);
+    MiceNames=MiceNames(~isnan(MiceNames));
+    
+    for p=1:length(nameParams)
+        
+        eval(['MatrixDataInfo=',nameInfoParams{p},'{nn};'])
+        MatrixDataInfo_temp=[];
+        eval(['MatrixData=',nameParams{p},'{nn};'])
+        MatrixData_temp=[];
+        for uu=1:length(MiceNames)
+            index=find(MatrixDataInfo(:,2)==MiceNames(uu));
+            if ~isempty(index) && (sum(isnan(nanmean(MatrixData(index,:),1)))~=size(MatrixData,2))
+                MatrixData_temp=[MatrixData_temp;SmoothDec(nanmean(MatrixData(index,:),1),smofact)'];
+                MatrixDataInfo_temp=[MatrixDataInfo_temp;[unique(MatrixDataInfo(index,1)) unique(MatrixDataInfo(index,2))]];
+            end
+            clear index
+        end
+        eval([nameInfoParams{p},'{nn}=MatrixDataInfo_temp;'])
+        eval([nameParams{p},'{nn}=MatrixData_temp;'])
+    end
+end
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DISPLAY RESPI DISTRIBUTION
+
+colori={'k','b','r'};
+figure('Color',[1 1 1])
+
+for nn=1:length(nameStateEpoch)
+    MatrixData=TimeDistrib{nn};
+    MatrixDataInfo=InfoDistrib{nn};
+    
+    % individual mice
+    subplot(3,length(nameStateEpoch),nn), hold on,
+    leg=[];nstrain=[0 0];
+    for l=1:size(MatrixData,1)
+        try 
+            plot(xindex,MatrixData(l,:),'Color',colori{MatrixDataInfo(l,1)})
+        leg=[leg,{['Mouse ',num2str(MatrixDataInfo(l,2))]}];
+        percMatrixData(l,1:size(MatrixData,2))=100*MatrixData(l,:)/sum(MatrixData(l,:));
+        end
+    end
+    xlim(FreqRange)
+    if nn==1,ylabel('Time (s)'); legend(leg);end
+    title(nameStateEpoch{nn})
+    xlabel('Frequency (Hz)')
+    
+    
+    % pool strains
+    subplot(3,length(nameStateEpoch),length(nameStateEpoch)+nn), hold on,
+    
+    for str=1:length(strains)
+        indexst=find(MatrixDataInfo(:,1)==str);
+        meanstr=nanmean(MatrixData(indexst,:),1);
+        plot(xindex,meanstr,'Color',colori{str},'Linewidth',2)
+    end
+    if nn==1, ylabel('Time (s)');legend(strains);end
+    
+    for str=1:length(strains)
+        indexst=find(MatrixDataInfo(:,1)==str);
+        meanstr=nanmean(MatrixData(indexst,:),1);
+         if length(indexst)>2
+             stdstr=stdError(MatrixData(indexst,:));
+             plot(xindex,meanstr+stdstr,'Color',colori{str});
+             plot(xindex,meanstr-stdstr,'Color',colori{str});
+         end
+    end
+    xlim(FreqRange)
+    title(nameStateEpoch{nn})
+    xlabel('Frequency (Hz)')
+    
+    % pool strains, percentage of mouse
+    subplot(3,length(nameStateEpoch),2*length(nameStateEpoch)+nn), hold on,
+    for str=1:length(strains)
+        indexst=find(MatrixDataInfo(:,1)==str);
+        meanstr=nanmean(percMatrixData(indexst,:),1);
+        plot(xindex,meanstr,'Color',colori{str},'Linewidth',2)
+        if length(indexst)>2
+             stdstr=stdError(percMatrixData(indexst,:));
+             plot(xindex,meanstr+stdstr,'Color',colori{str});
+             plot(xindex,meanstr-stdstr,'Color',colori{str});
+        end
+         
+        % stats: Cramer, homogeneity distribution
+        try
+            temp=[];
+            for dis=1:length(xindex)
+                for tdis=1:round(meanstr(dis))
+                    temp=[temp,xindex(dis)];
+                end
+            end
+            if str==1, x1=temp; else, x2=temp;end
+        end
+    end
+    xlim(FreqRange)
+    try [h,p] = kstest2(x1,x2);, catch, p=NaN;end
+    title([nameStateEpoch{nn},'  p=',num2str(floor(p*1E3)/1E3)])
+    xlabel('Frequency (Hz)')
+    if nn==1, ylabel('Percentage of Vigilance State Duration');end
+    
+end
+
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DISPLAY RESPI SPECTRUM
+
+
+figure('Color',[1 1 1])
+
+for nn=1:length(nameStateEpoch)
+    MatrixData=SpRespiAll{nn};
+    MatrixDataInfo=InfoRespi{nn};
+    
+    % individual mice
+    subplot(2,length(nameStateEpoch),nn), hold on,
+    leg=[];
+    for l=1:size(MatrixData,1)
+        try
+        plot(f_Respi,10*log10(MatrixData(l,:)),'color',colori{MatrixDataInfo(l,1)});
+        leg=[leg,{['Mouse ',num2str(MatrixDataInfo(l,2))]}];
+        end
+    end
+    xlim(FreqRange)
+    if nn==1,ylabel('RespiTSD Power (au)'); legend(leg);end
+    title(nameStateEpoch{nn})
+    xlabel('Frequency (Hz)')
+    
+    
+    % pool strains
+    subplot(2,length(nameStateEpoch),length(nameStateEpoch)+nn), hold on,
+    
+    for str=1:length(strains)
+        indexst=find(MatrixDataInfo(:,1)==str);
+        meanstr=nanmean(MatrixData(indexst,:),1);
+        plot(f_Respi,10*log10(meanstr),'color',colori{str},'Linewidth',2);
+    end
+    if nn==1, ylabel('RespiTSD Power (au)');legend(strains);end
+    for str=1:length(strains)
+        indexst=find(MatrixDataInfo(:,1)==str);
+        meanstr=nanmean(MatrixData(indexst,:),1);
+         if length(indexst)>2
+             stdstr=stdError(MatrixData(indexst,:));
+             plot(f_Respi,SmoothDec(10*log10(meanstr+stdstr),smofact),'Color',colori{str});
+             plot(f_Respi,SmoothDec(10*log10(meanstr-stdstr),smofact),'Color',colori{str});
+         end
+    end
+    xlim(FreqRange)
+    title(nameStateEpoch{nn})
+    xlabel('Frequency (Hz)')
+end
+
+
+    

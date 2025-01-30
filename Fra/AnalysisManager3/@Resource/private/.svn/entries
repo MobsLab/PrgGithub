@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-05-25T10:43:10.993826Z"
+   url="svn+ssh://uvavpn/home/battagli/svn/matlab/branches/AnalysisManager/@Resource/private"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   repos="svn+ssh://uvavpn/home/battagli/svn/matlab"
+   revision="50"/>
+<entry
+   committed-rev="1"
+   name="checkProvidedBy.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="3a23c297b2114a85ba92452b986ceae8"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+</wc-entries>

@@ -1,0 +1,136 @@
+%LaunchAnalyseNosePokeOdor
+
+%% INITIALIZATION
+res=pwd;
+if isempty(strfind(res,'/')), mark='\'; else, mark='/'; end
+experiment='Vanillin'; % or 'Discrimination' or 'Eugenol'
+disp(['    * * * Analysing Experiment ',experiment,' * * *']);
+%% PATH FOR EXPERIMENTS
+dKOmice={'Mouse146' 'Mouse149' 'Mouse158' 'Mouse159'};
+WTmice={'Mouse148' 'Mouse160' 'Mouse161'};
+C57mice={'Mouse113' 'Mouse115' 'Mouse119' 'Mouse130' 'Mouse133'};
+
+if  strcmp(mark,'\'), FileTOAnalyse='\\NASDELUXE\DataMOBsRAID5\ProjetAstro\OdorDetectionDiscrination';end
+if  strcmp(mark,'/'), FileTOAnalyse='/media/DataMOBsRAID5/ProjetAstro/OdorDetectionDiscrination';end
+
+%paths
+lis=dir(FileTOAnalyse);
+a=0;
+for i=3:length(lis)
+    if ~isempty(strfind(lis(i).name,experiment)) && isempty(strfind(lis(i).name,'Old'))
+        a=a+1; Dir.path{a}=[FileTOAnalyse,mark,lis(i).name];
+    end
+end
+
+%names
+for i=1:length(Dir.path)
+    Dir.manipe{i}=experiment;
+    tempname=Dir.path{i}(max(strfind(Dir.path{i},'Mouse')):end);
+    tempname(strfind(tempname,'-'))=[];
+    ok=0;
+    for sti=1:length(tempname)
+        ste=length(tempname);
+        while ok~=1 && sti<ste
+            if ~isempty(str2num(tempname(sti:ste))); Dir.name{i}=['Mouse-',tempname(sti:ste)];ok=1; end
+            ste=ste-1;
+        end
+    end
+    if ok==0, tempname=input('Enter num of the mouse: '); Dir.name{i}=['Mouse-',num2str(tempname)]; end
+end
+
+% Strain
+for i=1:length(Dir.path)
+    if sum(strcmp(Dir.name{i},WTmice))
+        Dir.group{i}='WT';
+    elseif sum(strcmp(Dir.name{i},dKOmice))
+        Dir.group{i}='dKO';
+    elseif sum(strcmp(Dir.name{i},C57mice))
+        Dir.group{i}='C57';
+    else
+        Dir.group{i}=nan;
+    end
+end
+
+%% 
+
+%parameters={'Nb NosePokes','% time in NosePoke','Time in NosePoke','Interval InterNosePoke'};
+parameters={'Nb NosePokes','% time in NosePoke','Zscore % NosePoke','% Time in NosePoke Zone','% NosePoke when in Zone'};
+
+MATTT=[];
+    
+for man=1:length(Dir.path)
+    disp(Dir.path{man});
+    clear tempload NosePokesIntervals MATTdisp MATTdispSelect indexSelect
+    clear  NosePokesIntervals
+    
+    try
+        tempload=load([Dir.path{man},mark,'NosePokeData.mat'],'NosePokesIntervals','newStopSignal','newStartSignal');
+        NosePokesIntervals=tempload.NosePokesIntervals;
+        newStopSignal=tempload.newStopSignal;
+        newStartSignal=tempload.newStartSignal;
+        tempload=load([Dir.path{man},mark,'TrackSniffData.mat'],'namePhase','NameTrackFiles','basename');
+        basename=tempload.basename;
+    catch
+       cd(Dir.path{man})
+       disp('Run AnalyseNosePokeOdor.m'); keyboard;
+       tempload=load([Dir.path{man},mark,'TrackSniffData.mat'],'namePhase','NameTrackFiles','basename');
+       basename=tempload.basename;
+       cd(res)
+    end
+    if ~exist('namePhase','var')
+         namePhase=tempload.namePhase; 
+    end
+    if ~isequal(namePhase,tempload.namePhase), disp('PROBLEM, not same phases as previous expe'); keyboard;end
+    
+    nmouse=str2num(Dir.name{man}(7:end));
+    MATTdisp=zeros(length(parameters),length(tempload.NameTrackFiles));
+    MATTdisp(1:length(parameters),1:2)=[nmouse*ones(1,length(parameters)) ;1:length(parameters)]';
+    
+    for i=1:length(tempload.NameTrackFiles)
+        tempIntervals=NosePokesIntervals{i};
+        sti=Start(tempIntervals,'s');
+        ste=Stop(tempIntervals,'s');
+        
+        MATTdisp(1,i+2)=nmouse;
+        MATTdisp(2,i+2)=i;
+        MATTdisp(1,i+2)=length(sti);
+        MATTdisp(2,i+2)=100*sum(ste-sti)/(newStopSignal(i)-newStartSignal(i));
+        MATTdisp(3,i+2)=sum(ste-sti);
+        if length(sti)>2, MATTdisp(4,i+2)=mean(sti(2:end)-ste(1:end-1));else, MATTdisp(4,i+2)=NaN; end
+
+    end
+    MATTT=[MATTT;MATTdisp];
+end
+
+MATTT=MATTT(:,1:length(tempload.NameTrackFiles)+2);
+MATTT=[[0,0,1:length(tempload.NameTrackFiles)];MATTT];
+
+
+%% DISPLAY ALL RESULTS
+indexSelect=[];
+% for i=1:length(namePhase)
+%     if ~isempty([strfind(namePhase{i},'Solvant'),strfind(namePhase{i},'Odor')])
+%         indexSelect=[indexSelect,i];
+%     end
+% end
+indexSelect=2:2:length(namePhase);
+
+for pp=1:length(parameters)
+    tempMAT=MATTT(MATTT(:,2)==pp,3:end);
+    %subplot(length(parameters),1,pp), 
+    PlotErrorBarN(tempMAT,1,1,2);
+    ylabel(parameters{pp}), title(experiment),
+    set(gca,'XTick',1:size(tempMAT,2))
+    set(gca,'XTickLabel',namePhase)
+end
+
+for pp=1:length(parameters)
+    tempMAT=MATTT(MATTT(:,2)==pp,indexSelect+2);
+    %subplot(length(parameters),1,pp), 
+    PlotErrorBarN(tempMAT,1,1,1);
+    ylabel(parameters{pp}), title(experiment),
+    set(gca,'XTick',1:size(tempMAT,2))
+    set(gca,'XTickLabel',namePhase(indexSelect))
+end
+
+

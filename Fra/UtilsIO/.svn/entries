@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="11"
+   name=""
+   committed-date="2006-06-05T15:43:32.457573Z"
+   url="file:///home/battagli/svn/matlab/trunk/UtilsIO"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   prop-time="2006-06-06T06:42:16.000000Z"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="ReadDataWaveASCIIFile.c"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e98135005fafadcadb8b5717c81f5365"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReadCR_nt.cpp"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="2ca78307c4590fd2f84e4214597cb6dd"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReadCR_tsd.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="944eff9f88262b3477559c86640236a6"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PlotWV.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="47f06a3589e5e853debd7ad7a6834358"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="LoadTTlipa.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="520021715ef5a79c4988c6dec5758fe9"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="LoadTT1.c"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="4f99bf229e19e12e3decb842fc647a51"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="LoadTT0_nt.cpp"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="0786aedd6bd36f8cbda8b3d843b285e9"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="LoadSpikes.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="f2855e1e0ac2b4015b3d1ebb14ce8ef8"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="CR2SE.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="df985f7984f1a7577b2dfb1825fddc7d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="WriteCR.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e146d81566476e9a3ef727c4e32fc42c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="._.DS_Store"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="96c68b79bc82b883258762468d5a38a3"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="LoadTTbatta.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a74f367fff73069dfad3cb9424e887da"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+</wc-entries>

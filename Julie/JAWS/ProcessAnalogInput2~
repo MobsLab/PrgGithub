@@ -1,0 +1,5 @@
+ProcessAnalogInput
+
+diode_ON_period1=intervalSet(2057.5*1E4,2154.3*1E4);
+diode_ON_period1=intervalSet(2417.5*1E4,2791.3*1E4);
+diode_ON=A=thresholdIntervals(LFP,0.0001'Direction','Below');

@@ -1,0 +1,2 @@
+function showPairCofiring = showPaircofiring(PairCovObj,pairsCorr)
+

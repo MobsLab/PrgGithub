@@ -1,0 +1,50 @@
+function A = basicPETH(A)
+
+
+fontSize = 12;
+
+A = getResource(A, 'CellNames');
+A = getResource(A, 'SpikeData');
+
+A= getResource(A, 'TrialOutcome');
+trialOutcome = trialOutcome{1};
+
+A = getResource(A, 'StartTrial');
+startTrial = startTrial{1};
+
+[success, message, messageid] = mkdir(parent_dir(A), 'PETHs');
+
+pethdir = [parent_dir(A), filesep 'PETHs'];
+[p,ds,e] = fileparts(current_dir(A));
+
+
+
+for i = 1:length(S)
+
+    figure(1), clf
+    [fh1, rasterAx1, histAx1] = RasterPETH(S{i}, startTrial, -50000, 100000, ...
+        'Markers', { trialOutcome} , 'MarkerTypes', {'r.' }, 'MarkerSize', 20, 'BinSize', 200);
+    title([ ds '_' cellnames{i} ' all start '], 'interpreter', 'none', ...
+        'FontSize', fontSize, 'FontName', 'Verdana');
+    set(rasterAx1, 'FontSize', fontSize, 'FontName', 'Verdana');
+    set(histAx1, 'FontSize', fontSize, 'FontName', 'Verdana');
+
+    
+    saveas(fh1, [pethdir filesep ds '_' cellnames{i} 'starttrialPETH'], 'png');
+
+    figure(2), clf
+    [fh2, rasterAx2, histAx2] = RasterPETH(S{i}, trialOutcome, -100000, 50000, ...
+        'Markers', { startTrial} , 'MarkerTypes', {'r.' }, 'MarkerSize', 20, 'BinSize', 200);
+    title([ ds '_' cellnames{i} ' all end '], 'interpreter', 'none', ...
+        'FontSize', fontSize, 'FontName', 'Verdana');
+    set(rasterAx2, 'FontSize', fontSize, 'FontName', 'Verdana');
+    set(histAx2, 'FontSize', fontSize, 'FontName', 'Verdana');
+
+    
+    
+    saveas(fh2, [pethdir filesep ds '_' cellnames{i} 'trialOutcomePETH'], 'png');
+
+    
+    
+end
+

@@ -1,0 +1,205 @@
+%%LPS data
+% first digit is mouse / second is day
+filename{1,1}='/media/DataMOBs/ProjetLPS/Mouse051/20130220/BULB-Mouse-51-20022013';
+filename{1,2}='/media/DataMOBs/ProjetLPS/Mouse051/20130221/BULB-Mouse-51-21022013';
+filename{1,3}='/media/DataMOBs/ProjetLPS/Mouse051/20130222/BULB-Mouse-51-22022013';
+filename{1,4}='/media/DataMOBs/ProjetLPS/Mouse051/20130223/BULB-Mouse-51-23022013';
+
+
+filename{2,1}='/media/DataMOBs/ProjetLPS/Mouse055/20130402/BULB-Mouse-55-56-02042013';
+filename{2,2}='/media/DataMOBs/ProjetLPS/Mouse055/20130403/BULB-Mouse-55-03042013';
+filename{2,3}='/media/DataMOBs/ProjetLPS/Mouse055/20130404/BULB-Mouse-55-04042013';
+filename{2,4}='/media/DataMOBs/ProjetLPS/Mouse055/20130405/BULB-Mouse-55-05042013';
+
+filename{3,1}='/media/DataMOBs/ProjetLPS/Mouse056/20130409/BULB-Mouse-56-09042013';
+filename{3,2}='/media/DataMOBs/ProjetLPS/Mouse056/20130410/BULB-Mouse-56-10042013';
+filename{3,3}='/media/DataMOBs/ProjetLPS/Mouse056/20130411/BULB-Mouse-56-11042013';
+filename{3,4}='/media/DataMOBs/ProjetLPS/Mouse056/20130412/BULB-Mouse-56-12042013';
+
+filename{4,1}='/media/DataMOBs/ProjetLPS/Mouse063/20130424/BULB-Mouse-63-24042013';
+filename{4,2}='/media/DataMOBs/ProjetLPS/Mouse063/20130425/BULB-Mouse-63-25042013';
+filename{4,3}='/media/DataMOBs/ProjetLPS/Mouse063/20130426/BULB-Mouse-63-26042013';
+filename{4,4}='/media/DataMOBs/ProjetLPS/Mouse063/20130427/BULB-Mouse-63-27042013';
+
+Ripch=[17,14,11,11];
+Spf=[8 12;10 15;15 20;10 20];
+Spf=[5 10; 10 14;6 8; 8 12];
+PFCxch=[20,21;1,1;6,2;10,8]; %deep then sup
+PaCxch=[23,28;10,11;12,8;3,0];
+
+% Cross correllograms of already linked units
+
+RSlag=5;
+SDlag=5;
+RDlag=5;
+s=1;
+errcoup=[];
+for m= 1:4
+    num=0;
+    m
+    for d=1:4
+        d
+        try
+            num=num+1;
+            cd(filename{m,d})
+            load('StateEpoch.mat');
+            load('behavResources.mat');
+            load('Oscillations.mat');
+            %             try
+            %                 load('NewSpindles.mat')
+            %             end
+            load(strcat('LFPData/LFP',num2str(Ripch(m)),'.mat'));
+            [SpairRPa,SunpairRPa]=CloseEvents(Range((SpindlesPa{s,1})),Range((Ripples{1})));
+            [SpairRPF,SunpairRPF]=CloseEvents(Range((SpindlesPF{s,1})),Range((Ripples{1})));
+            [RpairSPa,RunpairSPa]=CloseEvents(Range((Ripples{1})),Range((SpindlesPa{s,1})));
+            [RpairSPF,RunpairSPF]=CloseEvents(Range((Ripples{1})),Range((SpindlesPF{s,1})));
+            [DpairRPa,DunpairRPa]=CloseEvents(Range((DeltaPa{1})),Range((Ripples{1})));
+            try
+            [DpairRPF,DunpairRPF]=CloseEvents(Range((DeltaPF{1})),Range((Ripples{1})));
+            [RpairDPF,RunpairDPF]=CloseEvents(Range((Ripples{1})),Range((DeltaPF{1})));
+            [SpairDPF,SunpairDPF]=CloseEvents(Range((SpindlesPF{s,1})),Range((DeltaPF{1})));
+            [DpairSPF,DunpairSPF]=CloseEvents(Range((DeltaPF{1})),Range((SpindlesPF{s,1})));
+            catch
+                DpairRPF=[];
+                DunpairRPF=[];
+                RpairDPF=[];
+                RunpairDPF=[];
+                SpairDPF=[];
+                SunpairDPF=[];
+                DpairSPF=[];
+                DunpairSPF=[];
+            end
+            [RpairDPa,RunpairDPa]=CloseEvents(Range((Ripples{1})),Range((DeltaPa{1})));
+            [SpairDPa,SunpairDPa]=CloseEvents(Range((SpindlesPa{s,1})),Range((DeltaPa{1})));
+            [DpairSPa,DunpairSPa]=CloseEvents(Range((DeltaPa{1})),Range((SpindlesPa{s,1})));
+            
+            SpairRPa=ts(SpairRPa);
+            SunpairRPa=ts(SunpairRPa);
+            SpairRPF=ts(SpairRPF);
+            SunpairRPF=ts(SunpairRPF);
+            
+            RpairSPa=ts(RpairSPa);
+            RunpairSPa=ts(RunpairSPa);
+            RunpairSPF=ts(RunpairSPF);
+            RpairSPF=ts(RpairSPF);
+            
+            DpairRPa=ts(DpairRPa);
+            DunpairRPa=ts(DunpairRPa);
+            DpairRPF=ts(DpairRPF);
+            DunpairRPF=ts(DunpairRPF);
+            
+            RpairDPa=ts(RpairDPa);
+            RunpairDPF=ts(RunpairDPF);
+            RpairDPF=ts(RpairDPF);
+            RunpairDPa=ts(RunpairDPa);
+
+            SpairDPa=ts(SpairDPa);
+            SunpairDPa=ts(SunpairDPa);
+            SpairDPF=ts(SpairDPF);
+            SunpairDPF=ts(SunpairDPF);
+            
+            DpairSPa=ts(DpairSPa);
+            DunpairSPa=ts(DunpairSPa);
+            DpairSPF=ts(DpairSPF);
+            DunpairSPF=ts(DunpairSPF);
+            
+            
+            if d==1
+                for g=1:2
+                    if g==1
+                        
+                        Epoch=And(SWSEpoch,PreEpoch);
+                        Epoch=Epoch-NoiseEpoch-GndNoiseEpoch;
+                        Epoch=CleanUpEpoch(Epoch);
+                        if size(Start(Epoch),1)~=0
+                            LaunchStructCoupUncoup
+                            num=num+1;
+                        else
+                            num=num+1;
+                        end
+                    else
+                        Epoch=And(SWSEpoch,VEHEpoch);
+                        Epoch=Epoch-NoiseEpoch-GndNoiseEpoch;
+                        Epoch=CleanUpEpoch(Epoch);
+                        if size(Start(Epoch),1)~=0
+                            LaunchStructCoupUncoup
+                        end
+                        
+                    end
+                end
+            elseif d==2
+                for g=1:2
+                    if g==1
+                        Epoch=And(SWSEpoch,PreEpoch);
+                        Epoch=Epoch-NoiseEpoch-GndNoiseEpoch;
+                        Epoch=CleanUpEpoch(Epoch);
+                        if size(Start(Epoch),1)~=0
+                            LaunchStructCoupUncoup
+                            num=num+1;
+                        else
+                            num=num+1;
+                        end
+                        
+                    else
+                        Epoch=And(SWSEpoch,LPSEpoch);
+                        Epoch=Epoch-NoiseEpoch-GndNoiseEpoch;
+                        Epoch=CleanUpEpoch(Epoch);
+                        
+                        if size(Start(Epoch),1)~=0
+                                       LaunchStructCoupUncoup
+
+                        end
+                    end
+                end
+            else
+                g=1;
+                Epoch=SWSEpoch;
+                Epoch=Epoch-NoiseEpoch-GndNoiseEpoch;
+                Epoch=CleanUpEpoch(Epoch);
+                LaunchStructCoupUncoup
+                
+            end
+        catch
+            errcoup=[erross;m,d]
+        end
+        
+    end
+end
+
+figure
+for p=9:14
+s=1;
+for m=1:4
+   for num=1:6
+       try
+       CoupDel(s,:)=DataLPSPaC{num,m}{p}/sum(DataLPSPaC{num,m}{p});
+       end
+       try
+       UnCoupDel(s,:)=DataLPSPaUC{num,m}{p}/sum(DataLPSPaUC{num,m}{p});
+       end
+       s=s+1;
+   end
+end
+
+subplot(2,6,p-8)
+plot(B,zscore(mean(UnCoupDel)))
+hold on
+plot(B,zscore(mean(CoupDel)),'r')
+
+for m=1:4
+   for num=1:6
+       try
+       CoupDel(s,:)=DataLPSPFC{num,m}{p}/sum(DataLPSPFC{num,m}{p});
+       end
+       try
+       UnCoupDel(s,:)=DataLPSPFUC{num,m}{p}/sum(DataLPSPFUC{num,m}{p});
+       end
+       s=s+1;
+   end
+end
+
+subplot(2,6,p-2)
+plot(B,zscore(mean(UnCoupDel)))
+hold on
+plot(B,zscore(mean(CoupDel)),'r')
+end

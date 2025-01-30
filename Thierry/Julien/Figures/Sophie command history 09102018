@@ -1,0 +1,373 @@
+edit
+load('/media/mobschapeau/DataMOBS92/Processed_DATA/M781_processed/M781_Baseline_10sREM_Stim30s_05092018_20180905_122424/LFPData/DigInfo6.mat')
+figure
+LFP
+plot(Range(LFP),Data(DigTSD))
+plot(Range(DigTSD),Data(DigTSD))
+edit PlotRipRaw.m -all
+which PlotRipRaw.m -all
+edit
+load('SleepScoring_OBGamma.mat','Wake','SmoothTheta','Info')
+Info
+hist(Data(SmoothTheta))
+hist(Data(SmoothTheta),100)
+HighThetaEpoch = threhsoldIntervals(SmoothTheta,Info.theta_thresh,'Direction','Above');
+hist(Data(SmoothTheta), [0:0.1:100])
+HighThetaEpoch = thresholdIntervals(SmoothTheta,Info.theta_thresh,'Direction','Above');
+HighThetaWake = and(Wake,HighThetaEpoch);
+load('dHPC_deep_Low_Spectrum.mat')
+sptsd = tsd(Spectro{2}*1e4, Spectro{1})
+figure
+load('SleepScoring_OBGamma.mat','WakeREMEpoch')
+load('SleepScoring_OBGamma.mat','REMEpoch')
+clf
+plot(Spectro{3},mean(Data(sptsd))))
+plot(Spectro{3},mean(Data(sptsd)))
+hold on
+plot(Spectro{3},mean(Data(Restrict(sptsd,REMEpoch))))
+plot(Spectro{3},mean(Data(Restrict(sptsd,HighThetaWake))))
+Info
+HighThetaWake = dropShortIntervals(HighThetaWake,Info.theta_thresh*1e4);
+plot(Spectro{3},mean(Data(Restrict(sptsd,HighThetaWake))))
+clf
+imagesc(log(Spectro{1}')), axis xy
+clim
+clim([3 12])
+clim([3 10])
+clim([3 12])
+read_Intan_RHD2000_file
+plot(Spectro{3},mean(Data(Restrict(sptsd,HighThetaWake))))
+save('SleepScoring_OBGamma.mat','HighThetaWake','-append')
+hist(Stop(REMEpoch,'s')-Start(REMEpoch,'s'))
+Stop(REMEpoch,'s')-
+Stop(REMEpoch,'s')
+hist(Stop(REMEpoch,'s')-Start(REMEpoch,'s'),20)
+sum((Stop(REMEpoch,'s')-Start(REMEpoch,'s'))<10)
+sum((Stop(REMEpoch,'s')-Start(REMEpoch,'s'))>10)
+REMEpoch_Long =  dropShortIntervals(REMEpoch,DeltaStim*1e4);
+HighThetaWake_Long =  dropShortIntervals(HighThetaWake,DeltaStim*1e4);
+DeltaStim = 10; % 10 seconds between stims
+StimDur = 30; % stim last 30s
+REMEpoch_Long =  dropShortIntervals(REMEpoch,DeltaStim*1e4);
+HighThetaWake_Long =  dropShortIntervals(HighThetaWake,DeltaStim*1e4);
+(stop_ep-start_ep)
+start_ep = Start(subset(REMEpoch_Long,k));
+stop_ep = Start(subset(REMEpoch_Long,k));
+(stop_ep-start_ep)
+k=1
+start_ep = Start(subset(REMEpoch_Long,k));
+stop_ep = Start(subset(REMEpoch_Long,k));
+(stop_ep-start_ep)
+start_ep = Start(subset(REMEpoch_Long,k));
+stop_ep = Stop(subset(REMEpoch_Long,k));
+(stop_ep-start_ep)
+(stop_ep-start_ep)/1e4
+((stop_ep-start_ep)/1e4)/(DeltaStim+StimDur)
+ceil(((stop_ep-start_ep)/1e4)/(DeltaStim+StimDur))
+k=10
+start_ep = Start(subset(REMEpoch_Long,k));
+stop_ep = Stop(subset(REMEpoch_Long,k));
+(stop_ep-start_ep)/1e4
+RemStim = [];
+for k = 1 : length(Start(REMEpoch_Long))
+start_ep = Start(subset(REMEpoch_Long,k));
+stop_ep = Stop(subset(REMEpoch_Long,k));
+NumStims_ep = ceil(((stop_ep-start_ep)/1e4)/(DeltaStim+StimDur));
+for c = 1:NumStims_ep
+RemStim = [RemStim,start_ep+DeltaStim*c+StimDur*(c-1)];
+end
+end
+RemStim
+RemStim_ts = ts(RemStim);
+RemStim_ts
+events = RemStim
+load('dHPC_sup_Low_Spectrum')
+SpectroH=Spectro;
+%%AveargeSpectre Stim REM (0)
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+title('HPC REM')
+Restrict(ts(events*1E4),REMEpoch)
+load('SleepScoring_OBGamma.mat','REMEpoch')
+Restrict(ts(events*1E4),REMEpoch)
+Restrict(ts(events),REMEpoch)
+events
+events = RemStim/1e4;
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+% delay between stims
+DeltaStim = 20; % 10 seconds between stims
+StimDur = 20; % stim last 30s
+REMEpoch_Long =  dropShortIntervals(REMEpoch,DeltaStim*1e4);
+HighThetaWake_Long =  dropShortIntervals(HighThetaWake,DeltaStim*1e4);
+RemStim = [];
+for k = 1 : length(Start(REMEpoch_Long))
+start_ep = Start(subset(REMEpoch_Long,k));
+stop_ep = Stop(subset(REMEpoch_Long,k));
+NumStims_ep = ceil(((stop_ep-start_ep)/1e4)/(DeltaStim+StimDur));
+for c = 1:NumStims_ep
+RemStim = [RemStim,start_ep+DeltaStim*c+StimDur*(c-1)];
+end
+end
+events = RemStim/1e4;
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+Info
+cl
+clf
+hist(Data(SmoothTheta), [0:0.1:100])
+hist(Data(SmoothTheta), [0:0.1:10])
+Info.theta_thresh = 2.5
+% threshold all data with the REM theta threhsold
+HighThetaEpoch = thresholdIntervals(SmoothTheta,Info.theta_thresh,'Direction','Above');
+% Define wake period with high theta power
+HighThetaWake = and(Wake,HighThetaEpoch);
+% get rid of events that are too short
+HighThetaWake = dropShortIntervals(HighThetaWake,Info.theta_thresh*1e4);
+% delay between stims
+DeltaStim = 10; % 10 seconds between stims
+StimDur = 30; % stim last 30s
+REMEpoch_Long =  dropShortIntervals(REMEpoch,DeltaStim*1e4);
+HighThetaWake_Long =  dropShortIntervals(HighThetaWake,DeltaStim*1e4);
+RemStim = [];
+for k = 1 : length(Start(REMEpoch_Long))
+start_ep = Start(subset(REMEpoch_Long,k));
+stop_ep = Stop(subset(REMEpoch_Long,k));
+NumStims_ep = ceil(((stop_ep-start_ep)/1e4)/(DeltaStim+StimDur));
+for c = 1:NumStims_ep
+RemStim = [RemStim,start_ep+DeltaStim*c+StimDur*(c-1)];
+end
+end
+events = RemStim/1e4;
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+REMEpoch_Long =  dropShortIntervals(REMEpoch,DeltaStim*1e4);
+HighThetaWake_Long =  dropShortIntervals(HighThetaWake,DeltaStim*1e4);
+RemStim = [];
+for k = 1 : length(Start(REMEpoch_Long))
+start_ep = Start(subset(REMEpoch_Long,k));
+stop_ep = Stop(subset(REMEpoch_Long,k));
+NumStims_ep = ceil(((stop_ep-start_ep)/1e4)/(DeltaStim+StimDur));
+for c = 1:NumStims_ep
+RemStim = [RemStim,start_ep+DeltaStim*1*e4*c+StimDur*1e4*(c-1)];
+end
+end
+RemStim = [];
+for k = 1 : length(Start(REMEpoch_Long))
+start_ep = Start(subset(REMEpoch_Long,k));
+stop_ep = Stop(subset(REMEpoch_Long,k));
+NumStims_ep = ceil(((stop_ep-start_ep)/1e4)/(DeltaStim+StimDur));
+for c = 1:NumStims_ep
+RemStim = [RemStim,start_ep+DeltaStim*1e4*c+StimDur*1e4*(c-1)];
+end
+end
+events = RemStim/1e4;
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+clear all
+load('SleepScoring_OBGamma.mat','Wake','SmoothTheta','Info','REMEpoch')
+% threshold all data with the REM theta threhsold
+HighThetaEpoch = thresholdIntervals(SmoothTheta,Info.theta_thresh,'Direction','Above');
+% Define wake period with high theta power
+HighThetaWake = and(Wake,HighThetaEpoch);
+% get rid of events that are too short
+HighThetaWake = dropShortIntervals(HighThetaWake,Info.theta_thresh*1e4);
+%save('SleepScoring_OBGamma.mat','HighThetaWake','-append')
+% delay between stims
+DeltaStim = 10; % 10 seconds between stims
+StimDur = 30; % stim last 30s
+REMEpoch_Long =  dropShortIntervals(REMEpoch,DeltaStim*1e4);
+HighThetaWake_Long =  dropShortIntervals(HighThetaWake,DeltaStim*1e4);
+RemStim = [];
+for k = 1 : length(Start(REMEpoch_Long))
+start_ep = Start(subset(REMEpoch_Long,k));
+stop_ep = Stop(subset(REMEpoch_Long,k));
+NumStims_ep = ceil(((stop_ep-start_ep)/1e4)/(DeltaStim+StimDur));
+for c = 1:NumStims_ep
+RemStim = [RemStim,start_ep+DeltaStim*1e4*c+StimDur*1e4*(c-1)];
+end
+end
+load('dHPC_deep_Low_Spectrum.mat')
+sptsd = tsd(Spectro{2}*1e4, Spectro{1})
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+SpectroH=Spectro;
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+events = RemStim/1e4;
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+clmi
+clim
+clim([27 50])
+% Attention Digin2 pour ancien protocoles et Digin6 pour BCI protocol
+load('LFPData/DigInfo6.mat')
+load('SleepScoring_OBGamma.mat')
+TTLEpoch = thresholdIntervals(DigTSD,0.99,'Direction','Above');
+% TTL = colonne de temps au dessus de 0.99 pour avoir les 1 = stim ON
+TTLEpoch_merged = mergeCloseIntervals(TTLEpoch,1e4);
+% merge tous les temps des tim plus proche de 1 sec pour éviter les créneaux et le remplacer par un step entier d'une min
+for k = 1:length(Start(TTLEpoch_merged))
+LittleEpoch = subset(TTLEpoch_merged,k);
+Freq_Stim(k) = round(1./(median(diff(Start(and(TTLEpoch,LittleEpoch),'s')))));
+Time_Stim(k) = min(Start(and(TTLEpoch,LittleEpoch)));
+end
+events=Start(TTLEpoch_merged)/1E4;
+load('H_Low_Spectrum.mat')
+SpectroH=Spectro;
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+clim
+clim([27 50])
+load('H_Low_Spectrum.mat')
+figure
+imagesc(log(Spectro{1}')), axis xy
+load('H_Low_Spectrum.mat')
+figure
+imagesc(log(Spectro{1}')), axis xy
+clim([27 50])
+clim([-2 5])
+clim([-2 2])
+clm
+clim
+clim([4 16])
+clim([4 12])
+WakeStim = [];
+for k = 1 : length(Start(HighThetaWake_Long))
+start_ep = Start(subset(HighThetaWake_Long,k));
+stop_ep = Stop(subset(HighThetaWake_Long,k));
+NumStims_ep = ceil(((stop_ep-start_ep)/1e4)/(DeltaStim+StimDur));
+for c = 1:NumStims_ep
+WakeStim = [WakeStim,start_ep+DeltaStim*1e4*c+StimDur*1e4*(c-1)];
+end
+end
+load('H_Low_Spectrum.mat')
+Wake
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),Wake),500,300);
+SpectroH=Spectro;
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),Wake),500,300);
+events = WakeStim/1e4;
+[MH,SH,tH]=AverageSpectrogram(tsd(SpectroH{2}*1E4,10*log10(SpectroH{1})),SpectroH{3},Restrict(ts(events*1E4),Wake),500,300);
+save('SimulatedStims.mat','WakeStim','RemStim')
+WakeStim = ts(WakeStim);
+RemStim = ts(RemStim);
+save('SimulatedStims.mat','WakeStim','RemStim')
+RemStim
+Range(RemStim,'s')
+load('ExpeInfo.mat')
+ExpeInfo
+load('ExpeInfo.mat')
+ExpeInfo
+load('SimulatedStims.mat')
+events = sort(Range(RemStim,'s'),Range(WakeStim,'s'));
+events = sort([Range(RemStim,'s'),Range(WakeStim,'s')]);
+events = sort([Range(RemStim,'s');Range(WakeStim,'s')]);
+events
+StimulateStimsWithTheta_VLPO
+%%%%% Output: Average Spectrum around stimulation for each region per state
+%%%%%         (VLPO,OB,PFC,HPC)+ Panel of 4 regions per state
+%%%%%         +HPC theta REM vs Baseline + Plotripraw EMG stim REM
+%%%% Option average spectrum :  colorbar   caxis([A B])
+%%%%load des spectrums et variables (avoir fait les spectres avant)
+clear all
+pathname='Figures'
+pathname2='Figures/Average_Spectrums'
+mkdir Figures
+mkdir(fullfile(pathname,'Average_Spectrums'))
+load('ExpeInfo.mat')
+switch ExpeInfo.OptoStimulation
+case 'yes'
+disp('loading stim times')
+% Attention Digin2 pour ancien protocoles et Digin6 pour BCI protocol
+load('LFPData/DigInfo6.mat')
+load('SleepScoring_OBGamma.mat')
+TTLEpoch = thresholdIntervals(DigTSD,0.99,'Direction','Above');
+% TTL = colonne de temps au dessus de 0.99 pour avoir les 1 = stim ON
+TTLEpoch_merged = mergeCloseIntervals(TTLEpoch,1e4);
+% merge tous les temps des tim plus proche de 1 sec pour éviter les créneaux et le remplacer par un step entier d'une min
+for k = 1:length(Start(TTLEpoch_merged))
+LittleEpoch = subset(TTLEpoch_merged,k);
+Freq_Stim(k) = round(1./(median(diff(Start(and(TTLEpoch,LittleEpoch),'s')))));
+Time_Stim(k) = min(Start(and(TTLEpoch,LittleEpoch)));
+end
+events=Start(TTLEpoch_merged)/1E4;
+case 'no'
+disp('no stims - simulating')
+if exist('SimulatedStims.mat')==0
+StimulateStimsWithTheta_VLPO
+end
+load('SimulatedStims.mat')
+events = sort([Range(RemStim,'s');Range(WakeStim,'s')]);
+Freq_Stim = ones(1,length(events))*20;
+end
+StartStim_dansREM=Range(Restrict(ts(events*1E4),REMEpoch));
+load('SleepScoring_OBGamma.mat')
+StartStim_dansREM=Range(Restrict(ts(events*1E4),REMEpoch));
+%%Pour checker combien de Stilm par période
+%Nb de stim
+Stim=size(Start(TTLEpoch_merged))
+%Nb de stim pendant le REM
+StimREM=size(Start(and(TTLEpoch_merged,REMEpoch)))
+%Nb de stim pendant le SWS
+StimSWS=size(Start(and(TTLEpoch_merged,SWSEpoch)))
+%Nb de stim pendant Wake
+StimWAKE=size(Start(and(TTLEpoch_merged,Wake)))
+%Matrice contenant les 4 valeurs précédentes
+MStim=[Stim StimREM StimSWS StimWAKE]
+TTLEpoch_merged = intervalSet(events*1e4,events*1e4+30*1e4);
+%%Pour checker combien de Stilm par période
+%Nb de stim
+Stim=size(Start(TTLEpoch_merged))
+%Nb de stim pendant le REM
+StimREM=size(Start(and(TTLEpoch_merged,REMEpoch)))
+%Nb de stim pendant le SWS
+StimSWS=size(Start(and(TTLEpoch_merged,SWSEpoch)))
+%Nb de stim pendant Wake
+StimWAKE=size(Start(and(TTLEpoch_merged,Wake)))
+%Matrice contenant les 4 valeurs précédentes
+MStim=[Stim StimREM StimSWS StimWAKE]
+Stim
+%%Pour checker combien de Stilm par période
+%Nb de stim
+Stim=size(Start(TTLEpoch_merged),1)
+%Nb de stim pendant le REM
+StimREM=size(Start(and(TTLEpoch_merged,REMEpoch)),1)
+%Nb de stim pendant le SWS
+StimSWS=size(Start(and(TTLEpoch_merged,SWSEpoch)),1)
+%Nb de stim pendant Wake
+StimWAKE=size(Start(and(TTLEpoch_merged,Wake)),1)
+%Matrice contenant les 4 valeurs précédentes
+MStim=[Stim StimREM StimSWS StimWAKE]
+TTLEpoch_merged = intervalSet(events*1e4,events*1e4+0.1*1e4);
+checker combien de Stilm par période
+%Nb de stim
+Stim=size(Start(TTLEpoch_merged),1)
+%Nb de stim pendant le REM
+StimREM=size(Start(and(TTLEpoch_merged,REMEpoch)),1)
+%Nb de stim pendant le SWS
+StimSWS=size(Start(and(TTLEpoch_merged,SWSEpoch)),1)
+%Nb de stim pendant Wake
+StimWAKE=size(Start(and(TTLEpoch_merged,Wake)),1)
+%Matrice contenant les 4 valeurs précédentes
+MStim=[Stim StimREM StimSWS StimWAKE]
+%%Pour checker combien de Stilm par période
+%Nb de stim
+Stim=size(Start(TTLEpoch_merged),1)
+%Nb de stim pendant le REM
+StimREM=size(Start(and(TTLEpoch_merged,REMEpoch)),1)
+%Nb de stim pendant le SWS
+StimSWS=size(Start(and(TTLEpoch_merged,SWSEpoch)),1)
+%Nb de stim pendant Wake
+StimWAKE=size(Start(and(TTLEpoch_merged,Wake)),1)
+%Matrice contenant les 4 valeurs précédentes
+MStim=[Stim StimREM StimSWS StimWAKE]
+TTLEpoch_merged = intervalSet(events*1e4,events*1e4+30*1e4);
+%%Pour checker combien de Stilm par période
+%Nb de stim
+Stim=size(Start(TTLEpoch_merged),1)
+%Nb de stim pendant le REM
+StimREM=size(Start(and(TTLEpoch_merged,REMEpoch)),1)
+%Nb de stim pendant le SWS
+StimSWS=size(Start(and(TTLEpoch_merged,SWSEpoch)),1)
+%Nb de stim pendant Wake
+StimWAKE=size(Start(and(TTLEpoch_merged,Wake)),1)
+%Matrice contenant les 4 valeurs précédentes
+MStim=[Stim StimREM StimSWS StimWAKE]
+%%%Pour le VLPO
+load('VLPO_Low_Spectrum')
+SpectroV=Spectro
+%%AveargeSpectre Stim REM (début stim en 0)
+[MV,SV,tV]=AverageSpectrogram(tsd(SpectroV{2}*1E4,10*log10(SpectroV{1})),SpectroV{3},Restrict(ts(events*1E4),REMEpoch),500,300);
+fig = figure;
+fig

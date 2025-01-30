@@ -1,0 +1,1 @@
+RefSubtraction_multi('amplifier.dat',32,2,'M733',0:15,4,[],'M724',16:31,20,[]);

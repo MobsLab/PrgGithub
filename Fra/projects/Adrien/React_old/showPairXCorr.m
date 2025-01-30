@@ -1,0 +1,213 @@
+function nbGoodPairs = showPairXCorr(pairCovObj,pairsCorr)
+
+maxFigures = 25;
+nbCorrPairs = length(pairsCorr);
+removedPairs = 0;
+
+%in msec!
+
+binSizes = 10;
+binSize = 50;
+nbBinss = 200;
+nbBins = 200;
+
+%for autocorrelogramms
+binSizesA = 1;
+binSizeA = 10;
+nbBinssA = 160;
+nbBinsA = 80;
+
+
+if nbCorrPairs < maxFigures*(nbCorrPairs/(nbCorrPairs+1)) + 1 %check if 0 < nbPairs < ~maxFigures
+
+	close all;
+
+	load(['~/Data/LPPA/' pairCovObj.dset 'AdrienData.mat']);
+	load(['~/Data/LPPA/' pairCovObj.dset 'AdrienData2.mat']);
+
+	stT = Range(startTrial);
+	trO = Range(trialOutcome);
+
+	focusEpoch = intervalSet(stT-1000,trO+3000);	
+%  	focus2Epoch = intervalSet(stT,trO-10000);	
+
+	ix = 1;
+	for i=1:nbCorrPairs
+		
+		cells = pairCovObj.cellPair{pairsCorr(i)};
+		
+		TT1 = cellnames{cells(1)};
+		TT2 = cellnames{cells(2)};
+		
+		if TT1(3) ~= TT2(3)
+			
+
+			[hS1s tS1s] = CrossCorr(Range(Restrict(S{cells(1)},sleep1Epoch)),Range(Restrict(S{cells(2)},sleep1Epoch)),binSizes,nbBinss);
+			[hS2s tS2s] = CrossCorr(Range(Restrict(S{cells(1)},sleep2Epoch)),Range(Restrict(S{cells(2)},sleep2Epoch)),binSizes,nbBinss);
+			[hMs tMs] = CrossCorr(Range(Restrict(S{cells(1)},mazeEpoch)),Range(Restrict(S{cells(2)},mazeEpoch)),binSizes,nbBinss);
+
+			[hS1 tS1] = CrossCorr(Range(Restrict(S{cells(1)},sleep1Epoch)),Range(Restrict(S{cells(2)},sleep1Epoch)),binSize,nbBins);
+			[hS2 tS2] = CrossCorr(Range(Restrict(S{cells(1)},sleep2Epoch)),Range(Restrict(S{cells(2)},sleep2Epoch)),binSize,nbBins);
+			[hM tM] = CrossCorr(Range(Restrict(S{cells(1)},mazeEpoch)),Range(Restrict(S{cells(2)},mazeEpoch)),binSize,nbBins);
+
+			S1 = Range(Restrict(S{cells(1)},focusEpoch));
+			S2 = Range(Restrict(S{cells(2)},focusEpoch));
+
+			if (max(S1)*max(S2) ~= 0)
+				[hMFocus tMFocus] = CrossCorr(Range(Restrict(S{cells(1)},focusEpoch)),Range(Restrict(S{cells(2)},focusEpoch)),binSize,nbBins);
+				[hMFocuss tMFocuss] = CrossCorr(Range(Restrict(S{cells(1)},focusEpoch)),Range(Restrict(S{cells(2)},focusEpoch)),binSizes,nbBinss);
+				[hAuto1 tAuto1] = CrossCorr(Range(Restrict(S{cells(1)},focusEpoch)),Range(Restrict(S{cells(1)},focusEpoch)),binSizeA,nbBinsA);	
+				[hAuto1s tAuto1s] = CrossCorr(Range(Restrict(S{cells(1)},focusEpoch)),Range(Restrict(S{cells(1)},focusEpoch)),binSizesA,nbBinssA);
+				[hAuto2 tAuto2] = CrossCorr(Range(Restrict(S{cells(2)},focusEpoch)),Range(Restrict(S{cells(2)},focusEpoch)),binSizeA,nbBinsA);	
+				[hAuto2s tAuto2s] = CrossCorr(Range(Restrict(S{cells(2)},focusEpoch)),Range(Restrict(S{cells(2)},focusEpoch)),binSizesA,nbBinssA);
+				hAuto1(tAuto1 == 0) = 0;
+				hAuto2(tAuto2 == 0) = 0;
+				hAuto1s(tAuto1s == 0) = 0;
+				hAuto2s(tAuto2s == 0) = 0;
+
+
+
+			else
+				tMFocus = tM;
+				tMFocuss = tMs;
+				hMFocus = zeros(length(tMFocus),1);
+				hMFocuss = zeros(length(tMFocuss),1);
+				hAuto1 = zeros(length(tAuto1),1);
+				hAuto2 = zeros(length(tAuto2),1);
+				hAuto1s = zeros(length(tAuto1s),1);	
+				hAuto2s = zeros(length(tAuto2s),1);
+			end
+
+				
+
+
+%  			S1 = Range(Restrict(S{cells(1)},focus2Epoch));
+%  			S2 = Range(Restrict(S{cells(2)},focus2Epoch));
+%  
+%  			if (max(S1)*max(S2) ~= 0)
+%  				[hMFocus2 tMFocus2] = CrossCorr(Range(Restrict(S{cells(1)},focus2Epoch)),Range(Restrict(S{cells(2)},focus2Epoch)),50,120);
+%  				[hMFocus2s tMFocus2s] = CrossCorr(Range(Restrict(S{cells(1)},focus2Epoch)),Range(Restrict(S{cells(2)},focus2Epoch)),10,80);
+%  			else
+%  				tMFocus2 = tM;
+%  				tMFocus2s = tMs;
+%  				hMFocus2 = zeros(length(tMFocus2),1);
+%  				hMFocus2s = zeros(length(tMFocus2s),1);
+%  			end
+
+
+			
+
+
+			yMaxs = 1.2*max([hS1s;hMs;hMFocuss;hS2s]);
+			yMax = 1.2*max([hS1;hM;hMFocus;hS2]);
+			corrDiff = num2str(pairCovObj.CS2Vect(pairsCorr(i)) - pairCovObj.CS1Vect(pairsCorr(i)));
+
+			f1S1 = Data(intervalrate(S{cells(1)},sleep1Epoch));
+			f1M = Data(intervalrate(S{cells(1)},mazeEpoch));
+			f1MFocus = mean(Data(intervalrate(S{cells(1)},focusEpoch)));
+%  			f1MFocus2 = mean(Data(intervalrate(S{cells(1)},focus2Epoch)));
+			f1S2 = Data(intervalrate(S{cells(1)},sleep2Epoch));
+
+			f2S1 = Data(intervalrate(S{cells(2)},sleep1Epoch));
+			f2M = Data(intervalrate(S{cells(2)},mazeEpoch));
+			f2MFocus = mean(Data(intervalrate(S{cells(2)},focusEpoch)));
+%  			f2MFocus2 = mean(Data(intervalrate(S{cells(2)},focus2Epoch)));
+			f2S2 = Data(intervalrate(S{cells(2)},sleep2Epoch));
+
+
+			h = figure(ix);
+			clf;
+			set(h,'position',[300 300 1400 400]);
+			set(h,'name',[pairCovObj.dset ': xCorr cells ' TT1 ' and ' TT2 ' --  CorrDiff: ' num2str(corrDiff)]);	
+			subplot(2,5,1);
+				bar(tS1s,hS1s);
+				set(gca,'YLim',[0 yMaxs]);
+				title(['Sleep1 Epoch f1=' num2str(f1S1) ' f2=' num2str(f2S1)])	
+			subplot(2,5,2);
+%  				bar(tMs,hMs);
+%  				set(gca,'YLim',[0 yMaxs]);
+%  				title(['Maze Epoch f1=' num2str(f1M) ' f2=' num2str(f2M)])
+				bar(tMFocuss,hMFocuss);
+				set(gca,'YLim',[0 yMaxs]);
+				title(['Maze Focus Epoch f1=' num2str(f1MFocus) ' f2=' num2str(f2MFocus)])
+			subplot(2,5,3);
+				bar(tAuto1s,hAuto1s);
+				%set(gca,'YLim',[0 yMaxs]);
+				title(['autocorr cell 1'])
+			subplot(2,5,4);
+%  				bar(tMFocus2s,hMFocus2s);
+%  				set(gca,'YLim',[0 yMaxs]);
+%  				title(['Maze Focus2 Epoch f1=' num2str(f1MFocus2) ' f2=' num2str(f2MFocus2)])
+				bar(tAuto2s,hAuto2s);
+				%set(gca,'YLim',[0 yMaxs]);
+				title(['autocorr cell 2'])
+			subplot(2,5,5);
+				bar(tS2s,hS2s)
+				set(gca,'YLim',[0 yMaxs]);
+				title(['Sleep2 Epoch f1=' num2str(f1S2) ' f2=' num2str(f2S2)])	
+
+
+			subplot(2,5,6);
+				bar(tS1,hS1);
+				set(gca,'YLim',[0 yMax]);
+				title(['Sleep1 Epoch']);	
+			subplot(2,5,7);
+%  				bar(tM,hM);
+%  				set(gca,'YLim',[0 yMax]);
+%  				title(['Maze Epoch'])	;
+				bar(tMFocus,hMFocus);
+				set(gca,'YLim',[0 yMax]);
+				title([num2Str(mean(Stop(focusEpoch)-Start(focusEpoch))000)])	;
+			subplot(2,5,8);
+%  				bar(tMFocus,hMFocus);
+%  				set(gca,'YLim',[0 yMax]);
+%  				title([num2Str(mean(Stop(focusEpoch)-Start(focusEpoch))000)])	;
+				bar(tAuto1,hAuto1);
+				%set(gca,'YLim',[0 yMaxs]);
+%  				title(['autocorr cell &'])
+			subplot(2,5,9);
+%  				bar(tMFocus2,hMFocus2);
+%  				set(gca,'YLim',[0 yMax]);
+%  				title([num2Str(mean(Stop(focus2Epoch)-Start(focus2Epoch))000)])	;
+				bar(tAuto2,hAuto2);
+				%set(gca,'YLim',[0 yMaxs]);
+%  				title(['autocorr cell 2'])
+			subplot(2,5,10);
+				bar(tS2,hS2);
+				set(gca,'YLim',[0 yMax]);
+				title(['Seep2 Epoch'])	;
+			
+			ix = ix + 1; % index of next figure
+			
+		else
+
+			fprintf(['Cells ' TT1 ' and cells ' TT2 ' come from the same TT. Have not been taken into account\n' ]);
+			removedPairs = removedPairs + 1;	
+
+		end
+
+
+			
+		
+
+	end
+	
+	nbGoodPairs = nbCorrPairs-removedPairs;
+		
+	fprintf('\n\n');
+	fprintf([ ' **************************************************************** \n' ]);
+	fprintf([ ' * Statistics :                                                 * \n' ]);
+	fprintf([ ' * nbCells            : ' num2str(pairCovObj.nbCells)            '\n' ]);
+	fprintf([ ' * nbPairs            : ' num2str(nbPairs)                       '\n' ]);
+	fprintf([ ' * #Pair w/ high corr : ' num2str(nbCorrPairs)                   '\n' ]);
+	fprintf([ ' * ...not from same TT: ' num2str(nbGoodPairs)                   '\n' ]);
+	fprintf([ ' * percentage         : ' num2str(nbGoodPairs/nbPairs*100)       '\n' ]);
+	fprintf([ ' **************************************************************** \n' ]);
+	fprintf('\n\n');
+
+else
+
+	fprintf(['Too many cells or no correlated pairs! (' num2str(nbCorrPairs) ' correlated pairs)\n']);	
+
+end
+

@@ -1,0 +1,430 @@
+function Compute_RatioSleepML(NameDrug,RatioTotalTime,SubStages,SaveFigure)
+ 
+% function Compute_RatioSleepML(NameDrug,RatioTotalTime,SubStages,SaveFigure)
+%
+% inputs :
+% NameDrug = 'DPCPX','LPS','CB' or 'None'
+% RatioTotalTime (optional) = 1 if ratio on total recording time, 0 (default) if sleep time ratio 
+% SubStages = 1 if compute S12 & S34 (see FindSleepStage.m), 0 otherwise
+% SaveFigure (optional) = 1 (default) if save, 0 otherwise
+
+% Exemple: Compute_RatioSleepML('None',0,1,0);
+
+%% Verifications of inputs
+
+if ~exist('NameDrug','var')
+    error('Not enough input arguments') 
+end
+
+if ~exist('RatioTotalTime','var')
+    RatioTotalTime=0;
+end
+
+if ~exist('SubStages','var')
+    SubStages=0;
+end
+FolderSubStages='SleepStagesPaCxDeep.mat';
+
+if ~exist('SaveFigure','var')
+    SaveFigure=1;
+end
+
+%% Directories and epochs
+
+NameEpoch={'REMEpoch','SWSEpoch','MovEpoch'};
+ANALYNAME=['Analyse_RatioSleep/Analyse_',NameDrug,'_RatioSleep'];
+disp(ANALYNAME);
+if RatioTotalTime, ANALYNAME=[ANALYNAME,'Tot'];end
+if SubStages, ANALYNAME=[ANALYNAME,'_SubStages']; NameEpoch={NameEpoch{:},'S12','S34'}; end
+
+if ~exist('Analyse_RatioSleep','dir')
+    mkdir('Analyse_RatioSleep')
+end
+
+try 
+    load([ANALYNAME,'.mat'])
+    InjectionName; Dir; NameEpoch;
+    disp([ANALYNAME,'.mat already exists.. Using it'])
+    
+catch
+    
+    if strcmp(NameDrug,'DPCPX')
+        InjectionName={'Pre' 'VEH' 'DPCPX'};
+        Dir=PathForExperimentsML('DPCPX');
+        
+    elseif strcmp(NameDrug,'LPS')
+        InjectionName={'PreVEH' 'VEH' 'PreLPS' 'LPS' 'H24' 'H48'};
+        Dir=PathForExperimentsML('LPS');
+        
+    elseif strcmp(NameDrug,'CP')
+        InjectionName={'Pre' 'VEH' 'CP'};
+        Dir=PathForExperimentsML('CANAB');
+        
+    elseif strcmp(NameDrug,'None');
+        InjectionName={'Pre' 'Pre'};
+        Dir=PathForExperimentsML('BASAL');
+    else
+        error(['No drug name corresponding to ',NameDrug])
+    end
+    
+    disp(['... Creating ',ANALYNAME,'.mat'])
+    save([ANALYNAME,'.mat'],'InjectionName','Dir','NameEpoch');
+end
+
+Strains=unique(Dir.group);
+MiceNames=unique(Dir.name);
+
+
+%% AllEpochs
+
+try
+    AllEpochsName{1,1}; AllEpochs{1}{1,1};
+    
+catch
+    for man=1:length(Dir.path)
+        disp(' '); disp(['* * * ',Dir.group{man},'-',Dir.name{man},' * * *'])
+        clear epoch SWSEpoch REMEpoch MovEpoch S12 S12
+        load([Dir.path{man},'/StateEpoch.mat'],'SWSEpoch','REMEpoch','MovEpoch')
+        if SubStages, 
+            try 
+                load([Dir.path{man},'/',FolderSubStages],'S12','S34');
+            catch
+                disp(['Missing ',FolderSubStages])
+            end
+        end
+        
+        for nn=1:length(NameEpoch)
+            for inj=1:length(InjectionName),
+                AllEpochs_man{nn,inj}=NaN;
+            end
+        end
+        
+        for nn=1:length(NameEpoch)
+            
+            for inj=1:length(InjectionName),
+                load([Dir.path{man},'/behavResources.mat'],[InjectionName{inj},'Epoch'])
+                try
+                    eval(['epoch=and(',NameEpoch{nn},',',InjectionName{inj},'Epoch);']);
+                
+                    if man==1, AllEpochsName{nn,inj}=['and(',NameEpoch{nn},'-',InjectionName{inj},')'];end
+                    AllEpochs_man{nn,inj}=epoch;
+                end
+            end
+        end
+        AllEpochs{man}=AllEpochs_man;
+    end
+    save([ANALYNAME,'.mat'],'-append','AllEpochsName','AllEpochs')
+end
+            
+%% parameters of sleep for each experiment
+
+% preallocation
+RatioRemSws=nan(length(Dir.path),length(InjectionName));
+Qrem=nan(length(Dir.path),length(InjectionName));
+Qsws=nan(length(Dir.path),length(InjectionName));
+Qsleep=nan(length(Dir.path),length(InjectionName));
+if SubStages
+    Qs12=nan(length(Dir.path),length(InjectionName));
+    Qs34=nan(length(Dir.path),length(InjectionName));
+end
+
+for man=1:length(Dir.path)
+    
+    AllEpochs_man=AllEpochs{man};
+    
+    for inj=1:length(InjectionName)
+        clear Irem Isws Iwake
+        Irem=AllEpochs_man{strcmp(NameEpoch,'REMEpoch'),inj};
+        Isws=AllEpochs_man{strcmp(NameEpoch,'SWSEpoch'),inj};
+        Iwake=AllEpochs_man{strcmp(NameEpoch,'MovEpoch'),inj};
+        if SubStages
+            Is12=AllEpochs_man{strcmp(NameEpoch,'S12'),inj};
+            Is34=AllEpochs_man{strcmp(NameEpoch,'S34'),inj};
+        end
+        
+        
+        if sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s'))+sum(Stop(Iwake,'s')-Start(Iwake,'s')) ~=0
+            RatioRemSws(man,inj)=sum(Stop(Irem,'s')-Start(Irem,'s'))/sum(Stop(Isws,'s')-Start(Isws,'s'));
+            Qsleep(man,inj)=(sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s')))/(sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s'))+sum(Stop(Iwake,'s')-Start(Iwake,'s')))*100;
+            
+            if RatioTotalTime
+                Qrem(man,inj)=sum(Stop(Irem,'s')-Start(Irem,'s'))/(sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s'))+sum(Stop(Iwake,'s')-Start(Iwake,'s')))*100;
+                Qsws(man,inj)=sum(Stop(Isws,'s')-Start(Isws,'s'))/(sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s'))+sum(Stop(Iwake,'s')-Start(Iwake,'s')))*100;
+                if SubStages
+                    try 
+                        Qs12(man,inj)=sum(Stop(Is12,'s')-Start(Is12,'s'))/(sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s'))+sum(Stop(Iwake,'s')-Start(Iwake,'s')))*100;
+                        Qs34(man,inj)=sum(Stop(Is34,'s')-Start(Is34,'s'))/(sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s'))+sum(Stop(Iwake,'s')-Start(Iwake,'s')))*100;
+                    end
+                end
+            else
+                Qrem(man,inj)=sum(Stop(Irem,'s')-Start(Irem,'s'))/(sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s')))*100;
+                Qsws(man,inj)=sum(Stop(Isws,'s')-Start(Isws,'s'))/(sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s')))*100;
+                if SubStages
+                    try
+                        Qs12(man,inj)=sum(Stop(Is12,'s')-Start(Is12,'s'))/(sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s')))*100;
+                        Qs34(man,inj)=sum(Stop(Is34,'s')-Start(Is34,'s'))/(sum(Stop(Irem,'s')-Start(Irem,'s'))+sum(Stop(Isws,'s')-Start(Isws,'s')))*100;
+                    end
+                end
+            end
+        end
+    end
+
+end
+
+%% Info of experiment for each parameter
+
+nameMatrix={'Qsleep','Qrem','Qsws','RatioRemSws'};
+yLimMatrix=[100 20 100 0.25 ];
+if SubStages, 
+    nameMatrix={nameMatrix{:},'Qs12','Qs34'};
+    yLimMatrix=[yLimMatrix, 100,100];
+end
+
+
+for mm=1:length(nameMatrix)
+    clear Temp MatrixM
+    eval(['MatrixM=',nameMatrix{mm},';'])
+    
+    [I,J]=find(~isnan(MatrixM)); 
+    Temp=MatrixM(~isnan(MatrixM)); 
+    Temp(:,2)=J;
+    
+    for i=1:length(J), 
+        Temp(i,3)=find(strcmp(Dir.group(I(i)),Strains)); 
+        Temp(i,4)=find(strcmp(Dir.name(I(i)),MiceNames));
+    end
+    
+    All_parameters{mm}=Temp; % value / injection / strain / Mouse
+end
+
+
+%% Display values for each mouse
+scrsz = get(0,'ScreenSize');
+Ttitle={'% Sleep','% REM','% SWS','REM / SWS'};
+Ttitleshort={'PercentageSleep','PercentageREM','PercentageSWS','ratioREMvsSWS'};
+
+if SubStages, 
+    Ttitle={Ttitle{:},'% S12','% S34'};
+    Ttitleshort={Ttitleshort{:},'PercentageS12','PercentageS34'};
+end
+
+for i=1:length(Ttitle)
+    if i~=4 
+        if RatioTotalTime
+            Ttitle{i}=[Ttitle{i},' on total recording'];
+        else
+            Ttitle{i}=[Ttitle{i},' on total sleep'];
+        end
+    end
+end
+
+figure('color',[1 1 1],'Position',[2 scrsz(4)/2 scrsz(3)/4 scrsz(4)/2]), FsleepR=gcf;
+
+
+for gg=1:length(MiceNames)
+    for i=1:length(nameMatrix)
+        clear Temp
+        subplot(length(nameMatrix),length(MiceNames),(i-1)*length(MiceNames)+gg)
+        
+        Temp=find(All_parameters{i}(:,4)==gg);
+        bar(All_parameters{i}(Temp,1));
+        
+        l=length(All_parameters{i}(Temp,1));
+        set(gca,'xtick',1:l); xlim([0 l+1])
+        set(gca,'xticklabel',InjectionName(All_parameters{i}(Temp,2)))
+        
+        title(Ttitle{i}); 
+        ylabel([Strains{unique(All_parameters{i}(Temp,3))},'-',MiceNames{gg}(end-1:end)]); 
+        ylim([0 yLimMatrix(i)]);
+    end
+end
+
+%% pool data for each mouse
+if 1
+    TEMP=All_parameters;
+    for i=1:length(nameMatrix)
+        AllTemp=TEMP{i};
+        temp=[];
+        for uu=1:length(MiceNames)
+            for inj=1:length(InjectionName)
+                index=find(AllTemp(:,2)==inj & AllTemp(:,4)==uu);
+                temp=[temp;[nanmean(AllTemp(index,1)),inj,unique(AllTemp(index,3)),uu]];
+            end
+        end
+        All_parameters{i}=temp;
+    end
+end
+
+%% display compared between strains
+
+figure('color',[1 1 1],'Position',scrsz), FsleepR_Strains=gcf;
+fact_errorbar=-0.15:0.3/(length(Strains)-1):0.15;
+
+for i=1:length(nameMatrix)
+    clear Bartemp BartempStd
+    BarStd=[];BarLine=[];
+    AnovFactor_Strains=[];
+    AnovFactor_Injection=[];
+    AnovData=[];
+    for inj=1:length(InjectionName)
+        for gg=1:length(Strains)
+            
+            index_temp=find(All_parameters{i}(:,2)==inj & All_parameters{i}(:,3)==gg);
+            Bartemp(inj,gg)=nanmean(All_parameters{i}(index_temp,1));
+            BartempStd(inj,gg)=stdError(All_parameters{i}(index_temp,1));
+            position_errorbar((inj-1)*length(Strains)+gg)=inj+fact_errorbar(gg);
+            
+            AnovData=[AnovData;All_parameters{i}(index_temp,1)];
+            AnovFactor_Strains=[AnovFactor_Strains;zeros(length(index_temp),1)+gg];
+            AnovFactor_Injection=[AnovFactor_Injection;zeros(length(index_temp),1)+inj];
+            legend_strains{gg}=[Strains{gg},' (n=',num2str(length(index_temp)),')'];
+        end
+        BarStd=[BarStd,BartempStd(inj,:)];
+        BarLine=[BarLine,Bartemp(inj,:)];
+    end
+    
+    % display
+    subplot(2,ceil(length(nameMatrix)/2),i),
+    bar(Bartemp)
+    legend(legend_strains)
+    hold on, errorbar(position_errorbar,BarLine,BarStd,'+','color','k')
+    set(gca,'xtick',[1:length(InjectionName)]);
+    set(gca,'xticklabel',InjectionName);
+    ylabel(Ttitle{i});
+    ylim([0 yLimMatrix(i)])
+    
+    % stats
+    if length(InjectionName)>1 && length(Strains)>1
+        [p,table] = anovan(AnovData,{AnovFactor_Strains AnovFactor_Injection},'model','full');
+        title({['strains: p=',num2str(floor(1E4*p(1))/1E4)],['Injection: p=',num2str(floor(1E4*p(2))/1E4)],['Interaction p=',num2str(floor(1E4*p(3))/1E4)]});
+    elseif length(InjectionName)>1 && length(Strains)<2
+        [p,table] = anovan(AnovData,{AnovFactor_Injection});
+        title(['Injection: p=',num2str(floor(1E4*p(1))/1E4)]);
+    elseif length(InjectionName)<2 && length(Strains)>1
+        [p,table] = anovan(AnovData,{AnovFactor_Strains});
+        title(['strains: p=',num2str(floor(1E4*p(1))/1E4)]);
+    end
+        
+    StatTable{i}=table;
+    Save_AnovData{i}=AnovData;
+    Save_AnovFactor_Strains{i}=AnovFactor_Strains;
+    Save_AnovFactor_Injection{i}=AnovFactor_Injection;
+end
+save([ANALYNAME,'.mat'],'-append','StatTable','Save_AnovData','Save_AnovFactor_Strains','Save_AnovFactor_Injection')
+
+
+%% compared intravraiability to intervariability
+if 0
+if strcmp(NameDrug,'None')
+    
+    for i=1:length(nameMatrix)
+        
+        AnovFactor_Day=[];
+        AnovData=All_parameters{i}(1:size(All_parameters{i},1)/2,1);
+        AnovFactor_Mouse=All_parameters{i}(1:size(All_parameters{i},1)/2,4);
+        unique_temp_mouse=unique(AnovFactor_Mouse);
+        comptUniqueTempMouse=zeros(1,length(unique_temp_mouse));
+        for j=1:length(AnovData)
+            comptUniqueTempMouse(unique_temp_mouse==All_parameters{i}(j,4))=comptUniqueTempMouse(unique_temp_mouse==All_parameters{i}(j,4))+1;
+            AnovFactor_Day=[AnovFactor_Day;comptUniqueTempMouse(unique_temp_mouse==All_parameters{i}(j,4))];
+        end
+        
+        % stats
+        figure(FsleepR_Strains), subplot(2,ceil(length(nameMatrix)/2),i),
+        if length(unique(AnovFactor_Day))>1 && length(unique(AnovFactor_Mouse))>1
+            [p,table] = anovan(AnovData,{AnovFactor_Day,AnovFactor_Mouse},'model','full');
+            xlabel({['IntraVar: p=',num2str(floor(1E4*p(1))/1E4)],['InterVar: p=',num2str(floor(1E4*p(2))/1E4)],['Interaction: p=',num2str(floor(1E4*p(3))/1E4)]});
+        end
+        
+    end
+end
+end
+%% Display pooled values for strains + statistics
+% 
+% 
+% 
+% 
+% 
+% clear ANOV
+% for i=1:length(nameMatrix)
+%     figure(FsleepR_Strains), subplot(length(nameMatrix),1,i),
+%     bar(Bartemp(i,:))
+%     hold on, errorbar(1:length(Bartemp(i,:)),Bartemp(i,:),BartempStd(i,:),'+','color','k')
+%     
+%     set(gca,'xtick',[1:length(Bartemp(i,:))]); 
+%     title(Ttitle{i})
+%     set(gca,'xticklabel',[InjectionName,' n=',num2str(Nn(i,:))]);
+%     
+%     compt=0;
+%     for gg=1:length(Strains), %factor 2 = strain
+%         a=1; clear Temp
+%         for inj=1:length(InjectionName), %factor 1 = injection day
+%             if length(All_parameters{i}(All_parameters{i}(:,2)==inj & All_parameters{i}(:,3)==gg ,1))<2, a=0; end
+%             Temp{inj}=All_parameters{i}(All_parameters{i}(:,2)==inj & All_parameters{i}(:,3)==gg ,1);
+%         end
+%         if a, 
+%             compt=compt+1; ANOV{compt}=Temp; 
+%             ANOVgroup{compt}=Strains{gg}; 
+%         end
+%     end
+%     
+% %     if length(ANOV)>1,
+% %         keyboard
+% %         [p,t,st,Pt1,Pt2,Pt3,group]=CalculANOVAmultipleTwoway(ANOV{:});
+% %         title(Ttitle{i}); set(gca,'xtick',1:length(InjectionName));
+% %         set(gca,'xticklabel',InjectionName);
+% %         disp(Ttitle{i});
+% %         disp('Factor injection day:');disp(Pt1);
+% %         disp('Factor strain:');disp(Pt2);
+% %         disp('Factor injection day x Factor strain:');disp(Pt3);
+% %         
+% %     else
+% %         [p,t,st,Pt,group]=CalculANOVAmultipleOneway(ANOV{1});
+% %         title(['Strain ',ANOVgroup{1}]); ylabel(Ttitle{i});set(gca,'xtick',1:length(InjectionName));
+% %         set(gca,'xticklabel',InjectionName);
+% %         FsleepR_StrainsStat{i}=gcf;
+% %         
+% %         disp(Ttitle{i});disp(Pt);
+% %         fprintf(file,'%s\n',['Strain ',ANOVgroup{1}]);
+% %         fprintf(file,'%s\n','  ');fprintf(file,'%s\n',Ttitle{i});
+% %         for j=1:length(InjectionName), fprintf(file,'%s\n',' '); for ii=1:length(InjectionName)-1, fprintf(file,'%6.3f',Pt{ii,j});end;end
+% %         fprintf(file,'%s\n','  ');
+% %         for ii=1:length(InjectionName)-1,
+% %             for j=1:length(InjectionName),
+% %                 if Pt{ii,j}<0.05,
+% %                     disp([InjectionName{ii},' vs ',InjectionName{j},': p=',num2str(Pt{ii,j})]);
+% %                     fprintf(file,'%s\n',[InjectionName{ii},' vs ',InjectionName{j},': p=',num2str(Pt{ii,j})]);
+% %                 end
+% %             end
+% %         end
+% %         
+% %     end
+% end
+
+
+
+
+
+
+%% Save figures
+
+if SaveFigure
+    res=pwd;
+    % nameFolderSave to save figure
+
+    nameFolderSave=ANALYNAME;
+    
+    if ~exist([res,'/',nameFolderSave],'dir')
+        mkdir(res,nameFolderSave);
+    else
+        disp(['Warning: folder ',nameFolderSave,' already exists. Figures may be erased'])
+    end
+    
+    disp('Keyboard for figure change before saving or to prevent saving')
+    keyboard
+    saveFigure(FsleepR,'SleepRatio_All',[res,'/',nameFolderSave]);
+    saveFigure(FsleepR_Strains,'SleepRatio_StrainsEffect',[res,'/',nameFolderSave]);
+%     for i=1:length(nameMatrix), saveFigure(FsleepR_StrainsStat{i},['Sleep',ANOVgroup{1},Ttitleshort{i}],[res,'/',nameFolderSave]);end
+    
+end
+

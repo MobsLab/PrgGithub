@@ -1,0 +1,199 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Ce code de Karim sert à tracer deux figures
+% La première sert à tracer les 3 spectres HPC et les 3 spectres Bulb pour le SleepScoring OB gamma de la souris 926
+% La deuxième sert à tracer les 3 spectres HPC et les 3 spectres Bulb pour le SleepScoring Accelero de la souris 926
+
+% Pour cette souris, le gamma n'est pas beau (channel 23), donc il faut
+% regarder la différence entre les 2 SleepScoring
+
+% Dans un deuxième temps, on change le channel bulb_deep (channel 24) et on
+% recalcule le spectre pour voir si c'est mieux
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Calcul des spectres - loading des data
+
+
+% Baseline 2
+
+cd /media/nas5/Thierry_DATA/Rat_box_72h/923_926_Baseline2_box_rat_72h_01112019_191101_101432/M926
+
+
+% channel=23
+% save('Bulb_deep.mat','channel')
+% load('ChannelsToAnalyse/Bulb_deep.mat')       % On recalcule le spectre après avoir changé de channel
+% channel_Bulb=channel;
+% foldername=pwd;
+% if foldername(end)~=filesep
+%     foldername(end+1)=filesep;
+% end
+% HighSpectrum(foldername,channel_Bulb,'B');
+
+    
+
+load SleepScoring_OBGamma REMEpoch SWSEpoch Wake
+REMobBas2=REMEpoch;
+WakeobBas2=Wake; 
+SWSobBas2=SWSEpoch;
+load SleepScoring_Accelero REMEpoch Wake SWSEpoch
+REMAccBas2=REMEpoch;
+WakeAccBas2=Wake; 
+SWSAccBas2=SWSEpoch;
+
+load('B_High_Spectrum.mat')
+SpB=tsd(Spectro{2}*1E4,Spectro{1});
+fb=Spectro{3};
+load('H_Low_Spectrum.mat')
+SpH=tsd(Spectro{2}*1E4,Spectro{1});
+fh=Spectro{3};
+
+SpHBas2=SpH;
+SpBBas2=SpB;
+
+
+% Exposure
+
+cd /media/nas5/Thierry_DATA/Rat_box_72h/923_926_Exposure_box_rat_72h_31102019_191031_100146/M926
+
+% channel=23
+% save('Bulb_deep.mat','channel')
+% load('ChannelsToAnalyse/Bulb_deep.mat')
+% channel_Bulb=channel;
+% foldername=pwd;
+% if foldername(end)~=filesep
+%     foldername(end+1)=filesep;
+% end
+% HighSpectrum(foldername,channel_Bulb,'B');
+
+load SleepScoring_OBGamma REMEpoch SWSEpoch Wake
+REMobExp=REMEpoch;
+WakeobExp=Wake; 
+SWSobExp=SWSEpoch;
+load SleepScoring_Accelero REMEpoch Wake SWSEpoch
+REMAccExp=REMEpoch;
+WakeAccExp=Wake; 
+SWSAccExp=SWSEpoch;
+
+load('B_High_Spectrum.mat')
+SpB=tsd(Spectro{2}*1E4,Spectro{1});
+fb=Spectro{3};
+load('H_Low_Spectrum.mat')
+SpH=tsd(Spectro{2}*1E4,Spectro{1});
+fh=Spectro{3};
+
+SpHExp=SpH;
+SpBExp=SpB;
+
+
+% Baseline 1
+
+cd /media/nas5/Thierry_DATA/Rat_box_72h/923_926_Baseline1_box_rat_72h_30102019_191030_102649/M926
+
+% channel=23
+% save('Bulb_deep.mat','channel')
+load('ChannelsToAnalyse/Bulb_deep.mat')
+channel_Bulb=channel;
+foldername=pwd;
+if foldername(end)~=filesep
+    foldername(end+1)=filesep;
+end
+HighSpectrum(foldername,channel_Bulb,'B');
+
+load SleepScoring_OBGamma REMEpoch SWSEpoch Wake
+REMobBas1=REMEpoch;
+WakeobBas1=Wake; 
+SWSobBas1=SWSEpoch;
+load SleepScoring_Accelero REMEpoch Wake SWSEpoch
+REMAccBas1=REMEpoch;
+WakeAccBas1=Wake; 
+SWSAccBas1=SWSEpoch;
+
+load('B_High_Spectrum.mat')
+SpB=tsd(Spectro{2}*1E4,Spectro{1});
+fb=Spectro{3};
+load('H_Low_Spectrum.mat')
+SpH=tsd(Spectro{2}*1E4,Spectro{1});
+fh=Spectro{3};
+
+SpHBas1=SpH;
+SpBBas1=SpB;
+
+
+%% Tracer des figures
+
+
+figure
+subplot(2,3,1), hold on, 
+plot(fh,mean(10*(Data(Restrict(SpHBas1,WakeobBas1)))),'k','linewidth',2), title('Wake M926'), ylabel('Hpc')
+plot(fh,mean(10*(Data(Restrict(SpHBas2,WakeobBas2)))),'b','linewidth',2)
+plot(fh,mean(10*(Data(Restrict(SpHExp,WakeobExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+subplot(2,3,2), hold on, 
+plot(fh,mean(10*(Data(Restrict(SpHBas1,SWSobBas1)))),'k','linewidth',2), title('SWS M926'), ylabel('Hpc')
+plot(fh,mean(10*(Data(Restrict(SpHBas2,SWSobBas2)))),'b','linewidth',2)
+plot(fh,mean(10*(Data(Restrict(SpHExp,SWSobExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+subplot(2,3,3), hold on, 
+plot(fh,mean(10*(Data(Restrict(SpHBas1,REMobBas1)))),'k','linewidth',2), title('REM'), ylabel('Hpc')
+plot(fh,mean(10*(Data(Restrict(SpHBas2,REMobBas2)))),'b','linewidth',2)
+plot(fh,mean(10*(Data(Restrict(SpHExp,REMobExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+subplot(2,3,4), hold on, 
+plot(fb,mean(10*(Data(Restrict(SpBBas1,WakeobBas1)))),'k','linewidth',2), title('Wake'), ylabel('OB')
+plot(fb,mean(10*(Data(Restrict(SpBBas2,WakeobBas2)))),'b','linewidth',2)
+plot(fb,mean(10*(Data(Restrict(SpBExp,WakeobExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+subplot(2,3,5), hold on, 
+plot(fb,mean(10*(Data(Restrict(SpBBas1,SWSobBas1)))),'k','linewidth',2), title('SWS'), ylabel('OB')
+plot(fb,mean(10*(Data(Restrict(SpBBas2,SWSobBas2)))),'b','linewidth',2)
+plot(fb,mean(10*(Data(Restrict(SpBExp,SWSobExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+subplot(2,3,6), hold on, 
+plot(fb,mean(10*(Data(Restrict(SpBBas1,REMobBas1)))),'k','linewidth',2), title('REM'), ylabel('OB')
+plot(fb,mean(10*(Data(Restrict(SpBBas2,REMobBas2)))),'b','linewidth',2)
+plot(fb,mean(10*(Data(Restrict(SpBExp,REMobExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+
+
+
+figure
+subplot(2,3,1), hold on, 
+plot(fh,mean(10*(Data(Restrict(SpHBas1,WakeAccBas1)))),'k','linewidth',2), title('Wake Acc'), ylabel('Hpc')
+plot(fh,mean(10*(Data(Restrict(SpHBas2,WakeAccBas2)))),'b','linewidth',2)
+plot(fh,mean(10*(Data(Restrict(SpHExp,WakeAccExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+subplot(2,3,2), hold on, 
+plot(fh,mean(10*(Data(Restrict(SpHBas1,SWSAccBas1)))),'k','linewidth',2), title('SWS Acc'), ylabel('Hpc')
+plot(fh,mean(10*(Data(Restrict(SpHBas2,SWSAccBas2)))),'b','linewidth',2)
+plot(fh,mean(10*(Data(Restrict(SpHExp,SWSAccExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+subplot(2,3,3), hold on, 
+plot(fh,mean(10*(Data(Restrict(SpHBas1,REMAccBas1)))),'k','linewidth',2), title('REM Acc'), ylabel('Hpc')
+plot(fh,mean(10*(Data(Restrict(SpHBas2,REMAccBas2)))),'b','linewidth',2)
+plot(fh,mean(10*(Data(Restrict(SpHExp,REMAccExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+subplot(2,3,4), hold on, 
+plot(fb,mean(10*(Data(Restrict(SpBBas1,WakeAccBas1)))),'k','linewidth',2), title('Wake Acc'), ylabel('OB')
+plot(fb,mean(10*(Data(Restrict(SpBBas2,WakeAccBas2)))),'b','linewidth',2)
+plot(fb,mean(10*(Data(Restrict(SpBExp,WakeAccExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+subplot(2,3,5), hold on, 
+plot(fb,mean(10*(Data(Restrict(SpBBas1,SWSAccBas1)))),'k','linewidth',2), title('SWS Acc'), ylabel('OB')
+plot(fb,mean(10*(Data(Restrict(SpBBas2,SWSAccBas2)))),'b','linewidth',2)
+plot(fb,mean(10*(Data(Restrict(SpBExp,SWSAccExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')
+
+subplot(2,3,6), hold on, 
+plot(fb,mean(10*(Data(Restrict(SpBBas1,REMAccBas1)))),'k','linewidth',2), title('REM Acc'), ylabel('OB')
+plot(fb,mean(10*(Data(Restrict(SpBBas2,REMAccBas2)))),'b','linewidth',2)
+plot(fb,mean(10*(Data(Restrict(SpBExp,REMAccExp)))),'r','linewidth',2)
+legend('Baseline 1', 'Baseline 2', 'Exposure')

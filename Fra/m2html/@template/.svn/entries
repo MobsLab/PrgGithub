@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-05-25T10:43:10.993826Z"
+   url="file:///home/battagli/svn/matlab/trunk/m2html/@template"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="display.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="f78c06fdf9eec1272b1ea5e57154016e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="parse.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="08dbf27bd5b58d0aaa821c2bbc0cf1ed"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="set.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="0dd16b6b51b9bb4ffef39d06bd7ab621"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="template.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="138c0aa3496baaead6e4a3dde32e35dc"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="char.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="8f3c07c78e7772fc0752b4a24717e28c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   name="private"
+   kind="dir"/>
+<entry
+   committed-rev="1"
+   name="get.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="2abd75be362cb6b9dc6f4ab49e7a4eb3"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+</wc-entries>

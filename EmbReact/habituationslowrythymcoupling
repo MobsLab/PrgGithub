@@ -1,0 +1,146 @@
+%% Are theta and OB ocillations coupled?
+%  Only look
+%% Comodulation in three states : REM, SWS, Locomotion
+clear all
+
+SaveFolderName='/media/DataMOBsRAID/ProjectEmbReact/Figures/Nov2016/SlowRythymCoupling';
+Files=PathForExperimentsEmbReact('Habituation');
+% Params
+params.Fs=1250;
+params.trialave=0;
+params.err=[1 0.0500];
+params.pad=2;
+params.fpass=[0 20];
+movingwin=[3 0.2];
+params.tapers=[3 5];Struc={'HPC','OB','PFCx'};
+
+for pp=1:length(Files.path)
+    for c=1
+        try
+            cd(Files.path{pp}{c})
+            clear FilLFPL Hi Lo EpHi Sp Phase y
+            
+            load('ChannelsToAnalyse/Bulb_deep.mat')
+            chB=channel;
+            load(['LFPData/LFP',num2str(chB),'.mat']);
+            [y, ARmodel] = WhitenSignal(Data(LFP),[],1,[],2);
+            LFPAll.OB=tsd(Range(LFP),y);
+            [Sp.OB,tspB,fspB]=mtspecgramc(y,movingwin,params);
+            Hi=mean(Sp.OB(:,find(fspB<7,1,'last'):find(fspB<11,1,'last'))');
+            Lo=mean(Sp.OB(:,find(fspB<1,1,'last'):find(fspB<7,1,'last'))');
+            EpHi=thresholdIntervals(tsd(tspB*1e4,Hi'-Lo'),0);
+            EpHi=mergeCloseIntervals(EpHi,3*1e4);
+            FilLFPL=FilterLFP(tsd(Range(LFP),y),[7 11],1024);
+            Hil=hilbert(Data(Restrict(FilLFPL,EpHi)));
+            Phase.OB=angle(Hil)*180/pi+180;
+            snip=ceil(rand(1)*length(Phase.OB));
+            Phase.OBR=[Phase.OB(snip:end);Phase.OB(1:snip-1)];
+            
+            clea y LFP
+            try
+                load('ChannelsToAnalyse/dHPC_deep.mat')
+                chH=channel;
+            catch
+                
+                load('ChannelsToAnalyse/dHPC_rip.mat')
+                chH=channel;
+            end
+            load(['LFPData/LFP',num2str(chH),'.mat']);
+            [y, ARmodel] = WhitenSignal(Data(LFP),[],1,[],2);
+            [Sp.HPC,tspH,fspH]=mtspecgramc(y,movingwin,params);
+            LFPAll.HPC=tsd(Range(LFP),y);
+            FilLFPL=FilterLFP(tsd(Range(LFP),y),[7 11],1024);
+            Hil=hilbert(Data(Restrict(FilLFPL,EpHi)));
+            Phase.HPC=angle(Hil)*180/pi+180;
+            snip=ceil(rand(1)*length(Phase.HPC));
+            Phase.HPCR=[Phase.HPC(snip:end);Phase.HPC(1:snip-1)];
+            
+            clea y LFP
+            load('ChannelsToAnalyse/PFCx_deep.mat')
+            chP=channel;
+            load(['LFPData/LFP',num2str(chP),'.mat']);
+            [y, ARmodel] = WhitenSignal(Data(LFP),[],1,[],2);
+            [Sp.PFCx,tspH,fspH]=mtspecgramc(y,movingwin,params);
+            LFPAll.PFCx=tsd(Range(LFP),y);
+            FilLFPL=FilterLFP(tsd(Range(LFP),y),[7 11],1024);
+            Hil=hilbert(Data(Restrict(FilLFPL,EpHi)));
+            Phase.PFCx=angle(Hil)*180/pi+180;
+            snip=ceil(rand(1)*length(Phase.PFCx));
+            Phase.PFCxR=[Phase.PFCx(snip:end);Phase.PFCx(1:snip-1)];
+            
+            % RealData
+            for ss=1:3
+                for sss=1:3
+                    if not(ss==sss)
+                        [temp,xx,yy]=hist2(eval(['Phase.',Struc{ss}]),eval(['Phase.',Struc{sss}]),100,100);
+                        eval(['nn.',Struc{ss},'n',Struc{sss},'=temp'])
+                    end
+                end
+            end
+            
+            fig=figure;
+            for ss=1:3
+                for sss=1:3
+                    if not(ss==sss)
+                        subplot(3,3,(ss-1)*3+sss)
+                        imagesc(xx,yy,log(eval(['nn.',Struc{ss},'n',Struc{sss}]))), caxis([2 6])
+                    else
+                        subplot(3,3,(ss-1)*3+sss)
+                        imagesc(tspB,fspB,log(eval(['Sp.',Struc{ss}]))'), axis xy, hold on,
+                        line([Start(EpHi,'s') Stop(EpHi,'s')]',ones(2,length(Start(EpHi)))*15,'color','k')
+                        Sptsd=tsd(tspB*1e4,(eval(['Sp.',Struc{ss}])));
+                        meansp=nanmean(Data(Restrict(Sptsd,EpHi)));
+                        meansp=meansp/(max(meansp)-min(meansp));
+                        plot(meansp*300,fspB)
+                    end
+                end
+            end
+            subplot(3,3,1), title('HPC'), ylabel('HPC')
+            subplot(3,3,2), title('OB'),
+            subplot(3,3,3), title('PFC'),
+            subplot(3,3,4), ylabel('OB'),
+            subplot(3,3,7), ylabel('PFC'),
+            saveas(fig,[SaveFolderName,'ThetaBandCouplingM',num2str(Files.ExpeInfo{pp}.nmouse),'.png']);
+            saveas(fig,[SaveFolderName,'ThetaBandCouplingM',num2str(Files.ExpeInfo{pp}.nmouse),'.fig']);
+            close all
+            
+            clear nn
+            % random data
+            for ss=1:3
+                for sss=1:3
+                    if not(ss==sss)
+                        [temp,xx,yy]=hist2(eval(['Phase.',Struc{ss},'R']),eval(['Phase.',Struc{sss},'R']),100,100);
+                        eval(['nn.',Struc{ss},'n',Struc{sss},'=temp'])
+                    end
+                end
+            end
+            
+            fig=figure;
+            for ss=1:3
+                for sss=1:3
+                    if not(ss==sss)
+                        subplot(3,3,(ss-1)*3+sss)
+                        imagesc(xx,yy,log(eval(['nn.',Struc{ss},'n',Struc{sss}]))), caxis([2 6])
+                    else
+                        subplot(3,3,(ss-1)*3+sss)
+                        imagesc(tspB,fspB,log(eval(['Sp.',Struc{ss}]))'), axis xy, hold on
+                        line([Start(EpHi,'s') Stop(EpHi,'s')]',ones(2,length(Start(EpHi)))*15,'color','k')
+                        Sptsd=tsd(tspB*1e4,(eval(['Sp.',Struc{ss}])));
+                        meansp=nanmean(Data(Restrict(Sptsd,EpHi)));
+                        meansp=meansp/(max(meansp)-min(meansp));
+                        plot(meansp*300,fspB)
+                    end
+                end
+            end
+            subplot(3,3,1), title('HPC'), ylabel('HPC')
+            subplot(3,3,2), title('OB'),
+            subplot(3,3,3), title('PFC'),
+            subplot(3,3,4), ylabel('OB'),
+            subplot(3,3,7), ylabel('PFC'),
+            saveas(fig,[SaveFolderName,'ThetaBandCouplingRandM',num2str(Files.ExpeInfo{pp}.nmouse),'.png']);
+            saveas(fig,[SaveFolderName,'ThetaBandCouplingRandM',num2str(Files.ExpeInfo{pp}.nmouse),'.fig']);
+            close all
+            
+        end
+    end
+end

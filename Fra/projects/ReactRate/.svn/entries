@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-05-25T10:43:10.993826Z"
+   url="file:///home/battagli/svn/matlab/trunk/projects/ReactRate"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="HippoSpikeData_fn.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="faa03b2dcd74f1c83740d9a77ce00f9a"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACEpochs10min.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="0cd44f774c4ae7bbfee1069ff4b684b4"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACThetaPhase.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6c7b4fa43a92abaa81be7597a5d74482"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReadCedASCIISpikeTrain.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="4472a2aae82e1c0f376da6346fce8c21"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="newSharpWaves.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1f8e74c9502a4dc8537c0e7c914da5f1"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACInterneurons.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1b8b2a357b8e404252521187fd796e39"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HippoCellList_fn.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="d2e34074e04a4905f363cc17945dfc91"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HippoSpikeData.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="abad95a1de4839f2f0e6ceed040116c5"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACPosition.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="baf64b6109340b62987810e996580779"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeWarpEpochLimits.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6583752468bb86e506186cdf6066f269"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="CRAMDatasets.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5b0cd04071af4dec5802d70f11aaf290"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACDatasets.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="da62ff6dba8f48acf89544d44e784feb"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACSpw.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="8178256d8f158787f51d7a510628aa50"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeSQResources.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="fff94a0f2e80c0edaeb6cb5ec55bb73d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeOldSharpWaves.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="9243665de9450621f16f9d048f63edb4"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACInterneurons2.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="17e5775059e481ca731b8e036a90ea04"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="Hyper5Epochs10min.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="cce6dd09c66f0aef57517d2636fb7fa9"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="retrieve_epoch_limits.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="b9e3a30c27624a547775126da60e07e8"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="Hyper5SpikeData_fn.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="0b73c290b2df0d248a7abc007be627cb"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="CortCellList_fn.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="95b0983bb6e58e8f60b05a21fc7b2439"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="WarpRuns"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="98c6857e49a3909a4311697d291fc3b3"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeCellNameResource.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5fac773dcbc90b1ba26cbbaf85792ea7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeCellNameResourceHippo.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5fac773dcbc90b1ba26cbbaf85792ea7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACPrePostSleep.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="f291094767f90666ef24b7deda7567dd"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="CRAMPrePostSleep.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="62225943123628688c6476c35318165e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACRuns.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="963a335155a9a0fdfc33e96c68f858d7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="GlobRate.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6019c8654b78dfb9c012c7643fe67a67"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="DIRACCellList_fn.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ab2e295963f374ff9962ca56621990c5"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="CRAMCellList_fn.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="f87fb18af42de1be6136c383fab9d80e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="Hyper5Datasets.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="09ff9759703930844cbcceaa9f757877"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="SpikeData.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1a9ba640f9cf660ed0ece485a2d6daf7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="Hyper5Spw.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="702fa254e677c8e2f7300d6b105aab6d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="WarpSleepEpochs10min.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5729cd59a65eab4a95bad638c87d39e7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HippoSpikeData_BD1_fn.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="57fb96d9aa3672af3f9b3e67ee89237c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="WarpEpochs10min.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="c3d5d62d70e384bed807a9c211a54336"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeSharpWaves.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6583752468bb86e506186cdf6066f269"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ReactEVCV.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1ba8e8cb382061ccc3d42064a5886cf1"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="Hyper5PrePostSleep.m"
+   text-time="2006-06-01T11:59:01.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ad9ef0ad428d710d2039a0154577434e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+</wc-entries>

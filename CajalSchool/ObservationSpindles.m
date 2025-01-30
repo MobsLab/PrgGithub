@@ -1,0 +1,54 @@
+function Spi=ObservationSpindles(LFPs,EpochSpiDetect,channel4spindles,channel4observation,freq,Spi) 
+
+
+sp=3000;
+rg=Range(LFPs{channel4spindles},'s');
+
+try
+    Spi;
+catch
+    Spi = FindSpindlesKJ(LFPs{channel4spindles}, EpochSpiDetect, 'frequency_band',freq);
+end
+
+SpindlesEpoch=intervalSet(Spi(:,1)*1E4,Spi(:,3)*1E4);
+
+Filsp = FilterLFP(LFPs{channel4spindles},freq,1024);
+squaredSignal = Data(Filsp).^2;
+
+windowLength = 11;
+%windowLength=1/median(diff(Range(Filsp,'s')))/1250*11;
+
+window = ones(windowLength,1)/windowLength;
+[normalizedSquaredSignal] = unity(Filter0(window,sum(squaredSignal,2)));
+temp = tsd(Range(Filsp),smooth(normalizedSquaredSignal,10));
+t = FindLocalMax(temp);
+normalizedSquaredSignal = Data(Restrict(t,temp));
+squaretsd=tsd(Range(Filsp),runmean(rescale(normalizedSquaredSignal,0,2.5*max(Data(Filsp))),100));
+
+
+variance_sig = (2/3) * std(Data(Restrict(Filsp,EpochSpiDetect)));
+threshold=3*variance_sig;
+
+
+figure, hold on
+plot(Range(LFPs{channel4spindles},'s'),Data(LFPs{channel4spindles}),'k')
+try
+    for a=1:length(channel4observation)
+        plot(Range(LFPs{channel4observation(a)},'s'),a*sp+Data(LFPs{channel4observation(a)}),'b')
+    end
+    
+end
+for i=1:length(Start(SpindlesEpoch))
+    plot(Range(Restrict(LFPs{channel4spindles},subset(SpindlesEpoch,i)),'s'),Data(Restrict(LFPs{channel4spindles},subset(SpindlesEpoch,i))),'r')
+    try
+        for a=1:length(channel4observation)
+        plot(Range(Restrict(LFPs{channel4observation(a)},subset(SpindlesEpoch,i)),'s'),a*sp+Data(Restrict(LFPs{channel4observation(a)},subset(SpindlesEpoch,i))),'m')
+        end
+    end
+end
+plot(Range(LFPs{channel4spindles},'s'),-2*sp+Data(LFPs{channel4spindles}),'k')
+plot(Range(Filsp,'s'),-2*sp+Data(Filsp),'r','linewidth',2)
+plot(Range(squaretsd,'s'),-2*sp+Data(squaretsd),'m','linewidth',1)
+line([rg(1),rg(end)],[threshold threshold]-2*sp,'color','m')
+
+  

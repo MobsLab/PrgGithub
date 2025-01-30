@@ -1,0 +1,29 @@
+function A = PfcHcEEGTraces(A)
+
+%  A = getResource(A, 'Sleep2Specgram');
+%  A = getResource(A, 'SleepSpecgramFreq');
+
+
+A = registerResource(A, 'HcTrace', 'numeric', {1,1}, ...
+    'hcTrace', ...
+    ['the best trace for hippocampal EEG']);
+
+A = registerResource(A, 'PfcTrace', 'numeric', {1,1}, ...
+    'pfcTrace', ...
+    ['the best trace for prefrontal EEG']);
+
+
+%      for n = 1:6
+%          figure(1);
+%  
+%  	imagesc(times, sleepSpecgramFreq, log10(abs(S')+eps)); axis xy
+%  
+%      end
+
+    pfcTrace = input('PFC Trace? ');
+    hcTrace = input('HCTrace? ');
+
+
+end
+
+    A = saveAllResources(A);

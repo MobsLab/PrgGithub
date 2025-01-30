@@ -1,0 +1,56 @@
+% 14.06.2017
+
+%% build W from the .clu
+% cd /media/DataMOBS60/OptoSleepStim/Mouse467/20170202/Mouse467OptoRamp_170202_083500
+% cd /media/DataMOBs62/OptoSleepStim/Mouse459/20161123
+cd /media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse458/20161117
+
+res=pwd;
+SetCurrentSession % load the .clu
+RemoveMUA=1;
+MakeData_Spikes
+
+
+
+%  % on this data batch, I put 5 tetrodes in PFC but I collected spikes from single wires -> to remove
+%  load SpikeData TT
+% ind_neurones_PFC=ones(size(TT));
+% for k=1:length(TT);
+%     if TT{1,k}(1)>5,
+%         ind_neurones_PFC(k)=0;
+%     end
+% end
+% load MeanWaveform
+% save('MeanWaveform_allchans.mat','BestElec','Peak','Params','W')
+% BestElec=BestElec(logical(ind_neurones_PFC));
+% Peak=Peak(logical(ind_neurones_PFC));
+% Params=Params(logical(ind_neurones_PFC));
+% W=W(logical(ind_neurones_PFC));
+% save('MeanWaveform.mat','BestElec','Peak','Params','W')
+
+%% build WFMat
+load MeanWaveform
+PlotOrNot=1;
+DropBoxLocation='/home/mobs/Dropbox/Kteam/';
+figure;
+WFMat=nan(size(W,2),32);
+for k=1:length(W)
+    [minval,ind_min]=nanmin(nanmin((W{1,k}')));
+    % in case the waveform is upside down
+    [extremeval ,ind_extr]=nanmax(nanmax(abs((W{1,k}'))));
+    if abs(minval)<extremeval
+        ind_min=extremeval;
+    end
+    WFMat(k,:)=W{1,k}(ind_min,:);
+    
+end
+ 
+ 
+[UnitID,UnitIDOld,WFInfo]=SortMyWaveforms(WFMat',DropBoxLocation,PlotOrNot);
+cd(res)
+IntCode=-1;
+PyCode=1;
+save WaveformsSorted_Py_IN UnitID UnitIDOld WFInfo IntCode PyCode
+saveas(gcf,'SortMyWaveforms.fig')
+
+ 

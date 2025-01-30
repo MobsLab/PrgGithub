@@ -1,0 +1,34 @@
+function [c,ceq] = nonlconstr(x)
+
+global dt
+amp1=x(1);
+n1=x(2);
+tau1=x(4);
+n2=x(5);
+del2=x(6);
+tau2=x(7);
+
+t=[0:dt:3];
+Alpha1=(t).^n1.*exp(-(t)./tau1);
+temp1=zeros(1,length(t));
+val=min(floor(del1/dt),length(t));
+temp1(val+1:end)=Alpha1(1:end-val);
+Alpha1=temp1;
+Alpha2=(t).^n2.*exp(-(t)./tau2);
+temp1=zeros(1,length(t));
+val=min(floor(del2/dt),length(t));
+temp1(val+1:end)=Alpha2(1:end-val);
+Alpha2=temp1;
+Alpha1=Alpha1./max(Alpha1);
+Alpha2=Alpha2./max(Alpha2);
+
+c = [-x(2);
+    -x(3);
+    -x(4);
+    -x(5);
+    -x(6);
+    -x(7);
+    x(4)-4;
+    x(7)-4];
+ceq = [max(Alpha1)==length(Alpha1);max(Alpha2)==length(Alpha2)];
+end

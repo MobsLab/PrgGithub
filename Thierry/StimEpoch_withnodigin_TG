@@ -1,0 +1,35 @@
+clear all
+load('VLPO_Low_Spectrum.mat')
+VLPO_20Hz_tsd = tsd(Spectro{2}*1e4,nanmean(Spectro{1}(:,250:260)')');
+plot(Range(VLPO_20Hz_tsd,'s'),Data(VLPO_20Hz_tsd))
+
+% seuils à fixer
+Threshold = 1.5*1e4;
+LowThreshold = 0.5*1e4;
+
+
+% On trouve grossièrement les simts
+StimEpoch = thresholdIntervals(VLPO_20Hz_tsd,Threshold,'Direction','Above');
+StimEpoch = mergeCloseIntervals(StimEpoch,15*1e4);
+dur = (Stop(StimEpoch,'s')-Start(StimEpoch,'s'));
+StimEpoch = dropShortIntervals(StimEpoch,50*1e4);
+StartStim = Start(StimEpoch);
+
+% on affine le début des stims
+clf
+for k = 1:length(StartStim)
+    LittleEpoch = subset(StimEpoch,k);
+    LittleEpoch = intervalSet(Start(LittleEpoch)-5*1e4,Start(LittleEpoch)+5*1e4);
+    Dat = Data(Restrict(VLPO_20Hz_tsd,LittleEpoch));
+    Time = Range(Restrict(VLPO_20Hz_tsd,LittleEpoch));
+    TimeStart(k) = Time(find(Dat<LowThreshold,1,'last'));
+end
+
+StimEpoch = intervalSet(TimeStart,TimeStart+60*1e4);
+subplot(211)
+plot(Range(VLPO_20Hz_tsd,'s'),Data(VLPO_20Hz_tsd))
+hold on
+plot(Range(Restrict(VLPO_20Hz_tsd,StimEpoch),'s'),Data(Restrict(VLPO_20Hz_tsd,StimEpoch)))
+subplot(223)
+hist(dur,200)
+xlabel('Stim duration before selection')

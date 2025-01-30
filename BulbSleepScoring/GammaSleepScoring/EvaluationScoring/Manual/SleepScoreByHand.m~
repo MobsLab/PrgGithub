@@ -1,0 +1,463 @@
+function SleepScoreByHand(SaveName)
+
+% Initialize variables
+global winsize; winsize=10; % seconds
+global begin; begin=0; % seconds
+global TimeWindows; TimeWindows=[5,10,30,100,500];
+global smootime; smootime=3;
+global X Y XH YX
+global SWSEpoch REMEpoch Wake
+global Transition; Transition=[];
+SWSEpoch=intervalSet(0,0);REMEpoch=intervalSet(0,0);Wake=intervalSet(0,0);
+global firstTime;firstTime=0;
+global Sp
+global Cols; Cols=[0,0.8,1;1,0,0;0,0,0];
+global Incoh;
+global Saveornot;
+global EMGFact; EMGFact=30;
+global EMGLFP smooth_Theta EMGLFPSm
+global HPCFact; HPCFact=5;
+
+%% Set up the buttons
+hand(1)=figure('units','normalized',...
+    'position',[0.05 0.1 0.9 0.8],...
+    'numbertitle','off',...
+    'name','Menu',...
+    'menubar','none',...
+    'tag','fenetre depart');
+
+EMGPlot=subplot(2,3,2:3)
+title('EMG')
+HPCPlot=subplot(2,3,5:6)
+title('HPC')
+
+try
+    StrStpScore=load('ScoringLims.mat'); StrStpScore=StrStpScore.StrStpScore;
+    begin=StrStpScore(1);
+end
+
+hand(2)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.25 0.5 0.03 0.05],...
+    'string','<',...
+    'tag','GoBack',...
+    'callback', @GoBack);
+
+hand(3)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.9 0.5 0.03 0.05],...
+    'string','>',...
+    'tag','GoFor',...
+    'callback', @GoFor);
+
+hand(4)=uicontrol(hand(1),'style','listbox',...
+    'units','normalized',...
+    'position',[0.01 0.05 0.8/9 0.05],...
+    'string','Launch Batch',...
+    'tag','WindowSize',...
+    'callback', @WindowSize,...
+    'string',{'5s','10s','30s','100s','500s'});
+
+txt(1)=uicontrol(hand(1),'style','text', ...
+    'units','normalized',...
+    'position',[0.01 0.12 0.08 0.03],...
+    'string','Win Size');
+
+AddHand(1)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.05 0.9 0.1 0.05],...
+    'string','S-->R',...
+    'tag','StoR',...
+    'callback', @StoR);
+AddHand(2)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.05 0.8 0.1 0.05],...
+    'string','R-->S',...
+    'tag','RtoS',...
+    'callback', @RtoS);
+AddHand(3)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.05 0.7 0.1 0.05],...
+    'string','S-->W',...
+    'tag','StoW',...
+    'callback', @StoW);
+AddHand(4)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.05 0.6 0.1 0.05],...
+    'string','W-->S',...
+    'tag','WtoS',...
+    'callback', @WtoS);
+AddHand(5)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.05 0.5 0.1 0.05],...
+    'string','R-->W',...
+    'tag','RtoW',...
+    'callback', @RtoW);
+
+DelHand(1)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.05 0.4 0.1 0.05],...
+    'string','Delete',...
+    'tag','Delete',...
+    'callback', @DeleteTrans, 'BackgroundColor',[0.2 0.2 0.2],'ForegroundColor','w');
+
+hand(5)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.05 0.3 0.1 0.05],...
+    'string','Finished',...
+    'tag','Done',...
+    'callback', @Done);
+
+hand(6)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.23 0.4 0.02 0.03],...
+    'string','+',...
+    'tag','Done',...
+    'callback', @HPCscaleUp);
+
+hand(7)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.23 0.35 0.02 0.03],...
+    'string','-',...
+    'tag','Done',...
+    'callback', @HPCscaleDown);
+
+hand(8)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.23 0.83 0.02 0.03],...
+    'string','-',...
+    'tag','Done',...
+    'callback', @EMGscaleDown);
+
+hand(9)=uicontrol(hand(1),'style','pushbutton',...
+    'units','normalized',...
+    'position',[0.23 0.9 0.02 0.03],...
+    'string','+',...
+    'tag','Done',...
+    'callback', @EMGscaleUp);
+
+% load('SleepScoringManual.mat'); firstTime=1;
+%% Load Files
+FolderName=uigetdir;
+cd(FolderName)
+channel=load('ChannelsToAnalyse/EMG.mat'); EMGchan= struct2array(channel);
+channel=load('ChannelsToAnalyse/dHPC_rip.mat'); HPCchan= struct2array(channel);
+Epochs=load('StateEpochSB.mat','NoiseEpoch','GndNoiseEpoch','sleepper');
+NoiseEpoch=Epochs.NoiseEpoch;
+GndNoiseEpoch=Epochs.GndNoiseEpoch;
+sleepper=Epochs.sleepper;
+% LFP=load(['LFPData/LFP',num2str(EMGchan),'.mat']); EMGLFP= LFP.LFP;
+% EMGLFP=FilterLFP(EMGLFP,[50 300],1024);
+% EMGLFPSm=tsd(Range(EMGLFP),runmean(Data((EMGLFP)).^2,ceil(smootime/median(diff(Range(EMGLFP,'s'))))));
+LFP=load(['LFPData/LFP',num2str(HPCchan),'.mat']); HPCLFP= LFP.LFP;
+a=load('SleepScoringData.mat');
+EMGLFP=a.EMGLFP;
+EMGLFPSm=a.EMGLFPSm;
+smooth_Theta=a.smooth_Theta;
+
+% FilTheta=FilterLFP(HPCLFP,[5 10],1024);
+% FilDelta=FilterLFP(HPCLFP,[2 5],1024);
+% HilTheta=hilbert(Data(FilTheta));
+% HilDelta=hilbert(Data(FilDelta));
+% H=abs(HilDelta);
+% H(H<100)=100;
+% ThetaRatio=abs(HilTheta)./H;
+% ThetaRatioTSD=tsd(Range(FilTheta),ThetaRatio);
+% smooth_Theta=tsd(Range(ThetaRatioTSD),runmean(Data(ThetaRatioTSD),ceil(smootime/median(diff(Range(ThetaRatioTSD,'s'))))));
+TotalEpoch=intervalSet(0,max(Range(HPCLFP)));
+[Y,X]=hist(log(Data(Restrict(EMGLFPSm,TotalEpoch-NoiseEpoch-GndNoiseEpoch))),1000);
+EMGLFPSm=tsd(Range(EMGLFPSm),log(Data(EMGLFPSm)));
+
+Sp=load('H_Low_Spectrum.mat');
+Sptsd=tsd(Sp.Spectro{2}*1e4,Sp.Spectro{1});
+[YH,XH]=hist(log(Data(Restrict(smooth_Theta,And(TotalEpoch-NoiseEpoch-GndNoiseEpoch,sleepper)))),1000);
+global stdEMG;stdEMG=std(Data(Restrict(EMGLFP,TotalEpoch-NoiseEpoch-GndNoiseEpoch)))*0.9;
+global MaxEMG;MaxEMG=max(Data(Restrict(EMGLFP,TotalEpoch-NoiseEpoch-GndNoiseEpoch)))*0.9;
+global MinEMG;MinEMG=-max(Data(Restrict(EMGLFP,TotalEpoch-NoiseEpoch-GndNoiseEpoch)))*0.9;
+global MaxEMGS;MaxEMGS=max(Data(Restrict(EMGLFPSm,TotalEpoch-NoiseEpoch-GndNoiseEpoch)))*0.9;
+global MinEMGS;MinEMGS=-max(Data(Restrict(EMGLFPSm,TotalEpoch-NoiseEpoch-GndNoiseEpoch)))*0.9;
+global MaxHPC;MaxHPC=max(Data(Restrict(HPCLFP,TotalEpoch-NoiseEpoch-GndNoiseEpoch)))*0.9;
+global MinHPC;MinHPC=min(Data(Restrict(HPCLFP,TotalEpoch-NoiseEpoch-GndNoiseEpoch)))*0.9;
+global ThetFact; ThetFact=max(Data(Restrict(smooth_Theta,TotalEpoch-NoiseEpoch-GndNoiseEpoch)))-min(Data(Restrict(smooth_Theta,TotalEpoch-NoiseEpoch-GndNoiseEpoch)));
+DoPlot
+
+%% Set up buttons for navigating data
+
+    function WindowSize(hObject, eventdata, handles)
+        winsize=TimeWindows(get(hObject,'value'));
+        DoPlot
+    end
+    function GoFor(~,~)
+        begin=min(begin+winsize/2,max(Range(HPCLFP,'s'))-winsize);
+        DoPlot
+    end
+    function GoBack(~,~)
+        begin=max([0,begin-winsize/2]);
+        DoPlot
+    end
+    function HPCscaleUp(~,~)
+        HPCFact=HPCFact*1.5;DoPlot
+    end
+ function HPCscaleDown(~,~)
+        HPCFact=HPCFact/1.5;DoPlot
+ end
+  function EMGscaleUp(~,~)
+        EMGFact=EMGFact*1.5;DoPlot
+    end
+ function EMGscaleDown(~,~)
+        EMGFact=EMGFact/1.5;DoPlot
+ end
+
+%% Adding transitions
+
+    function StoR(~,~)
+        
+        [x,y]=ginput(1);
+        startin=2;stoppin=1;
+        if firstTime==0
+            Transition=[Transition;0,100,stoppin];
+            firstTime=1;
+        end
+        Transition=[Transition;x*1e4,stoppin,startin];
+        Transition=sortrows(Transition);    
+        Transition(1,:)=[0,100,Transition(2,2)];
+        DoPlot
+    end
+    function RtoS(~,~)
+        [x,y]=ginput(1);
+        startin=1;stoppin=2;
+        if firstTime==0
+            Transition=[Transition;0,100,stoppin];
+            firstTime=1;
+        end
+        Transition=[Transition;x*1e4,stoppin,startin];
+        Transition=sortrows(Transition);
+        Transition(1,:)=[0,100,Transition(2,2)];
+        DoPlot
+    end
+
+    function StoW(~,~)
+        [x,y]=ginput(1);
+        startin=3;stoppin=1;
+        if firstTime==0
+            Transition=[Transition;0,100,stoppin];
+            firstTime=1;
+        end
+        Transition=[Transition;x*1e4,stoppin,startin];
+        Transition=sortrows(Transition);
+        Transition(1,:)=[0,100,Transition(2,2)];
+        DoPlot
+    end
+    function WtoS(~,~)
+        
+        [x,y]=ginput(1);
+        startin=1;stoppin=3;
+        if firstTime==0
+            Transition=[Transition;0,100,stoppin];
+            firstTime=1;
+        end
+        Transition=[Transition;x*1e4,stoppin,startin];
+        Transition=sortrows(Transition);
+        Transition(1,:)=[0,100,Transition(2,2)];
+        DoPlot
+    end
+    function RtoW(~,~)
+        [x,y]=ginput(1);
+        startin=3;stoppin=2;
+        if firstTime==0
+            Transition=[Transition;0,100,stoppin];
+            firstTime=1;
+        end
+        Transition=[Transition;x*1e4,stoppin,startin];
+        Transition=sortrows(Transition);
+        Transition(1,:)=[0,100,Transition(2,2)];
+        DoPlot
+    end
+
+    function DeleteTrans(~,~)         
+        [x,y]=ginput(2);       
+        if find(Transition(:,1)>x(1)*1e4 & Transition(:,1)<x(2)*1e4)==2
+            Transition(find(Transition(:,1)>x(1)*1e4 & Transition(:,1)<x(2)*1e4),:)=[];
+           Transition(1,:)=[0,100,Transition(2,2)];
+        else
+        Transition(find(Transition(:,1)>x(1)*1e4 & Transition(:,1)<x(2)*1e4),:)=[];
+        end
+        
+%         if isempty(Transition)
+%             firstTime=0;
+%         end
+        Transition(1,:)=[0,100,Transition(2,2)];
+        DoPlot
+    end
+
+%% When all is done, make Epochs
+    function Done(~,~)
+        
+        Transition(1,:)=[0,100,Transition(2,2)];
+        %% First Check for incoherences
+        Incoh=Transition(find(Transition(2:end,2)~=Transition(1:end-1,3)),1);
+        if ~isempty(Incoh)
+            begin=Incoh(1)/1e4-20;
+            winsize=30;
+            DoPlot
+        else
+            % If all is coherent add last Epoch
+            Transition=[Transition;max(Range(EMGLFP)),Transition(end,3),100];
+            % Now Make Epochs
+            Wake=intervalSet(Transition(Transition(:,3)==3,1),Transition(Transition(:,2)==3,1));
+            Wake=Wake-NoiseEpoch-GndNoiseEpoch; Wake=CleanUpEpoch(Wake);
+            SWSEpoch=intervalSet(Transition(Transition(:,3)==1,1),Transition(Transition(:,2)==1,1));
+            SWSEpoch=SWSEpoch-NoiseEpoch-GndNoiseEpoch; SWSEpoch=CleanUpEpoch(SWSEpoch);
+            REMEpoch=intervalSet(Transition(Transition(:,3)==2,1),Transition(Transition(:,2)==2,1));
+            REMEpoch=REMEpoch-NoiseEpoch-GndNoiseEpoch; REMEpoch=CleanUpEpoch(REMEpoch);
+            figure
+            subplot(2,1,1)
+            plot(Range(EMGLFP,'s'),Data(EMGLFP))
+            hold on
+            line([0 max(Range(EMGLFP,'s'))],[MaxEMG*0.8 MaxEMG*0.8],'linewidth',10,'color','w')
+            sleepstart=Start(REMEpoch);
+            sleepstop=Stop(REMEpoch);
+            for k=1:length(sleepstart)
+                line([sleepstart(k)/1e4 sleepstop(k)/1e4],[MaxEMG*0.8 MaxEMG*0.8],'color',[1 0.2 0.2],'linewidth',5);
+            end
+            sleepstart=Start(SWSEpoch);
+            sleepstop=Stop(SWSEpoch);
+            for k=1:length(sleepstart)
+                line([sleepstart(k)/1e4 sleepstop(k)/1e4],[MaxEMG*0.8 MaxEMG*0.8],'color',[0.4 0.5 1],'linewidth',5);
+            end
+            sleepstart=Start(Wake);
+            sleepstop=Stop(Wake);
+            for k=1:length(sleepstart)
+                line([sleepstart(k)/1e4 sleepstop(k)/1e4],[MaxEMG*0.8 MaxEMG*0.8],'color',[0.6 0.6 0.6],'linewidth',5);
+            end
+            
+            subplot(2,1,2)
+            plot(Range(HPCLFP,'s'),Data(HPCLFP))
+            hold on
+            line([0 max(Range(EMGLFP,'s'))],[MaxHPC*0.8 MaxHPC*0.8],'linewidth',10,'color','w')
+            sleepstart=Start(REMEpoch);
+            sleepstop=Stop(REMEpoch);
+            for k=1:length(sleepstart)
+                line([sleepstart(k)/1e4 sleepstop(k)/1e4],[MaxHPC*0.8 MaxHPC*0.8],'color',[1 0.2 0.2],'linewidth',5);
+            end
+            sleepstart=Start(SWSEpoch);
+            sleepstop=Stop(SWSEpoch);
+            for k=1:length(sleepstart)
+                line([sleepstart(k)/1e4 sleepstop(k)/1e4],[MaxHPC*0.8 MaxHPC*0.8],'color',[0.4 0.5 1],'linewidth',5);
+            end
+            sleepstart=Start(Wake);
+            sleepstop=Stop(Wake);
+            for k=1:length(sleepstart)
+                line([sleepstart(k)/1e4 sleepstop(k)/1e4],[MaxHPC*0.8 MaxHPC*0.8],'color',[0.6 0.6 0.6],'linewidth',5);
+            end
+            save(strcat(SaveName, 'SleepScoringManual.mat'),'SWSEpoch','Wake','REMEpoch','Transition')
+            
+        end
+
+    end
+%% General plotting function
+    function DoPlot
+        
+        if mod(size(Transition,1),10)==0
+            save(strcat(SaveName, 'SleepScoringManual.mat'),'SWSEpoch','Wake','REMEpoch','Transition')
+        end
+        subplot(2,12,3:11)
+        hold off
+        plot(Range(Restrict(EMGLFPSm,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s'),EMGFact*Data(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4)))/(MaxEMG-MinEMG)+(max(X)))
+        hold on
+        plot(Range(Restrict(EMGLFPSm,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s'),Data(Restrict(EMGLFPSm,intervalSet(begin*1e4,begin*1e4+winsize*1e4))),'r','linewidth',3)
+        ylim([min(X) max(X)*1.2])
+        hold on
+        plot(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s'),Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s')*0+stdEMG*2,'r')
+        plot(mean(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s')),max(X)*1.1,'w.','MarkerSize',80)
+        plot(mean(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s')),max(X)*1.1,'ko','MarkerSize',30,'LineWidth',3)
+        plot(mean(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s')),max(X)*1.1,'*','MarkerSize',15,'LineWidth',3)
+        plot(mean(Range(Restrict(EMGLFP,intervalSet(begin*1e4+winsize*1e4/3,begin*1e4+2*winsize*1e4/3)),'s')),max(X)*1.1,'w.','MarkerSize',80)
+        plot(mean(Range(Restrict(EMGLFP,intervalSet(begin*1e4+winsize*1e4/3,begin*1e4+2*winsize*1e4/3)),'s')),max(X)*1.1,'ko','MarkerSize',30,'LineWidth',3)
+        plot(mean(Range(Restrict(EMGLFP,intervalSet(begin*1e4+winsize*1e4/3,begin*1e4+2*winsize*1e4/3)),'s')),max(X)*1.1,'r*','MarkerSize',15,'LineWidth',3)
+        plot(mean(Range(Restrict(EMGLFP,intervalSet(begin*1e4+2*winsize*1e4/3,begin*1e4+3*winsize*1e4/3)),'s')),max(X)*1.1,'w.','MarkerSize',80)
+        plot(mean(Range(Restrict(EMGLFP,intervalSet(begin*1e4+2*winsize*1e4/3,begin*1e4+3*winsize*1e4/3)),'s')),max(X)*1.1,'ko','MarkerSize',30,'LineWidth',3)
+        plot(mean(Range(Restrict(EMGLFP,intervalSet(begin*1e4+2*winsize*1e4/3,begin*1e4+3*winsize*1e4/3)),'s')),max(X)*1.1,'k*','MarkerSize',15,'LineWidth',3)
+        line([max(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s')) max(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s'))],[ (max(X)*1.2-min(X))/2+min(X) max(X)*1.2],'k')
+
+        line([max(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s')) max(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s'))],[ (max(X)*1.2-min(X))/2+min(X) max(X)*1.2],'k')
+
+        line([max(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s')) max(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s'))],[ (max(X)*1.2-min(X))/2+min(X) max(X)*1.2],'k')
+
+        for i=2:size(Transition,1)
+            try
+            plot([Transition(i,1)/1e4 ;Transition(i,1)/1e4],[ (max(X)*1.2-min(X))/2+min(X) max(X)*1.2],'color',Cols(Transition(i,2),:),'linewidth',4)
+            plot([Transition(i,1)/1e4 ;Transition(i,1)/1e4],[min(X) (max(X)*1.2-min(X))/2+min(X)],'color',Cols(Transition(i,3),:),'linewidth',4)
+            if Transition(i,2)==Transition(i-1,3)
+                line([Transition(i-1,1)/1e4 Transition(i,1)/1e4],[max(X)*1.1 max(X)*1.1],'color',Cols(Transition(i,2),:),'linewidth',4)
+            end
+            catch
+                Transition(2,:)=[];
+            end
+        end
+        
+              
+        try
+            line([StrStpScore(1) StrStpScore(1)],[min(X) max(X)*1.2],'color',[0.6 0.6 0.6],'linewidth',4)
+            line([StrStpScore(2) StrStpScore(2)],[min(X) max(X)*1.2],'color',[0.6 0.6 0.6],'linewidth',4)
+            text(StrStpScore(1),min(X)+(max(X)-min(X))/2,'STOP');text(StrStpScore(1),min(X)+1.5*(max(X)-min(X))/2,'STOP');text(StrStpScore(1),min(X)+1.8*(max(X)-min(X))/2,'STOP')
+            text(StrStpScore(2),min(X)+(max(X)-min(X))/2,'STOP'); text(StrStpScore(2),min(X)+1.5*(max(X)-min(X))/2,'STOP'); text(StrStpScore(2),1.8*min(X)+(max(X)-min(X))/2,'STOP')
+
+        end
+        xlim([min(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s')) max(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s'))])
+        xlabel('time (s)')
+        title('EMG')
+        subplot(2,12,12)
+        hold off
+        plot(Y/sum(Y),X), hold on
+        ylim([min(X) max(X)*1.2]), xlim([0 0.015])
+        plot(0.01/3,(mean(Data(Restrict(EMGLFPSm,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3))))),'*','MarkerSize',15)
+        plot(2*0.01/3,(mean(Data(Restrict(EMGLFPSm,intervalSet(begin*1e4+winsize*1e4/3,begin*1e4+2*winsize*1e4/3))))),'r*','MarkerSize',15)
+        plot(3*0.01/3,(mean(Data(Restrict(EMGLFPSm,intervalSet(begin*1e4+2*winsize*1e4/3,begin*1e4+3*winsize*1e4/3))))),'k*','MarkerSize',15)
+        title('EMG Power Dist')
+
+        subplot(2,12,3+12:11+12)
+        hold off
+        imagesc(Range(Restrict(Sptsd,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s'),Sp.Spectro{3},log(Data(Restrict(Sptsd,intervalSet(begin*1e4,begin*1e4+winsize*1e4))))'), axis xy,caxis([-2 17])
+        hold on
+        plot(Range(Restrict(HPCLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s'),HPCFact*Data(Restrict(HPCLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4)))/MaxHPC+25,'k')
+        plot(Range(Restrict(smooth_Theta,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s'),5*Data(Restrict(smooth_Theta,intervalSet(begin*1e4,begin*1e4+winsize*1e4)))/ThetFact-5,'k')
+        plot(mean(Range(Restrict(HPCLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s')),28,'w.','MarkerSize',80)
+        plot(mean(Range(Restrict(HPCLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s')),28,'ko','MarkerSize',30,'LineWidth',3)
+        plot(mean(Range(Restrict(HPCLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3)),'s')),28,'*','MarkerSize',15,'LineWidth',3)
+        plot(mean(Range(Restrict(HPCLFP,intervalSet(begin*1e4+winsize*1e4/3,begin*1e4+2*winsize*1e4/3)),'s')),28,'w.','MarkerSize',80)
+        plot(mean(Range(Restrict(HPCLFP,intervalSet(begin*1e4+winsize*1e4/3,begin*1e4+2*winsize*1e4/3)),'s')),28,'ko','MarkerSize',30,'LineWidth',3)
+        plot(mean(Range(Restrict(HPCLFP,intervalSet(begin*1e4+winsize*1e4/3,begin*1e4+2*winsize*1e4/3)),'s')),28,'r*','MarkerSize',15,'LineWidth',3)
+        plot(mean(Range(Restrict(HPCLFP,intervalSet(begin*1e4+2*winsize*1e4/3,begin*1e4+3*winsize*1e4/3)),'s')),28,'w.','MarkerSize',80)
+        plot(mean(Range(Restrict(HPCLFP,intervalSet(begin*1e4+2*winsize*1e4/3,begin*1e4+3*winsize*1e4/3)),'s')),28,'ko','MarkerSize',30,'LineWidth',3)
+        plot(mean(Range(Restrict(HPCLFP,intervalSet(begin*1e4+2*winsize*1e4/3,begin*1e4+3*winsize*1e4/3)),'s')),28,'k*','MarkerSize',15,'LineWidth',3)
+        for i=2:size(Transition,1)
+            plot([Transition(i,1)/1e4 ;Transition(i,1)/1e4],[15 30],'color',Cols(Transition(i,2),:),'linewidth',4)
+            plot([Transition(i,1)/1e4 ;Transition(i,1)/1e4],[0 15],'color',Cols(Transition(i,3),:),'linewidth',4)
+            if Transition(i,2)==Transition(i-1,3)
+                line([Transition(i-1,1)/1e4 Transition(i,1)/1e4],[20 20],'color',Cols(Transition(i,2),:),'linewidth',4)
+            end
+        end
+        
+        ylim([-5 30])
+        xlabel('time (s)')
+        title('HPC')
+         try
+            line([StrStpScore(1) StrStpScore(1)],[0 30],'color',[0.6 0.6 0.6],'linewidth',4)
+            line([StrStpScore(2) StrStpScore(2)],[0 30],'color',[0.6 0.6 0.6],'linewidth',4)
+            text(StrStpScore(1),15,'STOP');       text(StrStpScore(1),20,'STOP');       text(StrStpScore(1),18,'STOP');
+            text(StrStpScore(2),15,'STOP');       text(StrStpScore(1),20,'STOP');       text(StrStpScore(1),18,'STOP');
+
+         end
+         xlim([min(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s')) max(Range(Restrict(EMGLFP,intervalSet(begin*1e4,begin*1e4+winsize*1e4)),'s'))])
+        subplot(2,12,24)
+        hold off
+        plot(YH/sum(YH),XH), hold on
+        %ylim([9 13]), xlim([0 0.015])
+        plot(0.01/3,log(mean(Data(Restrict(smooth_Theta,intervalSet(begin*1e4,begin*1e4+winsize*1e4/3))))),'*')
+        plot(2*0.01/3,log(mean(Data(Restrict(smooth_Theta,intervalSet(begin*1e4+winsize*1e4/3,begin*1e4+2*winsize*1e4/3))))),'r*')
+        plot(3*0.01/3,log(mean(Data(Restrict(smooth_Theta,intervalSet(begin*1e4+2*winsize*1e4/3,begin*1e4+3*winsize*1e4/3))))),'k*')
+        title('Thet/Del Dist')
+
+    end
+end

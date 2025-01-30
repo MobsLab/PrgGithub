@@ -1,0 +1,32 @@
+clear all
+SessionNames={'WallRetestShockMAPEyeshock','WallRetestSafeMAPEyeshock','WallHabShockMAPEyeshock','WallHabSafeMAPEyeshock','WallCondShockMAPEyeshock','WallCondSafeMAPEyeshock'};
+
+for ss=1:length(SessionNames)
+    
+    SessionNames{ss}
+    Dir=PathForExperimentsEmbReact(SessionNames{ss})
+    
+    for mouse=1:length(Dir.path)
+        for session=1:length(Dir.path{mouse})
+            cd(Dir.path{mouse}{session})
+            load('behavResources.mat')
+            
+            for k=1:2
+                Dur{ss,mouse}(k)=(sum(Stop(ZoneEpoch{k},'s')-Start(ZoneEpoch{k},'s')));%./sum(sum((Zone{k})));
+            end
+        end
+        Tot1(ss,mouse,:)=Dur{ss,mouse};
+    end
+  
+    
+end   
+
+Tot1(2,:,1)=Tot1(2,:,2);
+Tot1(4,:,1)=Tot1(4,:,2);
+Tot1(6,:,1)=Tot1(6,:,2);
+Tot2(:,:)=Tot1(:,:,1);
+
+figure, errorbar(mean(Tot2,2),stdError(Tot2'),'.')
+hold on, bar(mean(souris564))
+set(gca,'XTick',[1:5],'XTickLabel',{'Shock','NoShock','Centre','CentreShock','CentreNoShock'})
+title('souris 564')

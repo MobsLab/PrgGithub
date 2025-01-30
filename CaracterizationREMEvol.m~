@@ -1,0 +1,85 @@
+% CaracterizationREMEvol
+
+
+load('/Users/Bench/Documents/Data/DataSleep244/Sleep244.mat')
+
+
+res=pwd;
+tempchBulb=load([res,'/ChannelsToAnalyse/Bulb_deep.mat'],'channel');
+chBulb=tempchBulb.channel;
+eval(['load(''',res,'','/SpectrumDataL/Spectrum',num2str(chBulb),'.mat'');'])
+SpBulb=Sp;
+fBulb=f;
+tBulb=t;
+tempchHPC=load([res,'/ChannelsToAnalyse/dHPC_deep.mat'],'channel');
+chHPC=tempchHPC.channel;
+eval(['load(''',res,'','/SpectrumDataL/Spectrum',num2str(chHPC),'.mat'');'])
+SpHpc=Sp;
+fHpc=f;
+tHpc=t;
+tempchPFC=load([res,'/ChannelsToAnalyse/PFCx_deep.mat'],'channel');
+chPFC=tempchPFC.channel;
+eval(['load(''',res,'','/SpectrumDataL/Spectrum',num2str(chPFC),'.mat'');'])
+SpPfc=Sp;
+fPfc=f;
+tPfc=t;
+        
+        
+        
+StsdH=tsd(tHpc*1E4,SpHpc);
+StsdP=tsd(tPfc*1E4,SpPfc);
+StsdB=tsd(tBulb*1E4,SpBulb);
+TotalEpoch=intervalSet(tPfc(1)*1E4,tPfc(end)*1E4);
+[Epoch,val,val2]=FindStrongOsc(SpBulb,tBulb,fBulb,TotalEpoch,1,[2 4], [0.1 1.5],[10 16]);
+
+figure('color',[1 1 1]), 
+subplot(1,3,1), plot(fBulb,mean(Data(Restrict(StsdB,REMEpochC-Epoch{10}))))
+hold on, plot(fBulb,mean(Data(Restrict(StsdB,and(REMEpochC,Epoch{10})))),'r')
+subplot(1,3,2), plot(fPfc,mean(Data(Restrict(StsdP,REMEpochC-Epoch{10}))))
+hold on, plot(fPfc,mean(Data(Restrict(StsdP,and(REMEpochC,Epoch{10})))),'r')
+subplot(1,3,3), plot(fHpc,mean(Data(Restrict(StsdH,REMEpochC-Epoch{10}))))
+hold on, plot(fHpc,mean(Data(Restrict(StsdH,and(REMEpochC,Epoch{10})))),'r')
+
+[r,p,r2,p2]=CrossFreqCoupling(SpPfc,tPfc,fPfc,SpHpc,tHpc,fHpc,REMEpochC-Epoch{10});
+[r,p,r2,p2]=CrossFreqCoupling(SpPfc,tPfc,fPfc,SpHpc,tHpc,fHpc,and(REMEpochC,Epoch{10}));
+
+[r,p,r2,p2]=CrossFreqCoupling(SpPfc,tPfc,fPfc,SpBulb,tBulb,fBulb,REMEpochC-Epoch{10});
+[r,p,r2,p2]=CrossFreqCoupling(SpPfc,tPfc,fPfc,SpBulb,tBulb,fBulb,and(REMEpochC,Epoch{10}));
+
+[r,p,r2,p2]=CrossFreqCoupling(SpBulb,tBulb,fBulb,SpHpc,tHpc,fHpc,REMEpochC-Epoch{10});
+[r,p,r2,p2]=CrossFreqCoupling(SpBulb,tBulb,fBulb,SpHpc,tHpc,fHpc,and(REMEpochC,Epoch{10}));
+
+
+clear pow
+clear PercBulbOsc
+tps=0:0.01:1;
+ReNormT=zeros(length(tps),length(f));
+ReNormT2=[];
+for i=1:length(Start(REMEpochC))
+    clear IdxOB
+    clear valEpoch
+    Per(i,1)=sum(End(and(subset(REMEpochC,i),Epoch{10}))-Start((and(subset(REMEpochC,i),Epoch{10}))));
+    Per(i,2)=sum(End((subset(REMEpochC,i)-Epoch{10}))-Start(((subset(REMEpochC,i)-Epoch{10}))));    
+    [ReNormTemp{i},ff,tps]=RescaleSpectroram0to1(StsdB,f,subset(REMEpochC,i),tps);
+    ReNormT=ReNormT+ReNormTemp{i};
+    ReNormT2=[ReNormT2;ReNormTemp{i}];
+    pow(i,:)=mean(ReNormTemp{i}(:,find(ff>2&ff<4)),2);
+    
+    REMsubepoch=tsd(Range(Restrict(StsdB,subset(REMEpochC,i))),[1:length(Range(Restrict(StsdB,subset(REMEpochC,i))))]');
+    rg=Range(REMsubepoch);
+    IdxOB=Data(Restrict(REMsubepoch,Epoch{10}));
+    valEpoch=zeros(length(Range(Restrict(StsdB,subset(REMEpochC,i)))),1);
+    valEpoch(IdxOB)=1;
+    valEpochTsd=tsd((rg-rg(1))/(rg(end)-rg(1)), valEpoch);
+    PercBulbOsc(i,:)=Data(Restrict(valEpochTsd,ts(tps)));
+    %PercBulbOsc(i,:)=resample(valEpoch,length(tps),length(valEpoch));
+end
+
+figure('color',[1 1 1]), 
+subplot(2,4,1:4), imagesc(tps,f,ReNormT'), axis xy
+subplot(2,4,5), hold on, plot(Per(:,1)./(Per(:,1)+Per(:,2)),'k'), plot(Per(:,2)./(Per(:,1)+Per(:,2)),'r'), xlim([0 size(Per,1)])
+subplot(2,4,6), imagesc(pow), axis xy
+subplot(2,4,7), imagesc(zscore(pow)), axis xy
+subplot(2,4,8), imagesc(PercBulbOsc), axis xy
+
+

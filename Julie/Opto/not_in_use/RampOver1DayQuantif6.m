@@ -1,0 +1,341 @@
+% RampOver1DayQuantif6.m
+% from RampOver1DayQuantif5.m but select sweep with derivée nulle
+% 08.03.2017
+
+% from RampOver1DayQuantif4.m
+% - add a criterion : the oscillation should be really present for being included in the analysis 
+% criterion using derivée nulle
+
+sav=1;
+
+% FIGURES
+% - spectra during each stimulation (30sec): colored = selected / grey = not selected
+% - scatterplot power before stim /during stim for all stimulation frequencies, for bulb and PFC. colored = selected / grey = not selected
+
+% OUTPUTS
+% - StrongOscBefore, save in DataRampOver1DayQuantif_selectionCrit
+
+% STILL TO DO 
+% apply the selection criterion only on bulb signal (not on PFC)
+% select based on dérivée not with strongosc
+
+
+%% INPUTS
+cd /media/DataMOBsRAIDN/ProjetAversion/RampOver1dayQuantif
+res=pwd;
+res_rslt='/media/DataMOBsRAIDN/ProjetAversion/RampOver1dayQuantif/Ramp_6_derive_selection';
+Dir.path={
+        '/media/DataMOBsRAIDN/ProjetAversion/provisoire/458/20161116';
+    '/media/DataMOBsRAIDN/ProjetAversion/provisoire/458/20170117';
+    '/media/DataMOBsRAIDN/ProjetAversion/provisoire/459/20170123';
+    '/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse465/20170126';
+    '/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse465/20170127';
+    '/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse466/20170130';
+    '/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse466/20170131';
+    '/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse467/20170202';
+    '/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse467/20170203';
+    '/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse468/20170207';
+    '/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse468/20170208';
+};
+%Dir.name={'Mouse458';'Mouse458';'Mouse459';'Mouse465';'Mouse465';'Mouse466';'Mouse466'};
+Dir.name={'Mouse458';'Mouse458';'Mouse459';'Mouse465';'Mouse465';'Mouse466';'Mouse466';'Mouse467';'Mouse467';'Mouse468';'Mouse468'};
+
+
+
+load /media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/f_0-20;
+StepName={'Ramp'};%'EXT-48'
+structlist={'Bulb_deep_right','Bulb_deep_left','PFCx_deep_right','PFCx_deep_left'};
+
+%% INITIALIZE
+colori={'b','b','r','r'};
+structlistname=structlist;
+for i=1:length(structlistname)
+    ind_und=strfind(structlistname{i},'_');
+    structlistname{i}(ind_und)=' ';
+end
+man=1;
+
+LFPpower=nan(length(StepName),length(structlist), length(Dir.path),50,67,15); % 50 : nb d'events (max estimé)/ 67 : nb fqce dans le spectre / 15 : nb de fqce de stim dans la rampe (max)
+LFPpower_Before=nan(length(StepName),length(structlist), length(Dir.path),16,67,15);
+
+[params,movingwin,suffix]=SpectrumParametersML('low'); % low or high
+ 
+%% LOAD OR COMPUTE DATA
+
+try
+    cd /media/DataMOBsRAIDN/ProjetAversion/RampOver1dayQuantif/Ramp_4_no_selection
+    
+    load(['DataRampOver1DayQuantif_no_selection.mat']);
+    disp(['Loading existing data from DataRampOver1DayQuantif_no_selection.mat']);
+catch
+    
+    for man=1:length(Dir.path) 
+% for man=1:1
+        cd (Dir.path{man})
+        MouseNb=str2num(Dir.name{man}(end-2:end));
+        Mousename=['M' Dir.name{man}(end-2:end)];
+        disp(Mousename)
+        
+        load StimInfo
+        StimInfoAllMan{man}=StimInfo;
+        
+        for i=1:length(structlist)
+
+            if exist([Dir.path{man},'/ChannelsToAnalyse/',structlist{i},'.mat']) 
+                temp=load([Dir.path{man},'/ChannelsToAnalyse/',structlist{i},'.mat']);
+                try
+                    load([Dir.path{man},'/SpectrumDataL/Spectrum' num2str(temp.channel),'.mat'],'Sp', 't', 'f') % t en secondes
+                    disp(['SpectrumDataL/Spectrum' num2str(temp.channel),'... loaded'])
+                catch
+
+                    if ~exist([Dir.path{man},'/SpectrumDataL'],'dir'), mkdir([Dir.path{man},'/SpectrumDataL']);end
+                    eval(['temp2=load(''',Dir.path{man},'/LFPData/LFP',num2str(temp.channel),'.mat'');'])
+                    disp(['Computing SpectrumDataL/Spectrum' num2str(temp.channel),'... '])
+                    [Sp,t,f]=mtspecgramc(Data(temp2.LFP),movingwin,params);
+                    eval(['save(''',Dir.path{man},'/SpectrumDataL/Spectrum',num2str(temp.channel),'.mat'',','''Sp'',','''t'',','''f'',','''params'',','''movingwin'');'])
+                end
+                StsdL=tsd(t*1E4,Sp);
+
+            else
+                disp(['no channel for ' structlist{i} ' in this mouse '])
+            end
+            
+            fq_list=unique(StimInfo.Freq);
+            nb_fq=length(unique(StimInfo.Freq));
+
+            for fq=1:nb_fq
+                LaserInt{man,fq} =intervalSet(StimInfo.StartTime(StimInfo.Freq==fq_list(fq))*1E4, StimInfo.StopTime(StimInfo.Freq==fq_list(fq))*1E4);
+
+                for evnt=1:length(Start(LaserInt{man,fq}))
+Sp_On{1,i,man,evnt,fq}=Data(Restrict(StsdL,subset(LaserInt{man,fq},evnt)));
+Sp_Off{1,i,man,evnt,fq}=Data(Restrict(StsdL,shift(subset(LaserInt{man,fq},evnt), -30E4)));
+
+t_On{1,i,man,evnt,fq}=Range(Restrict(StsdL,subset(LaserInt{man,fq},evnt)));
+t_Off{1,i,man,evnt,fq}=Range(Restrict(StsdL,shift(subset(LaserInt{man,fq},evnt), -30E4)));
+
+% Sp_On{1,i,man,evnt,fq}=tsd(Range(Restrict(StsdL,subset(LaserInt{man,fq},evnt))),Data(Restrict(StsdL,subset(LaserInt{man,fq},evnt))));
+% Sp_Off{1,i,man,evnt,fq}=tsd(Range(Restrict(StsdL,shift(subset(LaserInt{man,fq},evnt), -30E4))),Data(Restrict(StsdL,shift(subset(LaserInt{man,fq},evnt), -30E4))));
+
+% Sp_On(1,i,man,evnt,1:length(f),fq)=tsd(Range(Restrict(StsdL,subset(LaserInt{man,fq},evnt))),Data(Restrict(StsdL,subset(LaserInt{man,fq},evnt))));
+% Sp_Off(1,i,man,evnt,1:length(f),fq)=tsd(Range(Restrict(StsdL,shift(subset(LaserInt{man,fq},evnt), -30E4))),Data(Restrict(StsdL,shift(subset(LaserInt{man,fq},evnt), -30E4))));
+                    if length(f)>67%164
+                        LFPpower(1,i,man,evnt,1:length(f1),fq)= interp1(f,nanmean(Data(Restrict(StsdL,subset(LaserInt{man,fq},evnt)))),f1);
+                        LFPpower_Before(1,i,man,evnt,1:length(f1),fq)= interp1(f,nanmean(Data(Restrict(StsdL,shift(subset(LaserInt{man,fq},evnt), -30E4)))),f1);
+                    else
+                        LFPpower(1,i,man,evnt,1:length(f1),fq)= nanmean(Data(Restrict(StsdL,subset(LaserInt{man,fq},evnt))));
+                        LFPpower_Before(1,i,man,evnt,1:length(f1),fq)= nanmean(Data(Restrict(StsdL,shift(subset(LaserInt{man,fq},evnt), -30E4))));
+                    end
+                end
+            end
+
+        end
+    end
+    
+    
+       
+    if sav
+        cd(res_rslt)
+        save DataRampOver1DayQuantif_no_selection LFPpower LFPpower_Before f1 f structlistname fq_list Dir LaserInt StimInfoAllMan f Sp_On Sp_Off t_On t_Off nb_fq fq_list
+    end
+end
+
+
+
+%% PLOT SPECTRA
+if 1
+%     for man=1:1
+        for man=1:length(Dir.path) 
+        SelectSweepfig=figure('Position', [200          48         1500         926]);
+        % manSpfig=figure('Position', [200          48         1500         926]);
+        Mousename=['M' Dir.name{man}(end-2:end)];
+fq_list=unique(StimInfoAllMan{man}.Freq);
+
+        for i=1:length(structlist)
+            
+            nb_fq=length(unique(StimInfoAllMan{man}.Freq));
+
+            for fq=1:nb_fq
+                sub{i,fq}=subplot(length(structlist),nb_fq,nb_fq*(i-1)+fq); hold on
+                
+                
+                for evnt=1:length(Start(LaserInt{man,fq}))
+                    % select sweep with a peak present between 0.5 and 5 Hz
+                    lfp_pow_bef=squeeze(LFPpower_Before(1,i,man,evnt,:,fq));
+                    derivee=diff(SmoothDec(lfp_pow_bef(~isnan(lfp_pow_bef)),1));
+                    
+                    ind_pos=(derivee>0);
+                    dd=diff(+ind_pos);
+                    bump_freq=f1(diff(+ind_pos)==-1);
+                    
+                    figure(SelectSweepfig)
+
+                    if ~isempty(bump_freq)
+
+                         if sum((bump_freq<5)& (bump_freq>1))>0
+                             %plot(f1,squeeze(LFPpower_Before(1,i,man,evnt,:,fq)),'Color',colori{i})
+                             plot(f1(~isnan(lfp_pow_bef)),squeeze(SmoothDec(lfp_pow_bef(~isnan(lfp_pow_bef)),1)),'Color',colori{i})
+                             
+                             BumpPresent{1,i,man,evnt,fq,1}=1;
+                         else
+                             %plot(f1,squeeze(LFPpower_Before(1,i,man,evnt,:,fq)),'Color',[0.5 0.5 0.5])
+                             plot(f1(~isnan(lfp_pow_bef)),squeeze(SmoothDec(lfp_pow_bef(~isnan(lfp_pow_bef)),1)),'Color',[0.5 0.5 0.5])
+                             BumpPresent{1,i,man,evnt,fq,1}=0;
+                         end
+                    else
+                        %plot(f1,squeeze(LFPpower_Before(1,i,man,evnt,:,fq)),'Color',[0.5 0.5 0.5])
+                        plot(f1(~isnan(lfp_pow_bef)),squeeze(SmoothDec(lfp_pow_bef(~isnan(lfp_pow_bef)),1)),'Color',[0.5 0.5 0.5])
+                        BumpPresent{1,i,man,evnt,fq,1}=0;
+                    end
+                    
+                end
+
+                if fq==1,ylabel(structlistname{i});end
+                xlim([0 10]);% xlim([0 f1(end)]);
+%                 if strfind(structlist{i}, 'Bulb')
+%                     ylim([0 4E5])
+%                 elseif strfind(structlist{i}, 'PFC')
+%                     ylim([0 4E5])
+%                 end
+                if i==length(structlist), xlabel(['stim ' num2str(fq_list(fq)) 'Hz']);end
+                if i==1&&fq==1, text(-0.2,1.3,[StepName{1} ' ' Dir.path{man}(end-7:end) ' - ' Mousename],'units','normalized');end
+                
+                
+            end
+            
+
+        end
+
+        %if strfind(Mousename, 'M458') ||strfind(Mousename, 'M465')||strfind(Mousename, 'M466')
+        for i=1:length(structlist)
+            for fq=1:nb_fq
+                sub{i,fq}=subplot(length(structlist),nb_fq,nb_fq*(i-1)+fq); hold on
+                YL=ylim;
+                if YL(2)>4E5
+                    if strfind(structlist{i}, 'Bulb')
+                        ylim([0 4E5])
+                    elseif strfind(structlist{i}, 'PFC')
+                        ylim([0 1E5])
+                    end
+                end
+
+            end
+        end
+    % end
+    
+        subplot(sub{1,1})
+        text(-0.2,1.5,['blue: Selected sweeps'],'units','normalized')
+        cd(res_rslt)
+        % cd /media/DataMOBS59/OptoSleepStim
+        %saveas(manSpfig,[ Mousename '_' Dir.path{man}(end-7:end) '_RampOver1Day.fig'])
+        %saveas(SelectSweepfig,[ Mousename '_' Dir.path{man}(end-7:end) '_derive-Selected_.fig'])
+        saveFigure(SelectSweepfig,[ Mousename '_' Dir.path{man}(end-7:end) '_derive-Selected_'],res_rslt)
+        
+    end
+end
+    
+if sav
+    cd(res_rslt)
+    save DataRampOver1DayQuantif_selectionCrit BumpPresent 
+end
+
+%% Plot efficiency of Low Fq inhibition
+% BY MOUSE
+
+    indLow=(f1>1&f1<4);
+    for man=1:length(Dir.path) 
+        Mousename=['M' Dir.name{man}(end-2:end)];
+        manMeanfig=figure('Position', [200          48         1500         926]);
+        
+        for i=1:length(structlist)
+            for fq=1:nb_fq
+                sub{i,fq}=subplot(length(structlist),nb_fq,nb_fq*(i-1)+fq); hold on
+
+                for evnt=1:length(Start(LaserInt{man,fq}))
+
+                    LowPowerStimOn=nanmean(squeeze(LFPpower(1,i,man,evnt,indLow,fq)));
+                    LowPowerStimOff=nanmean(squeeze(LFPpower_Before(1,i,man,evnt,indLow,fq)));                    
+
+                    if strfind(structlist{i}, 'Bulb')
+                        if BumpPresent{1,i,man,evnt,fq,1}
+                         plot(LowPowerStimOn,LowPowerStimOff,'ob')
+                        else
+                            plot(LowPowerStimOn,LowPowerStimOff,'o','MarkerEdgeColor',[0.5 0.5 0.5])
+                        end
+                     elseif strfind(structlist{i}, 'PFC')
+                         if BumpPresent{1,i,man,evnt,fq,1}
+                             plot(LowPowerStimOn,LowPowerStimOff,'or')
+                         else
+                            plot(LowPowerStimOn,LowPowerStimOff,'o','MarkerEdgeColor',[0.5 0.5 0.5])
+                        end
+                    end
+
+                end
+                XL=ylim; YL=ylim;
+                maxi=max(XL(2), YL(2));
+                %line([0 0],[maxi maxi],'Color',[0.7 0.7 0.7])
+                line([0 maxi ],[ 0 maxi],'Color',[0.7 0.7 0.7])
+                xlim([0 maxi]),ylim([0 maxi]),
+
+                if i==1&&fq==1, text(-0.2,1.3,[StepName{1} ' ' Dir.path{man}(end-7:end) ' - ' Mousename],'units','normalized');end
+                if i==length(structlist), xlabel(['stim ' num2str(fq_list(fq)) 'Hz']);end
+                if fq==1,ylabel(structlistname{i});end
+            end
+        end
+        % cd /media/DataMOBS59/OptoSleepStim
+        
+        if sav
+        cd(res_rslt)
+        %saveas(manMeanfig,[ Mousename '_' Dir.path{man}(end-7:end)  '_LowFqInhibition.fig'])
+        saveFigure(manMeanfig,[ Mousename '_' Dir.path{man}(end-7:end)  '_LowFqInhibition'],res)
+    
+        end
+    end
+    
+%% ALL MOUSE
+Allmicefig=figure('Position', [200          48         1500         926]);
+indLow=(f1>1&f1<4);
+    for man=1:length(Dir.path) 
+        
+        for i=1:length(structlist)
+            for fq=1:nb_fq
+                sub{i,fq}=subplot(length(structlist),nb_fq,nb_fq*(i-1)+fq); hold on
+                
+                for evnt=1:length(Start(LaserInt{man,fq}))
+                    LowPowerStimOn=nanmean(squeeze(LFPpower(1,i,man,evnt,indLow,fq)));
+                    LowPowerStimOff=nanmean(squeeze(LFPpower_Before(1,i,man,evnt,indLow,fq)));
+%                
+                    if strfind(structlist{i}, 'Bulb')
+                        if BumpPresent{1,i,man,evnt,fq,1}
+                         plot(LowPowerStimOn,LowPowerStimOff,'ob')
+                        else
+                            plot(LowPowerStimOn,LowPowerStimOff,'o','MarkerEdgeColor',[0.5 0.5 0.5])
+                        end
+                     elseif strfind(structlist{i}, 'PFC')
+                         if BumpPresent{1,i,man,evnt,fq,1}
+                             plot(LowPowerStimOn,LowPowerStimOff,'or')
+                         else
+                            plot(LowPowerStimOn,LowPowerStimOff,'o','MarkerEdgeColor',[0.5 0.5 0.5])
+                        end
+                    end
+
+
+                end
+                XL=ylim; YL=ylim;
+                maxi=max(XL(2), YL(2));
+                %line([0 0],[maxi maxi],'Color',[0.7 0.7 0.7])
+                line([0 maxi ],[ 0 maxi],'Color',[0.7 0.7 0.7])
+                xlim([0 maxi]),ylim([0 maxi]),
+
+                if i==1&&fq==1, text(-0.2,1.3,['x: 30 sec laser ON / y : 30 sec before'],'units','normalized');end
+                if i==length(structlist), xlabel(['stim ' num2str(fq_list(fq)) 'Hz']);end
+                if fq==1,ylabel(structlistname{i});end
+            end
+        end
+    end
+% cd /media/DataMOBS59/OptoSleepStim
+if sav
+    cd(res_rslt)
+    saveas(Allmicefig,[ 'Allmice_LowFqInhibition.fig'])
+    saveFigure(Allmicefig,[ 'Allmice_LowFqInhibition'],res)
+end
+cd(res)

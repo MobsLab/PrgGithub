@@ -1,0 +1,682 @@
+
+clear all, close all
+
+% Load names of all mice to use
+AllSlScoringMice
+
+
+%% To execute
+MatX=[-0.7:3.2/99:2.5];
+MatY=[-1.5:3.5/99:2];
+for mm=1:m
+    mm
+    tic
+     
+    for i=1:4
+        Points{i}=[];
+    end
+    cd(filename2{mm})
+    %     load('MapsTransitionProba.mat')
+    load('StateEpochSB.mat','SWSEpoch','Wake','smooth_Theta','smooth_ghi')%     %Find transition zone
+    %     temp=nanmean(Val{4}');
+    %     [C,I]=min(temp(20:80));
+    %     I=I+19;
+    %     Lim2=find(temp(I:end)>0.9,1,'first')+I;
+    %     Lim1=find(temp(1:I)>0.9,1,'last');
+    %     %     plot(temp)
+    %     %     hold on
+    %     %     plot(Lim1,temp(Lim1),'*r')
+    %     %     plot(Lim2,temp(Lim2),'*r')
+    %     % pause
+    %     % hold off
+    %     X1=exp(MatX(Lim1)+nanmean(log(Data(Restrict(smooth_ghi,SWSEpoch)))));
+    %     X2=exp(MatX(Lim2)+nanmean(log(Data(Restrict(smooth_ghi,SWSEpoch)))));
+    %     TransitionEpoch1=thresholdIntervals(smooth_ghi,X1,'Direction','Above');
+    %     TransitionEpoch2=thresholdIntervals(smooth_ghi,X2,'Direction','Below');
+    %     TransitionEpoch=And(TransitionEpoch1,TransitionEpoch2);
+    %
+    %     save('TransLims.mat','X1','X2','TransitionEpoch')
+    try
+    load('TransLims.mat')
+    catch
+        load(' TransLims.mat')
+    end
+    
+      if exist('PF_Low_Spectrum.mat')>0
+        load([ filename2{mm} 'PF_Low_Spectrum.mat'])
+        SptsdPF=tsd(Spectro{2}*1e4,Spectro{1});
+    else
+        clear SptsdPF
+    end
+    if exist('Pa_Low_Spectrum.mat')>0
+        load([ filename2{mm} 'Pa_Low_Spectrum.mat'])
+        SptsdPa=tsd(Spectro{2}*1e4,Spectro{1});
+    else
+        clear SptsdPa
+    end
+    if exist('H_Low_Spectrum.mat')>0
+        load([ filename2{mm} 'H_Low_Spectrum.mat'])
+        SptsdH=tsd(Spectro{2}*1e4,Spectro{1});
+    else
+        clear SptsdH
+    end
+    if exist('B_Low_Spectrum.mat')>0
+        load([ filename2{mm} 'B_Low_Spectrum.mat'])
+        SptsdB=tsd(Spectro{2}*1e4,Spectro{1});
+    else
+        clear SptsdB
+    end
+    
+    if exist('PF_High_Spectrum.mat')>0
+        load([ filename2{mm} 'PF_High_Spectrum.mat'])
+        SptsdHPF=tsd(Spectro{2}*1e4,Spectro{1});
+    else
+        clear SptsdHPF
+    end
+    if exist('Pa_High_Spectrum.mat')>0
+        load([ filename2{mm} 'Pa_High_Spectrum.mat'])
+        SptsdHPa=tsd(Spectro{2}*1e4,Spectro{1});
+    else
+        clear SptsdHPa
+    end
+    if exist('H_High_Spectrum.mat')>0
+        load([ filename2{mm} 'H_High_Spectrum.mat'])
+        SptsdHH=tsd(Spectro{2}*1e4,Spectro{1});
+    else
+        clear SptsdHH
+    end
+    if exist('B_High_Spectrum.mat')>0
+        load([ filename2{mm} 'B_High_Spectrum.mat'])
+        SptsdHB=tsd(Spectro{2}*1e4,Spectro{1});
+    else
+        clear SptsdHB
+    end
+    
+    mm=1;
+    WakeBeg=Restrict(ts(Start(TransitionEpoch)),Wake);
+    [a,bWkBe]=intersect(Range(ts(Start(TransitionEpoch))),Range(WakeBeg));
+    WakeEnd=Restrict(ts(Stop(TransitionEpoch)),Wake);
+    [a,bWkEn]=intersect(Range(ts(Stop(TransitionEpoch))),Range(WakeEnd));
+    SleepBeg=Restrict(ts(Start(TransitionEpoch)),SWSEpoch);
+    [a,bSlBe]=intersect(Range(ts(Start(TransitionEpoch))),Range(SleepBeg));
+    SleepEnd=Restrict(ts(Stop(TransitionEpoch)),SWSEpoch);
+    [a,bSlEn]=intersect(Range(ts(Stop(TransitionEpoch))),Range(SleepEnd));
+    
+    %Sleep to Sleep
+    temp=(subset(TransitionEpoch,(intersect(bSlBe,bSlEn))));temp=mergeCloseIntervals(temp,1e4);
+    PostSpecPer=dropShortIntervals(temp,3e4);
+    [Y{mm,1},X{mm,1}]=hist((Stop(temp)-Start(temp))/1e4,50);
+    Dur{mm,1}=sum((Stop(temp)-Start(temp))/1e4);
+    temp=mergeCloseIntervals(temp,5e4);
+    SpecPer=intervalSet(Start(temp)-5e4,Start(temp));
+    if exist('SptsdH')>0
+        SpH{mm,1}=nanmean(Data(Restrict(SptsdH,SpecPer)));
+        SpHPost{mm,1}=nanmean(Data(Restrict(SptsdH,PostSpecPer)));
+    else
+        SpH=NaN;
+        SpHPost=NaN;
+    end
+    if  exist('SptsdHH')>0
+        SpHH{mm,1}=nanmean(Data(Restrict(SptsdHH,SpecPer)));
+        SpHHPost{mm,1}=nanmean(Data(Restrict(SptsdHH,PostSpecPer)));
+    else
+        SpHH=NaN;
+        SpHHPost=NaN;
+    end
+    if exist('SptsdPa')>0
+        SpPa{mm,1}=nanmean(Data(Restrict(SptsdPa,SpecPer)));
+        SpPaPost{mm,1}=nanmean(Data(Restrict(SptsdPa,PostSpecPer)));
+    else
+        SpPa=NaN;
+        SpPaPost=NaN;
+    end
+    if exist('SptsdHPa')>0
+        SpPaH{mm,1}=nanmean(Data(Restrict(SptsdHPa,SpecPer)));
+        SpPaHPost{mm,1}=nanmean(Data(Restrict(SptsdHPa,PostSpecPer)));
+    else
+        SpPaH=NaN;
+        SpPaHPost=NaN;
+    end
+    if exist('SptsdPF')>0
+        SpPF{mm,1}=nanmean(Data(Restrict(SptsdPF,SpecPer)));
+        SpPFPost{mm,1}=nanmean(Data(Restrict(SptsdPF,PostSpecPer)));
+    else
+        SpPF=NaN;
+        SpPFPost=NaN;
+    end
+    if exist('SptsdHPF')>0
+        SpPFH{mm,1}=nanmean(Data(Restrict(SptsdHPF,SpecPer)));
+        SpPFHPost{mm,1}=nanmean(Data(Restrict(SptsdHPF,PostSpecPer)));
+      else
+        SpPFH=NaN;
+        SpPFHPost=NaN;
+    end
+    if exist('SptsdB')>0
+        SpB{mm,1}=nanmean(Data(Restrict(SptsdB,SpecPer)));
+        SpBPost{mm,1}=nanmean(Data(Restrict(SptsdB,PostSpecPer)));
+    else
+        SpB=NaN;
+        SpBPost=NaN;
+    end
+    if exist('SptsdHB')>0
+        SpBH{mm,1}=nanmean(Data(Restrict(SptsdHB,SpecPer)));
+        SpBHPost{mm,1}=nanmean(Data(Restrict(SptsdHB,PostSpecPer)));
+    else
+        SpBH=NaN;
+        SpBHPost=NaN;
+    end
+    for k=1:length(Start(SpecPer))
+        Points{1}=[Points{1},[nanmean(Data(Restrict(smooth_ghi,subset(SpecPer,k))));nanmean(Data(Restrict(smooth_Theta,subset(SpecPer,k))))]];
+    end
+    
+    % Wake to Wake
+    temp=(subset(TransitionEpoch,(intersect(bWkBe,bWkEn))));temp=mergeCloseIntervals(temp,1e4);
+    PostSpecPer=dropShortIntervals(temp,3e4);
+    [Y{mm,2},X{mm,2}]=hist((Stop(temp)-Start(temp))/1e4,50);
+    Dur{mm,2}=sum((Stop(temp)-Start(temp))/1e4);
+    temp=mergeCloseIntervals(temp,5e4);
+    SpecPer=intervalSet(Start(temp)-5e4,Start(temp));
+    if exist('SptsdH')>0
+        SpH{mm,2}=nanmean(Data(Restrict(SptsdH,SpecPer)));
+        SpHPost{mm,2}=nanmean(Data(Restrict(SptsdH,PostSpecPer)));
+    end
+    if  exist('SptsdHH')>0
+        SpHH{mm,2}=nanmean(Data(Restrict(SptsdHH,SpecPer)));
+        SpHHPost{mm,2}=nanmean(Data(Restrict(SptsdHH,PostSpecPer)));
+    end
+    if exist('SptsdPa')>0
+        SpPa{mm,2}=nanmean(Data(Restrict(SptsdPa,SpecPer)));
+        SpPaPost{mm,2}=nanmean(Data(Restrict(SptsdPa,PostSpecPer)));
+    end
+    if exist('SptsdHPa')>0
+        SpPaH{mm,2}=nanmean(Data(Restrict(SptsdHPa,SpecPer)));
+        SpPaHPost{mm,2}=nanmean(Data(Restrict(SptsdHPa,PostSpecPer)));
+    end
+    if exist('SptsdPF')>0
+        SpPF{mm,2}=nanmean(Data(Restrict(SptsdPF,SpecPer)));
+        SpPFPost{mm,2}=nanmean(Data(Restrict(SptsdPF,PostSpecPer)));
+    end
+    if exist('SptsdHPF')>0
+        SpPFH{mm,2}=nanmean(Data(Restrict(SptsdHPF,SpecPer)));
+        SpPFHPost{mm,2}=nanmean(Data(Restrict(SptsdHPF,PostSpecPer)));
+    end
+    if exist('SptsdB')>0
+        SpB{mm,2}=nanmean(Data(Restrict(SptsdB,SpecPer)));
+        SpBPost{mm,2}=nanmean(Data(Restrict(SptsdB,PostSpecPer)));
+    end
+    if exist('SptsdHB')>0
+        SpBH{mm,2}=nanmean(Data(Restrict(SptsdHB,SpecPer)));
+        SpBHPost{mm,2}=nanmean(Data(Restrict(SptsdHB,PostSpecPer)));
+    end
+     for k=1:length(Start(SpecPer))
+        Points{2}=[Points{2},[nanmean(Data(Restrict(smooth_ghi,subset(SpecPer,k))));nanmean(Data(Restrict(smooth_Theta,subset(SpecPer,k))))]];
+     end
+    
+    %Wk to Sleep
+    temp=(subset(TransitionEpoch,(intersect(bWkBe,bSlEn))));temp=mergeCloseIntervals(temp,1e4);
+    PostSpecPer=dropShortIntervals(temp,3e4);
+    [Y{mm,3},X{mm,3}]=hist((Stop(temp)-Start(temp))/1e4,50);
+    Dur{mm,3}=sum((Stop(temp)-Start(temp))/1e4);
+    temp=mergeCloseIntervals(temp,5e4);
+    SpecPer=intervalSet(Start(temp)-5e4,Start(temp));
+    if exist('SptsdH')>0
+        SpH{mm,3}=nanmean(Data(Restrict(SptsdH,SpecPer)));
+        SpHPost{mm,3}=nanmean(Data(Restrict(SptsdH,PostSpecPer)));
+    end
+    if  exist('SptsdHH')>0
+        SpHH{mm,3}=nanmean(Data(Restrict(SptsdHH,SpecPer)));
+        SpHHPost{mm,3}=nanmean(Data(Restrict(SptsdHH,PostSpecPer)));
+    end
+    if exist('SptsdPa')>0
+        SpPa{mm,3}=nanmean(Data(Restrict(SptsdPa,SpecPer)));
+        SpPaPost{mm,3}=nanmean(Data(Restrict(SptsdPa,PostSpecPer)));
+    end
+    if exist('SptsdHPa')>0
+        SpPaH{mm,3}=nanmean(Data(Restrict(SptsdHPa,SpecPer)));
+        SpPaHPost{mm,3}=nanmean(Data(Restrict(SptsdHPa,PostSpecPer)));
+    end
+    if exist('SptsdPF')>0
+        SpPF{mm,3}=nanmean(Data(Restrict(SptsdPF,SpecPer)));
+        SpPFPost{mm,3}=nanmean(Data(Restrict(SptsdPF,PostSpecPer)));
+    end
+    if exist('SptsdHPF')>0
+        SpPFH{mm,3}=nanmean(Data(Restrict(SptsdHPF,SpecPer)));
+        SpPFHPost{mm,3}=nanmean(Data(Restrict(SptsdHPF,PostSpecPer)));
+    end
+    if exist('SptsdB')>0
+        SpB{mm,3}=nanmean(Data(Restrict(SptsdB,SpecPer)));
+        SpBPost{mm,3}=nanmean(Data(Restrict(SptsdB,PostSpecPer)));
+    end
+    if exist('SptsdHB')>0
+        SpBH{mm,3}=nanmean(Data(Restrict(SptsdHB,SpecPer)));
+        SpBHPost{mm,3}=nanmean(Data(Restrict(SptsdHB,PostSpecPer)));
+    end
+    for k=1:length(Start(SpecPer))
+        Points{3}=[Points{3},[nanmean(Data(Restrict(smooth_ghi,subset(SpecPer,k))));nanmean(Data(Restrict(smooth_Theta,subset(SpecPer,k))))]];
+     end
+    
+    %Sleep to Wk
+    temp=(subset(TransitionEpoch,(intersect(bSlBe,bWkEn))));temp=mergeCloseIntervals(temp,1e4);
+    PostSpecPer=dropShortIntervals(temp,3e4);
+    [Y{mm,4},X{mm,4}]=hist((Stop(temp)-Start(temp))/1e4,50);
+    Dur{mm,4}=sum((Stop(temp)-Start(temp))/1e4);
+    temp=mergeCloseIntervals(temp,5e4);
+    SpecPer=intervalSet(Start(temp)-5e4,Start(temp));
+    if exist('SptsdH')>0
+        SpH{mm,4}=nanmean(Data(Restrict(SptsdH,SpecPer)));
+        SpHPost{mm,4}=nanmean(Data(Restrict(SptsdH,PostSpecPer)));
+    end
+    if  exist('SptsdHH')>0
+        SpHH{mm,4}=nanmean(Data(Restrict(SptsdHH,SpecPer)));
+        SpHHPost{mm,4}=nanmean(Data(Restrict(SptsdHH,PostSpecPer)));
+    end
+    if exist('SptsdPa')>0
+        SpPa{mm,4}=nanmean(Data(Restrict(SptsdPa,SpecPer)));
+        SpPaPost{mm,4}=nanmean(Data(Restrict(SptsdPa,PostSpecPer)));
+    end
+    if exist('SptsdHPa')>0
+        SpPaH{mm,4}=nanmean(Data(Restrict(SptsdHPa,SpecPer)));
+        SpPaHPost{mm,4}=nanmean(Data(Restrict(SptsdHPa,PostSpecPer)));
+    end
+    if exist('SptsdPF')>0
+        SpPF{mm,4}=nanmean(Data(Restrict(SptsdPF,SpecPer)));
+        SpPFPost{mm,4}=nanmean(Data(Restrict(SptsdPF,PostSpecPer)));
+    end
+    if exist('SptsdHPF')>0
+        SpPFH{mm,4}=nanmean(Data(Restrict(SptsdHPF,SpecPer)));
+        SpPFHPost{mm,4}=nanmean(Data(Restrict(SptsdHPF,PostSpecPer)));
+    end
+    if exist('SptsdB')>0
+        SpB{mm,4}=nanmean(Data(Restrict(SptsdB,SpecPer)));
+        SpBPost{mm,4}=nanmean(Data(Restrict(SptsdB,PostSpecPer)));
+    end
+    if exist('SptsdHB')>0
+        SpBH{mm,4}=nanmean(Data(Restrict(SptsdHB,SpecPer)));
+        SpBHPost{mm,4}=nanmean(Data(Restrict(SptsdHB,PostSpecPer)));
+    end
+    for k=1:length(Start(SpecPer))
+        Points{4}=[Points{4},[nanmean(Data(Restrict(smooth_ghi,subset(SpecPer,k))));nanmean(Data(Restrict(smooth_Theta,subset(SpecPer,k))))]];
+    end
+     
+    % Sleep
+    if exist('SptsdH')>0
+        SpH{mm,5}=nanmean(Data(Restrict(SptsdH,SWSEpoch)));
+    end
+    if exist('SptsdPa')>0
+        SpPa{mm,5}=nanmean(Data(Restrict(SptsdPa,SWSEpoch)));
+    end
+    if exist('SptsdPF')>0
+        SpPF{mm,5}=nanmean(Data(Restrict(SptsdPF,SWSEpoch)));
+    end
+    if exist('SptsdB')>0
+        SpB{mm,5}=nanmean(Data(Restrict(SptsdB,SWSEpoch)));
+    end
+    if exist('SptsdHH')>0
+        SpHH{mm,5}=nanmean(Data(Restrict(SptsdHH,SWSEpoch)));
+    end
+    if exist('SptsdHPa')>0
+        SpPaH{mm,5}=nanmean(Data(Restrict(SptsdHPa,SWSEpoch)));
+    end
+    if exist('SptsdHPF')>0
+        SpPFH{mm,5}=nanmean(Data(Restrict(SptsdHPF,SWSEpoch)));
+    end
+    if exist('SptsdHB')>0
+        SpBH{mm,5}=nanmean(Data(Restrict(SptsdHB,SWSEpoch)));
+    end
+    
+    % Wake
+    if exist('SptsdH')>0
+        SpH{mm,6}=nanmean(Data(Restrict(SptsdH,Wake)));
+    end
+    if exist('SptsdPa')>0
+        SpPa{mm,6}=nanmean(Data(Restrict(SptsdPa,Wake)));
+    end
+    if exist('SptsdPF')>0
+        SpPF{mm,6}=nanmean(Data(Restrict(SptsdPF,Wake)));
+    end
+    if exist('SptsdB')
+        SpB{mm,6}=nanmean(Data(Restrict(SptsdB,Wake)));
+    end
+    if exist('SptsdHH')
+        SpHH{mm,6}=nanmean(Data(Restrict(SptsdHH,Wake)));
+    end
+    if exist('SptsdHPa')>0
+        SpPaH{mm,6}=nanmean(Data(Restrict(SptsdHPa,Wake)));
+    end
+    if exist('SptsdHPF')>0
+        SpPFH{mm,6}=nanmean(Data(Restrict(SptsdHPF,Wake)));
+    end
+    if exist('SptsdHB')>0
+        SpBH{mm,6}=nanmean(Data(Restrict(SptsdHB,Wake)));
+    end
+     save TransitionZoneAnalysis.mat SpBH SpB SpPaH SpPa SpPF SpPFH SpHH SpH Points SpPFHPost SpPaHPost SpHHPost SpBHPost SpPFPost  SpHPost SpBPost X Y Dur SpPaPost
+     clear SpBH SpB SpPaH SpPa SpPF SpPFH SpHH SpH Points SpPFHPost SpPaHPost SpHHPost SpBHPost SpPFPost SpPaPost SpHPost SpBPost X Y Dur smooth_Theta smooth_ghi
+     toc
+end
+
+
+figure
+%a: duration of events
+%b : % of events
+%c : % of transition zone time
+clear a
+for mm=1:m
+    cd(filename2{mm})
+    load TransitionZoneAnalysis.mat 
+    a(mm,1)=sum(X{1,1}.*Y{1,1}/sum(Y{1,1}));
+    a(mm,2)=sum(X{1,2}.*Y{1,2}/sum(Y{1,2}));
+    a(mm,3)=sum(X{1,3}.*Y{1,3}/sum(Y{1,3}));
+    a(mm,4)=sum(X{1,4}.*Y{1,4}/sum(Y{1,4}));
+    b(mm,:)=sum(reshape([Y{1,:}],50,4))./sum(sum(reshape([Y{1,:}],50,4)));
+    c(mm,:)=(reshape([Dur{1,:}],1,4))./sum(sum(reshape([Dur{1,:}],1,4)));
+end
+figure
+subplot(131)
+PlotErrorBar(a,0)
+set(gca,'XTick',[1:4],'XTickLabel',{'StoS','WtoW','WtoS','StoW'})
+title('Av trans event duration')
+subplot(132)
+PlotErrorBar(b,0)
+set(gca,'XTick',[1:4],'XTickLabel',{'StoS','WtoW','WtoS','StoW'})
+title('% of total events')
+subplot(133)
+PlotErrorBar(c,0)
+set(gca,'XTick',[1:4],'XTickLabel',{'StoS','WtoW','WtoS','StoW'})
+title('% of total event time')
+
+load('/media/DataMOBSSlSc/SleepScoringMice/M177178/M177178-Sleep-22102014/M178/H_High_Spectrum.mat')
+fH=Spectro{3};
+load('/media/DataMOBSSlSc/SleepScoringMice/M177178/M177178-Sleep-22102014/M178/H_Low_Spectrum.mat')
+f=Spectro{3};
+
+
+for m=1:13
+    cd(filename2{m})
+    load TransitionZoneAnalysis.mat
+    for k=1:6
+       try, SpH1{m,k}=SpH{1,k}./sum(SpH{1,k}); catch,  SpH1{m,k}=[];end
+       try, SpPa1{m,k}=SpPa{1,k}./sum(SpPa{1,k});catch,  SpPa1{m,k}=[];end
+       try, SpPF1{m,k}=SpPF{1,k}./sum(SpPF{1,k});catch,  SpPF1{m,k}=[];end
+       try, SpB1{m,k}=SpB{1,k}./sum(SpB{1,k});catch,  SpB1{m,k}=[];end
+       try, SpHH1{m,k}=10*log10(SpHH{1,k}./sum(SpHH{1,k}));catch,  SpHH1{m,k}=[];end
+       try, SpPaH1{m,k}=10*log10(SpPaH{1,k}./sum(SpPaH{1,k}));catch,  SpPaH1{m,k}=[];end
+       try, SpPFH1{m,k}=10*log10(SpPFH{1,k}./sum(SpPFH{1,k}));catch,  SpPFH1{m,k}=[];end
+       try, SpBH1{m,k}=10*log10(SpBH{1,k}./sum(SpBH{1,k}));catch,  SpBH1{m,k}=[];end
+    end
+    for k=1:4
+        try,SpHPost1{m,k}=SpHPost{1,k}./sum(SpHPost{1,k});catch,  SpHPost1{m,k}=[];end
+        try,SpPaPost1{m,k}=SpPaPost{1,k}./sum(SpPaPost{1,k});catch,  SpPaPost1{m,k}=[];end
+        try,SpPFPost1{m,k}=SpPFPost{1,k}./sum(SpPFPost{1,k});catch,  SpPFPost1{m,k}=[];end
+        try,SpBPost1{m,k}=SpBPost{1,k}./sum(SpBPost{1,k});catch,  SpBPost1{m,k}=[];end
+        try,SpHHPost1{m,k}=10*log10(SpHHPost{1,k}./sum(SpHHPost{1,k}));catch,  SpHHPost1{m,k}=[];end
+        try,SpPaHPost1{m,k}=10*log10(SpPaHPost{1,k}./sum(SpPaHPost{1,k}));catch,  SpPaHPost1{m,k}=[];end
+        try,SpPFHPost1{m,k}=10*log10(SpPFHPost{1,k}./sum(SpPFHPost{1,k}));catch,  SpPFHPost1{m,k}=[];end
+        try,SpBHPost1{m,k}=10*log10(SpBHPost{1,k}./sum(SpBHPost{1,k}));catch,  SpBHPost1{m,k}=[];end
+    end
+end
+
+%Wake to Sleep/Wake to Wake
+% Low frequency before transition
+fig=figure;
+set(fig,'Position',[100 100 4000 500]);
+subplot(141)
+g=shadedErrorBar(f,nanmean(reshape([SpH1{:,6}],263,size([SpH1{:,6}],2)/263)'),[stdError(reshape([SpH1{:,6}],263,size([SpH1{:,6}],2)/263)');stdError(reshape([SpH1{:,6}],263,size([SpH1{:,6}],2)/263)')]);
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpH1{:,2}],263,size([SpH1{:,6}],2)/263)'),[stdError(reshape([SpH1{:,2}],263,size([SpH1{:,6}],2)/263)');stdError(reshape([SpH1{:,2}],263,size([SpH1{:,6}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpH1{:,3}],263,size([SpH1{:,6}],2)/263)'),[stdError(reshape([SpH1{:,3}],263,size([SpH1{:,6}],2)/263)');stdError(reshape([SpH1{:,3}],263,size([SpH1{:,6}],2)/263)')],'b');
+title('HPC')
+subplot(142)
+g=shadedErrorBar(f,nanmean(reshape([SpPa1{:,6}],263,size([SpPa1{:,6}],2)/263)'),[stdError(reshape([SpPa1{:,6}],263,size([SpPa1{:,6}],2)/263)');stdError(reshape([SpPa1{:,6}],263,size([SpPa1{:,6}],2)/263)')]);
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpPa1{:,2}],263,size([SpPa1{:,6}],2)/263)'),[stdError(reshape([SpPa1{:,2}],263,size([SpPa1{:,6}],2)/263)');stdError(reshape([SpPa1{:,2}],263,size([SpPa1{:,6}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpPa1{:,3}],263,size([SpPa1{:,6}],2)/263)'),[stdError(reshape([SpPa1{:,3}],263,size([SpPa1{:,6}],2)/263)');stdError(reshape([SpPa1{:,3}],263,size([SpPa1{:,6}],2)/263)')],'b');
+title('PaCx')
+subplot(143)
+g=shadedErrorBar(f,nanmean(reshape([SpPF1{:,6}],263,size([SpPF1{:,6}],2)/263)'),[stdError(reshape([SpPF1{:,6}],263,size([SpPF1{:,6}],2)/263)');stdError(reshape([SpPF1{:,6}],263,size([SpPF1{:,6}],2)/263)')]);
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpPF1{:,2}],263,size([SpPF1{:,6}],2)/263)'),[stdError(reshape([SpPF1{:,2}],263,size([SpPF1{:,6}],2)/263)');stdError(reshape([SpPF1{:,2}],263,size([SpPF1{:,6}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpPF1{:,3}],263,size([SpPF1{:,6}],2)/263)'),[stdError(reshape([SpPF1{:,3}],263,size([SpPF1{:,6}],2)/263)');stdError(reshape([SpPF1{:,3}],263,size([SpPF1{:,6}],2)/263)')],'b');
+title('PFCx')
+subplot(144)
+g1=shadedErrorBar(f,nanmean(reshape([SpB1{:,6}],263,size([SpB1{:,6}],2)/263)'),[stdError(reshape([SpB1{:,6}],263,size([SpB1{:,6}],2)/263)');stdError(reshape([SpB1{:,6}],263,size([SpB1{:,6}],2)/263)')]);
+hold on
+g2=shadedErrorBar(f,nanmean(reshape([SpB1{:,2}],263,size([SpB1{:,6}],2)/263)'),[stdError(reshape([SpB1{:,2}],263,size([SpB1{:,6}],2)/263)');stdError(reshape([SpB1{:,2}],263,size([SpB1{:,6}],2)/263)')],'r');
+g3=shadedErrorBar(f,nanmean(reshape([SpB1{:,3}],263,size([SpB1{:,6}],2)/263)'),[stdError(reshape([SpB1{:,3}],263,size([SpB1{:,6}],2)/263)');stdError(reshape([SpB1{:,3}],263,size([SpB1{:,6}],2)/263)')],'b');
+title('OB')
+legend([g1.patch g2.patch g3.patch],{'W','W/W','W/S'})
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/WtoSLowBef.fig')
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/WtoSLowBef.png')
+close all
+
+%Sleep to Wake/Sleep to Sleep
+% Low frequency before transition
+fig=figure;
+set(fig,'Position',[100 100 4000 500]);
+subplot(141)
+g=shadedErrorBar(f,nanmean(reshape([SpH1{:,5}],263,size([SpH1{:,5}],2)/263)'),[stdError(reshape([SpH1{:,5}],263,size([SpH1{:,5}],2)/263)');stdError(reshape([SpH1{:,5}],263,size([SpH1{:,5}],2)/263)')]);
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpH1{:,1}],263,size([SpH1{:,5}],2)/263)'),[stdError(reshape([SpH1{:,1}],263,size([SpH1{:,5}],2)/263)');stdError(reshape([SpH1{:,1}],263,size([SpH1{:,5}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpH1{:,4}],263,size([SpH1{:,5}],2)/263)'),[stdError(reshape([SpH1{:,4}],263,size([SpH1{:,5}],2)/263)');stdError(reshape([SpH1{:,4}],263,size([SpH1{:,5}],2)/263)')],'b');
+title('HPC')
+subplot(142);
+g=shadedErrorBar(f,nanmean(reshape([SpPa1{:,5}],263,size([SpPa1{:,5}],2)/263)'),[stdError(reshape([SpPa1{:,5}],263,size([SpPa1{:,5}],2)/263)');stdError(reshape([SpPa1{:,5}],263,size([SpPa1{:,5}],2)/263)')])
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpPa1{:,1}],263,size([SpPa1{:,5}],2)/263)'),[stdError(reshape([SpPa1{:,1}],263,size([SpPa1{:,5}],2)/263)');stdError(reshape([SpPa1{:,1}],263,size([SpPa1{:,5}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpPa1{:,4}],263,size([SpPa1{:,5}],2)/263)'),[stdError(reshape([SpPa1{:,4}],263,size([SpPa1{:,5}],2)/263)');stdError(reshape([SpPa1{:,4}],263,size([SpPa1{:,5}],2)/263)')],'b');
+title('PaCx')
+subplot(143)
+g=shadedErrorBar(f,nanmean(reshape([SpPF1{:,5}],263,size([SpPF1{:,5}],2)/263)'),[stdError(reshape([SpPF1{:,5}],263,size([SpPF1{:,5}],2)/263)');stdError(reshape([SpPF1{:,5}],263,size([SpPF1{:,5}],2)/263)')]);
+hold on;
+g=shadedErrorBar(f,nanmean(reshape([SpPF1{:,1}],263,size([SpPF1{:,5}],2)/263)'),[stdError(reshape([SpPF1{:,1}],263,size([SpPF1{:,5}],2)/263)');stdError(reshape([SpPF1{:,1}],263,size([SpPF1{:,5}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpPF1{:,4}],263,size([SpPF1{:,5}],2)/263)'),[stdError(reshape([SpPF1{:,4}],263,size([SpPF1{:,5}],2)/263)');stdError(reshape([SpPF1{:,4}],263,size([SpPF1{:,5}],2)/263)')],'b');
+title('PFCx')
+subplot(144)
+g1=shadedErrorBar(f,nanmean(reshape([SpB1{:,5}],263,size([SpB1{:,5}],2)/263)'),[stdError(reshape([SpB1{:,5}],263,size([SpB1{:,5}],2)/263)');stdError(reshape([SpB1{:,5}],263,size([SpB1{:,5}],2)/263)')]);
+hold on
+g2=shadedErrorBar(f,nanmean(reshape([SpB1{:,1}],263,size([SpB1{:,5}],2)/263)'),[stdError(reshape([SpB1{:,1}],263,size([SpB1{:,5}],2)/263)');stdError(reshape([SpB1{:,1}],263,size([SpB1{:,5}],2)/263)')],'r');
+g3=shadedErrorBar(f,nanmean(reshape([SpB1{:,4}],263,size([SpB1{:,5}],2)/263)'),[stdError(reshape([SpB1{:,4}],263,size([SpB1{:,5}],2)/263)');stdError(reshape([SpB1{:,4}],263,size([SpB1{:,5}],2)/263)')],'b');
+title('OB')
+legend([g1.patch g2.patch g3.patch],{'S','S/S','S/W'})
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/StoWLowBef.fig')
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/StoWLowBef.png')
+close all
+
+%Wake to Sleep/Wake to Wake
+% High frequency before transition
+fig=figure;
+set(fig,'Position',[100 100 4000 500]);
+subplot(141)
+g=shadedErrorBar(fH,nanmean(reshape([SpHH1{:,6}],32,size([SpHH1{:,6}],2)/32)'),[stdError(reshape([SpHH1{:,6}],32,size([SpHH1{:,6}],2)/32)');stdError(reshape([SpHH1{:,6}],32,size([SpHH1{:,6}],2)/32)')]);
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpHH1{:,2}],32,size([SpHH1{:,2}],2)/32)'),[stdError(reshape([SpHH1{:,2}],32,size([SpHH1{:,2}],2)/32)');stdError(reshape([SpHH1{:,2}],32,size([SpHH1{:,2}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpHH1{:,3}],32,size([SpHH1{:,3}],2)/32)'),[stdError(reshape([SpHH1{:,3}],32,size([SpHH1{:,3}],2)/32)');stdError(reshape([SpHH1{:,3}],32,size([SpHH1{:,3}],2)/32)')],'b');
+title('HPC')
+subplot(142)
+g=shadedErrorBar(fH,nanmean(reshape([SpPaH1{:,6}],32,size([SpPaH1{:,6}],2)/32)'),[stdError(reshape([SpPaH1{:,6}],32,size([SpPaH1{:,6}],2)/32)');stdError(reshape([SpPaH1{:,6}],32,size([SpPaH1{:,6}],2)/32)')]);
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpPaH1{:,2}],32,size([SpPaH1{:,2}],2)/32)'),[stdError(reshape([SpPaH1{:,2}],32,size([SpPaH1{:,2}],2)/32)');stdError(reshape([SpPaH1{:,2}],32,size([SpPaH1{:,2}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpPaH1{:,3}],32,size([SpPaH1{:,3}],2)/32)'),[stdError(reshape([SpPaH1{:,3}],32,size([SpPaH1{:,3}],2)/32)');stdError(reshape([SpPaH1{:,3}],32,size([SpPaH1{:,3}],2)/32)')],'b');
+title('PaCx')
+subplot(143)
+g=shadedErrorBar(fH,nanmean(reshape([SpPFH1{:,6}],32,size([SpPFH1{:,6}],2)/32)'),[stdError(reshape([SpPFH1{:,6}],32,size([SpPFH1{:,6}],2)/32)');stdError(reshape([SpPFH1{:,6}],32,size([SpPFH1{:,6}],2)/32)')]);
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpPFH1{:,2}],32,size([SpPFH1{:,2}],2)/32)'),[stdError(reshape([SpPFH1{:,2}],32,size([SpPFH1{:,2}],2)/32)');stdError(reshape([SpPFH1{:,2}],32,size([SpPFH1{:,2}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpPFH1{:,3}],32,size([SpPFH1{:,3}],2)/32)'),[stdError(reshape([SpPFH1{:,3}],32,size([SpPFH1{:,3}],2)/32)');stdError(reshape([SpPFH1{:,3}],32,size([SpPFH1{:,3}],2)/32)')],'b');
+title('PFCx')
+subplot(144)
+g1=shadedErrorBar(fH,nanmean(reshape([SpBH1{:,6}],32,size([SpBH1{:,6}],2)/32)'),[stdError(reshape([SpBH1{:,6}],32,size([SpBH1{:,6}],2)/32)');stdError(reshape([SpBH1{:,6}],32,size([SpBH1{:,6}],2)/32)')]);
+hold on
+g2=shadedErrorBar(fH,nanmean(reshape([SpBH1{:,2}],32,size([SpBH1{:,2}],2)/32)'),[stdError(reshape([SpBH1{:,2}],32,size([SpBH1{:,2}],2)/32)');stdError(reshape([SpBH1{:,2}],32,size([SpBH1{:,2}],2)/32)')],'r');
+g3=shadedErrorBar(fH,nanmean(reshape([SpBH1{:,3}],32,size([SpBH1{:,3}],2)/32)'),[stdError(reshape([SpBH1{:,3}],32,size([SpBH1{:,3}],2)/32)');stdError(reshape([SpBH1{:,3}],32,size([SpBH1{:,3}],2)/32)')],'b');
+title('OB')
+legend([g1.patch g2.patch g3.patch],{'W','W/W','W/S'})
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/WtoSHiBef.fig')
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/WtoSHiBef.png')
+close all
+
+%Sleep to Wake/Sleep to Sleep
+% High frequency before transition
+fig=figure;
+set(fig,'Position',[100 100 4000 500]);
+subplot(141)
+g=shadedErrorBar(fH,nanmean(reshape([SpHH1{:,5}],32,size([SpHH1{:,5}],2)/32)'),[stdError(reshape([SpHH1{:,5}],32,size([SpHH1{:,5}],2)/32)');stdError(reshape([SpHH1{:,5}],32,size([SpHH1{:,5}],2)/32)')]);
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpHH1{:,1}],32,size([SpHH1{:,1}],2)/32)'),[stdError(reshape([SpHH1{:,1}],32,size([SpHH1{:,1}],2)/32)');stdError(reshape([SpHH1{:,1}],32,size([SpHH1{:,1}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpHH1{:,4}],32,size([SpHH1{:,4}],2)/32)'),[stdError(reshape([SpHH1{:,4}],32,size([SpHH1{:,4}],2)/32)');stdError(reshape([SpHH1{:,4}],32,size([SpHH1{:,4}],2)/32)')],'b');
+title('HPC')
+subplot(142)
+g=shadedErrorBar(fH,nanmean(reshape([SpPaH1{:,5}],32,size([SpPaH1{:,5}],2)/32)'),[stdError(reshape([SpPaH1{:,5}],32,size([SpPaH1{:,5}],2)/32)');stdError(reshape([SpPaH1{:,5}],32,size([SpPaH1{:,5}],2)/32)')]);
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpPaH1{:,1}],32,size([SpPaH1{:,1}],2)/32)'),[stdError(reshape([SpPaH1{:,1}],32,size([SpPaH1{:,1}],2)/32)');stdError(reshape([SpPaH1{:,1}],32,size([SpPaH1{:,1}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpPaH1{:,4}],32,size([SpPaH1{:,4}],2)/32)'),[stdError(reshape([SpPaH1{:,4}],32,size([SpPaH1{:,4}],2)/32)');stdError(reshape([SpPaH1{:,4}],32,size([SpPaH1{:,4}],2)/32)')],'b');
+title('PaCx')
+subplot(143)
+g=shadedErrorBar(fH,nanmean(reshape([SpPFH1{:,5}],32,size([SpPFH1{:,5}],2)/32)'),[stdError(reshape([SpPFH1{:,5}],32,size([SpPFH1{:,5}],2)/32)');stdError(reshape([SpPFH1{:,5}],32,size([SpPFH1{:,5}],2)/32)')]);
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpPFH1{:,1}],32,size([SpPFH1{:,1}],2)/32)'),[stdError(reshape([SpPFH1{:,1}],32,size([SpPFH1{:,1}],2)/32)');stdError(reshape([SpPFH1{:,1}],32,size([SpPFH1{:,1}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpPFH1{:,4}],32,size([SpPFH1{:,4}],2)/32)'),[stdError(reshape([SpPFH1{:,4}],32,size([SpPFH1{:,4}],2)/32)');stdError(reshape([SpPFH1{:,4}],32,size([SpPFH1{:,4}],2)/32)')],'b');
+title('PFCx')
+subplot(144)
+g1=shadedErrorBar(fH,nanmean(reshape([SpBH1{:,5}],32,size([SpBH1{:,5}],2)/32)'),[stdError(reshape([SpBH1{:,5}],32,size([SpBH1{:,5}],2)/32)');stdError(reshape([SpBH1{:,5}],32,size([SpBH1{:,5}],2)/32)')]);
+hold on
+g2=shadedErrorBar(fH,nanmean(reshape([SpBH1{:,1}],32,size([SpBH1{:,1}],2)/32)'),[stdError(reshape([SpBH1{:,1}],32,size([SpBH1{:,1}],2)/32)');stdError(reshape([SpBH1{:,1}],32,size([SpBH1{:,1}],2)/32)')],'r');
+g3=shadedErrorBar(fH,nanmean(reshape([SpBH1{:,4}],32,size([SpBH1{:,4}],2)/32)'),[stdError(reshape([SpBH1{:,4}],32,size([SpBH1{:,4}],2)/32)');stdError(reshape([SpBH1{:,4}],32,size([SpBH1{:,4}],2)/32)')],'b');
+title('OB')
+legend([g1.patch g2.patch g3.patch],{'S','S/S','S/W'})
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/StoWHiBef.fig')
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/StoWHiBef.png')
+close all
+
+%Wake to Sleep/Wake to Wake
+% Low frequency during transition
+fig=figure;
+set(fig,'Position',[100 100 4000 500]);
+subplot(141)
+g=shadedErrorBar(f,nanmean(reshape([SpH1{:,6}],263,size([SpH1{:,6}],2)/263)'),[stdError(reshape([SpH1{:,6}],263,size([SpH1{:,6}],2)/263)');stdError(reshape([SpH1{:,6}],263,size([SpH1{:,6}],2)/263)')]);
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpHPost1{:,2}],263,size([SpHPost1{:,2}],2)/263)'),[stdError(reshape([SpHPost1{:,2}],263,size([SpHPost1{:,2}],2)/263)');stdError(reshape([SpHPost1{:,2}],263,size([SpHPost1{:,2}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpHPost1{:,3}],263,size([SpHPost1{:,3}],2)/263)'),[stdError(reshape([SpHPost1{:,3}],263,size([SpHPost1{:,3}],2)/263)');stdError(reshape([SpHPost1{:,3}],263,size([SpHPost1{:,3}],2)/263)')],'b');
+title('HPC')
+subplot(142)
+g=shadedErrorBar(f,nanmean(reshape([SpPa1{:,6}],263,size([SpPa1{:,6}],2)/263)'),[stdError(reshape([SpPa1{:,6}],263,size([SpPa1{:,6}],2)/263)');stdError(reshape([SpPa1{:,6}],263,size([SpPa1{:,6}],2)/263)')])
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpPaPost1{:,2}],263,size([SpPaPost1{:,2}],2)/263)'),[stdError(reshape([SpPaPost1{:,2}],263,size([SpPaPost1{:,2}],2)/263)');stdError(reshape([SpPaPost1{:,2}],263,size([SpPaPost1{:,2}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpPaPost1{:,3}],263,size([SpPaPost1{:,3}],2)/263)'),[stdError(reshape([SpPaPost1{:,3}],263,size([SpPaPost1{:,3}],2)/263)');stdError(reshape([SpPaPost1{:,3}],263,size([SpPaPost1{:,3}],2)/263)')],'b');
+title('PaCx')
+subplot(143)
+g=shadedErrorBar(f,nanmean(reshape([SpPF1{:,6}],263,size([SpPF1{:,6}],2)/263)'),[stdError(reshape([SpPF1{:,6}],263,size([SpPF1{:,6}],2)/263)');stdError(reshape([SpPF1{:,6}],263,size([SpPF1{:,6}],2)/263)')]);
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpPFPost1{:,2}],263,size([SpPFPost1{:,2}],2)/263)'),[stdError(reshape([SpPFPost1{:,2}],263,size([SpPFPost1{:,2}],2)/263)');stdError(reshape([SpPFPost1{:,2}],263,size([SpPFPost1{:,2}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpPFPost1{:,3}],263,size([SpPFPost1{:,3}],2)/263)'),[stdError(reshape([SpPFPost1{:,3}],263,size([SpPFPost1{:,3}],2)/263)');stdError(reshape([SpPFPost1{:,3}],263,size([SpPFPost1{:,3}],2)/263)')],'b');
+title('PFCx')
+subplot(144)
+g1=shadedErrorBar(f,nanmean(reshape([SpB1{:,6}],263,size([SpB1{:,6}],2)/263)'),[stdError(reshape([SpB1{:,6}],263,size([SpB1{:,6}],2)/263)');stdError(reshape([SpB1{:,6}],263,size([SpB1{:,6}],2)/263)')]);
+hold on
+g2=shadedErrorBar(f,nanmean(reshape([SpBPost1{:,2}],263,size([SpBPost1{:,2}],2)/263)'),[stdError(reshape([SpBPost1{:,2}],263,size([SpBPost1{:,2}],2)/263)');stdError(reshape([SpBPost1{:,2}],263,size([SpBPost1{:,2}],2)/263)')],'r');
+g3=shadedErrorBar(f,nanmean(reshape([SpBPost1{:,3}],263,size([SpBPost1{:,3}],2)/263)'),[stdError(reshape([SpBPost1{:,3}],263,size([SpBPost1{:,3}],2)/263)');stdError(reshape([SpBPost1{:,3}],263,size([SpBPost1{:,3}],2)/263)')],'b');
+title('OB')
+legend([g1.patch g2.patch g3.patch],{'W','W/W','W/S'})
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/WtoSLowTrans.fig')
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/WtoSLowTrans.png')
+close all
+
+
+%Wake to Sleep/Wake to Wake
+% High frequency during transition
+fig=figure;
+set(fig,'Position',[100 100 4000 500]);
+subplot(141)
+g=shadedErrorBar(fH,nanmean(reshape([SpHH1{:,6}],32,size([SpHH1{:,6}],2)/32)'),[stdError(reshape([SpHH1{:,6}],32,size([SpHH1{:,6}],2)/32)');stdError(reshape([SpHH1{:,6}],32,size([SpHH1{:,6}],2)/32)')]);
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpHHPost1{:,2}],32,size([SpHHPost1{:,2}],2)/32)'),[stdError(reshape([SpHHPost1{:,2}],32,size([SpHHPost1{:,2}],2)/32)');stdError(reshape([SpHHPost1{:,2}],32,size([SpHHPost1{:,2}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpHHPost1{:,3}],32,size([SpHHPost1{:,3}],2)/32)'),[stdError(reshape([SpHHPost1{:,3}],32,size([SpHHPost1{:,3}],2)/32)');stdError(reshape([SpHHPost1{:,3}],32,size([SpHHPost1{:,3}],2)/32)')],'b');
+title('HPC')
+subplot(142)
+g=shadedErrorBar(fH,nanmean(reshape([SpPaH1{:,6}],32,size([SpPaH1{:,6}],2)/32)'),[stdError(reshape([SpPaH1{:,6}],32,size([SpPaH1{:,6}],2)/32)');stdError(reshape([SpPaH1{:,6}],32,size([SpPaH1{:,6}],2)/32)')])
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpPaHPost1{:,2}],32,size([SpPaHPost1{:,2}],2)/32)'),[stdError(reshape([SpPaHPost1{:,2}],32,size([SpPaHPost1{:,2}],2)/32)');stdError(reshape([SpPaHPost1{:,2}],32,size([SpPaHPost1{:,2}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpPaHPost1{:,3}],32,size([SpPaHPost1{:,3}],2)/32)'),[stdError(reshape([SpPaHPost1{:,3}],32,size([SpPaHPost1{:,3}],2)/32)');stdError(reshape([SpPaHPost1{:,3}],32,size([SpPaHPost1{:,3}],2)/32)')],'b');
+title('PaCx')
+subplot(143)
+g=shadedErrorBar(fH,nanmean(reshape([SpPFH1{:,6}],32,size([SpPFH1{:,6}],2)/32)'),[stdError(reshape([SpPFH1{:,6}],32,size([SpPFH1{:,6}],2)/32)');stdError(reshape([SpPFH1{:,6}],32,size([SpPFH1{:,6}],2)/32)')]);
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpPFHPost1{:,2}],32,size([SpPFHPost1{:,2}],2)/32)'),[stdError(reshape([SpPFHPost1{:,2}],32,size([SpPFHPost1{:,2}],2)/32)');stdError(reshape([SpPFHPost1{:,2}],32,size([SpPFHPost1{:,2}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpPFHPost1{:,3}],32,size([SpPFHPost1{:,3}],2)/32)'),[stdError(reshape([SpPFHPost1{:,3}],32,size([SpPFHPost1{:,3}],2)/32)');stdError(reshape([SpPFHPost1{:,3}],32,size([SpPFHPost1{:,3}],2)/32)')],'b');
+title('PfHCx')
+subplot(144)
+g1=shadedErrorBar(fH,nanmean(reshape([SpBH1{:,6}],32,size([SpBH1{:,6}],2)/32)'),[stdError(reshape([SpBH1{:,6}],32,size([SpBH1{:,6}],2)/32)');stdError(reshape([SpBH1{:,6}],32,size([SpBH1{:,6}],2)/32)')]);
+hold on
+g2=shadedErrorBar(fH,nanmean(reshape([SpBHPost1{:,2}],32,size([SpBHPost1{:,2}],2)/32)'),[stdError(reshape([SpBHPost1{:,2}],32,size([SpBHPost1{:,2}],2)/32)');stdError(reshape([SpBHPost1{:,2}],32,size([SpBHPost1{:,2}],2)/32)')],'r');
+g3=shadedErrorBar(fH,nanmean(reshape([SpBHPost1{:,3}],32,size([SpBHPost1{:,3}],2)/32)'),[stdError(reshape([SpBHPost1{:,3}],32,size([SpBHPost1{:,3}],2)/32)');stdError(reshape([SpBHPost1{:,3}],32,size([SpBHPost1{:,3}],2)/32)')],'b');
+title('OB')
+legend([g1.patch g2.patch g3.patch],{'W','W/W','W/S'})
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/WtoSHiTrans.fig')
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/WtoSHiTrans.png')
+close all
+
+
+
+%Sleep to Sleep/Sleep Sleep
+% Low frequency during transition
+fig=figure;
+set(fig,'Position',[100 100 4000 500]);
+subplot(141)
+g=shadedErrorBar(f,nanmean(reshape([SpH1{:,5}],263,size([SpH1{:,5}],2)/263)'),[stdError(reshape([SpH1{:,5}],263,size([SpH1{:,5}],2)/263)');stdError(reshape([SpH1{:,5}],263,size([SpH1{:,5}],2)/263)')]);
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpHPost1{:,1}],263,size([SpHPost1{:,1}],2)/263)'),[stdError(reshape([SpHPost1{:,1}],263,size([SpHPost1{:,1}],2)/263)');stdError(reshape([SpHPost1{:,1}],263,size([SpHPost1{:,1}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpHPost1{:,4}],263,size([SpHPost1{:,4}],2)/263)'),[stdError(reshape([SpHPost1{:,4}],263,size([SpHPost1{:,4}],2)/263)');stdError(reshape([SpHPost1{:,4}],263,size([SpHPost1{:,4}],2)/263)')],'b');
+title('HPC')
+subplot(142)
+g=shadedErrorBar(f,nanmean(reshape([SpPa1{:,5}],263,size([SpPa1{:,5}],2)/263)'),[stdError(reshape([SpPa1{:,5}],263,size([SpPa1{:,5}],2)/263)');stdError(reshape([SpPa1{:,5}],263,size([SpPa1{:,5}],2)/263)')])
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpPaPost1{:,1}],263,size([SpPaPost1{:,1}],2)/263)'),[stdError(reshape([SpPaPost1{:,1}],263,size([SpPaPost1{:,1}],2)/263)');stdError(reshape([SpPaPost1{:,1}],263,size([SpPaPost1{:,1}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpPaPost1{:,4}],263,size([SpPaPost1{:,4}],2)/263)'),[stdError(reshape([SpPaPost1{:,4}],263,size([SpPaPost1{:,4}],2)/263)');stdError(reshape([SpPaPost1{:,4}],263,size([SpPaPost1{:,4}],2)/263)')],'b');
+title('PaCx')
+subplot(143)
+g=shadedErrorBar(f,nanmean(reshape([SpPF1{:,5}],263,size([SpPF1{:,5}],2)/263)'),[stdError(reshape([SpPF1{:,5}],263,size([SpPF1{:,5}],2)/263)');stdError(reshape([SpPF1{:,5}],263,size([SpPF1{:,5}],2)/263)')]);
+hold on
+g=shadedErrorBar(f,nanmean(reshape([SpPFPost1{:,1}],263,size([SpPFPost1{:,1}],2)/263)'),[stdError(reshape([SpPFPost1{:,1}],263,size([SpPFPost1{:,1}],2)/263)');stdError(reshape([SpPFPost1{:,1}],263,size([SpPFPost1{:,1}],2)/263)')],'r');
+g=shadedErrorBar(f,nanmean(reshape([SpPFPost1{:,4}],263,size([SpPFPost1{:,4}],2)/263)'),[stdError(reshape([SpPFPost1{:,4}],263,size([SpPFPost1{:,4}],2)/263)');stdError(reshape([SpPFPost1{:,4}],263,size([SpPFPost1{:,4}],2)/263)')],'b');
+title('PFCx')
+subplot(144)
+g1=shadedErrorBar(f,nanmean(reshape([SpB1{:,5}],263,size([SpB1{:,5}],2)/263)'),[stdError(reshape([SpB1{:,5}],263,size([SpB1{:,5}],2)/263)');stdError(reshape([SpB1{:,5}],263,size([SpB1{:,5}],2)/263)')]);
+hold on
+g2=shadedErrorBar(f,nanmean(reshape([SpBPost1{:,1}],263,size([SpBPost1{:,1}],2)/263)'),[stdError(reshape([SpBPost1{:,1}],263,size([SpBPost1{:,1}],2)/263)');stdError(reshape([SpBPost1{:,1}],263,size([SpBPost1{:,1}],2)/263)')],'r');
+g3=shadedErrorBar(f,nanmean(reshape([SpBPost1{:,4}],263,size([SpBPost1{:,4}],2)/263)'),[stdError(reshape([SpBPost1{:,4}],263,size([SpBPost1{:,4}],2)/263)');stdError(reshape([SpBPost1{:,4}],263,size([SpBPost1{:,4}],2)/263)')],'b');
+title('OB')
+legend([g1.patch g2.patch g3.patch],{'S','S/S','S/W'})
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/StoWLowTrans.fig')
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/StoWLowTrans.png')
+close all
+
+%Sleep to Sleep/Sleep Sleep
+% High frequency during transition
+fig=figure;
+set(fig,'Position',[100 100 4000 500]);
+subplot(141)
+g=shadedErrorBar(fH,nanmean(reshape([SpHH1{:,5}],32,size([SpHH1{:,5}],2)/32)'),[stdError(reshape([SpHH1{:,5}],32,size([SpHH1{:,5}],2)/32)');stdError(reshape([SpHH1{:,5}],32,size([SpHH1{:,5}],2)/32)')]);
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpHHPost1{:,1}],32,size([SpHHPost1{:,1}],2)/32)'),[stdError(reshape([SpHHPost1{:,1}],32,size([SpHHPost1{:,1}],2)/32)');stdError(reshape([SpHHPost1{:,1}],32,size([SpHHPost1{:,1}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpHHPost1{:,4}],32,size([SpHHPost1{:,4}],2)/32)'),[stdError(reshape([SpHHPost1{:,4}],32,size([SpHHPost1{:,4}],2)/32)');stdError(reshape([SpHHPost1{:,4}],32,size([SpHHPost1{:,4}],2)/32)')],'b');
+title('HPC')
+subplot(142)
+g=shadedErrorBar(fH,nanmean(reshape([SpPaH1{:,5}],32,size([SpPaH1{:,5}],2)/32)'),[stdError(reshape([SpPaH1{:,5}],32,size([SpPaH1{:,5}],2)/32)');stdError(reshape([SpPaH1{:,5}],32,size([SpPaH1{:,5}],2)/32)')])
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpPaHPost1{:,1}],32,size([SpPaHPost1{:,1}],2)/32)'),[stdError(reshape([SpPaHPost1{:,1}],32,size([SpPaHPost1{:,1}],2)/32)');stdError(reshape([SpPaHPost1{:,1}],32,size([SpPaHPost1{:,1}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpPaHPost1{:,4}],32,size([SpPaHPost1{:,4}],2)/32)'),[stdError(reshape([SpPaHPost1{:,4}],32,size([SpPaHPost1{:,4}],2)/32)');stdError(reshape([SpPaHPost1{:,4}],32,size([SpPaHPost1{:,4}],2)/32)')],'b');
+title('PaCx')
+subplot(143)
+g=shadedErrorBar(fH,nanmean(reshape([SpPFH1{:,5}],32,size([SpPFH1{:,5}],2)/32)'),[stdError(reshape([SpPFH1{:,5}],32,size([SpPFH1{:,5}],2)/32)');stdError(reshape([SpPFH1{:,5}],32,size([SpPFH1{:,5}],2)/32)')]);
+hold on
+g=shadedErrorBar(fH,nanmean(reshape([SpPFHPost1{:,1}],32,size([SpPFHPost1{:,1}],2)/32)'),[stdError(reshape([SpPFHPost1{:,1}],32,size([SpPFHPost1{:,1}],2)/32)');stdError(reshape([SpPFHPost1{:,1}],32,size([SpPFHPost1{:,1}],2)/32)')],'r');
+g=shadedErrorBar(fH,nanmean(reshape([SpPFHPost1{:,4}],32,size([SpPFHPost1{:,4}],2)/32)'),[stdError(reshape([SpPFHPost1{:,4}],32,size([SpPFHPost1{:,4}],2)/32)');stdError(reshape([SpPFHPost1{:,4}],32,size([SpPFHPost1{:,4}],2)/32)')],'b');
+title('PfHCx')
+subplot(144)
+g1=shadedErrorBar(fH,nanmean(reshape([SpBH1{:,5}],32,size([SpBH1{:,5}],2)/32)'),[stdError(reshape([SpBH1{:,5}],32,size([SpBH1{:,5}],2)/32)');stdError(reshape([SpBH1{:,5}],32,size([SpBH1{:,5}],2)/32)')]);
+hold on
+g2=shadedErrorBar(fH,nanmean(reshape([SpBHPost1{:,1}],32,size([SpBHPost1{:,1}],2)/32)'),[stdError(reshape([SpBHPost1{:,1}],32,size([SpBHPost1{:,1}],2)/32)');stdError(reshape([SpBHPost1{:,1}],32,size([SpBHPost1{:,1}],2)/32)')],'r');
+g3=shadedErrorBar(fH,nanmean(reshape([SpBHPost1{:,4}],32,size([SpBHPost1{:,4}],2)/32)'),[stdError(reshape([SpBHPost1{:,4}],32,size([SpBHPost1{:,4}],2)/32)');stdError(reshape([SpBHPost1{:,4}],32,size([SpBHPost1{:,4}],2)/32)')],'b');
+title('OB')
+legend([g1.patch g2.patch g3.patch],{'S','S/S','S/W'})
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/StoWHiTrans.fig')
+saveas(fig,'/media/DataMOBSSlSc/SleepScoringMice/LastFigures/StoWHiTrans.png')

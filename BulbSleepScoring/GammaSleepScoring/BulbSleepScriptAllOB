@@ -1,0 +1,72 @@
+%Sleep Scoring Using Olfactory Bulb and Hippocampal LFP
+
+tic
+%% Step 1 - channels to use and 2 spectra
+close all
+clear all
+filename=cd;
+if filename(end)~='/'
+    filename(end+1)='/';
+end
+scrsz = get(0,'ScreenSize');
+try
+load('LFPData/LFP0.mat');
+LFP;
+catch
+load('LFPData/LFP3.mat');
+LFP; 
+end
+
+r=Range(LFP);
+TotalEpoch=intervalSet(0*1e4,r(end));
+mindur=3; %abs cut off for events;
+ThetaI=[3 3]; %merge and drop
+mw_dur=5; %max length of microarousal
+sl_dur=15; %min duration of sleep around microarousal
+ms_dur=10; % max length of microsleep
+wa_dur=20; %min duration of wake around microsleep
+
+
+ThreshEpoch=TotalEpoch;
+
+chH=load('StateEpochSB.mat','chH')
+chB=load('StateEpochSB.mat','chB')
+
+
+load StateEpochSB
+Epoch;
+
+TotalEpoch=And(TotalEpoch,Epoch);
+TotalEpoch=CleanUpEpoch(TotalEpoch);
+ThreshEpoch=And(ThreshEpoch,Epoch);
+ThreshEpoch=CleanUpEpoch(ThreshEpoch);
+close all;
+save('StateEpochSBAllOB.mat','chB','chH')
+
+Find1015Epoch(ThreshEpoch,ThetaI,chH,filename);
+
+close all;
+
+%% Step 3 - Behavioural Epochs
+FindBehavEpochsAllOB(TotalEpoch,mindur,mw_dur,sl_dur,ms_dur,wa_dur,filename)
+ 
+%% Step 4 - Sleep scoring figure
+WantPlotEpoch=input('Do you want a special Epoch for plotting ? y=1/n=0 ');
+if WantPlotEpoch
+    beginEp=input('Start time in sec ');
+    endEp=input('End time in sec ');
+    PlotEp=intervalSet(beginEp*1e4,endEp*1e4);
+    PlotEp=And(PlotEp,TotalEpoch);
+    PlotEp=CleanUpEpoch(PlotEp);
+else
+    PlotEp=TotalEpoch;
+end
+
+SleepScoreFigure(filename,PlotEp)
+toc
+% 
+% %m147
+% Ep=intervalSet([425,2191,3085,3350,5087,9573,10376,12509,18925]*1e4,[515,2356,3183,3536,5230,9612,10475,12779,19500]*1e4)
+% %m148
+% Ep=intervalSet([439,552,5980,6432,8265,24119]*1e4,[451,1137,6224,6614,8905,24263]*1e4)
+

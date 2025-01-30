@@ -1,0 +1,99 @@
+parent_dir = '/media/sdb1/Data'
+
+cd(parent_dir);
+A = Analysis(pwd);
+datasets = List2Cell([ parent_dir filesep 'datasets_rat20.list' ] );
+
+datasets2 = datasets([1:35]);
+datasets = [datasets2 ; datasets([37:length(datasets)])];
+
+nbDays = length(datasets);
+
+binSizeMaze = 1000;
+
+
+
+A = getResource(A,'CorrMS1',datasets);
+A = getResource(A,'CorrMS2',datasets);
+A = getResource(A,'CorrMS1PCA',datasets);
+A = getResource(A,'CorrMS2PCA',datasets);
+A = getResource(A,'TrialRules',datasets);
+A = getResource(A,'CorrectError',datasets);
+A = getResource(A,'TrialOutcome',datasets);
+A = getResource(A,'CM',datasets);
+
+shiftDays = [];
+
+for i=1:nbDays
+
+	ce(i) = sum(Data(correctError{i}) == 1);
+	left(i) = sum(Data(trialOutcome{i}) == 1);
+	nbTrials(i) = length(Data(correctError{i}));
+	
+	if length(find(diff(Data(trialRules{i})))) > 0
+		shiftDays = [shiftDays i];
+	end
+	
+	corr1 = Data(corrMS1{i});
+	corr2 = Data(corrMS2{i});
+	reactS1(i) = sum(corr1)/length(corr1);
+	reactS2(i) = sum(corr2)/length(corr2);
+	
+	
+	reactS1abs(i) = sum(abs(corr1))/length(corr1);
+	reactS2abs(i) = sum(abs(corr2))/length(corr2);
+
+
+	[PCACoef, PCAvar, PCAexp] = pcacov(cM{i});
+	nbPC = size(PCACoef,1);
+
+	corr1PC = Data(corrMS1PCA{i})';
+	corr2PC = Data(corrMS2PCA{i})';
+
+	[R,P] = corrcoef(PCAvar,var(corr1PC'));
+	rMS1(i) = R(1,2);
+	pMS1(i) = P(1,2);
+	[R,P] = corrcoef(PCAvar,var(corr2PC'));
+	rMS2(i) = R(1,2);
+	pMS2(i) = P(1,2);
+
+	[R,P] = corrcoef(var(corr1PC'),var(corr2PC'));
+	rS1S2(i) = R(1,2);
+	pS1S2(i) = P(1,2);
+
+	[R,P] = corrcoef(var(corr2PC'),var(corr1PC'));
+	rS2S1(i) = R(1,2);
+	pS2S1(i) = P(1,2);
+
+
+	EV(i) = ((rMS2(i)-rMS1(i)*rS2S1(i))/(sqrt((1-rMS1(i)^2)*(1-rS2S1(i)^2))))^2;
+
+	for pc=1:nbPC
+		
+		corrS1PC(pc) = sum(corr1PC(pc,:))/length(corr1PC(pc,:));
+		corrS2PC(pc) = sum(corr2PC(pc,:))/length(corr2PC(pc,:));
+
+		corrS1PCabs(pc) = sum(abs(corr1PC(pc,:)))/length(corr1PC(pc,:));
+		corrS2PCabs(pc) = sum(abs(corr2PC(pc,:)))/length(corr2PC(pc,:));
+
+
+	end
+
+	reactS1PC(i) = sum(corrS1PC);
+	reactS2PC(i) = sum(corrS2PC);
+
+	reactS1PCnorm(i) = corrS1PC*PCAexp/100;
+	reactS2PCnorm(i) = corrS2PC*PCAexp/100;
+	
+	reactS1PCabs(i) = sum(corrS1PCabs);
+	reactS2PCabs(i) = sum(corrS2PCabs);
+
+	reactS1PCnormabs(i) = corrS1PCabs*PCAexp/100;
+	reactS2PCnormabs(i) = corrS2PCabs*PCAexp/100;
+
+
+	clear corrS1PC corrS2PC corrS1PCabs corrS2PCabs
+
+end
+
+

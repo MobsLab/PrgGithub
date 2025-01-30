@@ -1,0 +1,151 @@
+
+res=pwd;
+load([res,'/LFPData/InfoLFP']);
+
+for num=0:length(LFP);  
+    clear LFP
+    clear i;
+    load([res,'/LFPData/LFP',num2str(num)]);
+    LFP2=ResampleTSD(LFP,500);
+    i=num+1;
+    
+    load LocalGlobalTotalAssignment
+    if 1
+        figure, [fh, rasterAx, histAx, MLstd(i)]=ImagePETH(LFP2, ts(sort([LocalStdGlobStdA;LocalStdGlobStdB])), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, MLdev(i)]=ImagePETH(LFP2, ts(sort([LocalDvtGlobStdA;LocalDvtGlobStdB])), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, MGdev(i)]=ImagePETH(LFP2, ts(sort([LocalStdGlobDvtA;LocalStdGlobDvtB])), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, OmiFreq(i)] = ImagePETH(LFP2, ts(sort([OmiAAAA;OmiBBBB])), J1, J2,'BinSize',800);close
+        figure, [fh, rasterAx, histAx, OmiRare(i)] = ImagePETH(LFP2, ts(sort([OmissionRareA;OmissionRareB])), J1, J2,'BinSize',800);close
+        MGstd(i)=MLstd(i);
+    end
+end
+
+save MMNanalysisLFP MGdev MGstd MLdev MLstd OmiFreq OmiRare
+
+%<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>    
+%<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>    
+
+J1=-2000;
+J2=+13000;
+smo=2;
+
+
+for i=1:length(LFP);   
+    %---------------------------------------------------------------------------
+    %<><><><><><><><><><><><><><> Local Effect <><><><><><><><><><><><><><><
+    %---------------------------------------------------------------------------
+    lim=5500;
+    pval=0.05;
+
+    tempA=Data(MLstd(i))';
+    Msa=[tempA(:,1:size(tempA,2)-1)];
+    Msa(Msa>lim)=nan;
+    Msa(Msa<-lim)=nan;
+   
+    tempB=Data(MLdev(i))';
+    Msb=[tempB(:,1:size(tempB,2)-1)];
+    Msb(Msb>lim)=nan;
+    Msb(Msb<-lim)=nan;
+    
+    [Ma,Sa,Ea]=MeanDifNan(RemoveNan(Msa));
+    [Mb,Sb,Eb]=MeanDifNan(RemoveNan(Msb));
+
+    [h,p]=ttest2(RemoveNan(Msa),RemoveNan(Msb));
+    rg=Range(MLdev(i),'ms');
+    pr=rescale(p,450, 490);
+        
+    tps=Range(MLstd(i),'ms');
+
+    figure, subplot(3,1,1)
+    hold on, plot(tps(1:end-1),SmoothDec((Ma),smo),'k','linewidth',2), 
+    hold on, plot(tps(1:end-1),SmoothDec((Ma+Ea),smo),'k') 
+    hold on, plot(tps(1:end-1),SmoothDec((Ma-Ea),smo),'k') 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb),smo),'r','linewidth',2) 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb+Eb),smo),'r') 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb-Eb),smo),'r') 
+    hold on, plot(rg(p<pval),pr(p<pval),'gx')
+    title(['local effect, channel',num2str(num),InfoLFP.structure(i)])
+    hold on, axis([-200 1300 -600 600])
+    for a=0:150:600
+        hold on, plot(a,min(axis):max(axis),'b','linewidth',1);
+    end
+
+    %---------------------------------------------------------------------------
+    %<><><><><><><><><><><><><><> Global Effect <><><><><><><><><><><><><><><
+    %---------------------------------------------------------------------------
+    tempA=Data(MGstd(i))';
+    Msa=[tempA(:,1:size(tempA,2)-1)];
+    Msa(Msa>lim)=nan;
+    Msa(Msa<-lim)=nan;
+    
+    tempB=Data(MGdev(i))';
+    Msb=[tempB(:,1:size(tempB,2)-1)];
+    Msb(Msb>lim)=nan;
+    Msb(Msb<-lim)=nan;
+
+    [Ma,Sa,Ea]=MeanDifNan(RemoveNan(Msa));
+    [Mb,Sb,Eb]=MeanDifNan(RemoveNan(Msb));
+
+    [h,p]=ttest2(RemoveNan(Msa),RemoveNan(Msb));
+    rg=Range(MGdev(i),'ms');
+    pr=rescale(p,450, 490);
+    
+    tps=Range(MGstd(i),'ms');
+
+    hold on, subplot (3,1,2)
+    hold on, plot(tps(1:end-1),SmoothDec((Ma),smo),'k','linewidth',2), 
+    hold on, plot(tps(1:end-1),SmoothDec((Ma+Ea),smo),'k') 
+    hold on, plot(tps(1:end-1),SmoothDec((Ma-Ea),smo),'k') 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb),smo),'r','linewidth',2) 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb+Eb),smo),'r') 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb-Eb),smo),'r') 
+    hold on, plot(rg(p<pval),pr(p<pval),'gx')
+    title(['Global effect, channel',num2str(num),InfoLFP.structure(i)])
+    hold on, axis([-200 1300 -600 600])
+    for a=0:150:600
+        hold on, plot(a,min(axis):max(axis),'b','linewidth',1);
+    end
+ 
+    %---------------------------------------------------------------------------
+    %<><><><><><><><><><><><><> Global Omission Effect <><><><><><><><><><><><><
+    %---------------------------------------------------------------------------
+    lim=5500;
+    pval=0.05;
+
+    tempA=Data(OmiFreq(i))';
+    Msa=[tempA(:,1:size(tempA,2)-1)];
+    Msa(Msa>lim)=nan;
+    Msa(Msa<-lim)=nan;
+    
+    tempB=Data(OmiRare(i))';
+    Msb=[tempB(:,1:size(tempB,2)-1)];
+    Msb(Msb>lim)=nan;
+    Msb(Msb<-lim)=nan;
+    
+    [Ma,Sa,Ea]=MeanDifNan(RemoveNan(Msa));
+    [Mb,Sb,Eb]=MeanDifNan(RemoveNan(Msb));
+
+    [h,p]=ttest2(RemoveNan(Msa),RemoveNan(Msb));
+    rg=Range(OmiFreq(i),'ms');
+    pr=rescale(p,450, 490);
+        
+    tps=Range(MLstd(i),'ms');
+
+    hold on, subplot (3,1,3)
+    hold on, plot(tps(1:end-1),SmoothDec((Ma),smo),'k','linewidth',2), 
+    hold on, plot(tps(1:end-1),SmoothDec((Ma+Ea),smo),'k') 
+    hold on, plot(tps(1:end-1),SmoothDec((Ma-Ea),smo),'k') 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb),smo),'r','linewidth',2) 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb+Eb),smo),'r') 
+    hold on, plot(tps(1:end-1),SmoothDec((Mb-Eb),smo),'r') 
+    hold on, plot(rg(p<pval),pr(p<pval),'gx')
+    title(['Global Omission effect, channel',num2str(num),InfoLFP.structure(i)])
+    hold on, axis([-200 1300 -600 600])
+    for a=0:150:600
+        hold on, plot(a,min(axis):max(axis),'b','linewidth',1);
+    end
+
+end
+
+
+

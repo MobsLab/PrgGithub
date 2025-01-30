@@ -1,0 +1,117 @@
+%% Get Ripples and Spindles
+struc={'B','H','Pi','PF','Pa','PFSup','PaSup','Amyg'};
+clear todo chan dataexis
+m=1;
+filename2{m}='/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse060/20130415/BULB-Mouse-60-15042013/';
+todo(m,:)=[1,1,0,1,1,1,1,0];
+dataexis(m,:)=[1,1,0,1,1,1,1,0];
+chan(m,:)=[1,10,NaN,4,13,6,2,NaN];
+
+m=2;
+filename2{m}='/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse082/20130730/BULB-Mouse-82-30072013/';
+todo(m,:)=[1,1,0,1,1,1,1,0];
+dataexis(m,:)=[1,1,0,1,1,1,1,0];
+chan(m,:)=[2,9,NaN,10,7,8,3,NaN];
+
+m=3;
+filename2{m}='/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse083/20130802/BULB-Mouse-83-02082013/';
+todo(m,:)=[1,1,0,1,1,1,1,0];
+dataexis(m,:)=[1,1,0,1,1,1,1,0];
+chan(m,:)=[6,10,NaN,5,13,1,7,NaN];
+
+m=4;
+filename2{m}='/media/DataMobs15/OB_behaviour/ProjetLPS/Mouse123/LPS_D1/LPSD1-Mouse-123-31032014/';
+todo(m,:)=[1,1,1,1,1,1,1,1];
+dataexis(m,:)=[1,1,1,1,1,1,1,1];
+chan(m,:)=[15,6,0,4,9,12,NaN,3];
+
+m=5;
+filename2{m}='/media/DataMobs15/OB_behaviour/ProjetLPS/Mouse124/LPSD1/LPSD1-Mouse-124-31032014/';
+todo(m,:)=[1,1,1,1,1,1,1,1];
+dataexis(m,:)=[1,1,1,1,1,0,0,1];
+chan(m,:)=[11,2,12,8,4,15,NaN,15];
+
+Spf=[5 10; 10 14;6 8; 8 12];
+for file=1:5
+    cd(filename2{file})
+    file
+    try
+        load('LFPData/LFP1.mat')
+    catch
+        load('LFPData/LFP2.mat')
+    end
+    load('StateEpochSB.mat','NoiseEpoch','GndNoiseEpoch')
+    rg=Range(LFP);
+    TotalEpoch=intervalSet(0,rg(end))-NoiseEpoch-GndNoiseEpoch;
+    TotalEpoch=CleanUpEpoch(TotalEpoch);
+    try
+        load('behavResources.mat','PreEpoch');
+        TotalEpoch=And(TotalEpoch,PreEpoch);
+    end
+    file
+    try
+        load('LFPData/LFP1.mat')
+    catch
+        load('LFPData/LFP2.mat')
+    end
+    load('StateEpochSB.mat','NoiseEpoch','GndNoiseEpoch')
+    rg=Range(LFP);
+    TotalEpoch=intervalSet(0,rg(end))-NoiseEpoch-GndNoiseEpoch;
+    TotalEpoch=CleanUpEpoch(TotalEpoch);
+    try
+        load('behavResources.mat','PreEpoch');
+        TotalEpoch=And(TotalEpoch,PreEpoch);
+    end
+    %     %%Ripples
+    %     if todo(file,2)==1
+    %         load(strcat('LFPData/LFP',num2str(chan(file,2)),'.mat'));
+    %         [Rip,usedEpoch]=FindRipplesKarimSB(LFP,TotalEpoch);
+    %         Ripples{1}=tsd(Rip(:,2)*1E4,Rip(:,2)*1E4);
+    %         Ripples{2}=usedEpoch;
+    %     end
+    %
+    %% Spindles PF
+    if todo(file,6)==1
+        load(strcat('LFPData/LFP',num2str(chan(file,6)),'.mat'));
+        for k=1:length(Spf)
+            [Spi,SWA,stdev,usedEpoch]=FindSpindlesKarimNewSB(LFP,Spf(k,:),TotalEpoch);
+            Spindles{k,1}=tsd(Spi(:,2)*1E4,Spi(:,3)*1E4-Spi(:,1)*1e4);
+            Spindles{k,2}=usedEpoch;
+        end
+    end
+    
+    %% Delta
+    % PF
+    if file<4
+        struct='PFCx'
+        [tDeltaT2,tDeltaP2,usedEpoch]=FindDeltaWavesChan(struct,TotalEpoch,[chan(file,6),chan(file,4)]);
+        DeltaPF{1}=tsd(Range(tDeltaT2),Range(tDeltaT2));
+        DeltaPF{2}=usedEpoch;
+        
+        %Pa
+        struct='PaCx'
+        [tDeltaT2,tDeltaP2,usedEpoch]=FindDeltaWavesChan(struct,TotalEpoch,[chan(file,7),chan(file,5)]);
+        DeltaPa{1}=tsd(Range(tDeltaT2),Range(tDeltaT2));
+        DeltaPa{2}=usedEpoch;
+    end
+    
+    
+    
+    %     %% Power
+    %     %PF
+    %     load(strcat('LFPData/LFP',num2str(chan(file,4)),'.mat'));
+    %     FilDel=FilterLFP(LFP,[1 4],1024);
+    %     HilDel=hilbert(Data(FilDel));
+    %     HilDel=abs(HilDel);
+    %     Del{1}=tsd(Range(LFP),HilDel);
+    %
+    %     load(strcat('LFPData/LFP',num2str(chan(file,5)),'.mat'));
+    %     LFP=Restrict(LFP,TotalEpoch);
+    %     FilDel=FilterLFP(LFP,[1 4],1024);
+    %     HilDel=hilbert(Data(FilDel));
+    %     HilDel=abs(HilDel);
+    %     Del{2}=tsd(Range(LFP),HilDel);
+    %
+    save('Oscillations.mat','Spindles','DeltaPa','DeltaPF','-v7.3','-append')
+    
+end

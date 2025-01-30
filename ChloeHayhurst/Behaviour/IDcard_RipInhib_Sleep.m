@@ -1,0 +1,513 @@
+clear all
+close all
+GetEmbReactMiceFolderList_BM
+Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear','LastCondPre'};
+
+Mouse_names = 'M1688';
+
+RangeLow = linspace(0.1526,20,261);
+RangeHigh = linspace(22,98,32);
+RangeVHigh = linspace(22,249,94);
+RangeLow2 = linspace(1.0681,20,249);
+
+disp('gathering data...')
+
+for sess=1:length(Session_type)
+     Sessions_List_ForLoop_BM
+    disp(Session_type{sess})
+    
+    % variables
+    Speed.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'speed');
+    Respi.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'respi_freq_bm');
+    %             ThetaPower.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'hpc_theta_power');
+%     Ripples.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'ripples');
+    StimEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch','epochname','stimepoch');
+%     HR.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'heartrate');
+%     HR_Var.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'heartratevar');
+    Xtsd.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'xalignedposition');
+    Ytsd.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'yalignedposition');
+    %             Accelero.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'accelero');
+    %             LinearPosition.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'LinearPosition');
+    Aligned_Position.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'alignedposition');
+    StimEpoch2.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch','epochname','vhc_stim');
+    SpectroBulb.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'spectrum','prefix','B_Low');
+    
+    % epochs
+    TotEpoch.(Session_type{sess}) = intervalSet(0,max(Range(Speed.(Session_type{sess}))));
+    FreezeEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freezeepoch');
+    FreezeEpoch_camera.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freeze_epoch_camera');
+    
+    ActiveEpoch.(Session_type{sess}) = TotEpoch.(Session_type{sess})-FreezeEpoch.(Session_type{sess});
+    ZoneEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'zoneepoch');
+    BlockedEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'blockedepoch');
+    UnblockedEpoch.(Session_type{sess}) = TotEpoch.(Session_type{sess})-BlockedEpoch.(Session_type{sess});
+    
+    try
+        StimEpochUnblocked.(Session_type{sess}) = and(StimEpoch.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
+    catch
+        StimEpochUnblocked.(Session_type{sess}) = NaN;
+    end
+    
+    XtsdUnblocked.(Session_type{sess}) = Restrict(Xtsd.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
+    YtsdUnblocked.(Session_type{sess}) = Restrict(Ytsd.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
+    XtsdFreezing.(Session_type{sess}) = Restrict(Xtsd.(Session_type{sess}),FreezeEpoch.(Session_type{sess}));
+    YtsdFreezing.(Session_type{sess}) = Restrict(Ytsd.(Session_type{sess}),FreezeEpoch.(Session_type{sess}));
+    XtsdFreezing_Unblocked.(Session_type{sess}) = Restrict(XtsdFreezing.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
+    YtsdFreezing_Unblocked.(Session_type{sess}) = Restrict(YtsdFreezing.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
+    XtsdStimUnblocked.(Session_type{sess}) = Restrict(XtsdUnblocked.(Session_type{sess}), Start(StimEpochUnblocked.(Session_type{sess})));
+    YtsdStimUnblocked.(Session_type{sess}) = Restrict(YtsdUnblocked.(Session_type{sess}), Start(StimEpochUnblocked.(Session_type{sess})));
+    XtsdStim.(Session_type{sess}) = Restrict(Xtsd.(Session_type{sess}), Start(StimEpoch.(Session_type{sess})));
+    YtsdStim.(Session_type{sess}) = Restrict(Ytsd.(Session_type{sess}), Start(StimEpoch.(Session_type{sess})));
+    
+    ShockZoneEpoch.(Session_type{sess}) = ZoneEpoch.(Session_type{sess}){1};
+    SafeZoneEpoch.(Session_type{sess}) = ZoneEpoch.(Session_type{sess}){2};
+    ShockCornerEpoch.(Session_type{sess}) = ZoneEpoch.(Session_type{sess}){4};
+    SafeCornerEpoch.(Session_type{sess}) = ZoneEpoch.(Session_type{sess}){5};
+    MiddleZoneEpoch.(Session_type{sess}) = ZoneEpoch.(Session_type{sess}){3};
+    SafeZoneEpoch_freezing.(Session_type{sess}) = or(ZoneEpoch.(Session_type{sess}){2} , ZoneEpoch.(Session_type{sess}){5});
+    ShockUnblockedEpoch.(Session_type{sess})= and(ShockZoneEpoch.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
+    SafeUnblockedEpoch.(Session_type{sess})= and(SafeZoneEpoch.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
+    
+    
+    FreezeShockEpoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
+    FreezeSafeEpoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , SafeZoneEpoch_freezing.(Session_type{sess}));
+    
+    FreezeSafe2Epoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , SafeZoneEpoch.(Session_type{sess}));
+    FreezeMiddleEpoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , MiddleZoneEpoch.(Session_type{sess}));
+    FreezeSafeCornerEpoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , SafeCornerEpoch.(Session_type{sess}));
+    FreezeShockCornerEpoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , ShockCornerEpoch.(Session_type{sess}));
+    
+    FreezeShockEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
+    FreezeSafeEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , SafeZoneEpoch.(Session_type{sess}));
+    
+    ActiveShockEpoch.(Session_type{sess}) = and(ActiveEpoch.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
+    ActiveSafeEpoch.(Session_type{sess}) = and(ActiveEpoch.(Session_type{sess}) , SafeZoneEpoch_freezing.(Session_type{sess}));
+    ActiveSafe2Epoch.(Session_type{sess}) = and(ActiveEpoch.(Session_type{sess}) , SafeZoneEpoch.(Session_type{sess}));
+    
+    Unblocked_ActiveEpoch.(Session_type{sess}) = and(ActiveEpoch.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
+    Unblocked_ActiveShockZoneEpoch.(Session_type{sess}) = and(ActiveShockEpoch.(Session_type{sess}) , UnblockedEpoch.(Session_type{sess}));
+    Unblocked_ActiveSafeZoneEpoch.(Session_type{sess}) = and(ActiveSafeEpoch.(Session_type{sess}) , UnblockedEpoch.(Session_type{sess}));
+    Unblocked_ActiveSafeZone2Epoch.(Session_type{sess}) = and(ActiveSafe2Epoch.(Session_type{sess}) , UnblockedEpoch.(Session_type{sess}));
+    
+    
+    [ShockZoneEpoch_Corrected.(Session_type{sess}) , SafeZoneEpoch_Corrected.(Session_type{sess})] = Correct_ZoneEntries_Maze_BM(Unblocked_ActiveShockZoneEpoch.(Session_type{sess}) , Unblocked_ActiveSafeZoneEpoch.(Session_type{sess}));
+    [ShockZoneEpoch_Corrected.(Session_type{sess}) , SafeZone2Epoch_Corrected.(Session_type{sess})] = Correct_ZoneEntries_Maze_BM(Unblocked_ActiveShockZoneEpoch.(Session_type{sess}) , Unblocked_ActiveSafeZone2Epoch.(Session_type{sess}));
+    
+    Position_Active_Unblocked.(Session_type{sess}) = Restrict(Aligned_Position.(Session_type{sess}),and(ActiveEpoch.(Session_type{sess}),UnblockedEpoch.(Session_type{sess})));
+    [Thigmo_Active(sess)] = Thigmo_From_Position_BM(Position_Active_Unblocked.(Session_type{sess}));
+    
+end
+
+
+for sess=1:length(Session_type)
+    Sessions_List_ForLoop_BM
+    disp(Session_type{sess})
+    
+    RespiFzShock.(Session_type{sess}) = Restrict(Respi.(Session_type{sess}), FreezeShockEpoch.(Session_type{sess}));
+    RespiFzSafe.(Session_type{sess}) = Restrict(Respi.(Session_type{sess}), FreezeSafeEpoch.(Session_type{sess}));
+    RespiFzSafe2.(Session_type{sess}) = Restrict(Respi.(Session_type{sess}), FreezeSafe2Epoch.(Session_type{sess}));
+    RespiFzMiddle.(Session_type{sess}) = Restrict(Respi.(Session_type{sess}), FreezeMiddleEpoch.(Session_type{sess}));
+    RespiFzSafeCorner.(Session_type{sess}) = Restrict(Respi.(Session_type{sess}), FreezeSafeCornerEpoch.(Session_type{sess}));
+    RespiFzShockCorner.(Session_type{sess}) = Restrict(Respi.(Session_type{sess}), FreezeShockCornerEpoch.(Session_type{sess}));
+    
+    RespiFzShock_mean(sess) = nanmean(Data(RespiFzShock.(Session_type{sess})));
+    RespiFzSafe_mean(sess) = nanmean(Data(RespiFzSafe.(Session_type{sess})));
+    RespiFzSafe2_mean(sess) = nanmean(Data(RespiFzSafe2.(Session_type{sess})));
+    RespiFzMiddle_mean(sess) = nanmean(Data(RespiFzMiddle.(Session_type{sess})));
+    RespiFzSafeCorner_mean(sess) = nanmean(Data(RespiFzSafeCorner.(Session_type{sess})));
+    RespiFzShockCorner_mean(sess) = nanmean(Data(RespiFzShockCorner.(Session_type{sess})));
+   
+    
+    SpectroBulbFz.(Session_type{sess})= Restrict(SpectroBulb.(Session_type{sess}),FreezeEpoch.(Session_type{sess}));
+    SpectroBulbFzShock.(Session_type{sess})= Restrict(SpectroBulb.(Session_type{sess}),FreezeShockEpoch.(Session_type{sess}));
+    SpectroBulbFzSafe.(Session_type{sess})= Restrict(SpectroBulb.(Session_type{sess}),FreezeSafeEpoch.(Session_type{sess}));
+    
+    MeanSpectroBulb.(Session_type{sess})=nanmean(Data(SpectroBulb.(Session_type{sess})));
+    MeanSpectroBulbCorr.(Session_type{sess})=nanmean(Data(SpectroBulb.(Session_type{sess}))).* RangeLow;
+    MeanSpectroBulbFzShock.(Session_type{sess})=nanmean(Data(SpectroBulbFzShock.(Session_type{sess})));
+    MeanSpectroBulbFzSafe.(Session_type{sess})=nanmean(Data(SpectroBulbFzSafe.(Session_type{sess})));
+    MeanSpectroBulbFzShockCorr.(Session_type{sess})=nanmean(Data(SpectroBulbFzShock.(Session_type{sess}))).* RangeLow;
+    MeanSpectroBulbFzSafeCorr.(Session_type{sess})=nanmean(Data(SpectroBulbFzSafe.(Session_type{sess}))).* RangeLow;
+    
+    TimeShockZone(sess)= sum(DurationEpoch(ShockZoneEpoch.(Session_type{sess}),'s'));
+    TimeSafeZone(sess)= sum(DurationEpoch(SafeZoneEpoch.(Session_type{sess}),'s'));
+    TimeSession(sess)= sum(DurationEpoch(TotEpoch.(Session_type{sess}),'s'));
+    TimeSafeZone2(sess)= sum(DurationEpoch(SafeZoneEpoch_freezing.(Session_type{sess}),'s'));
+    TimeShockUnblocked(sess)= sum(DurationEpoch(ShockZoneEpoch.(Session_type{sess}),'s'));
+    
+    
+    % Shock/Safe zone entries
+    
+    ShockZoneEntries(sess)= length(Start(ShockZoneEpoch.(Session_type{sess})));
+    SafeZoneEntries(sess)= length(Start(SafeZoneEpoch.(Session_type{sess})));
+    
+    ShockZoneEntriesCorr(sess)= length(Start(ShockZoneEpoch_Corrected.(Session_type{sess})));
+    SafeZoneEntriesCorr(sess)= length(Start(SafeZoneEpoch_Corrected.(Session_type{sess})));
+    SafeZoneEntries2Corr(sess)= length(Start(SafeZone2Epoch_Corrected.(Session_type{sess})));
+    
+    ExpeDuration(sess)= sum(DurationEpoch(TotEpoch.(Session_type{sess}),'s'));
+    
+    FreezeTime_camera(sess)= sum(DurationEpoch(FreezeEpoch_camera.(Session_type{sess}),'s'));
+    
+    FreezeTime(sess)= sum(DurationEpoch(FreezeEpoch.(Session_type{sess}),'s'));
+    FreezeTime_Shock(sess)= sum(DurationEpoch(FreezeShockEpoch.(Session_type{sess}),'s'));
+    FreezeTime_Safe(sess)= sum(DurationEpoch(FreezeSafeEpoch.(Session_type{sess}),'s'));
+    FreezeTime_Shock_camera(sess)= sum(DurationEpoch(FreezeShockEpoch_camera.(Session_type{sess}),'s'));
+    FreezeTime_Safe_camera(sess)= sum(DurationEpoch(FreezeSafeEpoch_camera.(Session_type{sess}),'s'));
+    FreezeTime_Safe2(sess)= sum(DurationEpoch(FreezeSafe2Epoch.(Session_type{sess}),'s'));
+    FreezeTime_Middle(sess)= sum(DurationEpoch(FreezeMiddleEpoch.(Session_type{sess}),'s'));
+    FreezeTime_SafeCorner(sess)= sum(DurationEpoch(FreezeSafeCornerEpoch.(Session_type{sess}),'s'));
+    FreezeTime_ShockCorner(sess)= sum(DurationEpoch(FreezeShockCornerEpoch.(Session_type{sess}),'s'));
+    
+    ActiveTime(sess)= sum(DurationEpoch(ActiveEpoch.(Session_type{sess}),'s'));
+    ActiveTime_Shock(sess)= sum(DurationEpoch(ActiveShockEpoch.(Session_type{sess}),'s'));
+    ActiveTime_Safe(sess)= sum(DurationEpoch(ActiveSafeEpoch.(Session_type{sess}),'s'));
+    
+    Freeze_Prop(sess)= FreezeTime(sess)/ TimeSession(sess);
+    FreezeShock_Prop(sess)= FreezeTime_Shock(sess)/ TimeSession(sess);
+    FreezeSafe_Prop(sess)= FreezeTime_Safe2(sess)/ TimeSession(sess);
+    Active_Prop(sess)= ActiveTime(sess)/ TimeSession(sess);
+    
+    PropShockZone(sess)= TimeShockZone(sess)/ TimeSession(sess);
+    PropSafeZone(sess)= TimeSafeZone(sess)/ TimeSession(sess);
+    PropSafeZone2(sess)= TimeSafeZone2(sess)/ TimeSession(sess);
+    
+    Stim_num(sess)= sum(DurationEpoch(StimEpoch.(Session_type{sess})))/2000;
+    Stim_num_unblocked(sess)= sum(DurationEpoch(StimEpochUnblocked.(Session_type{sess})))/2000;
+    a = length(StimEpoch2.(Session_type{sess}));
+    Stim_num2(sess)= length(a);
+    
+    [Thigmo_Active(sess)] = Thigmo_From_Position_BM(Position_Active_Unblocked.(Session_type{sess}));
+    
+end
+
+Session_type={'SleepPre','SleepPostPre','SleepPostPost'};
+
+for sess=1:length(Session_type)
+    Sessions_List_ForLoop_BM
+    disp(Session_type{sess})
+    Ripples.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'ripples');
+    Xtsd.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'xposition');
+    Ytsd.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'yposition');
+    StimEpoch2.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch','epochname','vhc_stim');
+    a = length(StimEpoch2.(Session_type{sess}));
+    Stim_num2(sess) = length(a);
+end
+
+
+%% Figures
+
+% Learning %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+figure
+subplot(251)
+plot(Data(XtsdUnblocked.TestPre),Data(YtsdUnblocked.TestPre)), hold on
+plot(Data(XtsdFreezing.TestPre),Data(YtsdFreezing.TestPre),'g.','MarkerSize',10)
+ylim([-0.3 1.3])
+xlim([-0.1 1.1])
+title('TestPre')
+subplot(252)
+plot(Data(XtsdUnblocked.CondPre),Data(YtsdUnblocked.CondPre)), hold on
+plot(Data(XtsdStimUnblocked.CondPre),Data(YtsdStimUnblocked.CondPre),'r.','MarkerSize',15)
+plot(Data(XtsdFreezing_Unblocked.CondPre),Data(YtsdFreezing_Unblocked.CondPre),'g.','MarkerSize',10)
+ylim([-0.3 1.3])
+xlim([-0.1 1.1])
+title('CondPre')
+subplot(253)
+plot(Data(XtsdUnblocked.TestPostPre),Data(YtsdUnblocked.TestPostPre)), hold on
+plot(Data(XtsdFreezing.TestPostPre),Data(YtsdFreezing.TestPostPre),'g.','MarkerSize',10)
+ylim([-0.3 1.3])
+xlim([-0.1 1.1])
+title('TestPostPre')
+subplot(254)
+plot(Data(XtsdUnblocked.CondPost),Data(YtsdUnblocked.CondPost)), hold on
+plot(Data(XtsdStimUnblocked.CondPost),Data(YtsdStimUnblocked.CondPost),'r.','MarkerSize',15)
+plot(Data(XtsdFreezing_Unblocked.CondPost),Data(YtsdFreezing_Unblocked.CondPost),'g.','MarkerSize',10)
+ylim([-0.3 1.3])
+xlim([-0.1 1.1])
+title('CondPost')
+subplot(255)
+plot(Data(XtsdUnblocked.TestPostPost),Data(YtsdUnblocked.TestPostPost)), hold on
+plot(Data(XtsdFreezing.TestPostPost),Data(YtsdFreezing.TestPostPost),'g.','MarkerSize',10)
+ylim([-0.3 1.3])
+xlim([-0.1 1.1])
+title('TestPostPost')
+
+subplot(256)
+
+x = categorical({'TestPre','TestPostPre','TestPostPost'});
+x = reordercats(x,{'TestPre','TestPostPre','TestPostPost'});
+vals = [ShockZoneEntriesCorr(1) SafeZoneEntries2Corr(1) ; ShockZoneEntriesCorr(2) SafeZoneEntries2Corr(2); ShockZoneEntriesCorr(3) SafeZoneEntries2Corr(3)];
+b = bar(x,vals);
+color1 = [1 .5 .5];
+color2 = [.5 .5 1];
+b(1).FaceColor = color1;
+b(2).FaceColor = color2;
+title('Numb of zone entries')
+
+
+subplot(257)
+
+x = categorical({'TestPre','TestPostPre','TestPostPost'});
+x = reordercats(x,{'TestPre','TestPostPre','TestPostPost'});
+vals = [PropShockZone(1) PropSafeZone(1) ; PropShockZone(2) PropSafeZone(2); PropShockZone(3) PropSafeZone(3)];
+b = bar(x,vals);
+color1 = [1 .5 .5];
+color2 = [.5 .5 1];
+b(1).FaceColor = color1;
+b(2).FaceColor = color2;
+title('Prop of time spent in zone')
+
+
+subplot(2,5,8)
+
+x = categorical({'CondPre','ExtPre','CondPost','ExtPost'});
+x = reordercats(x,{'CondPre','ExtPre','CondPost','ExtPost'});
+vals = [FreezeShock_Prop(4) FreezeSafe_Prop(4); FreezeShock_Prop(6) FreezeSafe_Prop(6); FreezeShock_Prop(5) FreezeSafe_Prop(5); FreezeShock_Prop(7) FreezeSafe_Prop(7)];
+
+b = bar(x,vals);
+color1 = [1 .5 .5];
+color2 = [.5 .5 1];
+b(1).FaceColor = color1;
+b(2).FaceColor = color2;
+title('Frezzing prop')
+
+subplot(259)
+
+x = categorical({'CondPre','CondPost'});
+x = reordercats(x,{'CondPre','CondPost'});
+vals = [RespiFzShock_mean(4) RespiFzSafe_mean(4); RespiFzShock_mean(5) RespiFzSafe_mean(5)];
+
+b = bar(x,vals);
+color1 = [1 .5 .5];
+color2 = [.5 .5 1];
+b(1).FaceColor = color1;
+b(2).FaceColor = color2;
+title('Respi')
+
+
+
+subplot(2,5,10)
+
+x = categorical({'TestPre','TestPrePost','TestPostPost'});
+x = reordercats(x,{'TestPre','TestPrePost','TestPostPost'});
+vals = [Thigmo_Active(1);Thigmo_Active(2);Thigmo_Active(3)];
+b = bar(x,vals);
+color = [0.5 0.5 0.5];
+b.FaceColor = color;
+title('Thigmotaxis')
+
+mtitle(Mouse_names);
+
+
+
+%% Physio
+
+% Respi
+figure
+subplot(2,5,1)
+plot(RangeLow,MeanSpectroBulbFzShock.Fear,'r')
+hold on
+plot(RangeLow,MeanSpectroBulbFzSafe.Fear,'b')
+vline(3,'--r')
+legend('shock','safe')
+makepretty
+title('Fear')
+xlim([0 10])
+subplot(2,5,6)
+plot(RangeLow,MeanSpectroBulbFzShockCorr.Fear,'r')
+hold on
+plot(RangeLow,MeanSpectroBulbFzSafeCorr.Fear,'b')
+vline(3,'--r')
+legend('shock','safe')
+makepretty
+xlim([0 10])
+subplot(252)
+plot(RangeLow,MeanSpectroBulbFzShock.CondPre,'r')
+hold on
+plot(RangeLow,MeanSpectroBulbFzSafe.CondPre,'b')
+vline(3,'--r')
+makepretty
+title('CondPre')
+xlim([0 10])
+subplot(253)
+plot(RangeLow,MeanSpectroBulbFzShock.LastCondPre,'r')
+hold on
+plot(RangeLow,MeanSpectroBulbFzSafe.LastCondPre,'b')
+vline(3,'--r')
+makepretty
+title('LastCondPre')
+xlim([0 10])
+subplot(254)
+clear a;
+a(1,:)=MeanSpectroBulbFzShock.CondPost;
+a(2,:)=MeanSpectroBulbFzShock.ExtPre;
+plot(RangeLow, nanmean(a),'r')
+hold on
+clear b;
+b(1,:)=MeanSpectroBulbFzSafe.CondPost;
+b(2,:)=MeanSpectroBulbFzSafe.ExtPre;
+plot(RangeLow, nanmean(b),'b')
+vline(3,'--r')
+makepretty
+title('ExtPre + Cond Post')
+xlim([0 10])
+subplot(255)
+plot(RangeLow,MeanSpectroBulbFzShock.ExtPost,'r')
+hold on
+plot(RangeLow,MeanSpectroBulbFzSafe.ExtPost,'b')
+legend('shock','safe')
+xlim([0 10])
+vline(3,'--r')
+makepretty
+title('ExtPost')
+
+subplot(257)
+plot(RangeLow,MeanSpectroBulbFzShockCorr.CondPre,'r')
+hold on
+plot(RangeLow,MeanSpectroBulbFzSafeCorr.CondPre,'b')
+vline(3,'--r')
+makepretty
+title('CondPre')
+xlim([0 10])
+
+subplot(258)
+plot(RangeLow,MeanSpectroBulbFzShockCorr.LastCondPre,'r')
+hold on
+plot(RangeLow,MeanSpectroBulbFzSafeCorr.LastCondPre,'b')
+vline(3,'--r')
+makepretty
+title('Last Cond Pre')
+xlim([0 10])
+
+subplot(259)
+clear a;
+a(1,:)=MeanSpectroBulbFzShockCorr.CondPost;
+a(2,:)=MeanSpectroBulbFzShockCorr.ExtPre;
+plot(RangeLow, nanmean(a),'r')
+vline(3,'--r')
+hold on
+clear b;
+b(1,:)=MeanSpectroBulbFzSafeCorr.CondPost;
+b(2,:)=MeanSpectroBulbFzSafeCorr.ExtPre;
+plot(RangeLow, nanmean(b),'b')
+makepretty
+title('ExtPre + Cond Post')
+xlim([0 10])
+subplot(2,5,10)
+plot(RangeLow,MeanSpectroBulbFzShockCorr.ExtPost,'r')
+hold on
+plot(RangeLow,MeanSpectroBulbFzSafeCorr.ExtPost,'b')
+legend('shock','safe')
+vline(3,'--r')
+xlim([0 10])
+makepretty
+title('ExtPost')
+mtitle(Mouse_names);
+
+%%
+
+Cols = {[1 .5 .5],[1 0.8 0.8],[1 0.8 1],[0.8 0.8 1],[0.5 0.5 1]};
+
+figure
+
+subplot(3,4,1:3)
+imagesc(Range(SpectroBulbFz.Cond),RangeLow,10*log10(Data(SpectroBulbFz.Cond))');axis xy
+hold on
+try
+    a = plot(Range(RespiFzShock.Cond),runmean_BM(Data(RespiFzShock.Cond),100),'.k');
+    a.Color = Cols{1,1};
+end
+try
+    a = plot(Range(RespiFzShockCorner.Cond),runmean_BM(Data(RespiFzShockCorner.Cond),100),'.r');
+    a.Color = Cols{1,2};
+end
+try
+    a = plot(Range(RespiFzMiddle.Cond),runmean_BM(Data(RespiFzMiddle.Cond),100),'.r');
+    a.Color = Cols{1,3};
+end
+try
+    
+    a = plot(Range(RespiFzSafeCorner.Cond),runmean_BM(Data(RespiFzSafeCorner.Cond),100),'.r');
+    a.Color = Cols{1,4};
+end
+try
+    a = plot(Range(RespiFzSafe2.Cond),runmean_BM(Data(RespiFzSafe2.Cond),100),'.r');
+    a.Color = Cols{1,5};
+end
+ylim([0 12])
+title('all freezing')
+
+
+% Epoch = {'Shock','ShockCorner','Middle','SafeCorner','Safe2'}
+% Session = 'Cond'
+% 
+% for epoch = 1:5
+%     per(:,1) = Start(eval(strcat('Freeze',Epoch{epoch},'Epoch.',Session)));
+%     per(:,2) = Stop(eval(strcat('Freeze',Epoch{epoch},'Epoch.',Session)));
+%      for k = 1:size(per)
+%         line([per(k,1) per(k,2)]/1e4, [10 10], 'color',Cols{1,epoch}, 'linewidth',5);hold on
+%      end  
+%     clear per
+% end
+
+
+subplot(3,4,5:7)
+imagesc(Range(SpectroBulbFzShock.Cond),RangeLow,10*log10(Data(SpectroBulbFzShock.Cond))');axis xy
+hold on
+a = plot(Range(RespiFzShock.Cond),runmean_BM(Data(RespiFzShock.Cond),100),'.k');
+a.Color = Cols{1,1};
+ylim([0 12])
+% caxis([0 1.8e6])
+title('shock freezing')
+subplot(3,4,9:11)
+imagesc(Range(SpectroBulbFzSafe.Cond),RangeLow,10*log10(Data(SpectroBulbFzSafe.Cond))');axis xy
+hold on
+a = plot(Range(RespiFzSafe.Cond),runmean_BM(Data(RespiFzSafe.Cond),100),'.k');
+a.Color = Cols{1,5};
+ylim([0 12])
+
+% caxis([0 1.8e6])
+title('safe freezing')
+
+
+subplot(1,4,4)
+
+x = categorical({'CondPre','ExtPre','CondPost','ExtPost'});
+x = reordercats(x,{'CondPre','ExtPre','CondPost','ExtPost'});
+vals = [RespiFzShock_mean(4) RespiFzSafe_mean(4);  RespiFzShock_mean(6) RespiFzSafe_mean(6); RespiFzShock_mean(5) RespiFzSafe_mean(5);  RespiFzShock_mean(7) RespiFzSafe_mean(7)];
+
+b = bar(x,vals);
+color1 = [1 .5 .5];
+color2 = [.5 .5 1];
+b(1).FaceColor = color1;
+b(2).FaceColor = color2;
+title('Respi Freezing')
+
+
+% 
+% % % % 
+% saveFigure_BM(2,'1641_ID2','/home/greta/Dropbox/Mobs_member/ChloeHayhurst/Data/UMaze/RipInhibSleep/IDCards')
+% saveFigure_BM(4,'1685_ID3','/home/greta/Dropbox/Mobs_member/ChloeHayhurst/Data/UMaze/RipInhibSleep/IDCards')
+% saveFigure_BM(3,'1641_ID3','/home/greta/Dropbox/Mobs_member/ChloeHayhurst/Data/UMaze/RipInhibSleep/IDCards')
+% 
+
+
+
+
+%%
+
+figure
+x = categorical({'Shock','ShockCorner','Middle','SafeCorner','Safe'});
+x = reordercats(x,{'Shock','ShockCorner','Middle','SafeCorner','Safe'});
+vals = [RespiFzShock_mean(8) RespiFzShockCorner_mean(8) RespiFzMiddle_mean(8) RespiFzSafeCorner_mean(8) RespiFzSafe2_mean(8)];
+b = bar(x,vals);
+title('Respi Freezing')
+
+
+
+
+
+
+

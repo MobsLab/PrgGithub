@@ -1,0 +1,239 @@
+% Analyse data plethysmo ManipDec15BulbectomiePlethysmo
+
+shammice=[280:290];
+bulbmice=[269:279];
+expgroup={shammice,bulbmice};
+groupname={'sham','bulb'};
+
+%datalocation='server'; 
+%manipname='ManipDec15BulbectomiePlethysmo';
+
+fig1=figure;
+fig2=figure;
+for g=1:2
+    group=expgroup{g};
+    for mousenb=1:length(group)
+        m=group(mousenb)
+        
+        try
+            PathPlethysmo=['/media/DataMobs31/Plethysmo/Data respi/ext_downsampled/M' num2str(m) '/M' num2str(m) '-TestPlethy-171215/'];
+            cd(PathPlethysmo)
+        catch
+            PathPlethysmo=['/media/DataMobs31/Plethysmo/Data respi/ext_downsampled/M' num2str(m) '/M' num2str(m) '-TestPlethy-231215/'];
+            cd(PathPlethysmo)
+        end
+        
+        
+        % debut data sur TTL Start
+        load('LFPData/LFP0.mat')
+        Temp=thresholdIntervals(LFP,1.5*1e4,'Direction','Above');
+        debut=-Start(Temp)/1e4;
+        load('Respi_Low_Spectrum.mat')
+        load('Behavior.mat')
+        % Bip
+        load('LFPData/LFP1.mat')
+        if ismember(m,[270:274, 280:284]) %CSplu=Bip
+            CSplu=tsd(Range(LFP)+debut*1e4,Data(LFP));
+        elseif ismember(m,[275:279,285:289,290,269]) %CSplu=WN
+            CSmin=tsd(Range(LFP)+debut*1e4,Data(LFP));
+        end
+        % White Noise
+        load('LFPData/LFP2.mat')
+        if ismember(m,[270:274, 280:284])
+            CSmin=tsd(Range(LFP)+debut*1e4,Data(LFP));
+        elseif ismember(m,[275:279,285:289,290,269])
+            CSplu=tsd(Range(LFP)+debut*1e4,Data(LFP));
+        end
+        
+        load('LFPData/LFP3.mat')
+        Respi=tsd(Range(LFP)+debut*1e4,Data(LFP));
+        
+        Sptsd=tsd(Spectro{2}*1e4+debut*1e4,Spectro{1});
+        %         figure
+        %         imagesc(Range(Sptsd,'s'),Spectro{3},log(Data(Sptsd)'));
+        %         axis xy
+        %
+        %
+        try load('BehavAnalysis.mat')
+            FreezeEpoch;
+        catch
+            a=Data(Movtsd);
+            a(a<0.01)=NaN;
+            Movtsd=tsd(Range(Movtsd),a);
+            
+            figure
+            plot(Range(Movtsd,'s'),Data(Movtsd))
+            [x,mov_thresh]=ginput(1);
+            FreezeEpoch=thresholdIntervals(Movtsd,mov_thresh,'Direction','Below');
+            FreezeEpoch=dropShortIntervals(FreezeEpoch,2*1e4);
+        end
+        
+        
+        %         figure
+        %         plot(Range(Movtsd,'s'),Data(Movtsd))
+        %         hold on
+        %         plot(Range(Restrict(Movtsd,FreezeEpoch),'s'),Data(Restrict(Movtsd,FreezeEpoch)),'g')
+        
+        
+        NoFreezeEpoch=intervalSet(0,1500*1e4)-FreezeEpoch;
+        Freezing{m-268,1}=mean(Data(Restrict(Sptsd,FreezeEpoch)));
+        Freezing{m-268,2}=mean(Data(Restrict(Sptsd,NoFreezeEpoch)));
+        
+        if sum(Stop(FreezeEpoch)-Start(FreezeEpoch))>50*1E4
+            SpFr=Restrict(Sptsd,FreezeEpoch);
+            
+            
+            
+            
+            div=sum(Stop(FreezeEpoch)-Start(FreezeEpoch))/5;
+            Epo(1)=intervalSet(0,div*1);
+            Epo(2)=intervalSet(div*1,div*2);
+            Epo(3)=intervalSet(div*2,div*3);
+            Epo(4)=intervalSet(div*3,div*4);
+            Epo(5)=intervalSet(div*4,div*5);
+            figure(fig2)
+            subplot(2,11,mousenb+(g-1)*11)
+            colors=jet(5);
+            for j=1:5
+                Ep=and(FreezeEpoch,Epo(j));
+                plot(Spectro{3},mean((Data(Restrict(Sptsd,Ep)))),'color',colors(j,:))
+                hold on
+                [amplMax,index]=max(mean((Data(Restrict(Sptsd,Ep)))));
+                freqMax=Spectro{3}(index);
+                RespiFr{m-268,j}=[amplMax,freqMax,sum(Stop(Ep,'s')-Start(Ep,'s'))];
+            end
+        end
+        
+        
+        %         figure
+        %         plot(Spectro{3},mean((Data(Restrict(Sptsd,NoFreezeEpoch)))),'r')
+        %         hold on
+        %         plot(Spectro{3},mean((Data(Restrict(Sptsd,FreezeEpoch)))),'b')
+        %
+        
+        %Freezing pendant les CS+
+        CSpluEpochs=thresholdIntervals(CSplu,0.5*1e4,'Direction','Above');
+        CSpluEpochs=mergeCloseIntervals(CSpluEpochs,10*1e4);
+        CSpluEpochs2=intervalSet(Start(CSpluEpochs),Start(CSpluEpochs)+50*1e4);
+        
+        CSminEpochs=thresholdIntervals(CSmin,0.5*1e4,'Direction','Above');
+        CSminEpochs=mergeCloseIntervals(CSminEpochs,10*1e4);
+        CSminEpochs2=intervalSet(Start(CSminEpochs),Start(CSminEpochs)+50*1e4);
+        
+        
+        figure(fig1)
+        subplot(2,11,mousenb+(g-1)*11)
+        colors=jet(length(Start(CSpluEpochs2)));
+        for i=1:length(Start(CSpluEpochs2))
+            Ep=and(FreezeEpoch,subset(CSpluEpochs2,i));
+            plot(Spectro{3},mean((Data(Restrict(Sptsd,Ep)))),'color',colors(i,:))
+            hold on
+            [amplMax,index]=max(mean((Data(Restrict(Sptsd,Ep)))));
+            freqMax=Spectro{3}(index);
+            RespiFrCSplu{m-268,i}=[amplMax,freqMax,sum(Stop(Ep,'s')-Start(Ep,'s'))];
+        end
+        
+        
+        
+        %          figure
+        %         colors=jet(length(Start(CSpluEpochs2)));
+        %         for i=1:length(Start(CSpluEpochs2))
+        %             Ep=subset(CSpluEpochs2,i);
+        %             plot(Spectro{3},mean((Data(Restrict(Sptsd,Ep)))),'color',colors(i,:))
+        %             hold on
+        %             [amplMax,index]=max(mean((Data(Restrict(Sptsd,Ep)))));
+        %             freqMax=Spectro{3}(index);
+        %             RespiFrCSplu2{m-268,i}=[amplMax,freqMax,sum(Stop(Ep,'s')-Start(Ep,'s'))];
+        %         end
+        
+        % 5 periodes : basal, CS-, CS+,CS+,CS+
+        CSminstart=Start(CSminEpochs2);
+        CSminstop=Stop(CSminEpochs2);
+        CSplustart=Start(CSpluEpochs2);
+        CSplustop=Stop(CSpluEpochs2);
+        basalEp=intervalSet(0,CSminstart(1));
+        CSminEp=intervalSet(CSminstart(1),CSminstop(4)+30*1e4);
+        CSpluEp1=intervalSet(CSplustart(1),CSplustop(4)+30*1e4);
+        CSpluEp2=intervalSet(CSplustart(5),CSplustop(8)+30*1e4);
+        CSpluEp3=intervalSet(CSplustart(9),CSplustop(12)+30*1e4);
+        
+        Frbasal=sum(Stop(and(FreezeEpoch,basalEp))-Start(and(FreezeEpoch,basalEp)))/(Stop(basalEp)-Start(basalEp));
+        FrCSmin=sum(Stop(and(FreezeEpoch,CSminEp))-Start(and(FreezeEpoch,CSminEp)))/(Stop(CSminEp)-Start(CSminEp));
+        FrCSplu1=sum(Stop(and(FreezeEpoch,CSpluEp1))-Start(and(FreezeEpoch,CSpluEp1)))/(Stop(CSpluEp1)-Start(CSpluEp1));
+        FrCSplu2=sum(Stop(and(FreezeEpoch,CSpluEp2))-Start(and(FreezeEpoch,CSpluEp2)))/(Stop(CSpluEp2)-Start(CSpluEp2));
+        FrCSplu3=sum(Stop(and(FreezeEpoch,CSpluEp3))-Start(and(FreezeEpoch,CSpluEp3)))/(Stop(CSpluEp3)-Start(CSpluEp3));
+        TableFr{g}(mousenb,1)=Frbasal;
+        TableFr{g}(mousenb,2)=FrCSmin;
+        TableFr{g}(mousenb,3)=FrCSplu1;
+        TableFr{g}(mousenb,4)=FrCSplu2;
+        TableFr{g}(mousenb,5)=FrCSplu3;
+        
+        
+        save('BehavAnalysis.mat','mov_thresh','FreezeEpoch')
+        
+        clear FreezeEpoch CSpluEpochs CSpluEpochs2 Sptsd CSplu CSmin mov_thresh
+    end
+end
+
+figure
+colors=jet(22);
+for m=1:22
+    a=reshape([RespiFrCSplu{m,1:12}],3,12)';
+    subplot(1,2,1)
+    plot([1:12],(a(:,1)),'color',colors(m,:)) %ampl
+    hold on
+    subplot(1,2,2)
+    plot([1:12],(a(:,2)),'color',colors(m,:)) %freq
+    hold on
+end
+
+figure
+colors=jet(22);
+Tot1=[];Tot2=[];
+for m=1:22
+    a=reshape([RespiFrCSplu{m,1:12}],3,12)';
+    for i=1:12
+        if a(i,3)<6
+            a(i,:)=NaN;
+        end
+    end
+    subplot(1,3,1)
+    plot([1:12],(a(:,1)),'color',colors(m,:)) %ampl
+    hold on
+    subplot(1,3,2)
+    plot([1:12],(a(:,2)),'color',colors(m,:)) %freq
+    hold on
+    subplot(1,3,3)
+    plot([1:12],(a(:,3)),'color',colors(m,:)) %freq
+    hold on
+    % pause
+    % clf
+    Tot1=[Tot1,a(:,1)];
+    Tot2=[Tot2,a(:,2)];
+    
+end
+figure
+subplot(1,2,1)
+plot(nanmean(Tot1'),'k','linewidth',2)
+errorbar([1:12],nanmean(Tot1'),stdError(Tot1'),'k','linewidth',2)
+
+subplot(1,2,2)
+plot(nanmean(Tot2'),'k','linewidth',2)
+
+errorbar([1:12],nanmean(Tot2'),stdError(Tot2'),'k','linewidth',2)
+
+figure
+for k=1:12
+    subplot(1,12,k)
+    hist(Tot2(k,:))
+end
+
+figure
+colors=jet(22);
+for m=1:22
+    subplot(1,2,1)
+    plot(Spectro{3},Freezing{m,1},'color', colors(m,:)), hold on
+    subplot(1,2,2)
+    plot(Spectro{3},Freezing{m,2},'color', colors(m,:)), hold on
+end
+

@@ -1,0 +1,466 @@
+function AnalyseMNT(NameManipe,folderName,filename)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% INPUTS
+NameManipedefault='MNT';
+tjitterArduino=0.3; % step of arduino activation
+freq=25000; % frequence acquisition en Hz
+StartChannel=11;
+StopChannel=12;
+StimTrigChannel=10;
+StimPulseChannel=0;
+PhotoDetectors=[1:8];
+BasenameDO='Di_D1_';
+LengthStim=5; % time in seconde
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% INITIATE
+disp(' ')
+if ~exist('folderName','var')
+    folderName=pwd;
+end
+if isempty(strfind(folderName,'/')), mark='\'; else, mark='/';end
+
+
+list=dir;
+if ~exist('filename','var')
+    for i=3:length(list)
+        if strcmp(list(i).name(1:4),'OPTO') && strcmp(list(i).name(end-3:end),'.mat')
+            filename=list(i).name(1:end-4);
+        end
+    end
+end
+
+if ~exist('NameManipe','var')
+    NameManipe=NameManipedefault;
+end
+%disp([' *** ',filename,' ***']);
+load([folderName,mark,filename]);
+
+filenameS=[filename(1:strfind(filename,'-wideband')-1),'-A'];
+basename=filename(1:23);
+disp(' '); disp(['     * * * ',basename,' * * *']);
+
+tempn=strfind(filename,'-');
+tempn=tempn(tempn>strfind(filename,'Mouse-'));
+n_mouse=str2num(filename(tempn(1)+1:tempn(2)-1));
+n_day=str2num(folderName(end));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% GET VARIABLES
+varNames=who;
+filenamevar=filename;
+filenamevar(strfind(filename,'-'))='_';
+
+% save variables
+save([folderName,mark,filenameS],'StartChannel','StopChannel','StimTrigChannel','StimPulseChannel','PhotoDetectors','BasenameDO')
+save([folderName,mark,filenameS],'-append','n_mouse','n_day')
+
+for i=1:length(varNames)
+    if strfind(varNames{i},filenamevar)
+        eval(['temp=',varNames{i},'.title;']);
+        
+        if  strfind(temp,BasenameDO)
+            clear Por Lev
+            eval(['Por=',varNames{i},'.times;']);
+            eval(['Lev=',varNames{i},'.level;']);
+            % is start/stop or stim
+            if strcmp(temp,[BasenameDO,num2str(StartChannel)])
+                TpsStart=Por(Lev==0); save([folderName,mark,filenameS],'-append','TpsStart')
+                disp([temp,' --> TpsStart']);
+            elseif strcmp(temp,[BasenameDO,num2str(StopChannel)])
+                TpsStop=Por(Lev==0);save([folderName,mark,filenameS],'-append','TpsStop')
+                disp([temp,' --> TpsStop']);
+            elseif strcmp(temp,[BasenameDO,num2str(StimTrigChannel)])
+                TStimTrig=ts(Por(Lev==0)*1E4);save([folderName,mark,filenameS],'-append','TStimTrig')
+                disp([temp,' --> TStimTrig']);
+            elseif strcmp(temp,[BasenameDO,num2str(StimPulseChannel)])
+                TStimPulse=ts(Por(Lev==0)*1E4);save([folderName,mark,filenameS],'-append','TStimPulse')
+                disp([temp,' --> TStimPulse']);
+           
+            end
+        elseif strcmp(temp,'Di_D1')
+            eval(['lenghtRec=',varNames{i},'.length;']);
+            disp([temp,' -> length recording =',num2str(floor(lenghtRec/freq)),'s'])
+        else
+            disp(temp);
+        end
+    end
+end 
+
+%% remove artifacts (arduino, all activated)
+t_artifact=[];
+for i=1:length(TpsStart)
+    if ismember(TpsStart(i),TpsStop)
+        t_artifact=[TpsStart(i);
+        TpsStart(i)=[];
+    end
+end
+try TpsStop(TpsStop==t_artifact)=[];end
+
+%% NOSE POKE PORTS SIGNAL
+for i=1:length(varNames)
+    if strfind(varNames{i},filenamevar)
+        eval(['temp=',varNames{i},'.title;']);
+        if  strfind(temp,BasenameDO)
+            clear Por Lev
+            eval(['Por=',varNames{i},'.times;']);
+            eval(['Lev=',varNames{i},'.level;']);
+            try
+                Lev(find(Por==t_artifact):find(Por==t_artifact)+1)=[];
+                Por(find(Por==t_artifact):find(Por==t_artifact)+1)=[];
+            end
+            % is photodetector
+            for pd=PhotoDetectors
+                if strcmp(temp,[BasenameDO,num2str(pd)])
+                    % Port is an intervalSet
+                    sti=Por(Lev==0)-tjitterArduino; 
+                    ste=Por(Lev==1);
+                    if length(sti)==length(ste)+1
+                        sti=sti(1:end-1);
+                    end
+                    % remove all activation at the end of recording
+                    indStop=[];
+                    for st=1:length(TpsStop)
+                        indStop=[indStop,find(floor((sti+tjitterArduino)*1E2)/1E2==floor(TpsStop(st)*1E2)/1E2)];
+                    end
+                    sti(indStop)=[];
+                    ste(indStop)=[];
+                    if ~isempty(Lev)
+                        if length(ste)==length(sti)
+                            eval(['Port',num2str(pd),'=intervalSet(sti*1E4,ste*1E4);'])
+                            eval(['save(''',[folderName,mark,filenameS],'.mat'',','''-append'',','''Port',num2str(pd),''');'])
+                            disp([temp,' --> Port',num2str(pd)]);
+                        else
+                            keyboard
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+disp(['... All has been saved in ',filenameS])
+
+%% LOAD TRACKING
+
+n_session=str2num(filename(strfind(filename,'Session')+7));
+
+NameTrackFiles=[];
+PosMatALL=[];
+disp(' ');disp('Loading and saving PosMat from... ')
+for i=3:length(list)
+    if exist(list(i).name,'dir')==7 && (length(list(i).name)>22 && strcmp(list(i).name(1:23),basename))
+        disp(['  - ',list(i).name])
+        NameTrackFiles=[NameTrackFiles,{list(i).name}];
+        if length(NameTrackFiles)==1
+            try
+                TempLoad=load([list(i).name,mark,'NosePokeON.mat'],'lengthPhase','Ratio_IMAonREAL','namePhase');
+                namePhase=TempLoad.namePhase;
+                lengthPhase=TempLoad.lengthPhase;
+                Ratio_IMAonREAL=TempLoad.Ratio_IMAonREAL;
+            end
+            TempLoad=load([list(i).name,mark,'InfoTracking.mat'],'ref');
+            ref=TempLoad.ref;
+        end
+        
+        %TempLoad=load([list(i).name,mark,'InfoTracking.mat'],'PosMat');
+        listt=dir(list(i).name);
+        for li=3:length(listt),
+            if length(listt(li).name)>4 && strcmp(listt(li).name(end-4:end-1),'-000'),
+                TempLoad=load([list(i).name,mark,listt(li).name,mark,'PosMat.mat'],'PosMat');
+            end
+        end
+        PosMatALL=[PosMatALL;[length(NameTrackFiles)*ones(size(TempLoad.PosMat,1),1),TempLoad.PosMat]];
+    end
+end
+save([folderName,mark,filenameS],'-append','NameTrackFiles','PosMatALL','basename','ref');
+try save([folderName,mark,filenameS],'-append','Ratio_IMAonREAL','lengthPhase','namePhase');end
+
+%% FITTING NOSEPOKE AND TRACKING FILES
+% extracting good periods 
+times=[[TpsStart,ones(length(TpsStart),1)];[TpsStop,zeros(length(TpsStop),1)]];
+times=sortrows(times,1);
+TpsStart=[]; TpsStop=[];
+for i=1:length(times)-1
+    if times(i,2)==1 && times(i+1,2)==0
+        TpsStart=[TpsStart;times(i,1)];
+        TpsStop=[TpsStop;times(i+1,1)];
+        disp(['      Session ',num2str(length(TpsStart)),' = ',num2str(floor(times(i+1,1)-times(i,1))),'s'])
+    end
+end
+
+% removing extra periods
+if length(NameTrackFiles)==size(TpsStart,1) && length(NameTrackFiles)==size(TpsStop,1)
+    disp(' file.mcd includes all and only the good track files');
+    SessionInterval=intervalSet(TpsStart*1E4,TpsStop*1E4);
+else
+    disp(['file.mcd includes ',num2str(size(TpsStart,1)),' periods, for ',num2str(length(NameTrackFiles)),' track files']);
+    for i=1:length(TpsStop)
+        disp(['   Period ',num2str(i),'- ',num2str(floor(TpsStop(i)-TpsStart(i))),'s'])
+    end
+    
+    removePokePeriods=input('Enter Period to discard (e.g. [1 3]): ');
+    while length(TpsStop)-length(removePokePeriods)~=length(NameTrackFiles)
+        disp([num2str(length(TpsStop)-length(NameTrackFiles)),' periods must be removed!'])
+        removePokePeriods=input('Enter Period to discard (e.g. [1 3]): ');
+    end
+    
+    TpsStart(removePokePeriods,:)=[];
+    TpsStop(removePokePeriods,:)=[];
+    SessionInterval=intervalSet(TpsStart*1E4,TpsStop*1E4);
+end
+save([folderName,mark,filenameS],'-append','SessionInterval','TpsStart','TpsStop')
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ASK WHICH REWARDED PORTS
+
+aa=strfind(folderName,NameManipe);
+try
+    load([folderName(1:aa+length(NameManipe)),'Config_',NameManipe,'_',num2str(n_mouse)])
+    ConfigurationsMNT;
+    disp(['Config_',NameManipe,'_',num2str(n_mouse),' already defined'])
+catch
+    disp('Enter the different configurations name (eg {''A'',''B'',''C'',''D''}) ')
+    ConfigurationsMNT=input(': ');
+    disp('Enter rewarded ports for each config (eg [1 4])')
+    for i=1:length(ConfigurationsMNT)
+        ok=0;
+        while ok==0
+            try
+                ConfigurationsMNT{2,i}=input(['config ',ConfigurationsMNT{1,i},' : ']);
+                ok=1;
+            catch
+                fprintf('Error -> ')
+            end
+        end
+    end
+    save([folderName(1:aa+length(NameManipe)),'Config_',NameManipe,'_',num2str(n_mouse)],'ConfigurationsMNT')
+    disp(['Configuration has been saved in Mouse',num2str(n_mouse),mark,NameManipe,mark,'Config_',NameManipe,'_',num2str(n_mouse)])
+end
+save([folderName,mark,filenameS],'-append','ConfigurationsMNT')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ANALYSE REWARDED PORTS
+% -------------------
+% Time in each port
+TimeInPorts=zeros(length(Start(SessionInterval)),8); % time in ports
+RewardedTimeInPorts=zeros(length(Start(SessionInterval)),8); % time in ports
+StimInPorts=zeros(length(Start(SessionInterval)),8); % number of stim in each port
+TimeRealStim=[]; % time of the begining of each stimulation period
+AllVisit=[];
+RewardedPorts=[];
+for ses=1:length(Start(SessionInterval))
+    disp(['Session ',num2str(ses),':'])
+    for pd=PhotoDetectors
+        % is visited?
+        eval(['epoch=and(Port',num2str(pd),',subset(SessionInterval,',num2str(ses),'));']);
+        
+        if ~isempty(Start(epoch))
+            TimeInPorts(ses,pd)=sum(Stop(epoch,'s')-Start(epoch,'s'));
+            AllVisit=[AllVisit;[zeros(length(Start(epoch)),1)+ses,Start(epoch,'s'),Stop(epoch,'s'),zeros(length(Start(epoch)),1)+pd]];
+        end
+        
+        % stims
+        temp=Range(Restrict(TStimTrig,epoch),'s');
+        if ~isempty(temp)
+            TempD=[6;diff(temp)];
+            StimInPorts(ses,pd)=length(temp(TempD>LengthStim));
+            TimeRealStim=[TimeRealStim;[ses*ones(length(temp(TempD>5)),1),temp(TempD>5)]];% remove re-entry >5ms
+            
+            StimON=intervalSet(temp(TempD>5)*1E4,(temp(TempD>5)+LengthStim)*1E4);
+            StimOnI=and(epoch,StimON);
+            TimeOnI=sum(Stop(StimOnI,'s')-Start(StimOnI,'s'));
+            RewardedTimeInPorts(ses,pd)=TimeOnI;
+            disp(['  -> ',num2str(length(temp(TempD>5))),' stim in port ',num2str(pd),' (',num2str(TimeOnI),'s)'])
+            RewardedPorts=[RewardedPorts;[ses,pd]];
+        end
+    end
+end
+TimeRealStim= sortrows(TimeRealStim,2);
+AllVisit=sortrows(AllVisit,2);
+ 
+ delay_reEntry=[1,5]; %remove re-entry<1s and <5s
+ TrueVisit=[];
+ TrueVisit_5sDelay=[];
+ for ses=1:length(Start(SessionInterval))
+     for ttt=1:2
+         % temp= tIN / tOUT / port / lasting / NewPort / delayWithLastPort
+         tAllVisit=AllVisit(AllVisit(:,1)==ses,2:4);
+         if ~isempty(tAllVisit)
+             tempvar=[tAllVisit,tAllVisit(:,2)-tAllVisit(:,1),[1;diff(tAllVisit(:,3))]~=0,[tAllVisit(1,1);(tAllVisit(2:end,1)-tAllVisit(1:end-1,2))]];
+             
+             tempvar(:,7)=(tempvar(:,5)~=0 | tempvar(:,6)> delay_reEntry(ttt));
+             vartest=zeros(size(tempvar,1),1);
+             vartestch=zeros(size(tempvar,1),1);
+             indexVar=find(tempvar(:,7));
+             
+             for jj=1:size(tempvar,1)
+                 if (tempvar(jj,5)==0) && (tempvar(jj,7)==0)
+                     cumsumtemp=cumsumtemp+tempvar(jj,4);
+                 else
+                     try vartestch(indexVar(find(indexVar==jj)-1))=cumsumtemp;end
+                     cumsumtemp=tempvar(jj,4);
+                 end
+                 vartest(jj)=cumsumtemp;
+             end
+             vartestch(indexVar(end))=cumsumtemp;
+             tempvar(:,8)=vartestch;
+             
+             if ttt==1
+                 TrueVisit=[TrueVisit;[zeros(sum(tempvar(:,7)==1),1)+ses,tempvar(find(tempvar(:,7)),[3,6,8])]];
+             else
+                 TrueVisit_5sDelay=[TrueVisit_5sDelay;[zeros(sum(tempvar(:,7)==1),1)+ses,tempvar(find(tempvar(:,7)),[3,6,8])]];
+             end
+         end
+         
+     end
+ end
+
+save([folderName,mark,filenameS],'-append','TimeInPorts','RewardedTimeInPorts','RewardedPorts','TimeRealStim','StimInPorts','tAllVisit','TrueVisit','TrueVisit_5sDelay')
+
+% -------------------
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DISPLAY
+scrsz = get(0,'ScreenSize');
+figure('Color',[1 1 1],'Position',scrsz/2), 
+for ses=1:length(Start(SessionInterval))
+    A=[TimeInPorts(ses,:)-RewardedTimeInPorts(ses,:);RewardedTimeInPorts(ses,:)];
+    subplot(2,length(Start(SessionInterval)),ses), 
+    bar(100*A'/(TpsStop(ses)-TpsStart(ses)),'stacked')
+    xlabel('Port Num'); ylabel('% Time of the session')
+    title([basename,' Session',num2str(ses)]), ylim([0, 100])
+    legend({'without stim','with stim'})
+    
+    subplot(2,length(Start(SessionInterval)),length(Start(SessionInterval))+ses), 
+    bar(100*A'/sum(TimeInPorts(ses,:)),'stacked')
+    xlabel('Port Num'); ylabel('% of all the Time spent in ports')
+    line([0,9],[100/8,100/8],'Color','r'); text(4,100/7,'Chance Level','Color','r')
+    title([basename,' Session',num2str(ses)]), ylim([0, 100])
+    
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  POOL FILES
+if 0
+    StopChannel=12;
+    BasenameDO='Di_D1_';
+    filenamesIN={'OPTO-Mouse-195-20112014-MultipleNosePoke-wideband1',...
+        'OPTO-Mouse-195-20112014-MultipleNosePoke-wideband2'};
+    filenameOUT='OPTO-Mouse-195-20112014-MultipleNosePoke-wideband';
+    
+    %% GET VARIABLES
+    
+    Na=0;
+    for ff=1:length(filenamesIN)
+        ALLtimes=[];
+        load(filenamesIN{ff});
+        varNames=who;
+        filenamevar=filenamesIN{ff};
+        filenamevar(strfind(filenamesIN{ff},'-'))='_';
+        
+        for i=1:length(varNames)
+            if strfind(varNames{i},filenamevar)
+                try
+                    eval(['temp=',varNames{i},'.times;']);
+                    ALLtimes=[ALLtimes;temp];
+                    Na=Na+1;
+                end
+                eval(['clear ',varNames{i}]);
+            end
+        end
+        MaxTime(ff)=max(ALLtimes);
+    end
+    clear ALLtimes
+    for a=1:Na
+        ALLtimes{a}=[];
+        ALLlevel{a}=[];
+        ALLtitle{a}=[];
+        ALLname{a}=[];
+    end
+    a=0;
+    for ff=1:length(filenamesIN)
+        load(filenamesIN{ff});
+        varNames=who;
+        filenamevar=filenamesIN{ff};
+        filenamevar(strfind(filenamesIN{ff},'-'))='_';
+        
+        for i=1:length(varNames)
+            if strfind(varNames{i},filenamevar)
+                try
+                    eval([varNames{i},'.times;']);
+                    disp(varNames{i})
+                    Doit=1;
+                catch
+                    disp(['Discard ',varNames{i}])
+                    Doit=0;
+                end
+                
+                if Doit
+                    try
+                    indbar=strfind(varNames{i},'_');
+                    tempvarname=[varNames{i}(1:max(indbar)-2),varNames{i}(max(indbar):end)];
+                    if ff==1
+                        a=a+1;
+                        ALLname{a}=tempvarname;
+                        eval(['ALLtitle{a}=',varNames{i},'.title;']);
+                        eval(['temp=',varNames{i},'.times;']);
+                        if strcmp(ALLtitle{a},[BasenameDO,num2str(StopChannel)])
+                            temp=[temp;MaxTime(ff)-0.001;MaxTime(ff)];
+                        end
+                    else
+                        a=find(strcmp(tempvarname,ALLname));
+                        eval(['temp=',varNames{i},'.times+MaxTime(ff-1);']);
+                        if strcmp(ALLtitle{a},[BasenameDO,num2str(StopChannel)])
+                            temp=[temp;MaxTime(ff)-0.001+MaxTime(ff-1);MaxTime(ff)+MaxTime(ff-1)];
+                        end
+                    end
+                    
+                    % times
+                    ALLtemp=ALLtimes{a};
+                    ALLtimes{a}=[ALLtemp;temp];
+                    
+                    % level
+                    eval(['temp=',varNames{i},'.level;']);
+                    if strcmp(ALLtitle{a},[BasenameDO,num2str(StopChannel)])
+                        temp=[temp;0;1];
+                    end
+                    ALLtemp=ALLlevel{a};
+                    if temp(end)==0,
+                        temp=[temp;1];
+                        timetemp=ALLtimes{a};
+                        ALLtimes{a}=[timetemp;timetemp(end)+0.0001];
+                    end
+                    ALLlevel{a}=[ALLtemp;temp];
+                    catch
+                        keyboard
+                    end
+                    
+                end
+                
+                eval(['clear ',varNames{i}]);
+            end
+        end
+    end
+    
+    disp('Saving...')
+    for a=1:length(ALLname)
+        try
+            eval([ALLname{a},'.title=''',ALLtitle{a},''';'])
+            eval([ALLname{a},'.times=ALLtimes{a};'])
+            eval([ALLname{a},'.level=ALLlevel{a};'])
+            try
+                eval(['save ',filenameOUT,' -append ',ALLname{a}])
+            catch
+                eval(['save ',filenameOUT,' ',ALLname{a}])
+            end
+            disp(ALLname{a})
+        end
+    end
+    
+end

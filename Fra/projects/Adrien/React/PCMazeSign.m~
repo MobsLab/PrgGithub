@@ -1,0 +1,85 @@
+function A = Analyse(A)
+
+
+A = getResource(A,'Sleep2Epoch');
+sleep2Epoch = sleep2Epoch{1};
+
+A = getResource(A,'Sleep1Epoch');
+sleep1Epoch = sleep1Epoch{1};
+
+A = getResource(A,'MazeEpoch');
+mazeEpoch = mazeEpoch{1};
+
+A = getResource(A,'SpikeData');
+nbCells = length(S);
+
+A = getResource(A,'PosXS');
+XS = XS{1};
+A = getResource(A,'PosYS');
+YS = YS{1};
+
+A = getResource(A, 'MazeEpoch');
+mazeEpoch = mazeEpoch{1};
+
+A = getResource(A,'Tetrode')
+
+Q = MakeQfromS(S,1000);
+Q = Restrict(Q,mazeEpoch);
+
+XS = Restrict(XS,mazeEpoch);
+YS = Restrict(YS,mazeEpoch);
+
+cM = spkcorrcoef(S,1000,mazeEpoch,TT);
+nbCells = size(cM,2);
+
+[PCACoef, PCAvar, PCAexp] = pcacov(cM);
+
+
+zQ = tsd(Range(Q),zscore(full(Data(Q))));
+PCscore = PCACoef'*Data(zQ)';
+
+[occH, x, y] = hist2d(Data(XS), Data(YS), 40, 40);
+
+
+nbBins1 = length(x);
+nbBins2 = length(y);
+
+
+X = Data(XS);
+Y = Data(YS);
+tX = Range(XS);
+tY = Range(YS);
+
+
+
+
+keyboard;
+
+	
+
+for pc=1:5
+
+	score = tsd(Range(zQ),PCscore(pc,:)');
+	score = Data(Restrict(score,XS));
+	scoreField = zeros(nbBins1-1,nbBins2-1);
+
+	for i=1:nbBins1-1
+	
+		tx = and(X>=x(i),X<x(i+1));
+		for j=1:nbBins2-1
+	
+			ty = and(Y>=y(j),Y<y(j+1));
+			t = find(and(tx,ty));
+			if length(t)>0
+				scorePCField(i,j) = mean(score(t));
+			end
+		end
+	
+	end
+
+figure(pc),clf
+imagesc(scorePCField)
+caxis([-2;2])
+colorbar
+
+end

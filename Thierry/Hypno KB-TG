@@ -1,0 +1,18 @@
+% work25janvier
+
+load('H_Low_Spectrum.mat')
+load SleepScoring_OBGamma REMEpoch Wake SWSEpoch TotalNoiseEpoch
+
+figure('color',[1 1 1]), imagesc(Spectro{2},Spectro{3},10*log10(Spectro{1}')), axis xy  % (spectrum between 20 and 100 Hz)
+SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[10 2]);  % 10 pour que l'hypnogramme parte de la valeur 10 avec une échelle a 2
+
+rg=Range(SleepStages);  % doone tous les temps de sleepstages 
+vect=find(Data(SleepStages)==3); % vect est le numero des valeurs de sleepstages poru lesquelles sleepstages vaut 3 
+
+[h1,b1]=hist(rg/1E4,[0:30:3E4]);  % ca permet d'avoir les temps pour toutes les valeurs de sleepstages en 30s. (de 0 a 3E4 secondes poru al fin du fichier)
+[h,b]=hist(rg(vect)/1E4,[0:30:3E4]); % ca permet d'avoir les temps pour toutes les valeurs de sleepstages qui valent 3 (pour REM) en 30s.
+
+hold on, plot(b,h./h1*10,'k*')
+
+
+

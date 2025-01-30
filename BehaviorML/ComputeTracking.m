@@ -1,0 +1,59 @@
+%ComputeTracking
+
+
+
+
+try
+    ref;
+    mask;
+    siz;
+catch
+
+[ref,mask,siz]=ComputeImageRef(nom);
+% Envt=1 pour open field
+% Envt=2 pour Environnement 2
+rep=input('Delete Reference video file : ','s');
+if rep=='o'
+eval(['!del ,',nom])
+end
+end
+
+lis=dir;
+erasepreviousfiles=1; % if you want to do the ComputeTracking even if previous files exist
+
+
+
+for i=3:length(lis)
+    filenameAvi=lis(i).name;
+    le=length(filenameAvi);         
+        if filenameAvi(le-2:le)=='avi'
+            try
+                filename=filenameAvi(1:le-4);
+                le2=length(filename);
+                if filename(le2-1:le2)=='-1'
+                        filename=filename(1:le2-2);
+                end
+                
+                if erasepreviousfiles
+                    
+                        [Pos,PosTh,Vit,ima,Fs]=TrackMouseLight(filenameAvi(1:le-4),5,ref,mask,siz);
+                        
+                        
+                else
+                            
+                            if exist([filename,'.pos'])
+                            error('File already exists. Aborting.')
+                            else
+                            [Pos,PosTh,Vit,ima,Fs]=TrackMouseLight(filenameAvi(1:le-4),5,ref,mask);
+                            end
+                end
+                
+            catch
+                disp('problem')
+                disp(filenameAvi(1:le-4))
+            end
+        end
+end
+
+close all
+

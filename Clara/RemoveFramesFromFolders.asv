@@ -1,0 +1,13 @@
+file2copy='';
+
+%create new folder
+if ~isdir()
+    new_folder=mkdir()
+end
+
+%copy files to new folder
+copyfile(file2copy,new_folder)
+
+%remove frames from new folder
+
+movefile([res '/' list(i).name ],[res '/corrupted_files'])

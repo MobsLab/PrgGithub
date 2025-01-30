@@ -1,0 +1,225 @@
+% OptoStim_trigLFP_ML.m
+
+
+%% inputs
+structureToAnalyze='Bulb';
+plotForCheck=1;
+firstMethod=0;
+plotPETH=0;
+saveFig=1;
+
+%% load stim
+
+load('LFPData/InfoLFP.mat')
+chStim=InfoLFP.channel(strcmp(InfoLFP.structure,'OPTO'));
+
+if isempty(chStim)
+    % -----------------------------------------------------------------
+    % ----------------------- MC_rack ---------------------------------
+    reverse=0;
+    try
+        load('StimMCRack.mat'); StimLFP;
+        disp('Loading existing StimLFP from StimMCRack.mat ...')
+        
+    catch
+        
+        disp('Calculating StimLFP ...')
+        
+        % load session and events
+        SetCurrentSession
+        evt=GetEvents('output','Descriptions');
+        
+        for i=1:length(evt)
+            if length(evt{i})<3 || (~strcmp(evt{i}(1:3),'beg') && ~strcmp(evt{i}(1:3),'end'))
+                disp(['name evt{',num2str(i),'}=',evt{i}]);
+                chStim=[chStim,i];
+            end
+        end
+        if isempty(chStim)
+            error('No evt for stim')
+        elseif length(chStim)>1
+            chStim=input('Enter the num of event you want to use: ');
+        end
+        disp(['Loading Events from evt{',num2str(chStim),'}...'])
+        
+        
+        % Sort stim and make it LFP
+        StimRow=GetEvents(evt{chStim});
+        
+        Stim=floor(sort(StimRow*1E4));
+        
+        if firstMethod
+            DifStim=diff([0;Stim]);
+            index=find(DifStim>100);
+            StimON=Stim(index);
+            StimOFF=[Stim(index(2:end)-1);Stim(end)];
+            if length(StimON)-length(StimOFF)>1
+                keyboard;
+            end
+        else
+            % method 20% square pulse
+            DifStimON=diff([Stim;0]);
+            indextemp=find(DifStimON>30);
+            Stim=Stim(indextemp);
+            
+            DifStimOFF=diff([0;Stim]);
+            indexStartBlock=find(DifStimOFF>1E4);
+            
+            Temp=[];
+            for i=1:length(indexStartBlock)-1
+                indexA=find(Stim>=Stim(indexStartBlock(i)) & Stim<Stim(indexStartBlock(i+1)));
+                A=Stim(indexA);
+                difA=diff(A);
+                if floor(mean(difA(2:2:end))/mean(difA(1:2:end)))~=4
+                    A=A(2:end);
+                end
+                if ~isempty(A) & floor(length(A)/2)~=length(A)/2
+                    A=A(1:end-1);
+                end
+                Temp=[Temp;A];
+            end
+            Stim=Temp;
+            DifStimON=diff([Stim;0]);
+            DifStimOFF=diff([0;Stim]);
+            indexStartBlock=find(DifStimOFF>1E4);
+            indexON=find(DifStimON<=1E4 | DifStimOFF<=1E4);
+            StimON=Stim(indexON(1:2:end));
+            StimOFF=Stim(indexON(2:2:end));
+            
+        end
+        
+        ONepoch=IntervalSet(StimON,StimOFF);
+        
+        
+%         DifStim=Diff(Stim);
+%         Stim(DifStim==0)=[];
+%         StimTS={ts(Stim)}; StimTS=tsdArray(StimTS);
+%         ContinueStim= MakeQfromS(StimTS,50); %edit raster
+%         
+%         hold on, plot(Range(ContinueStim,'s'),Data(ContinueStim),'b')
+%         
+%         DtStim=Data(ContinueStim);
+%         RgStim=Range(ContinueStim);
+%         DtStim(DtStim>1)=1;
+
+         
+
+
+        ChLFP=InfoLFP.channel(strcmp(InfoLFP.structure,structureToAnalyze));
+        load(['LFPData/LFP',num2str(ChLFP(1)),'.mat'],'LFP');
+        
+        RgStim=Range(LFP);
+        DtStim=zeros(length(RgStim),1);
+        RgStimON=Range(Restrict(LFP,ONepoch));
+        
+        clear LFP;
+        
+        Ii=ismember(floor(RgStim),floor(RgStimON));
+        DtStim(Ii)=1;
+        
+        StimLFP=tsd(RgStim,DtStim);
+        
+        if plotForCheck
+            figure('Color',[ 1 1 1]),
+            plot(Stim/1E4,ones(1,length(Stim)),'.k')
+            hold on, plot(StimON/1E4,ones(1,length(StimON)),'.r')
+            hold on, plot(StimOFF/1E4,ones(1,length(StimOFF)),'.b')
+            hold on, plot(Stim(indexStartBlock)/1E4,ones(1,length(Stim(indexStartBlock))),'.g')
+            hold on, plot(RgStim/1E4,DtStim,'k')
+            legend({'row','Stim ON','Stim OFF','StartBlock','StimLFP'})
+            
+            xlabel('Time (s)');
+            
+            ok=input('Are you satisfied with the threshold for stim? (y/n): ','s');
+            if ~strcmp(ok,'y'), keyboard;end
+        end
+        
+        disp('Saving StimLFP in StimMCRack.mat ...');
+        
+        save StimMCRack StimRow StimLFP chStim
+        
+    end
+else
+    
+    % ------------------------------------------------------------------
+    % ----------------------- Neuralynx --------------------------------
+    reverse=1;
+    disp(['loading LFPData/LFP',num2str(chStim),'.mat ...'])
+    load(['LFPData/LFP',num2str(chStim),'.mat'])
+    StimLFP=LFP;
+    
+end
+
+
+%% Determine blocks 
+try 
+    load('StimOPTO.mat');Stim;
+catch
+    [Stim,StartBlock,StopBlock,FreqBlock,ThreshCross1,ThreshCross2]=DetectStimSquare(StimLFP,reverse);
+
+    save StimOPTO Stim StartBlock StopBlock FreqBlock ThreshCross1 ThreshCross2
+end
+startT=Range(StartBlock);
+stopT=Range(StopBlock);
+freqT=Data(FreqBlock);
+
+
+%% ImagePETH for each block of stim
+colori={'r','m','k','b',};
+
+disp(' ')
+
+ChLFPRight=InfoLFP.channel(strcmp(InfoLFP.structure,structureToAnalyze) & strcmp(InfoLFP.hemisphere,'Right'));
+ChLFPLeft=InfoLFP.channel(strcmp(InfoLFP.structure,structureToAnalyze) & strcmp(InfoLFP.hemisphere,'Left'));
+ChLFP=[ChLFPRight(2:min(2,length(ChLFPRight))),ChLFPLeft(1:min(2,length(ChLFPLeft)))];
+
+LegendMet=[];
+LFParray=tsdArray;
+for i=1:length(ChLFP)
+    LegendMet{i}=['LFP',num2str(ChLFP(i))];
+    disp(['Loading LFP',num2str(ChLFP(i)),' (',structureToAnalyze,', ',InfoLFP.hemisphere{InfoLFP.channel==ChLFP(i)},')... '])
+    load(['LFPData/LFP',num2str(ChLFP(i)),'.mat'],'LFP')
+    LFParray{i}=LFP;
+end
+
+
+sizBin=50; %ms
+nbin=100;
+UfreqT=unique(freqT);
+for uu=1:length(UfreqT)
+    disp(['Freq: ',num2str(UfreqT(uu)),'Hz'])
+    indexU=find(freqT==UfreqT(uu));
+    
+    if ~plotPETH, figure('Color',[1 1 1]), numF(uu)=gcf;end
+    for i=1:length(indexU)
+        tempStim=Restrict(Stim,intervalSet(startT(indexU(i)),stopT(indexU(i))));
+        if plotPETH
+            figure('Color',[1 1 1]), ImagePETH(LFParray{1},tempStim, -5E3, +5E3,'BinSize',500);
+            title([num2str(UfreqT(uu)),'Hz Opto Stimulation - LFP ',structureToAnalyze,'(ch ',num2str(ChLFP(1)),')'])
+        else
+            figure(numF(uu)), subplot(3,ceil(length(indexU)/3),i),
+            for ch=1:length(ChLFP)
+                [m,s,tps]=mETAverage(Range(tempStim),Range(LFParray{ch}),Data(LFParray{ch}),sizBin,nbin);
+                hold on, plot(tps/1E3,m/1E3-(ch-1)*3,colori{ch})
+            end
+            title([num2str(UfreqT(uu)),'Hz OptoStim (n=',num2str(length(Range(tempStim))),')- LFP',structureToAnalyze])
+            xlabel('time (s)'); xlim([-1 1]*sizBin*nbin/2E3)
+            ylabel('averaged LFP'); ylim([-12,5]),
+            if UfreqT(uu)==1, xlim([-3 3])
+            elseif UfreqT(uu)>
+            else
+                
+        end
+    end
+    if ~plotPETH, legend(LegendMet);end
+end
+    
+
+%% save figures
+
+if saveFig
+    if ~exist('FigureOptoStimEffect','dir'), mkdir('FigureOptoStimEffect');end
+    for uu=1:length(UfreqT)
+        saveFigure(numF(uu),[num2str(UfreqT(uu)),'Hz_OptoStimEffect'],'FigureOptoStimEffect')
+    end
+end

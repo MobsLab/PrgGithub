@@ -1,0 +1,234 @@
+clear all
+SpeedThresh=3; % cm/s
+
+
+% SessNames={'EPM','Habituation' 'SleepPreUMaze' 'TestPre' 'UMazeCond' 'SleepPostUMaze' 'TestPost' 'Extinction',...
+%     'SoundHab' 'SleepPreSound' 'SoundCond' 'SleepPostSound' 'SoundTest','HabituationNight' 'SleepPreNight',...
+%     'TestPreNight' 'UMazeCondNight' 'SleepPostNight' 'TestPostNight' 'ExtinctionNight'};
+SessNames={ 'UMazeCond' 'SoundCond' 'SoundTest'};
+for ss=1:length(SessNames)
+    Dir=PathForExperimentsEmbReactMontreal(SessNames{ss});
+    MouseToAvoid=[117,431]; % mice with noisy data to exclude
+    Dir=RemoveElementsFromDir(Dir,'nmouse',MouseToAvoid);
+    
+    disp(SessNames{ss})
+    for d=1:length(Dir.path)
+        if ss==1
+            AllVals.Safe.WV{d}=[];         AllVals.Safe.PT{d}=[];
+            AllVals.Shock.WV{d}=[];         AllVals.Shock.PT{d}=[];
+            AllVals.All.WV{d}=[];         AllVals.All.PT{d}=[];
+            AllVals.Run.WV{d}=[];         AllVals.Run.PT{d}=[];
+        elseif ss==3
+            AllVals.SoundTest.WV{d}=[];         AllVals.SoundTest.PT{d}=[];
+        elseif ss==2
+            AllVals.SoundCond.WV{d}=[];         AllVals.SoundCond.PT{d}=[];
+        end
+        MouseName{ss,d}=num2str(Dir.ExpeInfo{d}{1}.nmouse);
+        disp(d)
+        for dd=1:length(Dir.path{d})
+            cd(Dir.path{d}{dd})
+            clear SleepyEpoch
+            load('InstFreqAndPhase.mat','LocalFreq')
+            load('behavResources.mat')
+            load('StateEpochSB.mat','TotalNoiseEpoch','SleepyEpoch')
+            RemovEpoch=or(or(TTLInfo.StimEpoch,TotalNoiseEpoch),SleepyEpoch);
+            
+            if ss==1
+                %% UMaze
+                %% On the safe side
+                LitEp=and(Behav.FreezeEpoch,or(Behav.ZoneEpoch{2},Behav.ZoneEpoch{5}))-RemovEpoch;
+                AllVals.Safe.WV{d}=[AllVals.Safe.WV{d};(Data(Restrict(LocalFreq.WV,LitEp)))];
+                AllVals.Safe.PT{d}=[AllVals.Safe.PT{d};(Data(Restrict(LocalFreq.PT,LitEp)))];
+                
+                %% On the shock side
+                LitEp=and(Behav.FreezeEpoch,Behav.ZoneEpoch{1})-RemovEpoch;
+                AllVals.Shock.WV{d}=[AllVals.Shock.WV{d};(Data(Restrict(LocalFreq.WV,LitEp)))];
+                AllVals.Shock.PT{d}=[AllVals.Shock.PT{d};(Data(Restrict(LocalFreq.PT,LitEp)))];
+                
+                %% AllTogether
+                LitEp=Behav.FreezeEpoch-RemovEpoch;
+                AllVals.All.WV{d}=[AllVals.All.WV{d};(Data(Restrict(LocalFreq.WV,LitEp)))];
+                AllVals.All.PT{d}=[AllVals.All.PT{d};(Data(Restrict(LocalFreq.PT,LitEp)))];
+                
+                %% running Epoch
+                dt=median(diff(Range(Behav.Movtsd,'s')));
+                tps=Range(Behav.Xtsd);
+                RunSpeed=tsd(tps(1:end-1),runmean((abs(diff(Data(Behav.Xtsd)))+abs(diff(Data(Behav.Ytsd))))./diff(Range(Behav.Xtsd,'s')),3));
+                RunningEpoch=thresholdIntervals(RunSpeed,SpeedThresh,'Direction','Above');
+                RunningEpoch=mergeCloseIntervals(RunningEpoch,1*1e4);
+                RunningEpoch=dropShortIntervals(RunningEpoch,2*1e4);
+                
+                LitEp=RunningEpoch-RemovEpoch;
+                AllVals.Run.WV{d}=[AllVals.Run.WV{d};(Data(Restrict(LocalFreq.WV,LitEp)))];
+                AllVals.Run.PT{d}=[AllVals.Run.PT{d};(Data(Restrict(LocalFreq.PT,LitEp)))];
+                
+            elseif ss==3
+                %% Sound test
+                LitEp=and(Behav.FreezeEpoch,intervalSet(0,800*1e4))-RemovEpoch;
+                AllVals.SoundTest.WV{d}=[AllVals.SoundTest.WV{d};(Data(Restrict(LocalFreq.WV,LitEp)))];
+                AllVals.SoundTest.PT{d}=[AllVals.SoundTest.PT{d};(Data(Restrict(LocalFreq.PT,LitEp)))];
+                
+            elseif ss==2
+                
+                %% Sound Cond
+                LitEp=Behav.FreezeEpoch-RemovEpoch;
+                AllVals.SoundCond.WV{d}=[AllVals.SoundCond.WV{d};(Data(Restrict(LocalFreq.WV,LitEp)))];
+                AllVals.SoundCond.PT{d}=[AllVals.SoundCond.PT{d};(Data(Restrict(LocalFreq.PT,LitEp)))];
+            end
+        end
+    end
+end
+
+fig=figure;fig.Name='UMazeWVsepmice';
+for d=1:length(AllVals.Safe.WV)
+    subplot(5,4,d)
+    nhist({AllVals.Shock.WV{d},AllVals.Safe.WV{d},AllVals.Run.WV{d}},'binfactor',0.4)
+    xlim([0 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([6 6],ylim,'color','k','linewidth',2,'linestyle',':')
+    title(MouseName{1,d})
+end
+
+fig=figure;fig.Name='UMazePTsepmice';
+for d=1:length(AllVals.Safe.WV)
+    subplot(5,4,d)
+    nhist({AllVals.Shock.PT{d},AllVals.Safe.PT{d},AllVals.Run.PT{d}},'binfactor',2)
+    xlim([0 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([6 6],ylim,'color','k','linewidth',2,'linestyle',':')
+    title(MouseName{1,d})
+end
+
+
+fig=figure;fig.Name='UMazeAllFzPTsepmice';
+for d=1:length(AllVals.Safe.WV)
+    subplot(5,4,d)
+    hist(AllVals.All.PT{d},100)
+    xlim([0 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([6 6],ylim,'color','k','linewidth',2,'linestyle',':')
+    title(MouseName{1,d})
+end
+
+fig=figure;fig.Name='UMazeAllFzWVsepmice';
+for d=1:length(AllVals.Safe.WV)
+    subplot(5,4,d)
+    hist(AllVals.All.WV{d},500)
+    xlim([0 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([6 6],ylim,'color','k','linewidth',2,'linestyle',':')
+    title(MouseName{1,d})
+end
+
+fig=figure;fig.Name='SoundPTsepmice';
+for d=1:length(AllVals.Safe.WV)
+    subplot(5,4,d)
+    nhist({AllVals.SoundTest.PT{d},AllVals.SoundCond.PT{d}},'samebins')
+    xlim([0 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([6 6],ylim,'color','k','linewidth',2,'linestyle',':')
+    title(MouseName{1,d})
+end
+
+fig=figure;fig.Name='SoundWVsepmice';
+for d=1:length(AllVals.Safe.WV)
+    subplot(5,4,d)
+    nhist({AllVals.SoundTest.WV{d},AllVals.SoundCond.WV{d}},'samebins')
+    xlim([0 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([6 6],ylim,'color','k','linewidth',2,'linestyle',':')
+    title(MouseName{1,d})
+end
+
+fig=figure;fig.Name=['AllCondWV '];
+clear YNoSchk YSchk Ytest YCond
+BinLims=[0.25:0.25:20];
+% exclude ouse with v little freezign and lots of baseline noise
+for mm=1:size(AllVals.Shock.WV,2)
+    if not(isempty(AllVals.Shock.WV{mm}))
+        [YSchk(mm,:),X]=hist(AllVals.Shock.WV{mm},BinLims);YSchk(mm,:)=YSchk(mm,:)./sum(YSchk(mm,:));
+    else
+        YSchk(mm,:)=nan(1,length(BinLims));
+    end
+    if not(isempty(AllVals.Safe.WV{mm}))
+        [YNoSchk(mm,:),X]=hist(AllVals.Safe.WV{mm},BinLims);YNoSchk(mm,:)=YNoSchk(mm,:)./sum(YNoSchk(mm,:));
+    else
+        YNoSchk(mm,:)=nan(1,length(BinLims));
+    end
+end
+
+for mm=1:size(AllVals.SoundCond.WV,2)
+    if not(isempty(AllVals.SoundCond.WV{mm}))
+        [YCond(mm,:),X]=hist(AllVals.SoundCond.WV{mm},BinLims);YCond(mm,:)=YCond(mm,:)./sum(YCond(mm,:));
+    else
+        YCond(mm,:)=nan(1,length(BinLims));
+    end
+    if not(isempty(AllVals.SoundTest.WV{mm}))
+        [Ytest(mm,:),X]=hist(AllVals.SoundTest.WV{mm},BinLims);Ytest(mm,:)=Ytest(mm,:)./sum(Ytest(mm,:));
+    else
+        Ytest(mm,:)=nan(1,length(BinLims));
+    end
+end
+
+
+stairs(BinLims,smooth(nanmean(YNoSchk),5),'b','linewidth',3);
+hold on
+stairs(BinLims,smooth(nanmean(YSchk),5),'r','linewidth',3);
+stairs(BinLims,smooth(nanmean(YCond),5),'m','linewidth',3);
+stairs(BinLims,smooth(nanmean(Ytest),5),'c','linewidth',3);
+
+xlim([1 15]),line([3 3],ylim,'color','k'),line([6 6],ylim,'color','k')
+
+
+fig=figure;fig.Name=['AllCondPT '];
+clear YNoSchk YSchk Ytest YCond
+BinLims=[0.25:0.25:20];
+% exclude ouse with v little freezign and lots of baseline noise
+for mm=1:size(AllVals.Shock.PT,2)
+    if not(isempty(AllVals.Shock.PT{mm}))
+        [YSchk(mm,:),X]=hist(AllVals.Shock.PT{mm},BinLims);YSchk(mm,:)=YSchk(mm,:)./sum(YSchk(mm,:));
+    else
+        YSchk(mm,:)=nan(1,length(BinLims));
+    end
+    if not(isempty(AllVals.Safe.PT{mm}))
+        [YNoSchk(mm,:),X]=hist(AllVals.Safe.PT{mm},BinLims);YNoSchk(mm,:)=YNoSchk(mm,:)./sum(YNoSchk(mm,:));
+    else
+        YNoSchk(mm,:)=nan(1,length(BinLims));
+    end
+end
+
+for mm=1:size(AllVals.SoundCond.PT,2)
+    if not(isempty(AllVals.SoundCond.PT{mm}))
+        [YCond(mm,:),X]=hist(AllVals.SoundCond.PT{mm},BinLims);YCond(mm,:)=YCond(mm,:)./sum(YCond(mm,:));
+    else
+        YCond(mm,:)=nan(1,length(BinLims));
+    end
+    if not(isempty(AllVals.SoundTest.PT{mm}))
+        [Ytest(mm,:),X]=hist(AllVals.SoundTest.PT{mm},BinLims);Ytest(mm,:)=Ytest(mm,:)./sum(Ytest(mm,:));
+    else
+        Ytest(mm,:)=nan(1,length(BinLims));
+    end
+end
+
+
+stairs(BinLims,smooth(nanmean(YNoSchk),5),'b','linewidth',3);
+hold on
+stairs(BinLims,smooth(nanmean(YSchk),5),'r','linewidth',3);
+stairs(BinLims,smooth(nanmean(YCond),5),'m','linewidth',3);
+stairs(BinLims,smooth(nanmean(Ytest),5),'c','linewidth',3);
+xlim([1 15]),line([3 3],ylim,'color','k'),line([6 6],ylim,'color','k')
+
+
+fig=figure;fig.Name=['AllCondPT '];
+YNoSchk=[]; YSchk=[]; Ytest=[]; YCond=[];
+BinLims=[0.25:0.25:20];
+% exclude ouse with v little freezign and lots of baseline noise
+for mm=1:size(AllVals.Shock.PT,2)
+    if not(isempty(AllVals.Shock.PT{mm}))
+        YSchk=[YSchk;AllVals.Shock.PT{mm}];
+    end
+    
+    if not(isempty(AllVals.Safe.PT{mm}))
+        YNoSchk=[YNoSchk;AllVals.Safe.PT{mm}];
+    end
+end
+
+for mm=1:size(AllVals.SoundCond.PT,2)
+    if not(isempty(AllVals.SoundCond.PT{mm}))
+        YCond=[YCond;AllVals.SoundCond.PT{mm}];
+    end
+    if not(isempty(AllVals.SoundTest.PT{mm}))
+        Ytest=[Ytest;AllVals.SoundTest.PT{mm}];
+    end
+end
+nhist({YSchk,YNoSchk,YCond,Ytest},'noerror')
+xlim([1 15]),line([3 3],ylim,'color','k'),line([6 6],ylim,'color','k')
+

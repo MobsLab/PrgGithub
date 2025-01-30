@@ -1,0 +1,67 @@
+
+% Is freezing in the homecage after conditionning is safe ?
+
+ load('StateEpochSB.mat', 'Sleep')
+ load('behavResources.mat', 'MovAcctsd')
+load('B_Low_Spectrum.mat')
+
+OB_Sp_tsd = tsd(Spectro{2}*1e4 , Spectro{1});
+Sleep_Beginning = Start(Sleep) ;
+Wake_Before_Sleep_Epoch = intervalSet(0 , Sleep_Beginning(1));
+
+smoofact_Acc = 30;
+th_immob_Acc = 1.7e7;
+thtps_immob=2;
+NewMovAcctsd=tsd(Range(MovAcctsd),runmean(Data(MovAcctsd),smoofact_Acc));
+FreezeAccEpoch=thresholdIntervals(NewMovAcctsd,th_immob_Acc,'Direction','Below');
+FreezeAccEpoch=mergeCloseIntervals(FreezeAccEpoch,0.3*1e4);
+FreezeAccEpoch=dropShortIntervals(FreezeAccEpoch,thtps_immob*1e4);
+
+Freezing_Before_Sleep = and(FreezeAccEpoch , Wake_Before_Sleep_Epoch);
+Freezing_After_Sleep = (FreezeAccEpoch-Freezing_Before_Sleep)-Sleep;
+
+sum(Stop(Freezing_After_Sleep)-Start(Freezing_After_Sleep))
+
+Acc_Wake_Before_Sleep = Restrict(MovAcctsd , Wake_Before_Sleep_Epoch);
+Acc_Fz_Before_Sleep = Restrict(MovAcctsd , Freezing_Before_Sleep);
+Acc_Fz_After_Sleep = Restrict(MovAcctsd , Freezing_After_Sleep);
+
+OB_Sp_Wake_Before_Sleep = Restrict(OB_Sp_tsd , Wake_Before_Sleep_Epoch);
+OB_Sp_Fz_Before_Sleep = Restrict(OB_Sp_tsd , Freezing_Before_Sleep);
+OB_Sp_Fz_After_Sleep = Restrict(OB_Sp_tsd , Freezing_After_Sleep);
+
+
+%% figures
+figure
+plot(Range(MovAcctsd) , Data(MovAcctsd))
+hold on
+plot(Range(Acc_Wake_Before_Sleep) , Data(Acc_Wake_Before_Sleep))
+plot(Range(Acc_Fz_Before_Sleep) , Data(Acc_Fz_Before_Sleep))
+plot(Range(Acc_Fz_After_Sleep) , Data(Acc_Fz_After_Sleep))
+
+
+figure
+imagesc(Range(OB_Sp_Wake_Before_Sleep,'s')  , Spectro{1, 3}  , Data(OB_Sp_Wake_Before_Sleep)'); axis xy;
+
+figure
+imagesc(Range(OB_Sp_Fz_Before_Sleep,'s')  , Spectro{1, 3}  , Data(OB_Sp_Fz_Before_Sleep)'); axis xy;
+
+figure
+imagesc(Range(OB_Sp_Fz_After_Sleep,'s')  , Spectro{1, 3}  , Data(OB_Sp_Fz_After_Sleep)'); axis xy;
+
+
+figure
+plot(Spectro{1, 3} , nanmean(Data(OB_Sp_Fz_Before_Sleep)))
+xlim([0 10]); hold on
+plot(Spectro{1, 3} , nanmean(Data(OB_Sp_Fz_After_Sleep)))
+makepretty; 
+% 
+% plot(Range() , Data())
+% 
+% sum(Stop()-Start())
+% 
+
+
+
+
+

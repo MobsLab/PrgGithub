@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-05-25T10:43:10.993826Z"
+   url="file:///home/battagli/svn/matlab/trunk/m2html/@template/private"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="loadtpl.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="4f7de59e3860357ca64595ae3c15df4e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="finish.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="18f2c5d934f56e14d781d7e1b1ff5deb"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="subst.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="482f07ef24c0f7feebd6873f8cac8794"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+</wc-entries>

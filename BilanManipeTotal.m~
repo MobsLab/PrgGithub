@@ -1,0 +1,306 @@
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%BilanManipeTotal
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+
+tr=3; 
+renorm=1;
+renormAll=0;
+DoSuite=0;
+sav=1;
+
+%--------------------------------------------------------------------------
+
+Protocol=1; % 1: sleep;   2: wake place cell;    3: Wake Manual
+
+NumberofManipes=3; 
+
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+if Protocol==1
+    
+%--------------------------------------------------------------------------
+% Sleep
+%--------------------------------------------------------------------------
+
+
+cd /media/DISK_2/Data2/ICSS-Sleep/Mouse026/20120109/ICSS-Mouse-26-09012011
+load AnalyseResourcesICSS Res
+% if renorm
+%     Nor=Res{1};
+%     Res{1}=Res{1}/mean(Nor);
+%     Res{2}=Res{2}/mean(Nor);
+%     Nor=Res{3};
+%     Res{3}=Res{3}/mean(Nor);
+%     Res{4}=Res{4}/mean(Nor);
+% end
+Res1=Res;
+
+load ParametersAnalyseICSS M o varargin
+
+
+VisuQuantifEpoxhTrial(M,o,1)
+VisuQuantifEpochTrialNeuron(M,6,[7, 9 ,11],1)
+
+VisuQuantifEpochTrialNeuron(M,6,[7],1)
+
+
+try
+fcd /media/DISK_1/Data1/creationData/20120207/ICSS-Mouse-29-07022012
+catch
+    cd /media/DISK_2/Data2/ICSS-Sleep/Mouse029/20120207
+end
+load AnalyseResourcesICSS Res
+% if renorm
+%     Nor=Res{1};
+%     Res{1}=Res{1}/mean(Nor);
+%     Res{2}=Res{2}/mean(Nor);
+%     Nor=Res{3};
+%     Res{3}=Res{3}/mean(Nor);
+%     Res{4}=Res{4}/mean(Nor);
+% end
+Res2=Res;
+
+load ParametersAnalyseICSS M o varargin
+
+%VisuQuantifEpoxhTrial(M,o,1)
+VisuQuantifEpochTrialNeuron(M,12,[1,2],1)
+
+
+
+
+cd /media/DISK_2/Data2/ICSS-Sleep/Mouse035/15052012/ICSS-Mouse-35-15052012
+load AnalyseResourcesICSS Res
+if renorm
+    Nor=Res{1};
+    Res{1}=Res{1}/mean(Nor);
+    Res{2}=Res{2}/mean(Nor);
+    Nor=Res{3};
+    Res{3}=Res{3}/mean(Nor);
+    Res{4}=Res{4}/mean(Nor);
+end
+Res3=Res;
+
+
+%VisuQuantifEpoxhTrial(M,o,1)
+VisuQuantifEpochTrialNeuron(M,23,[4,13],1)
+
+
+try
+fcd /media/DISK_1/Data1/creationData/20120208/20120208am/ICSS-Mouse-29-08022012
+catch
+cd /media/DISK_2/Data2/ICSS-Sleep/Mouse029/20120208am/
+end
+
+load AnalyseResourcesICSS Res
+% if renorm
+%     Nor=Res{1};
+%     Res{1}=Res{1}/mean(Nor);
+%     Res{2}=Res{2}/mean(Nor);
+%     Nor=Res{3};
+%     Res{3}=Res{3}/mean(Nor);
+%     Res{4}=Res{4}/mean(Nor);
+% end
+Res4=Res;
+
+load ParametersAnalyseICSS M o varargin
+
+%VisuQuantifEpoxhTrial(M,o,1)
+VisuQuantifEpochTrialNeuron(M,6,[1,2,8],1)
+
+
+try
+fcd /media/DISK_1/Data1/creationData/20120208/20120208pm/ICSS-Mouse-29-08022012
+catch
+cd /media/DISK_2/Data2/ICSS-Sleep/Mouse029/20120208pm/
+end
+
+load AnalyseResourcesICSS Res
+
+% if renorm
+% Res{1}=Res{1}/mean(Res{1});
+% Res{2}=Res{2}/mean(Res{1});
+% Res{3}=Res{3}/mean(Res{3});
+% Res{4}=Res{4}/mean(Res{3});
+% end
+Res5=Res;
+load ParametersAnalyseICSS M o varargin
+
+%VisuQuantifEpoxhTrial(M,o,1)
+
+VisuQuantifEpochTrialNeuron(M,28,[1,12],1)
+
+
+elseif Protocol==2
+
+
+%--------------------------------------------------------------------------
+% Wake Place cell
+%--------------------------------------------------------------------------
+
+cd /media/DISK_2/Data2/ICSS-Sleep/Mouse026/20111128/ICSS-Mouse-26-28112011
+
+load AnalyseResourcesICSS Res
+if renorm
+    Nor=Res{1};
+    Res{1}=Res{1}/mean(Nor);
+    Res{2}=Res{2}/mean(Nor);
+    Nor=Res{3};
+    Res{3}=Res{3}/mean(Nor);
+    Res{4}=Res{4}/mean(Nor);
+end
+Res1=Res;
+
+load ParametersAnalyseICSS M o varargin
+VisuQuantifEpoxhTrial(M,o,1)
+load behavResources namePos
+namePos'
+varargin'
+
+
+cd /media/DISK_2/Data2/ICSS-Sleep/Mouse029/20120209
+load AnalyseResourcesICSS Res
+if renorm
+    Nor=Res{1};
+    Res{1}=Res{1}/mean(Nor);
+    Res{2}=Res{2}/mean(Nor);
+    Nor=Res{3};
+    Res{3}=Res{3}/mean(Nor);
+    Res{4}=Res{4}/mean(Nor);
+end
+Res2=Res;
+
+load ParametersAnalyseICSS M o
+VisuQuantifEpoxhTrial(M,o,1)
+load behavResources namePos
+namePos'
+
+
+
+cd /media/DISK_1/Data1/creationData/Mouse017/ICSS-Mouse-17-22062011
+load AnalyseResourcesICSS Res
+if renorm
+    Nor=Res{1};
+    Res{1}=Res{1}/mean(Nor);
+    Res{2}=Res{2}/mean(Nor);
+    Nor=Res{3};
+    Res{3}=Res{3}/mean(Nor);
+    Res{4}=Res{4}/mean(Nor);
+end
+Res3=Res;
+
+load ParametersAnalyseICSS M o
+VisuQuantifEpoxhTrial(M,o,1)
+load behavResources namePos
+namePos'
+
+
+
+
+
+
+
+
+
+
+elseif Protocol==3
+
+%--------------------------------------------------------------------------
+% wake manual
+%--------------------------------------------------------------------------
+% 
+% 
+
+cd /media/Drobo2/DataD2/ICSS-Sleep/Mouse017/20110614/ICSS-Mouse-17-14062011
+load AnalyseResourcesICSS Res
+if renorm
+    Nor=Res{1};
+    Res{1}=Res{1}/mean(Nor);
+    Res{2}=Res{2}/mean(Nor);
+    Nor=Res{3};
+    Res{3}=Res{3}/mean(Nor);
+    Res{4}=Res{4}/mean(Nor);
+end
+Res1=Res;
+
+load ParametersAnalyseICSS M o
+VisuQuantifEpoxhTrial(M,o,1)
+load behavResources namePos
+namePos'
+
+
+cd /media/Drobo2/DataD2/ICSS-Sleep/Mouse015/ICSS-Mouse-15-15062011
+load AnalyseResourcesICSS Res
+if renorm
+    Nor=Res{1};
+    Res{1}=Res{1}/mean(Nor);
+    Res{2}=Res{2}/mean(Nor);
+    Nor=Res{3};
+    Res{3}=Res{3}/mean(Nor);
+    Res{4}=Res{4}/mean(Nor);
+end
+Res2=Res;
+
+load ParametersAnalyseICSS M o
+VisuQuantifEpoxhTrial(M,o,1)
+load behavResources namePos
+namePos'
+
+cd /media/Drobo2/DataD2/ICSS-Sleep/Mouse013/20110420/ICSS-Mouse-13-20042011
+load AnalyseResourcesICSS Res
+
+if renorm
+    Nor=Res{1};
+    Res{1}=Res{1}/mean(Nor);
+    Res{2}=Res{2}/mean(Nor);
+    Nor=Res{3};
+    Res{3}=Res{3}/mean(Nor);
+    Res{4}=Res{4}/mean(Nor);
+end
+Res3=Res;
+
+load ParametersAnalyseICSS M o
+VisuQuantifEpoxhTrial(M,o,1)
+load behavResources namePos
+namePos'
+
+
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+
+
+end
+
+
+
+if NumberofManipes==2
+BilanManipeFor2
+
+elseif NumberofManipes==3
+BilanManipeFor3
+
+elseif NumberofManipes==4
+BilanManipeFor4
+
+elseif NumberofManipes==5
+BilanManipeFor5
+
+end
+
+
+

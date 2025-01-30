@@ -1,0 +1,283 @@
+function []=GenerateSpindlesRipplesML(res)
+
+% inputs:
+% res (optional) = path
+
+%% INITIALIZATION
+
+if ~exist('res','var')
+    res=pwd;
+end
+
+disp(' ')
+disp([res,'/StateEpoch.mat'])
+
+load([res,'/StateEpoch.mat'],'SWSEpoch','NoiseEpoch','GndNoiseEpoch');
+Epoch=SWSEpoch-GndNoiseEpoch;
+Epoch=Epoch-NoiseEpoch;
+
+
+
+%% FIND DELTA WAVES
+% ------------------ Parietal Cortex --------------------------------------
+try
+    load DeltaPaCx tDeltaT2
+    tDeltaT2;
+    clear tDeltaT2
+catch
+    try
+        [tDeltaT2,tDeltaP2]=FindDeltaWavesChan('PaCx',Epoch);
+        save DeltaPaCx tDeltaT2 tDeltaP2
+        clear tDeltaT2
+        clear tDeltaP2
+    end
+end
+% ------------------ Prefrontal Cortex ------------------------------------
+try
+    load DeltaPFCx tDeltaT2
+    tDeltaT2;
+    clear tDeltaT2
+catch
+    try
+        [tDeltaT2,tDeltaP2]=FindDeltaWavesChan('PFCx',Epoch);
+        save DeltaPFCx tDeltaT2 tDeltaP2
+        clear tDeltaT2
+        clear tDeltaP2
+    end
+end
+
+%% FIND SPINDLES
+% ------------------ Parietal Cortex --------------------------------------
+try
+    clear SpiTot
+    load SpindlesPaCxDeep SpiTot
+    SpiTot;
+    clear SpiTot
+    
+catch
+    try
+   clear channel
+    load ChannelsToAnalyse/PaCx_deep
+    eval(['load LFPData/LFP',num2str(channel)])
+
+    [SpiTot,SWATot]=FindSpindlesKarimNew(LFP,[2 20],Epoch,'off');
+    [SpiHigh,SWAHigh]=FindSpindlesKarimNew(LFP,[12 15],Epoch,'off');
+    [SpiLow,SWALow]=FindSpindlesKarimNew(LFP,[9 12],Epoch,'off');
+    [SpiULow,SWAULow]=FindSpindlesKarimNew(LFP,[6 8],Epoch,'off');
+    save SpindlesPaCxDeep SpiTot SWATot SpiHigh SWAHigh SpiLow SWALow SpiULow SWAULow
+    end
+end
+
+    try
+        
+        clear S12
+    load SleepStagesPaCxDeep S12
+    S12;
+    clear S12
+    catch
+        try
+        clear channel
+    load ChannelsToAnalyse/PaCx_deep
+    eval(['load LFPData/LFP',num2str(channel)])
+    
+    
+    [S12,S34,S5,REMEpoch, WakeEpoch,SWAEpoch,SleepStages]=FindSleepStage(LFP);
+    save SleepStagesPaCxDeep S12 S34 S5 REMEpoch WakeEpoch SWAEpoch SleepStages 
+        end
+end
+
+clear SpiTot 
+clear SWATot 
+clear SpiHigh 
+clear SWAHigh 
+clear SpiLow 
+clear SWALow 
+clear SpiULow 
+clear SWAULow 
+clear S12 
+clear S34 
+clear S5 
+clear REMEpoch 
+clear WakeEpoch 
+clear SWAEpoch 
+clear SleepStages 
+clear channel 
+clear LFP  
+close all
+
+try
+        clear SpiTot
+    load SpindlesPaCxSup SpiTot
+    SpiTot;
+     
+    clear SpiTot
+catch
+    try
+    clear channel
+    load ChannelsToAnalyse/PaCx_sup
+    eval(['load LFPData/LFP',num2str(channel)])
+
+    [SpiTot,SWATot]=FindSpindlesKarimNew(LFP,[2 20],Epoch,'off');
+    [SpiHigh,SWAHigh]=FindSpindlesKarimNew(LFP,[12 15],Epoch,'off');
+    [SpiLow,SWALow]=FindSpindlesKarimNew(LFP,[9 12],Epoch,'off');
+    [SpiULow,SWAULow]=FindSpindlesKarimNew(LFP,[6 8],Epoch,'off');
+    save SpindlesPaCxSup SpiTot SWATot SpiHigh SWAHigh SpiLow SWALow SpiULow SWAULow
+    end
+end
+
+try    
+    clear S12
+    load SleepStagesPaCxSup S12
+    S12;
+    clear S12
+catch
+    try
+        clear channel
+     load ChannelsToAnalyse/PaCx_sup
+    eval(['load LFPData/LFP',num2str(channel)])
+    
+    [S12,S34,S5,REMEpoch, WakeEpoch,SWAEpoch,SleepStages]=FindSleepStage(LFP);
+    save SleepStagesPaCxSup S12 S34 S5 REMEpoch WakeEpoch SWAEpoch SleepStages 
+    end
+end
+
+clear SpiTot 
+clear SWATot 
+clear SpiHigh 
+clear SWAHigh 
+clear SpiLow 
+clear SWALow 
+clear SpiULow 
+clear SWAULow 
+clear S12 
+clear S34 
+clear S5 
+clear REMEpoch 
+clear WakeEpoch 
+clear SWAEpoch 
+clear SleepStages 
+clear channel 
+clear LFP  
+close all
+
+try
+    
+    clear SpiTot
+    load SpindlesPFCxDeep SpiTot
+    SpiTot;
+    
+   
+    clear SpiTot
+    
+catch
+    try
+    clear channel
+    load ChannelsToAnalyse/PFCx_deep
+    eval(['load LFPData/LFP',num2str(channel)])
+
+    [SpiTot,SWATot]=FindSpindlesKarimNew(LFP,[2 20],Epoch,'off');
+    [SpiHigh,SWAHigh]=FindSpindlesKarimNew(LFP,[12 15],Epoch,'off');
+    [SpiLow,SWALow]=FindSpindlesKarimNew(LFP,[9 12],Epoch,'off');
+    [SpiULow,SWAULow]=FindSpindlesKarimNew(LFP,[6 8],Epoch,'off');
+    save SpindlesPFCxDeep SpiTot SWATot SpiHigh SWAHigh SpiLow SWALow SpiULow SWAULow
+    end
+end
+
+    try
+        clear S12
+    load SleepStagesPFCxDeep S12
+    S12; 
+    clear S12
+    catch
+       try 
+        
+    load ChannelsToAnalyse/PFCx_deep
+    eval(['load LFPData/LFP',num2str(channel)])
+    
+    
+    [S12,S34,S5,REMEpoch, WakeEpoch,SWAEpoch,SleepStages]=FindSleepStage(LFP);
+    save SleepStagesPFCxDeep S12 S34 S5 REMEpoch WakeEpoch SWAEpoch SleepStages 
+       end
+end
+
+clear SpiTot 
+clear SWATot 
+clear SpiHigh 
+clear SWAHigh 
+clear SpiLow 
+clear SWALow 
+clear SpiULow 
+clear SWAULow 
+clear S12 
+clear S34 
+clear S5 
+clear REMEpoch 
+clear WakeEpoch 
+clear SWAEpoch 
+clear SleepStages 
+clear channel 
+clear LFP  
+close all
+
+try
+    
+      clear SpiTot
+    load SpindlesPFCxSup SpiTot
+    SpiTot;
+    
+   
+    clear SpiTot
+    
+catch
+    try
+    clear channel
+    load ChannelsToAnalyse/PFCx_sup
+    eval(['load LFPData/LFP',num2str(channel)])
+
+    [SpiTot,SWATot]=FindSpindlesKarimNew(LFP,[2 20],Epoch,'off');
+    [SpiHigh,SWAHigh]=FindSpindlesKarimNew(LFP,[12 15],Epoch,'off');
+    [SpiLow,SWALow]=FindSpindlesKarimNew(LFP,[9 12],Epoch,'off');
+    [SpiULow,SWAULow]=FindSpindlesKarimNew(LFP,[6 8],Epoch,'off');
+    save SpindlesPFCxSup SpiTot SWATot SpiHigh SWAHigh SpiLow SWALow SpiULow SWAULow
+    end
+end
+
+    try
+         clear S12
+    load SleepStagesPFCxSup S12
+    S12;
+    clear S12
+    catch
+        try
+        clear channel
+     load ChannelsToAnalyse/PFCx_sup
+    eval(['load LFPData/LFP',num2str(channel)])
+    
+    [S12,S34,S5,REMEpoch, WakeEpoch,SWAEpoch,SleepStages]=FindSleepStage(LFP);
+    save SleepStagesPFCxSup S12 S34 S5 REMEpoch WakeEpoch SWAEpoch SleepStages 
+        end
+end
+
+clear SpiTot 
+clear SWATot 
+clear SpiHigh 
+clear SWAHigh 
+clear SpiLow 
+clear SWALow 
+clear SpiULow 
+clear SWAULow 
+clear S12 
+clear S34 
+clear S5 
+clear REMEpoch 
+clear WakeEpoch 
+clear SWAEpoch 
+clear SleepStages 
+clear channel 
+clear LFP  
+close all
+
+clear SWSEpoch 
+clear NoiseEpoch 
+clear GndNoiseEpoch 
+clear Epoch

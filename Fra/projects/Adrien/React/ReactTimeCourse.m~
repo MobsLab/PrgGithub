@@ -1,0 +1,221 @@
+function A = Analyse(A)
+
+
+A = getResource(A,'Sleep2Epoch');
+sleep2Epoch = sleep2Epoch{1};
+
+A = getResource(A,'Sleep1Epoch');
+sleep1Epoch = sleep1Epoch{1};
+
+A = getResource(A,'MazeEpoch');
+mazeEpoch = mazeEpoch{1};
+
+A = getResource(A,'CellNames');
+A = getResource(A,'SpikeData');
+A = getResource(A,'Tetrode');
+
+A = registerResource(A, 'ReactTimeCourseS1', 'tsdArray', {[],1}, ...
+    'reactTimeCourseS1', ...
+    'react time course during sleep1');
+
+A = registerResource(A, 'ReactTimeCourseS2', 'tsdArray', {[],1}, ...
+    'reactTimeCourseS2', ...
+    'react time course during sleep2');
+
+
+A = registerResource(A, 'ReactTimeCourseMaze', 'tsdArray', {[],1}, ...
+    'reactTimeCourseMaze', ...
+    'react time course during maze Epoch');
+
+
+dataDir = parent_dir(A);
+Figures_dir = [dataDir filesep 'ReactTimeCourse' filesep 'simple2'];
+
+dset = current_dataset(A);
+[dummy1,dataset,dummy2] = fileparts(current_dir(A));
+
+%  eegfname = [dset filesep dataset 'eeg5.mat'];
+%  if exist([eegfname '.gz'])
+%      display(['unzipping file ' eegfname]);
+%      eval(['!gunzip ' eegfname '.gz']);
+%  end
+%  load(eegfname)
+%  display(['zipping file ' eegfname]);
+%  eval(['!gzip ' eegfname]);
+
+%  eegS1 = Restrict(EEG5,sleep1Epoch);
+%  eegS2 = Restrict(EEG5,sleep2Epoch);
+%  
+%  b = fir1(96,[0.005 0.01]);
+%  
+%  deegS1 = Data(eegS1);
+%  deegS1Filt = filtfilt(b,1,deegS1);
+%  eegS1std = std(deegS1Filt);
+%  eegS1Filt = tsd(Range(eegS1),deegS1Filt);
+%  
+%  deegS2 = Data(eegS2);
+%  deegS2Filt = filtfilt(b,1,deegS2);
+%  eegS2std = std(deegS2Filt);
+%  eegS2Filt = tsd(Range(eegS2),deegS2Filt);
+%  
+%  [thSt1 thEnd1] = findTheta(eegS1Filt,1.5*eegS1std,1.5*eegS1std)
+%  [thSt2 thEnd2] = findTheta(eegS2Filt,1*eegS2std,1*eegS2std)
+
+%  clear EEG5 eegS1 eegS2 eegS1Filt eegS2Filt
+
+
+%  keyboard
+cM = spkcorrcoef(S,1000,mazeEpoch,TT);
+nbCells = size(cM,2);
+
+%  [PCACoef, PCAvar, PCAexp] = pcacov(cM);
+
+Q = MakeQfromS(S,1000);
+
+QS1 = Restrict(Q,sleep1Epoch);
+QS1 = tsd(Range(QS1),zscore(full(Data(QS1))));
+dQS1 = Data(QS1);
+
+QS2 = Restrict(Q,sleep2Epoch);
+QS2 = tsd(Range(QS2),zscore(full(Data(QS2))));
+dQS2 = Data(QS2);
+
+QMaze = Restrict(Q,mazeEpoch);
+QMaze = tsd(Range(QMaze),zscore(full(Data(QMaze))));
+dQMaze = Data(QMaze);
+
+
+nbBins1 = size(dQS1,1);
+R1 = zeros(nbBins1,1);
+nbBins2 = size(dQS2,1);
+R2 = zeros(nbBins2,1);
+nbBinsM = size(dQMaze,1);
+RMaze = zeros(nbBinsM,1);
+
+
+
+for i=1:nbBins1
+
+	popVect = dQS1(i,:)';
+	norm = popVect'*popVect;
+	if (norm ~=0); R1(i) = popVect'*cM*popVect/norm; end;
+
+end
+
+for i=1:nbBins2
+
+	popVect = dQS2(i,:)';
+	norm = popVect'*popVect;
+	if (norm ~=0); R2(i) = popVect'*cM*popVect/norm; end;
+
+end
+
+
+for i=1:nbBinsM
+
+	popVect = dQMaze(i,:)';
+	norm = popVect'*popVect;
+	if (norm ~=0); RMaze(i) = popVect'*cM*popVect/norm; end;
+
+end
+
+
+fh = figure(1),clf
+
+sub1 = subplot(1,3,1)
+	rg = [1:10:nbBins1];
+
+	
+	times = Range(QS1);
+	times = times(rg)/10000;
+%  	thSt1 = Range(thSt1)/10000 - times(1);
+%  	thEnd1 = Range(thEnd1)/10000 - times(1);
+%  	if length(thEnd1)>length(thSt1); thEnd1(end)=[];end;
+	
+	Rsmooth = conv(R1,gausswin(GaussWinL))/sum(gausswin(GaussWinL));
+	Rsmooth = Rsmooth(GaussWinL/2:end-GaussWinL/2);
+	RsmF = Rsmooth(rg);
+	maxY = max(RsmF)+0.05;
+	minY = min(RsmF)-0.05;
+	
+	
+	hold on
+%  	fill([thSt1';thSt1';thEnd1';thEnd1'],[minY maxY maxY minY]'*ones(1,length(thSt1)),'r')
+	plot(times - times(1),RsmF,'LineWidth',3,'Color','k')
+
+
+sub2 = subplot(1,3,2)
+	rg = [1:10:nbBins2];
+	
+	times = Range(QS2);
+	times = times(rg)/10000;
+%  	
+%  	thSt2 = Range(thSt2)/10000 - times(1);
+%  	thEnd2 = Range(thEnd2)/10000 - times(1);
+%  	if length(thEnd2)>length(thSt2); thEnd2(end)=[];end;
+
+	Rsmooth = conv(R2,gausswin(GaussWinL))/sum(gausswin(GaussWinL));
+	Rsmooth = Rsmooth(GaussWinL/2:end-GaussWinL/2);
+	RsmF = Rsmooth(rg);
+	maxY = max(RsmF)+0.05;
+	minY = min(RsmF)-0.05;
+	
+	hold on
+%  	fill([thSt2';thSt2';thEnd2';thEnd2'],[minY maxY maxY minY]'*ones(1,length(thSt2)),'r')
+	plot(times - times(1),RsmF,'LineWidth',3,'Color','k')
+	plot(
+
+sub3 = subplot(1,3,3)
+
+	rg = [1:10:nbBinsM];
+
+	
+	times = Range(QMaze);
+	times = times(rg)/10000;
+%  	thSt1 = Range(thSt1)/10000 - times(1);
+%  	thEnd1 = Range(thEnd1)/10000 - times(1);
+%  	if length(thEnd1)>length(thSt1); thEnd1(end)=[];end;
+	
+	Rsmooth = conv(RMaze,gausswin(GaussWinL))/sum(gausswin(GaussWinL));
+	Rsmooth = Rsmooth(GaussWinL/2:end-GaussWinL/2);
+	RsmF = Rsmooth(rg);
+	maxY = max(RsmF)+0.05;
+	minY = min(RsmF)-0.05;
+	
+	
+	hold on
+%  	fill([thSt1';thSt1';thEnd1';thEnd1'],[minY maxY maxY minY]'*ones(1,length(thSt1)),'r')
+	plot(times - times(1),RsmF,'LineWidth',3,'Color','k')
+
+ylim1 = get(sub1,'YLim');
+ylim2 = get(sub2,'YLim');
+ylim3 = get(sub3,'YLim');
+
+ymax = max([ylim1(2) ylim2(2) ylim3(2)]; 
+ymin = min([ylim1(1) ylim2(1) ylim3(1)];
+
+set(sub1,'YLim',[ymin ymax]);
+set(sub2,'YLim',[ymin ymax]);
+set(sub3,'YLim',[ymin ymax]);
+
+
+saveas(fh,[Figures_dir filesep dataset 'ReactTimeCourse100msBins2minGW'],'png');
+
+
+
+
+reactTimeCourseS1 = {tsd(Range(QS1),R1)};
+reactTimeCourseS2 = {tsd(Range(QS2),R2)};
+reactTimeCourseMaze = {tsd(Range(QMaze),RMaze)};
+
+A = saveAllResources(A);
+
+
+
+
+
+
+
+
+
+

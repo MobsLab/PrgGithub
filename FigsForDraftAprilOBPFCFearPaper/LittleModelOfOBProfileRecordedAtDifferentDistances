@@ -1,0 +1,58 @@
+X=[0:0.01:20];
+DepthProfile=[-0.4:0.1:1];DepthProfile=[DepthProfile,fliplr(DepthProfile)];
+Depth=[1:length(DepthProfile)];
+a=sin(X);disttsource=[0.1,0.5,1,2,2.5,2.75,3,3.25,3.5,3.75,4,4.25,4.5,4.75,5];
+cols=paruly(66);
+
+
+figure
+for k=1:length(DepthProfile)
+    plot(X,a*DepthProfile(k)+Depth(k)), hold on
+end
+for dd=1:length(disttsource)
+for n=-10:55
+ElectrodePostion=[disttsource(dd),n];
+ElectrodeReadOut=zeros(size(a,1),size(a,2));
+for k=1:length(Depth)
+    dist=sqrt(ElectrodePostion(1).^2+(ElectrodePostion(2)-Depth(k)).^2);
+    ElectrodeReadOut=ElectrodeReadOut+a*DepthProfile(k)/dist.^2;
+end
+plot(X+max(X)*1.1*dd,50*ElectrodeReadOut./norm(ElectrodeReadOut)+n,'color',cols(n+11,:)), hold on
+end
+end
+
+figure
+X=[0:0.01:20];
+DepthProfile=[-0.4:0.1:1];DepthProfile=[DepthProfile,fliplr(DepthProfile)];
+Depth=[1:length(DepthProfile)];
+a=sin(X);
+for k=1:length(DepthProfile)
+    WaveLoc=a*DepthProfile(k);
+    plot(X,WaveLoc+Depth(k)), hold on
+    Ampref(k)=max(WaveLoc);
+    PhaseRef(k)=X(find(WaveLoc==max(WaveLoc),1,'first'));
+end
+cols=paruly(66);
+for dd=1:length(disttsource)
+for n=-10:55
+ElectrodePostion=[disttsource(dd),n];
+ElectrodeReadOut=zeros(size(a,1),size(a,2));
+for k=1:length(Depth)
+    dist=sqrt(ElectrodePostion(1).^2+(ElectrodePostion(2)-Depth(k)).^2);
+    ElectrodeReadOut=ElectrodeReadOut+a*DepthProfile(k)/dist.^2;
+end
+plot(X+max(X)*1.1*dd,ElectrodeReadOut+n,'color',cols(n+11,:)), hold on
+Amp(dd,n+11)=max(ElectrodeReadOut);
+Phase(dd,n+11)=X(find(ElectrodeReadOut==max(ElectrodeReadOut),1,'first'));
+end
+end
+
+figure
+subplot(121)
+imagesc(disttsource,[-10:55],Phase')
+hold on
+plot(PhaseRef/10,Depth,'r','linewidth',4)
+subplot(122)
+imagesc(disttsource,[-10:55],zscore(Amp'))
+hold on
+plot(Ampref*2,Depth,'r','linewidth',4)

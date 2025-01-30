@@ -1,0 +1,237 @@
+% load data
+load('/media/DataMOBs/ProjetDPCPX/Mouse051/20121227/BULB-Mouse-51-27122012/LFPData/LFP24.mat')
+load('StateEpoch.mat')
+ 
+params.Fs=1/median(diff(Range(LFP,'s')));
+params.trialave=0;
+params.err=[1 0.0500];
+params.pad=2;
+params.fpass=[0.1 20];
+movingwin=[3 0.2];
+params.tapers=[3 5];
+ 
+% calculate period by period
+Epoch=SWSEpoch-NoiseEpoch-GndNoiseEpoch;
+St=[];
+clear Freq
+for i=1:length(Start(Epoch))
+try
+Epoch1=subset(Epoch,i);
+[S,f]=mtspectrumc(Data(Restrict(LFP,Epoch1)),params);
+try
+Freq;
+catch
+Freq=f;
+end
+Stsd=tsd(f,S);
+S2=Restrict(Stsd,ts(Freq(1:10:end)));
+St=[St;Data(S2)'];
+end
+end
+storder=sort(St(:));
+[row,col]=find(St>storder(size(storder,1)-ceil(size(storder,1)/200)));
+St(row,col)=NaN;
+figure('color',[1 1 1]), plot(Freq(1:10:end),Freq(1:10:end).*(nanmean(St)),'k','linewidth',2)
+ 
+Epoch=REMEpoch-NoiseEpoch-GndNoiseEpoch;
+St=[];
+clear Freq
+for i=1:length(Start(Epoch))
+try
+Epoch1=subset(Epoch,i);
+[S,f]=mtspectrumc(Data(Restrict(LFP,Epoch1)),params);
+try
+Freq;
+catch
+Freq=f;
+end
+Stsd=tsd(f,S);
+S2=Restrict(Stsd,ts(Freq(1:10:end)));
+St=[St;Data(S2)'];
+end
+end
+storder=sort(St(:));
+[row,col]=find(St>storder(size(storder,1)-ceil(size(storder,1)/200)));
+St(row,col)=NaN;
+ 
+hold on
+ plot(Freq(1:10:end),Freq(1:10:end).*(nanmean(St)),'r','linewidth',2)
+ 
+Epoch=MovEpoch-NoiseEpoch-GndNoiseEpoch;
+St=[];
+clear Freq
+for i=1:length(Start(Epoch))
+try
+Epoch1=subset(Epoch,i);
+[S,f]=mtspectrumc(Data(Restrict(LFP,Epoch1)),params);
+try
+Freq;
+catch
+Freq=f;
+end
+Stsd=tsd(f,S);
+S2=Restrict(Stsd,ts(Freq(1:10:end)));
+St=[St;Data(S2)'];
+end
+end
+storder=sort(St(:));
+[row,col]=find(St>storder(size(storder,1)-ceil(size(storder,1)/200)));
+St(row,col)=NaN;
+hold on
+ plot(Freq(1:10:end),Freq(1:10:end).*(nanmean(St)),'c','linewidth',2)
+legend('SWS','REM','Wake')
+ 
+% % calculate whole spectrum and average over specific periods
+% clear f
+% [Sp,t,f]=mtspecgramc(Data(LFP),movingwin,params);
+sptsd=tsd(tB*10000,SpB);
+figure
+hold on
+Epoch=SWSEpoch-GndNoiseEpoch-NoiseEpoch;
+plot(f,10*log10(mean(Data(Restrict(sptsd,Epoch)))),'k','linewidth',2)
+Epoch=REMEpoch-GndNoiseEpoch-NoiseEpoch;
+plot(f,10*log10(mean(Data(Restrict(sptsd,Epoch)))),'r','linewidth',2)
+Epoch=MovEpoch-GndNoiseEpoch-NoiseEpoch;
+plot(f,10*log10(mean(Data(Restrict(sptsd,Epoch)))),'b','linewidth',2)
+legend('SWS','REM','MyREM','Wake')
+ 
+ 
+ 
+%%%%%%
+
+load('Bulb_chan.mat')
+load('StateEpoch.mat')
+load(strcat('LFPData/LFP',num2str(channel),'.mat'))
+
+params.fpass=[20 200];
+    params.tapers=[3 5];
+    movingwin=[0.1 0.005];
+    params.Fs=1250;
+    suffix='H';
+    
+% calculate period by period
+Epoch=SWSEpoch-NoiseEpoch-GndNoiseEpoch;
+St=[];
+clear Freq
+for i=1:length(Start(Epoch))
+try
+Epoch1=subset(Epoch,i);
+[S,f]=mtspectrumc(Data(Restrict(LFP,Epoch1)),params);
+try
+Freq;
+catch
+Freq=f;
+end
+Stsd=tsd(f,S);
+S2=Restrict(Stsd,ts(Freq(1:10:end)));
+St=[St;Data(S2)'];
+end
+end
+% storder=sort(St(:));
+% [row,col]=find(St>storder(size(storder,1)-ceil(size(storder,1)/200)));
+% St(row,col)=NaN;
+ 
+figure('color',[1 1 1]), plot(Freq(1:10:end),Freq(1:10:end).*(nanmean(St)),'k','linewidth',2)
+ 
+Epoch=REMEpoch-NoiseEpoch-GndNoiseEpoch;
+St=[];
+clear Freq
+for i=1:length(Start(Epoch))
+try
+Epoch1=subset(Epoch,i);
+[S,f]=mtspectrumc(Data(Restrict(LFP,Epoch1)),params);
+try
+Freq;
+catch
+Freq=f;
+end
+Stsd=tsd(f,S);
+S2=Restrict(Stsd,ts(Freq(1:10:end)));
+St=[St;Data(S2)'];
+end
+end
+% storder=sort(St(:));
+% [row,col]=find(St>storder(size(storder,1)-ceil(size(storder,1)/200)));
+% St(row,col)=NaN;
+ 
+hold on
+ plot(Freq(1:10:end),Freq(1:10:end).*(nanmean(St)),'r','linewidth',2)
+ 
+Epoch=MovEpoch-NoiseEpoch-GndNoiseEpoch;
+St=[];
+clear Freq
+for i=1:length(Start(Epoch))
+try
+Epoch1=subset(Epoch,i);
+[S,f]=mtspectrumc(Data(Restrict(LFP,Epoch1)),params);
+try
+Freq;
+catch
+Freq=f;
+end
+Stsd=tsd(f,S);
+S2=Restrict(Stsd,ts(Freq(1:10:end)));
+St=[St;Data(S2)'];
+end
+end
+% storder=sort(St(:));
+% [row,col]=find(St>storder(size(storder,1)-ceil(size(storder,1)/200)));
+% St(row,col)=NaN;
+hold on
+ plot(Freq(1:10:end),Freq(1:10:end).*(nanmean(St)),'b','linewidth',2)
+legend('SWS','REM','Wake')
+
+load('SpectrumREM_bulb_high.mat')
+
+figure
+hold on
+Epoch=SWSEpoch-GndNoiseEpoch-NoiseEpoch;
+plot(f,f.*(mean(Data(Restrict(sptsd,Epoch)))),'k','linewidth',2)
+Epoch=REMEpoch-GndNoiseEpoch-NoiseEpoch;
+plot(f,f.*(mean(Data(Restrict(sptsd,Epoch)))),'r','linewidth',2)
+% Epoch=MyREMEpoch-GndNoiseEpoch-NoiseEpoch;
+% plot(f,f.*(mean(Data(Restrict(sptsd,Epoch)))),'m','linewidth',2)
+Epoch=MovEpoch-GndNoiseEpoch-NoiseEpoch;
+plot(f,f.*(mean(Data(Restrict(sptsd,Epoch)))),'b','linewidth',2)
+legend('SWS','REM','Wake')
+title('Bulb')
+ 
+ 
+% % calculate whole spectrum and average over specific periods
+% clear f
+% [Sp,t,f]=mtspecgramc(Data(LFP),movingwin,params);
+% sptsd=tsd(t*10000,Sp);
+% figure
+% hold on
+% Epoch=SWSEpoch-GndNoiseEpoch-NoiseEpoch;
+% plot(f,10*log10(mean(Data(Restrict(sptsd,Epoch)))),'k','linewidth',2)
+% Epoch=REMEpoch-GndNoiseEpoch-NoiseEpoch;
+% plot(f,10*log10(mean(Data(Restrict(sptsd,Epoch)))),'r','linewidth',2)
+% Epoch=MovEpoch-GndNoiseEpoch-NoiseEpoch;
+% plot(f,10*log10(mean(Data(Restrict(sptsd,Epoch)))),'b','linewidth',2)
+% legend('SWS','REM','Wake')
+% save('Spectrum7_high.mat','Sp','f','movingwin', 'params','t')()
+% 
+% 
+% 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-05-25T10:43:10.993826Z"
+   url="file:///home/battagli/svn/matlab/trunk/projects/ADTheta"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="HDThetaCellsHDtheta.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e804d02e68ecbaa92f3629377d823eae"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDThetaPosition.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="41f110ffdb2942f7c3fd7132cbad8fec"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDFlags.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="38d44623ce8f89f8ea9b5b4fde1267c7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDThetaRatePrecession.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a382b83837c7a0d6d9d76de21815aa4d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDThetaThetaEEG.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6491f4cf0e355d6e3ae9347d3e98ea82"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDSummary.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="22c4ef4c16ee1c73222750d54a1bb4e4"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDRatePrecFigs.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="473899eb5aea8c3d60f80f04caf8bc49"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDThetaSpikeData_fn.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="47f8c6e237ef423983954f5a972fe659"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDThetaPositionMeasures.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="adfeaeaaae1df0fcbff9f08a9f2eceaf"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDFigures.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="87dd585013b54449861e65261edf1dde"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDThetaCellList_fn.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="4438c159b819758858b189c5b2102887"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDRatePrec.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="792e0e09c68d2c9db74eab6de3a3223f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDThetaEEG.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="41f110ffdb2942f7c3fd7132cbad8fec"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="HDTable.m"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="24f7d164db542e1baafbdabbba6dbb94"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+</wc-entries>

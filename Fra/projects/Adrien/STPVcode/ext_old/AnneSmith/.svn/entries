@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="54"
+   name=""
+   committed-date="2006-10-05T13:42:08.642821Z"
+   url="file:///home/battagli/svn/matlab/trunk/ext/AnneSmith"
+   last-author="battagli"
+   kind="dir"
+   revision="54"/>
+<entry
+   committed-rev="54"
+   name="Notes.pdf"
+   text-time="2006-10-05T11:44:33.000000Z"
+   committed-date="2006-10-05T13:42:08.642821Z"
+   checksum="52c9e6f28e121a44c5a7263841e2a757"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-10-05T11:44:57.000000Z"/>
+<entry
+   committed-rev="54"
+   name="runfiles.m"
+   text-time="2006-10-05T11:44:33.000000Z"
+   committed-date="2006-10-05T13:42:08.642821Z"
+   checksum="c0a343c487f4757b5ea4da697a8a9d79"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="54"
+   name="em_bino.m"
+   text-time="2006-10-05T11:44:33.000000Z"
+   committed-date="2006-10-05T13:42:08.642821Z"
+   checksum="5ae71e8c9d0d0df26cf47f2bcb22a3b2"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="54"
+   name="findj.m"
+   text-time="2006-10-05T11:44:33.000000Z"
+   committed-date="2006-10-05T13:42:08.642821Z"
+   checksum="26dd440df381ea5eeffbdd315a1c8436"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="54"
+   name="trialtotrial.m"
+   text-time="2006-10-05T11:44:33.000000Z"
+   committed-date="2006-10-05T13:42:08.642821Z"
+   checksum="aa821d41a3d304d51d42adf5e0c21920"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="54"
+   name="backest.m"
+   text-time="2006-10-05T11:44:33.000000Z"
+   committed-date="2006-10-05T13:42:08.642821Z"
+   checksum="43c461f4af3a4c6500a8404555bc3afb"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="54"
+   name="recfilter.m"
+   text-time="2006-10-05T11:44:33.000000Z"
+   committed-date="2006-10-05T13:42:08.642821Z"
+   checksum="c2213297992e174045a72608dc6996f3"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="54"
+   name="pdistn.m"
+   text-time="2006-10-05T11:44:33.000000Z"
+   committed-date="2006-10-05T13:42:08.642821Z"
+   checksum="749bb10f0b4872dc44bad6e798285b45"
+   last-author="battagli"
+   kind="file"/>
+<entry
+   committed-rev="54"
+   name="newtonsolve.m"
+   text-time="2006-10-05T11:44:33.000000Z"
+   committed-date="2006-10-05T13:42:08.642821Z"
+   checksum="fdd567ccc7f72b1f8ca0f981ee60e1e3"
+   last-author="battagli"
+   kind="file"/>
+</wc-entries>

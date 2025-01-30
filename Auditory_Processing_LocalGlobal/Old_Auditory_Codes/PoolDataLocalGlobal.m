@@ -1,0 +1,73 @@
+ % PoolDataLocalGlobal    
+ % permet de pooler les donn�es de deux protocoles cons�cutifs avec les
+ % memes fr�quences de std et dvt
+ 
+ 
+function [matVal,LFP]=PoolDataLocalGlobal(M1,M2,rg)
+
+load LFPData
+
+th=3000;
+W1=2;
+W2=3;
+W3=1;
+
+
+for i=1:length(LFP)
+    for j=1:12
+        temp1=Data(M1{i,j});
+        temp2=Data(M2{i,j});
+        a=1;
+        for k=1:size(temp1,2)
+            try
+                if length(find(abs(temp1(:,a))>th))>5
+                    temp1(:,a)=[];
+                else
+                    a=a+1;
+                end
+            end
+        end
+        a=1;
+        for k=1:size(temp2,2)
+            try
+                if length(find(abs(temp2(:,a))>th))>5
+                    temp2(:,a)=[];
+                else
+                    a=a+1;
+                end
+            end
+        end
+        temp1=temp1(1:1499,:);   
+        temp2=temp2(1:1499,:);
+        try
+            mmin=135;
+            mmax=140;
+            mmin2=150;
+            mmax2=160;
+            [BE,id]=sort(mean(temp1(mmin2:mmax2,:)-temp1(mmin:mmax,:)));
+            if mean(temp1(mmin2:mmax2,id(1))-temp1(mmin:mmax,id(1)))<mean(temp1(mmin2:mmax2,id(end))-temp1(mmin:mmax,id(end)))
+                % if mean(temp1(mmin:mmax,id(1)))>mean(temp1(mmin:mmax,id(end))) 
+                temp1=temp1(:,id(floor(W1*length(id)/W2):end));
+            else
+                temp1=temp1(:,id(1:floor(W3*length(id)/W2)));
+            end
+            clear id
+            
+            % [BE,id]=sort(mean(temp2(mmin:mmax,:)));
+            [BE,id]=sort(mean(temp2(mmin2:mmax2,:)-temp2(mmin:mmax,:)));
+            
+            if mean(temp2(mmin2:mmax2,id(1))-temp2(mmin:mmax,id(1)))<mean(temp2(mmin2:mmax2,id(end))-temp2(mmin:mmax,id(end)))
+                
+                % if mean(temp2(mmin:mmax,id(1)))>mean(temp2(mmin:mmax,id(end))) 
+                temp2=temp2(:,id(floor(W1*length(id)/W2):end));
+            else
+                temp2=temp2(:,id(1:floor(W3*length(id)/W2)));
+            end
+        end
+        Mt{i,j}=tsd(rg,[temp1,temp2]);
+    end
+        clear matVal
+        
+        matVal=Mt;
+end
+end

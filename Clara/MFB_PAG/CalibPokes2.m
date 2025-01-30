@@ -1,0 +1,211 @@
+% Epochs
+% Epochs253PAG1=intervalSet([116,258,505,778]*1e4,([116,258,505,778]+100)*1e4); % Manque le fichier DigDat.mat
+Epochs253PAG2=intervalSet([84,263,408,543,680,915]*1e4,([84,263,408,543,680,915]+100)*1e4);
+Epochs253PAG3=intervalSet([7,142,274,406,536,808,959,1139]*1e4,([7,142,274,406,536,808,959,1139]+100)*1e4);
+Epochs253PAG4=intervalSet([55,186,319,457,583,730,858,1011,1167]*1e4,([55,186,319,457,583,730,858,1011,1167]+100)*1e4);
+
+Epochs254PAG1=intervalSet([96,257,434,735]*1e4,([96,257,434,735]+100)*1e4);
+Epochs254PAG2=intervalSet([40,187,316,450,598,742,910,1046]*1e4,([40,187,316,450,598,742,910,1046]+100)*1e4);
+Epochs254PAG3=intervalSet([4,148,275,410,555,682,820,960,1080]*1e4,([4,148,275,410,555,682,820,960,1080]+100)*1e4);
+Epochs254PAG4=intervalSet([85,271,399,530,666,798,934,1073,1207]*1e4,([85,271,399,530,666,798,934,1073,1207]+100)*1e4);
+
+EpochsAll = {Epochs253PAG2,Epochs253PAG3,Epochs253PAG4,Epochs254PAG2,Epochs254PAG3,Epochs254PAG4}; %Epochs253PAG1
+NPDURall = {};
+
+location= {
+    '/media/MOBSDataRotation/M253/CalibPAG/Session2_121015/DigDat/M253_PAGCalib_Droite_Sess4_151012_122135',
+    '/media/MOBSDataRotation/M253/CalibPAG/Session3_131015/DigDat/M253_PAGCalib_Droite_Sess5_151013_110324',
+    '/media/MOBSDataRotation/M253/CalibPAG/Session4_141015/DigDat/M253_PAGCalib_Droite_Sess7_151014_105532',
+    '/media/MOBSDataRotation/M254/CalibPAG/Session2_121015/DigDat/M254_PAGCalib_Droite_Sess4_151012_124726',
+    '/media/MOBSDataRotation/M254/CalibPAG/Session3_131015/DigDat/M254_PAGCalib_Droite_Sess5_151013_113200',
+    '/media/MOBSDataRotation/M254/CalibPAG/Session4_141015/DigDat/M254_PAGCalib_Droite_Sess7_151013_113200_151014_112213'};
+DeltaT=[0,0,0,0,0,0];
+for i=1:length(location)
+    cd(location{i}) 
+    datafile = [location{i} '/DigDat.mat'];
+    DATA1 = load(datafile);
+    DATA1 = struct2array(DATA1);
+    poke = DATA1{1,2}(:,1);
+    PAG = DATA1{1,2}(:,2);
+    MFB = DATA1{1,2}(:,3);
+    Start = DATA1{1,2}(:,4);
+    tps=DATA1{1,1}-1-DeltaT(i);
+    dt=median(diff(tps));
+    PokeInfo=tsd(tps*1e4,poke);
+    Epochs = EpochsAll{i};
+    %save('PokeData.mat','tps','PAG','MFB','poke')
+    
+nb_pokes = 0;
+len = length(poke);
+durpoke = [];
+
+M=diff(MFB);P=diff(PAG);
+MFBInfo = tsd(tps(2:end)*1e4,M);
+PAGInfo = tsd(tps(2:end)*1e4,P);
+
+% Temps passé en NP
+if i==1
+figure;
+elseif i==4;
+    figure;
+end
+
+if i<4
+    mouse = 'M253';
+else
+    mouse = 'M254';
+end
+
+subplot(2,3,1), hold on
+Cols=jet(2);
+for j=1
+    ShortEpochs=thresholdIntervals(PokeInfo,0.5,'Direction','Below');
+    ShortEpochs=mergeCloseIntervals(ShortEpochs,j*1e4);
+    % Durrée totale NP
+    for k=1:length(start(Epochs))
+        NPDUR(k)=length(Data(Restrict(PokeInfo,And(subset(Epochs,k),ShortEpochs))))/length(Data(Restrict(PokeInfo,subset(Epochs,k))));
+    end
+    plot(NPDUR,'color',Cols(j,:))
+    hold on
+end
+keyboard
+title(['Duree totale NP ' mouse])
+NPDURall{i} = NPDUR;
+clear NPDUR
+
+
+%Nombre de stims
+subplot(2,3,2), hold on
+for k=1:length(start(Epochs))
+    Temp=Data(Restrict(MFBInfo,subset(Epochs,k)));
+    NB_MFB(k) = length(find(Temp==1));
+    Temp=Data(Restrict(PAGInfo,subset(Epochs,k)));
+    NB_PAG(k) = length(find(Temp==1));
+end
+plot(NB_MFB,'k');
+title(['Nb stims  ' mouse])
+clear NB_MFB
+% 
+% %Durée des pokes
+% subplot(2,3,3)
+% Cols=jet(5);
+% for j=[1:1:5]
+%     ShortEpochs=thresholdIntervals(PokeInfo,0.5,'Direction','Below');
+%     ShortEpochs=mergeCloseIntervals(ShortEpochs,j*1e4);
+%     
+%      for k=1:length(start(Epochs))
+%          Ddur(k) = median(((stop(And(ShortEpochs, subset(Epochs,k)))-start(and(ShortEpochs, subset(Epochs,k)))))*1e-4);
+%      end
+%     plot(Ddur,'color',Cols(j,:));hold on;
+% end
+% title(['duree med poke  ' mouse])
+% clear Ddur
+% 
+% %Durée max sans poke
+% subplot(2,3,4)
+% clear Max
+% ShortEpochs=thresholdIntervals(PokeInfo,0.5,'Direction','Above');
+% for k=1:length(start(Epochs))
+%     if isempty(stop(And(ShortEpochs, subset(Epochs,k))))
+%         Max(k) = 0;
+%     else 
+%     
+%     Max(k) = max(((stop(And(ShortEpochs, subset(Epochs,k)))-start(and(ShortEpochs, subset(Epochs,k)))))*1e-4);
+%     end
+% end
+% plot(Max)
+% title(['duree max sans poke  ' mouse])
+% clear Max
+% 
+% 
+% 
+% %Départ après PAG
+% subplot(2,3,5)
+% clear departPAG
+% ShortEpochs=thresholdIntervals(PokeInfo,0.5,'Direction','Below');
+% for q=[1:1:5]
+%     ShortEpochs=mergeCloseIntervals(ShortEpochs,q*1e4);
+% for k=1:length(start(Epochs))
+%    SubShort=(And(subset(Epochs,k),ShortEpochs));
+%    if isempty(start(SubShort))
+%        mnval(k) = 0;
+%    else
+%    for j=1:length(start(SubShort))
+%        STOP=stop(SubShort)/1e4;
+%        st=STOP(j);
+%        TempMFB=Data(Restrict(MFBInfo,subset(Epochs,k)));
+%        MFBst = find(TempMFB==1)*dt +start(Subset(Epochs,k))/1e4;
+%        tmp=st-MFBst; tmp(tmp<0)=[];
+%        MFBmin = min(tmp);
+%        TempPAG=Data(Restrict(PAGInfo,subset(Epochs,k)));
+%        PAGst = find(TempPAG==1)*dt +start(Subset(Epochs,k))/1e4;
+%        tmp=st-PAGst; tmp(tmp<0)=[];
+%        PAGmin = min(abs(st-PAGst));
+%        if min(([MFBmin,PAGmin])) == MFBmin
+%            departPAG{k}(j) = 0;
+%        else
+%            departPAG{k}(j) = 1;
+%        end
+%    
+%    end
+%    mnval(k)=mean(departPAG{k});
+%    end
+% end
+% plot(mnval,'color',Cols(q,:)), hold on
+% clear departPAG mnval
+% end
+% title(['Prop depart apres PAG  '  mouse])
+%  
+
+end
+
+
+
+
+
+
+% figure
+% 
+% plot(departPAG);
+
+% %Nombre de pokes
+% D=diff(poke);
+% nb_pokes=length(find(D==-1));
+% durpoke=(find(D==1)-find(D==-1))*dt;
+
+% %Durée des pokes
+% 
+% notpoking = find(poke);
+
+%%%timeseries
+
+% %trop lent!!!
+% for n = 2:len
+%     if poke(n-1) == 1;
+%         if poke(n) == 0;
+%             durpoke(n,1) = M253_PAG4{1,1}(n);
+%             nstop = n;
+%             nextpoke = poke(nstop+1);
+%             while nextpoke == 0
+%                 nstop = nstop+1;
+%                 if cputime > 120
+%                     break
+%                 end
+%             end
+%             durpoke(n,2) = M253_PAG4{1,1}(nstop);
+%         end
+%     end
+%     if cputime>200
+%         break
+%     end
+% end
+% 
+
+
+% 
+% 
+% durpoke(:,3) = durpoke(:,2) - durpoke(:,1);
+% 
+% 
+% 
+% % Départ après PAG

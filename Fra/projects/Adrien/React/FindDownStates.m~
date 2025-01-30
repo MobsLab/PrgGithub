@@ -1,0 +1,127 @@
+function A = Analysis(A)
+
+%for 200203:
+stDwnSt = 6450;
+endDwnSt = 6530;
+dwnStis = intervalset(stDwnSt*10000,endDwnSt*10000);
+
+
+
+%Parameters
+
+b = fir1(96,[0.1 0.3]);
+binSizeMaze = 1000;
+
+A = getResource(A,'SpikeData');
+nbCells = length(S);
+
+A = getResource(A,'CellNames');
+A = getResource(A,'Sleep2Epoch');
+sleep2Epoch = sleep2Epoch{1};
+A = getResource(A,'Sleep1Epoch');
+sleep1Epoch = sleep1Epoch{1};
+A = getResource(A,'MazeEpoch');
+mazeEpoch = mazeEpoch{1};
+
+
+cd(current_dir(A));
+dset = current_dataset(A);
+[dummy1,dataset,dummy2] = fileparts(current_dir(A));
+
+
+%load EEG
+
+eegfname = [dataset 'eeg1.mat'];
+if exist([eegfname '.gz'])
+    display(['unzipping file ' eegfname]);
+    eval(['!gunzip ' eegfname '.gz']);
+end
+load(eegfname)
+
+eeg1 = Restrict(EEG1,dwnStis);
+
+eegfname = [dataset 'eeg5.mat'];
+if exist([eegfname '.gz'])
+    display(['unzipping file ' eegfname]);
+    eval(['!gunzip ' eegfname '.gz']);
+end
+load(eegfname)
+
+eeg5 = Restrict(EEG5,dwnStis);
+
+clear EEG1 EEG5
+
+
+
+%Filter EEG and find Ripples
+%  
+%  eegS = Restrict(eeg5,sleep1Epoch);
+%  eegSFilt = filtfilt(b,1,Data(eegS));
+%  sigma = std(eegSFilt);
+%  eegSFilt = tsd(Range(eegS),eegSFilt);
+%  
+%  midRip1 = Range(midRip1);
+
+
+eeg5Filt = filtfilt(b,1,Data(eeg5));
+sigma = std(eeg5Filt);
+eeg5Filt = tsd(Range(eeg5),eeg5Filt);
+[stRip midRip2 endRip] = findRipples(eeg5Filt,5*sigma,2*sigma);
+midRip2 = Range(midRip2);
+
+
+clear eegS b dset stRip endRip dataDir eegSFilt
+
+
+%
+%  cM = spkZcorrcoef(S,binSizeMaze,mazeEpoch);
+%  
+%  %Avoid correlation computation between cells of the same TT
+%  
+%  for i=1:nbCells
+%  
+%  	for j=i+1:nbCells
+%  		cell1 = cellnames{i};
+%  		cell2 = cellnames{j};
+%  		if (cell1(3) == cell2(3))
+%  			cM(i,j) = 0;
+%  			cM(j,i) = 0;
+%  		end
+%  	end
+%  
+%  end
+%  
+%  %PCA
+%  
+%  [PCACoef, PCAvar, PCAexp] = pcacov(cM);
+%  pc1 = PCACoef(:,1);
+%  Q = MakeQfromS(S,1000);
+%  QS2 = Restrict(Q,sleep2Epoch);;
+%  dQS2 = full(Data(QS2));
+%  dQS2_PC1Cells = pc1'*dQS2';
+%  QS2_PC1Cells = tsd(Range(QS2),dQS2_PC1Cells');
+
+
+
+b = fir1(96,[0.00001 0.1]);
+t = Range(eeg1);
+T = median(diff(t));
+eeg1filt = tsd(Range(eeg1),filtfilt(b,1,Data(eeg1)));
+eeg1filt = Restrict(eeg1filt,[t(1):T*5:t(end)]); % resample 1/5
+
+T = median(diff(Range(eeg1filt)));
+[b,a]=butter(3,[49.5 50.5]*T/20000,'STOP'); % remove 50Hz
+eeg1filt50 = tsd(Range(eeg1filt),filtfilt(b,a,Data(eeg1filt)));
+figure(1),clf
+%  plot(Range(eeg1filt50)/10000,Data(eeg1filt50),Range(QS2_PC1Cells)/10000,3*Data(QS2_PC1Cells)/(max(Data(QS2_PC1Cells))))
+
+eeg1filt50r = Restrict(eeg1filt50,dwnStis);
+
+plot(Range(eeg1filt50r)/10000,Data(eeg1filt50r));
+for i=1:length(midRip2);line(midRip2(i)/10000,3,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor', 'r');end;
+for i=1:nbCells
+	s = S{i};
+	s= Restrict(s,dwnStis);
+	line(Range(s)/10000,-i/10-3,'LineStyle', 'none', 'Marker', '.', 'MarkerEdgeColor', [0 0 0]);
+end
+

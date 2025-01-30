@@ -1,0 +1,139 @@
+function SlowOscillationsML(PathManipe,Structure,depth)
+
+% function SlowOscillationsML(PathManipe,Structure,depth)
+%
+% inputs:
+% - PathManipe : directory
+% - Structure : cf InfoLFP.mat (default = 'PaCx')
+% - Depth : deep or Sup cf ChannelToAnalyse (default 'deep')
+
+%% INITIALISATION
+
+if ~exist('PathManipe','var') 
+    error('Missing input arguments')
+end
+
+if ~exist('Structure','var')
+    Structure='PaCx';
+end
+
+if ~exist('depth','var')
+    depth='deep';
+end
+
+
+
+%% PARAMS SPECTRO
+
+fpass1=[0.39 20]; % from Fellin et al. 2009
+
+params.Fs=1250;
+% params.Fs=1000; !!! if plethysmo
+params.fpass=fpass1;
+params.trialave=0;
+params.pad=2;
+params.err=[1 0.0500]; 
+%params.tapers=[3 5];
+params.tapers=[3 9];
+movingwin=[3 0.2]; 
+
+
+%% OTHER INPUTS
+
+scrz=[370 100 1250 830];
+nameManipe=PathManipe(max(strfind(PathManipe,'Mouse')):end);
+FolderSaveFig='/home/mobsyoda/Dropbox/MOBsProjetAstro/BILANmanipe/SlowOscillations';
+
+%% GET SPECTRUM
+
+if exist([PathManipe,'/AnlySlowOscillationML/',Structure,depth,'.mat'],'file')
+    disp('Loading existing spectrum from AnlySlowOscillationML')
+    load([PathManipe,'/AnlySlowOscillationML/',Structure,depth,'.mat'])
+end
+    
+try
+    SpNorm;
+catch
+    
+    tempload=load([PathManipe,'/ChannelsToAnalyse/',Structure,'_',depth,'.mat'],'channel');
+    eval(['load(''',PathManipe,'/LFPData/LFP',num2str(tempload.channel),'.mat'',''LFP'');'])
+    disp('Calculating spectrogram')
+    
+    % wide band spectrum for later normalization
+    
+    [SpAll,ti,fAll]=mtspecgramc(Data(LFP),movingwin,params);
+    normFact=sum(SpAll,2)*ones(1,length(fAll));
+    
+    if sum(sum(isnan(SpAll)))==0
+        SpNorm=SpAll./normFact;
+    else
+        disp('Error spectrum');
+        error;
+    end
+end
+
+
+%% GET GAMMA ENVELOPPE
+
+
+
+%% GET SWS BOOTS
+try
+    Start(Epoch60);
+catch
+    load([PathManipe,'/StateEpoch.mat'],'SWSEpoch','REMEpoch','MovEpoch')
+    Step60min=[min(Start(SWSEpoch,'s')):60*60:max(Stop(SWSEpoch,'s'))];
+    Epoch60=intervalSet(Step60min(1:end-1)*1E4,Step60min(2:end)*1E4);
+end
+
+%% PLOT SPECTRUM AND RATIO OVER TIME
+figure('color',[1 1 1],'Position',scrz),
+
+subplot(4,3,1:3),imagesc(ti,fAll,10*log10(SpAll)'), axis xy, caxis([20 65]);
+title([nameManipe,'    Spectrogramm [',num2str(fpass1(1)),'-',num2str(fpass1(2)),']Hz']);
+
+subplot(4,3,4:6),imagesc(ti,fAll,10*log10(SpNorm)'), axis xy,
+title(['Spectrogramm [',num2str(fpass1(1)),'-',num2str(fpass1(2)),']Hz normalized by sum(power all freq)']);
+
+%% GET SPECTRUM FOR BOOTS
+subplot(4,3,[7,8,10,11]),
+
+% SWS
+leg=[];
+for ep=1:length(Step60min)-1
+    clear epoch tEpoch SpEpoch
+    epoch=subset(Epoch60,ep);
+    [tEpoch, SpEall]=SpectroEpochML(SpNorm,ti,fAll,and(SWSEpoch,epoch));
+    hold on, plot(fAll,mean(SpEall,1),'Color',[1-(ep/length(Step60min)) 1-(ep/length(Step60min)) 0]);
+    leg=[leg,{['SWS',num2str(ep),'- ',num2str(floor(sum(Stop(and(SWSEpoch,epoch),'s')-Start(and(SWSEpoch,epoch),'s')))),'s']}];
+end
+
+% REM
+for ep=1:length(Step60min)-1
+    clear epoch tEpoch SpEpoch
+    epoch=subset(Epoch60,ep);
+    [tEpoch, SpEall]=SpectroEpochML(SpNorm,ti,fAll,and(REMEpoch,epoch));
+    hold on, plot(fAll,mean(SpEall,1),'Color',[1-(ep/length(Step60min)) 0 0]);
+    leg=[leg,{['REM',num2str(ep),'- ',num2str(floor(sum(Stop(and(REMEpoch,epoch),'s')-Start(and(REMEpoch,epoch),'s')))),'s']}];
+end
+
+% Mov
+for ep=1:length(Step60min)-1
+    clear epoch tEpoch SpEpoch
+    epoch=subset(Epoch60,ep);
+    [tEpoch, SpEall]=SpectroEpochML(SpNorm,ti,fAll,and(MovEpoch,epoch));
+    hold on, plot(fAll,mean(SpEall,1),'Color',[0 1-(ep/length(Step60min)) 0]);
+    leg=[leg,{['Mov',num2str(ep),'- ',num2str(floor(sum(Stop(and(MovEpoch,epoch),'s')-Start(and(MovEpoch,epoch),'s')))),'s']}];
+end
+legend(leg,'Location','EastOutside')
+
+
+%% SAVE ANALY AND FIGURES
+if ~exist([PathManipe,'AnlySlowOscillationML'],'dir')
+    mkdir([PathManipe,'AnlySlowOscillationML']);
+end
+
+save([PathManipe,'/AnlySlowOscillationML/',Structure,depth,'.mat'],'movingwin','params','fpass1','Epoch60','Step60min','SWSEpoch','REMEpoch','MovEpoch')
+save([PathManipe,'/AnlySlowOscillationML/',Structure,depth,'.mat'],'-append','SpNorm','fAll','ti','SpAll','Structure','depth')
+
+saveFigure(gcf,['Spectrum',Structure,depth,nameManipe],FolderSaveFig)

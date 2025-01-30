@@ -1,0 +1,251 @@
+
+
+clear all
+Mouse = [1230 1239 1240 1249 11230 11239 11240 11249];
+Session_type={'TestPre','Cond','TestPost'};
+for mouse = 1:length(Mouse)
+    Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+    Sess.(Mouse_names{mouse}) = GetAllMouseTaskSessions_MFB(Mouse(mouse));
+    TestPreSess.(Mouse_names{mouse}) = Sess.(Mouse_names{mouse})(find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'TestPre')))));
+    CondSess.(Mouse_names{mouse}) = Sess.(Mouse_names{mouse})(find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Cond')))));
+    TestPostSess.(Mouse_names{mouse}) = Sess.(Mouse_names{mouse})(find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'TestPost')))));
+end
+%  
+%     for sess=1:length(Session_type)
+%         if sess==1; Sess_To_use=TestPreSess;
+%         elseif sess==2; Sess_To_use=CondSess;
+%         elseif sess==3; Sess_To_use=TestPostSess;
+%         end
+%         ZoneEpoch.(Mouse_names{mouse}).(Session_type{sess}) = ConcatenateDataFromFolders_SB(Sess_To_use.(Mouse_names{mouse}),'epoch','epochname','zoneepoch_erc');
+%         Position.(Mouse_names{mouse}).(Session_type{sess}) = ConcatenateDataFromFolders_SB(Sess_To_use.(Mouse_names{mouse}),'position');
+%         for zones=1:9
+%             if or(sess==1,sess==3)
+%                 ZoneEpoch_TimeSpent.(Mouse_names{mouse}).(Session_type{sess})(zones) = sum(Stop(ZoneEpoch.(Mouse_names{mouse}).(Session_type{sess}){zones})-Start(ZoneEpoch.(Mouse_names{mouse}).(Session_type{sess}){zones}))/(960*1e4);
+%             else
+%                 ZoneEpoch_TimeSpent.(Mouse_names{mouse}).(Session_type{sess})(zones) = sum(Stop(ZoneEpoch.(Mouse_names{mouse}).(Session_type{sess}){zones})-Start(ZoneEpoch.(Mouse_names{mouse}).(Session_type{sess}){zones}))/(1920*1e4);
+%             end
+%         end
+%         ZoneEpoch_TimeSpent.(Session_type{sess})(mouse,:) = ZoneEpoch_TimeSpent.(Mouse_names{mouse}).(Session_type{sess});
+%     end
+% end
+
+
+
+for mouse = 1:length(Mouse)
+    Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+    for f=1:8
+        cd(TestPreSess.(Mouse_names{mouse}){f})
+        load('behavResources.mat')
+        for zones = 1:9
+            TestPreExplo.(Mouse_names{mouse})(f,zones) = sum(Stop(ZoneEpoch{zones})-Start(ZoneEpoch{zones}))/1e4;
+            TestPreProportion.(Mouse_names{mouse})(f,zones) = sum(Stop(ZoneEpoch{zones})-Start(ZoneEpoch{zones}))/120e4;
+            try
+                LatencyTestPre.(Mouse_names{mouse})(f,zones) = min(Start(ZoneEpoch{zones}))/1e4;
+            catch
+                LatencyTestPre.(Mouse_names{mouse})(f,zones) = 120;
+            end
+            TestPreMeanTime.(Mouse_names{mouse})(f,zones) = nanmean(Stop(ZoneEpoch{zones})-Start(ZoneEpoch{zones}))/1e4;
+            TestPreZonesEnter.(Mouse_names{mouse})(f,zones) = length(Stop(ZoneEpoch{zones}));
+        end
+        
+        cd(CondSess.(Mouse_names{mouse}){f})
+        load('behavResources.mat')
+        for zones = 1:9
+            CondExplo.(Mouse_names{mouse})(f,zones) = sum(Stop(ZoneEpoch{zones})-Start(ZoneEpoch{zones}))/1e4;
+            CondProportion.(Mouse_names{mouse})(f,zones) = sum(Stop(ZoneEpoch{zones})-Start(ZoneEpoch{zones}))/240e4;
+            try
+                LatencyCond.(Mouse_names{mouse})(f,zones) = min(Start(ZoneEpoch{zones}))/1e4;
+            catch
+                LatencyCond.(Mouse_names{mouse})(f,zones) = 240;
+            end
+            CondMeanTime.(Mouse_names{mouse})(f,zones) = nanmean(Stop(ZoneEpoch{zones})-Start(ZoneEpoch{zones}))/1e4;
+            CondZonesEnter.(Mouse_names{mouse})(f,zones) = length(Stop(ZoneEpoch{zones}));
+        end
+        
+        cd(TestPostSess.(Mouse_names{mouse}){f})
+        load('behavResources.mat')
+        for zones = 1:9
+            TestPostExplo.(Mouse_names{mouse})(f,zones) = sum(Stop(ZoneEpoch{zones})-Start(ZoneEpoch{zones}))/1e4;
+            TestPostProportion.(Mouse_names{mouse})(f,zones) = sum(Stop(ZoneEpoch{zones})-Start(ZoneEpoch{zones}))/120e4;
+            try
+                LatencyTestPost.(Mouse_names{mouse})(f,zones) = min(Start(ZoneEpoch{zones}))/1e4;
+            catch
+                LatencyTestPost.(Mouse_names{mouse})(f,zones) = 120;
+            end
+            TestPostMeanTime.(Mouse_names{mouse})(f,zones) = nanmean(Stop(ZoneEpoch{zones})-Start(ZoneEpoch{zones}))/1e4;
+            TestPostZonesEnter.(Mouse_names{mouse})(f,zones) = length(Stop(ZoneEpoch{zones}));
+        end
+    end
+end
+
+
+for mouse = 1:length(Mouse)
+    AllTestPreProportion(mouse,:) = nanmean(TestPreProportion.(Mouse_names{mouse}));
+    AllCondProportion(mouse,:) = nanmean(CondProportion.(Mouse_names{mouse}));
+    AllTestPostProportion(mouse,:) = nanmean(TestPostProportion.(Mouse_names{mouse}));
+    
+    AllTestPreProportion_2(mouse,:) = nanmean(TestPreProportion.(Mouse_names{mouse})(1:4,:));
+    AllCondProportion_2(mouse,:) = nanmean(CondProportion.(Mouse_names{mouse})(1:4,:));
+    AllTestPostProportion_2(mouse,:) = nanmean(TestPostProportion.(Mouse_names{mouse})(1:4,:));
+    
+    AllLatencyTestPre(mouse,:) = nanmean(LatencyTestPre.(Mouse_names{mouse}));
+    AllLatencyCond(mouse,:) = nanmean(LatencyCond.(Mouse_names{mouse}));
+    AllLatencyTestPost(mouse,:) = nanmean(LatencyTestPost.(Mouse_names{mouse}));
+    
+    AllCondEvolutionExplo(:,mouse) = CondProportion.(Mouse_names{mouse})(:,1);
+    AllCondEvolutionLatency(:,mouse) = LatencyCond.(Mouse_names{mouse})(:,1);
+    
+    AllTestPreZonesEnter(mouse,:) = nanmean(TestPreZonesEnter.(Mouse_names{mouse}));
+    AllCondZonesEnter(mouse,:) = nanmean(CondZonesEnter.(Mouse_names{mouse}));
+    AllTestPostZonesEnter(mouse,:) = nanmean(TestPostZonesEnter.(Mouse_names{mouse}));
+    
+    AllTestPreMeanTime(mouse,:) = nanmean(TestPreMeanTime.(Mouse_names{mouse}));
+    AllCondMeanTime(mouse,:) = nanmean(CondMeanTime.(Mouse_names{mouse}));
+    AllTestPostMeanTime(mouse,:) = nanmean(TestPostMeanTime.(Mouse_names{mouse}));
+end
+
+Cols = {[0 1 0],[.9 .9 .9]};
+X = [1:2];
+Legends = {'Stim','NoStim'};
+
+figure
+subplot(231)
+MakeSpreadAndBoxPlot2_SB([AllTestPreProportion(1:4,1) AllTestPreProportion(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); title('TestPre')
+subplot(232)
+MakeSpreadAndBoxPlot2_SB([AllCondProportion(1:4,1) AllCondProportion(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); title('Cond')
+subplot(233)
+MakeSpreadAndBoxPlot2_SB([AllTestPostProportion(1:4,1) AllTestPostProportion(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); title('TestPost')
+
+subplot(234)
+MakeSpreadAndBoxPlot2_SB([AllTestPreProportion(5:8,1) AllTestPreProportion(5:8,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); 
+subplot(235)
+MakeSpreadAndBoxPlot2_SB([AllCondProportion(5:8,1) AllCondProportion(5:8,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); 
+subplot(236)
+MakeSpreadAndBoxPlot2_SB([AllTestPostProportion(5:8,1) AllTestPostProportion(5:8,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); 
+
+
+figure
+subplot(231)
+MakeSpreadAndBoxPlot2_SB([sum(AllTestPreProportion(1:4,[1 8])') ; sum(AllTestPreProportion(1:4,[2 9])')]',Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); title('TestPre')
+subplot(232)
+MakeSpreadAndBoxPlot2_SB([sum(AllCondProportion(1:4,[1 8])') ; sum(AllCondProportion(1:4,[2 9])')]',Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); title('Cond')
+subplot(233)
+MakeSpreadAndBoxPlot2_SB([sum(AllTestPostProportion(1:4,[1 8])') ; sum(AllTestPostProportion(1:4,[2 9])')]',Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); title('TestPost')
+
+subplot(234)
+MakeSpreadAndBoxPlot2_SB([sum(AllTestPreProportion(5:8,[1 8])') ; sum(AllTestPreProportion(5:8,[2 9])')]',Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]);
+subplot(235)
+MakeSpreadAndBoxPlot2_SB([sum(AllCondProportion(5:8,[1 8])') ; sum(AllCondProportion(5:8,[2 9])')]',Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); 
+subplot(236)
+MakeSpreadAndBoxPlot2_SB([sum(AllTestPostProportion(5:8,[1 8])') ; sum(AllTestPostProportion(5:8,[2 9])')]',Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); 
+
+
+figure
+subplot(231)
+MakeSpreadAndBoxPlot2_SB([AllTestPreProportion_2(1:4,1) AllTestPreProportion_2(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); ylabel('Proportion'); title('TestPre')
+subplot(232)
+MakeSpreadAndBoxPlot2_SB([AllCondProportion_2(1:4,1) AllCondProportion_2(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); title('Cond')
+subplot(233)
+MakeSpreadAndBoxPlot2_SB([AllTestPostProportion_2(1:4,1) AllTestPostProportion_2(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); title('TestPost')
+
+subplot(234)
+MakeSpreadAndBoxPlot2_SB([AllTestPreProportion_2(5:8,1) AllTestPreProportion_2(5:8,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); ylabel('Proportion')
+subplot(235)
+MakeSpreadAndBoxPlot2_SB([AllCondProportion_2(5:8,1) AllCondProportion_2(5:8,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); 
+subplot(236)
+MakeSpreadAndBoxPlot2_SB([AllTestPostProportion_2(5:8,1) AllTestPostProportion_2(5:8,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1]); 
+
+a=suptitle('Explo, MFB, Maze, DZP, n=4'); a.FontSize=20;
+
+figure
+subplot(231)
+MakeSpreadAndBoxPlot2_SB([AllLatencyTestPre(1:4,1) AllLatencyTestPre(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 155]); ylabel('latency (s)'); title('TestPre')
+subplot(232)
+MakeSpreadAndBoxPlot2_SB([AllLatencyCond(1:4,1) AllLatencyCond(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 155]); title('Cond')
+subplot(233)
+MakeSpreadAndBoxPlot2_SB([AllLatencyTestPost(1:4,1) AllLatencyTestPost(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 155]); title('TestPost')
+
+subplot(234)
+MakeSpreadAndBoxPlot2_SB([AllLatencyTestPre(5:8,1) AllLatencyTestPre(5:8,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 155]); ylabel('latency (s)')
+subplot(235)
+MakeSpreadAndBoxPlot2_SB([AllLatencyCond(5:8,1) AllLatencyCond(5:8,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 155]); 
+subplot(236)
+MakeSpreadAndBoxPlot2_SB([AllLatencyTestPost(5:8,1) AllLatencyTestPost(5:8,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 155]); 
+
+a=suptitle('Explo, MFB, Maze, DZP, n=4'); a.FontSize=20;
+
+
+%% Learning during conditionning
+
+figure
+subplot(121)
+Conf_Inter=nanstd(AllCondEvolutionExplo(:,1:4)')/sqrt(size(AllCondEvolutionExplo(:,1:4),2));
+clear Mean_All_Sp; Mean_All_Sp=nanmean(AllCondEvolutionExplo(:,1:4)');
+shadedErrorBar([1:8] , Mean_All_Sp , Conf_Inter,'-k',1); hold on;
+Conf_Inter=nanstd(AllCondEvolutionExplo(:,5:8)')/sqrt(size(AllCondEvolutionExplo(:,5:8),2));
+clear Mean_All_Sp; Mean_All_Sp=nanmean(AllCondEvolutionExplo(:,5:8)');
+shadedErrorBar([1:8] , Mean_All_Sp , Conf_Inter,'-g',1); hold on;
+makepretty; ylabel('Proportion'); xlabel('sessions number')
+f=get(gca,'Children'); legend([f(5),f(1)],'Saline','DZP');
+
+subplot(122)
+Conf_Inter=nanstd(AllCondEvolutionLatency(:,1:4)')/sqrt(size(AllCondEvolutionLatency(:,1:4),2));
+clear Mean_All_Sp; Mean_All_Sp=nanmean(AllCondEvolutionLatency(:,1:4)');
+shadedErrorBar([1:8] , Mean_All_Sp , Conf_Inter,'-k',1); hold on;
+Conf_Inter=nanstd(AllCondEvolutionLatency(:,5:8)')/sqrt(size(AllCondEvolutionLatency(:,5:8),2));
+clear Mean_All_Sp; Mean_All_Sp=nanmean(AllCondEvolutionLatency(:,5:8)');
+shadedErrorBar([1:8] , Mean_All_Sp , Conf_Inter,'-g',1); hold on;
+makepretty; ylabel('Latency (s'); xlabel('sessions number')
+
+a=suptitle('Explo, MFB, Maze, DZP, n=4'); a.FontSize=20;
+
+
+
+figure
+subplot(231)
+MakeSpreadAndBoxPlot2_SB([AllLatencyTestPre(1:4,1) AllLatencyTestPre(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 155]); ylabel('latency (s)'); title('TestPre')
+subplot(232)
+MakeSpreadAndBoxPlot2_SB([AllLatencyCond(1:4,1) AllLatencyCond(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 155]); title('Cond')
+subplot(233)
+MakeSpreadAndBoxPlot2_SB([AllLatencyTestPost(1:4,1) AllLatencyTestPost(1:4,2)],Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 155]); title('TestPost')
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,95 @@
+%makeDataNosePoke
+
+
+%% Initiation
+spk=1;
+setCu=0;
+res=pwd;
+FreqVideo=15;
+cd(res)
+
+clear LFP lfpnames
+
+%% ------------------------------------------------------------------------
+%------------------------- LFP --------------------------------------------
+%--------------------------------------------------------------------------
+if 1
+    disp(' ');
+    disp('LFP Data')
+    
+    try 
+        load([res,'/LFPData/InfoLFP.mat'],'InfoLFP');
+        load([res,'/LFPData/LFP',num2str(InfoLFP.channel(1))],'LFP');
+        FragmentLFP='n';
+    catch
+        
+        try
+            load LFPData
+            Range(LFP{1});
+            FragmentLFP=input('LFPData.mat exists, do you want to fragment LFPData.mat in folder LFPData (y/n) ? ','s');
+        catch
+            FragmentLFP='y';
+        end
+    end
+    
+    if FragmentLFP=='y';
+        try
+            % infoLFP for each channel
+            disp(' ');
+            disp('...Creating InfoLFP.mat')
+            InfoLFP=listLFP_to_InfoLFP_ML(res);
+            
+            % LFPs
+            disp(' ');
+            disp('...Creating LFPData.mat')
+            
+            if setCu==0
+                SetCurrentSession
+                SetCurrentSession('same')
+                setCu=1;
+            end
+            
+            for i=1:length(InfoLFP.channel)
+                LFP_temp=GetLFP(InfoLFP.channel(i));
+                disp(['loading and saving LFP',num2str(InfoLFP.channel(i)),' in LFPData...']);
+                LFP=tsd(LFP_temp(:,1)*1E4,LFP_temp(:,2));
+                save([res,'/LFPData/LFP',num2str(InfoLFP.channel(i))],'LFP');
+                clear LFP LFP_temp
+            end
+            disp('Done')
+        catch
+            disp('problem for lfp')
+            %keyboard
+        end
+    end
+end
+
+%% ------------------------------------------------------------------------
+%----------------- BehavResources -----------------------------------------
+%--------------------------------------------------------------------------
+
+if 1
+    disp(' ');
+    disp('behavResources')
+    try
+        load behavResources
+        Pos;
+        disp('Done')
+    catch
+        %try  eval(['cd(''',res,'-wideband'')']); dirnamepref=9; catch, eval(['cd(''',res,'-EIB'')']); dirnamepref=4;end
+        if setCu==0
+            SetCurrentSessionAttentional
+            SetCurrentSessionAttentional('same')
+            setCu=1;
+        end
+        % ---------------------------------------------------------------------
+        
+        
+            evt=GetEventsAttentional('output','Descriptions');
+       
+                   
+             end
+        % ---------------------------------------------------------------------
+        
+    end
+end

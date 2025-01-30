@@ -1,0 +1,39 @@
+
+%FigureWTKOSpectroClean
+
+NameDir={'BASAL'};
+
+
+
+ST1=[];
+ST2=[];
+ST3=[];
+ST4=[];
+ST5=[];
+ST6=[];
+
+
+ST1ko=[];
+ST2ko=[];
+ST3ko=[];
+ST4ko=[];
+ST5ko=[];
+ST6ko=[];
+
+a=1;
+b=1;
+
+  
+    for i=1:length(NameDir)
+        Dir=PathForExperimentsML(NameDir{i});
+        
+        for man=1:length(Dir.path) 
+            %try
+            disp('  ')
+            disp(pwd)
+            cd(Dir.path{man})
+            
+        end
+    end
+    
+ 

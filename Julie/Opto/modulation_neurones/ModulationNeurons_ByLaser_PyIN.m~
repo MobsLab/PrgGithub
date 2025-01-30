@@ -1,0 +1,323 @@
+% ModulationNeurons_ByLaser_PyIN
+% 
+% 19.05.2017
+% from ModulationNeurons_ByLaser
+
+% similar, make 2 figures separating pyramids and interneurons
+% needs WaveformsSorted_Py_IN.mat (see code Run_Waveforms.m)
+
+sav=0;
+savindiv=0;
+cd /media/DataMOBsRAIDN/ProjetAversion/SleepStim
+resRslt=pwd;
+
+Dir.path={
+% '/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse458/20161117';
+'/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse459/20161123';
+'/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse465/20170126';
+'/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse467/20170202';
+
+};
+plo_NeuModFqindiv=0;
+suffix='dur';
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Compute neuron modulation for each stim frequencies, for each mice
+%% during stim, before (30sec) or after (30sec) 
+if 0
+for man=1:length(Dir.path)
+    
+    cd(Dir.path{man})
+    res=pwd; 
+    
+    % get laser stim
+    load StimInfo
+    fq_list=unique(StimInfo.Freq);
+    load([res,'/LFPData/InfoLFP']);
+    clear ch temp
+    ch=load('ChannelsToAnalyse/LaserInput.mat');
+    disp(['... Loading LaserInput: LFP',num2str(ch.channel)])
+    eval(['temp=load(''LFPData/LFP',num2str(ch.channel),'.mat'');']);
+    LFPlaser=temp.LFP;
+    int_laser=intervalSet(StimInfo.StartTime*1E4, StimInfo.StopTime*1E4);
+    
+
+    % %% for BEFORE
+%     int_laser=shift(int_laser,-30*1E4);
+%     LFPlaser=tsd(Range(LFPlaser)-30*1E4,Data(LFPlaser));
+%     suffix='bef';
+
+    % for AFTER
+%     int_laser=shift(int_laser,30*1E4);
+%     LFPlaser=tsd(Range(LFPlaser)+30*1E4,Data(LFPlaser));
+%     suffix='aft';
+
+    for fq=1:8
+        ind_OI{fq}=find(StimInfo.Freq==fq_list(fq));
+    end
+    save(['ModNeurons_' suffix],'int_laser','fq_list')
+
+    % visual check for laser channel : 
+    if 0, figure, plot(Range(Restrict(LFPlaser,subset(int_laser,ind_OI{fq}(1))))*1E-4, Data(Restrict(LFPlaser,subset(int_laser,ind_OI{fq}(1))))), 
+    figure, plot(Range(Restrict(LFPlaser,subset(int_laser,ind_OI{fq})))*1E-4, Data(Restrict(LFPlaser,subset(int_laser,ind_OI{fq})))),
+    hold on, line([Start(subset(int_laser,ind_OI{fq})) End(subset(int_laser,ind_OI{fq}))]*1E-4,[8 8]),end
+
+    load SpikeData.mat
+    removMUA=1;
+    [S,NumNeurons,numtt,TT]=GetSpikesFromStructure('PFCx',S,res,removMUA);
+
+    % Compute modulation 
+    try
+        Pht;
+    catch
+        for fq=1:8
+            for num=1:length(NumNeurons)
+                Pht{num,fq}=[];    
+                if size(Data(Restrict(S{NumNeurons(num)},subset(int_laser,ind_OI{fq}))),1)>1
+                    [Ph] = ModulationSquaredSignal(Restrict(LFPlaser,subset(int_laser,ind_OI{fq})),Restrict(S{NumNeurons(num)},subset(int_laser,ind_OI{fq})), 1,0);
+                    Pht{num,fq}=[Pht{num,fq};Ph];
+                end
+            end
+        end
+        save(['ModNeurons_' suffix],'Pht','-Append')
+    end
+    
+    if ~isdir([res '/modulation/']);
+        mkdir([res '/modulation/']);
+    end
+
+    try
+        Kappa;
+    catch
+        for fq=1:8
+            figure('Position',[  124          72        1710         902])
+            for num=1:length(NumNeurons)
+                subplot(6,10,num)
+                try
+                    [mu(num,fq), Kappa(num,fq), pval(num,fq)] =JustPoltMod(Pht{num,fq},25);
+                end
+                if num==1, text(-0.5,1.5,['freq ' num2str(fq_list(fq)) 'Hz'],'units','normalized'),end
+            end
+            if savindiv
+                saveas(gcf,[res '/modulation/freq' num2str(fq_list(fq)) 'Hz'])
+                saveFigure(gcf,['freq' num2str(fq_list(fq)) '_' suffix],[res '/modulation/'])
+            end
+        end
+        save(['ModNeurons_' suffix],'mu','Kappa','pval','NumNeurons','numtt','TT','-Append')
+    end
+    clear mu Kappa pval NumNeurons numtt TT Pht
+% 
+
+end % end of Dir.path
+end 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Figure with all 4 mice
+%% 4 mice separated
+%  suffix='bef';
+suffix='dur';
+% suffix='aft';
+Kappa=[];
+pval=[];
+Pht=[];
+mu=[];
+Py_or_IN=[];
+for man=1:length(Dir.path)
+    cd(Dir.path{man})
+    temp=load(['ModNeurons_' suffix]);
+    temp2=load('WaveformsSorted_Py_IN');
+   
+    KappaAr{man}=temp.Kappa;
+    PhtAr{man}=temp.Pht;
+    pvalAr{man}=temp.pval;
+    muAr{man}=temp.mu;
+    Py_or_INAr{man}=temp2.UnitID;
+    
+    Kappa=[Kappa;temp.Kappa];
+    pval=[pval;temp.pval];
+    Pht=[Pht;temp.Pht];
+    mu=[mu;temp.mu];
+    fq_list=temp.fq_list;
+    Py_or_IN=[Py_or_IN;temp2.UnitID];
+end
+cd(resRslt)
+if sav
+save(['ModNeurons_' suffix],'mu','Kappa','pval','mu','fq_list')
+end
+fig_Py=figure('Position',[201          69        1616         899]);
+fig_IN=figure('Position',[201          69        1616         899]);
+for man=1:length(Dir.path)
+    clear K
+    K=KappaAr{man};
+    K(pvalAr{man}>0.05)=nan;
+    Py_or_IN=Py_or_INAr{man};
+    % Py
+    figure(fig_Py)
+    subplot(3, length(Dir.path),man)
+    PlotErrorSpreadN_KJ(K(Py_or_IN==1,:),'plotcolors',[0 0 1],'newfig',0);hold on % Py  
+    ylim([0 1]),set(gca,'XTickLabel',[1 2 4 7 10 13 15 20])
+    if man==1,ylabel('Kappa'),end;
+    if man==1,text(-0.1,1.1, suffix, 'units','normalized'),end;
+    title([Dir.path{man}(end-11:end-9) ' - N tot = ' num2str(size(KappaAr{man},1)) ' / N int = ' num2str(size(KappaAr{man}(Py_or_IN==1,:),1))] )
+   
+    subplot(3, length(Dir.path),man+length(Dir.path))
+    try   PlotErrorBarN(K(Py_or_IN==1,:),0),    end
+    set(gca,'XTickLabel',[1 2 4 7 10 13 15 20])
+    if man==1,ylabel('Kappa'),end;
+
+   subplot(3, length(Dir.path),man+length(Dir.path)*2)
+   bar(sum(~isnan(K(Py_or_IN==1,:)))/ size(KappaAr{man}(Py_or_IN==1,:),1))
+    ylim([0 1]),set(gca,'XTickLabel',[1 2 4 7 10 13 15 20])
+   if man==1,ylabel('% modulated pyramidal'),end;
+    if man==length(Dir.path),xlabel('stim frequency'),end;
+
+    % IN
+    figure(fig_IN)
+    subplot(3, length(Dir.path),man)
+    PlotErrorSpreadN_KJ(K(Py_or_IN==-1,:),'plotcolors',[1 0 0],'newfig',0);hold on % IN
+    ylim([0 1]),set(gca,'XTickLabel',[1 2 4 7 10 13 15 20])
+    if man==1,ylabel('Kappa'),end;
+    if man==1,text(-0.1,1.1, suffix, 'units','normalized'),end;
+    title([Dir.path{man}(end-11:end-9) ' - N tot neurons = ' num2str(size(KappaAr{man},1)) ' - N int = ' num2str(size(KappaAr{man}(Py_or_IN==-1,:),1)) ] )
+   
+    subplot(3, length(Dir.path),man+length(Dir.path))
+    try    PlotErrorBarN(K(Py_or_IN==-1,:),0),    end
+    set(gca,'XTickLabel',[1 2 4 7 10 13 15 20])
+    if man==1,ylabel('Kappa'),end;
+    
+   subplot(3, length(Dir.path),man+length(Dir.path)*2)
+   bar(sum(~isnan(K(Py_or_IN==-1,:)))/ size(KappaAr{man}(Py_or_IN==-1,:),1))
+    ylim([0 1]),set(gca,'XTickLabel',[1 2 4 7 10 13 15 20])
+   if man==1,ylabel('% modulated IN'),end;
+    if man==length(Dir.path),xlabel('stim frequency'),end;
+end
+cd(resRslt)
+if sav
+    saveas(fig_IN,['ModByMouse' suffix '_IN.fig']);
+    saveFigure(fig_IN,['ModByMouse' suffix '_IN'],resRslt);
+    saveas(fig_Py,['ModByMouse' suffix '_Py.fig']);
+    saveFigure(fig_Py,['ModByMouse' suffix '_Py'],resRslt);
+end
+%% all concatenated
+
+Kappa=[];
+pval=[];
+Pht=[];
+mu=[];
+Py_or_IN=[];
+for man=1:length(Dir.path)
+    cd(Dir.path{man})
+    temp=load(['ModNeurons_' suffix]);
+    temp2=load('WaveformsSorted_Py_IN');
+   
+    KappaAr{man}=temp.Kappa;
+    PhtAr{man}=temp.Pht;
+    pvalAr{man}=temp.pval;
+    muAr{man}=temp.mu;
+    Py_or_INAr{man}=temp2.UnitID;
+    
+    Kappa=[Kappa;temp.Kappa];
+    pval=[pval;temp.pval];
+    Pht=[Pht;temp.Pht];
+    mu=[mu;temp.mu];
+    fq_list=temp.fq_list;
+    Py_or_IN=[Py_or_IN;temp2.UnitID];
+end
+
+
+
+K=Kappa;
+K(pval>0.05)=nan;
+
+% pyramidals
+fig_Py_all=figure('Position',[ 1958          67         307         899]);
+subplot(311)
+PlotErrorSpreadN_KJ(K(Py_or_IN==1,:),'plotcolors',[0 0 1],'newfig',0);hold on
+ylim([0 1]),set(gca,'XTickLabel',[1 2 4 7 10 13 15 20])
+ylabel('Kappa')
+text(-0.1,1.1, suffix, 'units','normalized')
+title([Dir.path{man}(end-11:end-9) ' - N tot = ' num2str(size(Kappa,1)) ' / N Py = ' num2str(size(Kappa(Py_or_IN==1,:),1))] )
+
+subplot(312)
+try PlotErrorBarN(K(Py_or_IN==1,:),0);end
+set(gca,'XTickLabel',fq_list)
+ylabel('Kappa')
+
+subplot(313)
+bar(sum(~isnan(K(Py_or_IN==1,:))/ size(Kappa(Py_or_IN==1,:),1)))
+ylim([0 0.7]),set(gca,'XTickLabel',fq_list)
+ylabel('% modulated neurons')
+xlabel('stim frequency')
+
+% interneurons
+fig_Int_all=figure('Position',[ 1958          67         307         899]);
+subplot(311)
+PlotErrorSpreadN_KJ(K(Py_or_IN==-1,:),'plotcolors',[1 0 0],'newfig',0);hold on
+ylim([0 1]),set(gca,'XTickLabel',[1 2 4 7 10 13 15 20])
+ylabel('Kappa')
+text(-0.1,1.1, suffix, 'units','normalized')
+title([Dir.path{man}(end-11:end-9) ' - N tot = ' num2str(size(Kappa,1)) ' / N int = ' num2str(size(Kappa(Py_or_IN==-1,:),1))] )
+
+subplot(312)
+try PlotErrorBarN(K(Py_or_IN==-1,:),0);end
+set(gca,'XTickLabel',fq_list)
+ylabel('Kappa')
+
+subplot(313)
+bar(sum(~isnan(K(Py_or_IN==-1,:))/ size(Kappa(Py_or_IN==-1,:),1)))
+ylim([0 0.7]),set(gca,'XTickLabel',fq_list)
+ylabel('% modulated neurons')
+xlabel('stim frequency')
+
+if sav
+    cd(resRslt)
+    saveas(fig_Py_all,['ModAllMice' suffix '_Py.fig']);
+    saveFigure(fig_Py_all,['ModAllMice' suffix '_Py'],resRslt);
+    saveas(fig_Int_all,['ModAllMice' suffix '_IN.fig']);
+    saveFigure(fig_Int_all,['ModAllMice' suffix '_IN'],resRslt);
+end
+
+if 0
+    %% Modulation index : compare before /during / after
+    bef=load('ModNeurons_bef');
+    dur=load('ModNeurons_dur');
+    aft=load('ModNeurons_bef');
+    MI_bef=(dur.Kappa-bef.Kappa)./(dur.Kappa+bef.Kappa);
+    MI_aft=(dur.Kappa-aft.Kappa)./(dur.Kappa+aft.Kappa);
+
+    figure('Position',[    1974         678        1754         230])
+    for fq=1:8
+        subplot(1,8,fq), hold on
+        plot(bef.Kappa(:,fq),dur.Kappa(:,fq),'.')
+        plot([0,0.5],[0 0.5], 'Color',[0.5 0.5 0.5])
+        ylabel('during')
+        xlabel('before')
+        xlim([0 0.5])
+        ylim([0 0.5])
+        title(['stim ' num2str(fq_list(fq)) ' Hz'])
+    end
+    saveas(gcf,['Mod_Bef_Dur_AllMice.fig']);
+    saveFigure(gcf,['Mod_Bef_Dur_AllMice' ],resRslt);
+
+    %%
+    figure('Position',[ 200          66        1317         614])
+    subplot(121)
+    PlotErrorSpreadN_KJ(MI_bef,'plotcolors',[0.7 0.7 0.7],'newfig',0,'markersize',8);
+    set(gca,'XTickLabel',fq_list)
+    plot([0 9],[0 0],'Color',[0.6 0.6 0.6])
+    title('during')
+    xlabel('before')
+    ylabel('Modulation Index during-before')
+
+    subplot(122)
+    PlotErrorSpreadN_KJ(MI_aft,'plotcolors',[0.7 0.7 0.7],'newfig',0,'markersize',8);
+    set(gca,'XTickLabel',fq_list)
+    plot([0 9],[0 0],'Color',[0.6 0.6 0.6])
+    title('during')
+    xlabel('after')
+    ylabel('Modulation Index during-after')
+
+    cd(resRslt)
+    saveas(gcf,['ModIndex_AllMice.fig']);
+    saveFigure(gcf,['Modindex_AllMice' ],resRslt);
+
+end

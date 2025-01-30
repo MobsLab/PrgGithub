@@ -1,0 +1,349 @@
+
+
+%% Generate all physio-brain params that indicate shock/safe
+clear all
+GetAllSalineSessions_BM
+GetEmbReactMiceFolderList_BM
+Group=11;
+bin_size=2;
+
+Mouse=Drugs_Groups_UMaze_BM(Group);
+Session_type={'CondPost'};
+for sess=1:length(Session_type) % generate all data required for analyses
+        [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),...
+            'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','linearposition');
+    
+%     [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('drugs',Mouse,lower(Session_type{sess}),...
+%         'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','linearposition');
+end
+
+clearvars -except OutPutData Epoch1 NameEpoch CondSess FearSess Session_type Group bin_size
+
+Mouse=Drugs_Groups_UMaze_BM(Group);
+Params={'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','linearposition'};
+
+for sess=1:length(Session_type)
+    for mouse=1:length(Mouse)
+        %         try
+        Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+        i=1;
+        clear ep ind_to_use
+        
+        for ep=1:length(Start(Epoch1.(Session_type{sess}){mouse, 3}))
+            
+            % for full 1s bin
+            for bin=1:ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, 3},ep)))/(bin_size*1e4)))-1 % bin of 2s or less
+                
+                % define bin
+                SmallEpoch = intervalSet(Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))+(bin-1)*bin_size*1e4 , Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))+(bin)*bin_size*1e4);
+                
+                % param in this bin
+                for par=1:length(Params)
+                    DATA.(Session_type{sess}).(Mouse_names{mouse})(par,i) = nanmedian(Data(Restrict(OutPutData.(Session_type{sess}).(Params{par}).tsd{mouse,1} , SmallEpoch)));
+                end
+                
+                i=i+1;
+            end
+            
+            
+            % for what's left in the episode, <1s of freezing epoch
+            ind_to_use = ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, 3},ep)))/(bin_size*1e4)))-1; % se(Session_type{sess}) to last freezing episode indice
+            SmallEpoch = intervalSet(Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))+(ind_to_use)*bin_size*1e4 , Stop(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))); % last small epoch is a bin with time < 2s
+            for par=1:length(Params)
+                DATA.(Session_type{sess}).(Mouse_names{mouse})(par,i) = nanmedian(Data(Restrict(OutPutData.(Session_type{sess}).(Params{par}).tsd{mouse,1} , SmallEpoch)));
+            end
+            
+            i=i+1;
+        end
+        
+        disp(Mouse_names{mouse})
+        %         end
+    end
+end
+
+clearvars -except DATA Epoch1 Mouse Mouse_names OutPutData Params Session_type Group bin_size
+
+[eig1 , eig2 , X , Y] = Figures_PCA_Freezing_UMaze_BM(Mouse , DATA.Fear , Params , 1);
+
+Drugs='ChronicFlx';
+i=4; saveFigure(i,['PCA_Freezing_' Drugs '_' num2str(i)],'/home/ratatouille/Desktop/Figures_Baptiste/')
+
+clearvars -except DATA Epoch1 Mouse Mouse_names OutPutData Params Session_type eig1 eig2 X Y
+
+
+save('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_SleepPre_Saline.mat')
+
+
+
+
+%%
+
+%% Generate all physio-brain params sleep
+clear all
+GetAllSalineSessions_BM
+GetEmbReactMiceFolderList_BM
+Group=11;
+bin_size=3;
+
+Mouse=Drugs_Groups_UMaze_BM(Group);
+Session_type={'sleep_pre'};
+for sess=1:length(Session_type) % generate all data required for analyses
+    [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),...
+        'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','pfc_delta_power');
+    
+    %     [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('drugs',Mouse,lower(Session_type{sess}),...
+    %         'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','linearposition');
+end
+
+clearvars -except OutPutData Epoch1 NameEpoch Sess Session_type Group bin_size
+
+Mouse=Drugs_Groups_UMaze_BM(Group);
+for mouse=1:length(Mouse)
+    Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+    try % are you sure ?
+        UMazeSleepSess.(Mouse_names{mouse}) = Sess.(Mouse_names{mouse})(find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Sleep')))));
+        SleepPreSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(1);
+        if length(UMazeSleepSess.(Mouse_names{mouse}))==3
+            SleepPreSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(1);
+            SleepPostPreSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(2);
+            SleepPostSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(3);
+        else
+            try
+                SleepPreSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(1);
+                SleepPostSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(2);
+            catch % for 11203... grrr
+                SleepPreSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(1);
+                SleepPostSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(1);
+            end
+        end
+    end
+end
+
+
+Params={'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','pfc_delta_power','states'};
+sta = [2 4 5];
+
+for sess=1:length(Session_type)
+    for mouse=1:length(Mouse)
+        try
+            Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+            i=1;
+            clear ep ind_to_use
+            
+            for states=1:3
+                for ep=1:length(Start(Epoch1.(Session_type{sess}){mouse, sta(states)}))
+                    
+                    % for full 1s bin
+                    for bin=1:ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, sta(states)},ep)))/(bin_size*1e4)))-1 % bin of 2s or less
+                        
+                        % define bin
+                        SmallEpoch = intervalSet(Start(subset(Epoch1.(Session_type{sess}){mouse, sta(states)},ep))+(bin-1)*bin_size*1e4 , Start(subset(Epoch1.(Session_type{sess}){mouse, sta(states)},ep))+(bin)*bin_size*1e4);
+                        
+                        % param in this bin
+                        for par=1:length(Params)-1
+                            DATA.(Session_type{sess}).(Mouse_names{mouse})(par,i) = nanmedian(Data(Restrict(OutPutData.(Session_type{sess}).(Params{par}).tsd{mouse,1} , SmallEpoch)));
+                        end
+                        par=length(Params);
+                        DATA.(Session_type{sess}).(Mouse_names{mouse})(par,i) = states;
+                        
+                        
+                        i=i+1;
+                    end
+                    
+                    
+                    % for what's left in the episode, <1s of freezing epoch
+                    ind_to_use = ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, sta(states)},ep)))/(bin_size*1e4)))-1; % se(Session_type{sess}) to last freezing episode indice
+                    SmallEpoch = intervalSet(Start(subset(Epoch1.(Session_type{sess}){mouse, sta(states)},ep))+(ind_to_use)*bin_size*1e4 , Stop(subset(Epoch1.(Session_type{sess}){mouse, sta(states)},ep))); % last small epoch is a bin with time < 2s
+                    for par=1:length(Params)-1
+                        DATA.(Session_type{sess}).(Mouse_names{mouse})(par,i) = nanmedian(Data(Restrict(OutPutData.(Session_type{sess}).(Params{par}).tsd{mouse,1} , SmallEpoch)));
+                    end
+                    par=length(Params);
+                    DATA.(Session_type{sess}).(Mouse_names{mouse})(par,i) = states;
+                    
+                    i=i+1;
+                end
+            end
+            
+            disp(Mouse_names{mouse})
+        end
+    end
+end
+
+clearvars -except DATA Epoch1 Mouse Mouse_names OutPutData Params Session_type bin_size
+
+save('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Sleep.mat')
+
+
+% remove mice not enough sleep
+for mouse=1:length(Mouse)
+    try
+        if size(DATA.sleep_pre.(Mouse_names{mouse}),2)<100
+            DATA.sleep_pre = rmfield(DATA.sleep_pre , Mouse_names{mouse});
+        end
+    end
+end
+
+% remove mice without sleep session
+i=1;
+for mouse=1:length(Mouse)
+    if isfield(DATA.sleep_pre,Mouse_names{mouse})
+        Mouse2(i)=Mouse(mouse);
+        Mouse_names2{i}=Mouse_names{mouse};
+        i=i+1;
+    end
+end
+clear Mouse Mouse_names
+Mouse=Mouse2;
+Mouse_names=Mouse_names2;
+clear Mouse2 Mouse_names2
+
+
+
+
+[eig1 , eig2 , X , Y] = Figures_PCA_Freezing_UMaze_BM(Mouse , DATA.sleep_pre , Params , 1)
+
+
+
+
+%% Generate all physio-brain params active
+clear all
+GetAllSalineSessions_BM
+GetEmbReactMiceFolderList_BM
+Group=11;
+sta = [3 4];
+bin_size=2;
+
+Mouse=Drugs_Groups_UMaze_BM(Group);
+Session_type={'CondPost'};
+for sess=1:length(Session_type) % generate all data required for analyses
+    %     [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),...
+    %         'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','linearposition');
+    
+    [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('drugs',Mouse,lower(Session_type{sess}),...
+        'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','linearposition');
+end
+
+clearvars -except OutPutData Epoch1 NameEpoch CondSess FearSess Session_type Group sta bin_size
+
+Mouse=Drugs_Groups_UMaze_BM(Group);
+Params={'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','linearposition','states'};
+for sess=1:length(Session_type)
+    for mouse=1:length(Mouse)
+        Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+        i=1;
+        clear ep ind_to_use
+        
+        for states=1:2 % freezing and active 
+            for ep=1:length(Start(Epoch1.(Session_type{sess}){mouse, sta(states)}))
+                
+                % for full 1s bin
+                for bin=1:ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, sta(states)},ep)))/(bin_size*1e4)))-1 % bin of 2s or less
+                    
+                    % define bin
+                    SmallEpoch = intervalSet(Start(subset(Epoch1.(Session_type{sess}){mouse, sta(states)},ep))+(bin-1)*bin_size*1e4 , Start(subset(Epoch1.(Session_type{sess}){mouse, sta(states)},ep))+(bin)*bin_size*1e4);
+                    
+                    % param in this bin
+                    for par=1:length(Params)-1
+                        DATA.(Session_type{sess}).(Mouse_names{mouse})(par,i) = nanmedian(Data(Restrict(OutPutData.(Session_type{sess}).(Params{par}).tsd{mouse,1} , SmallEpoch)));
+                    end
+                    par=length(Params);
+                    DATA.(Session_type{sess}).(Mouse_names{mouse})(par,i) = states;
+                    
+                    i=i+1;
+                end
+             end
+        end
+        disp(Mouse_names{mouse})
+    end
+end
+
+
+clearvars -except DATA Epoch1 Mouse Mouse_names OutPutData Params Session_type
+
+
+Figures_PCA_Freezing_UMaze_BM(Mouse , DATA.CondPost , Params , 1);
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%
+
+
+%% Generate all physio-brain params that indicate shock/safe for drug mice
+clear all
+GroupNames = {'FlxChr','FlxChr_Ctrl','RipInhib','RipInhib_Ctrl'};
+GroupId = [1,2,7,8];
+bin_size=2;
+
+for gg = 1:length(GroupNames)
+    
+    GetAllSalineSessions_BM
+    GetEmbReactMiceFolderList_BM
+    Group = GroupId(gg); % chronic fluo mice
+    
+    
+    Mouse=Drugs_Groups_UMaze_BM(Group);
+    Session_type={'CondPost'};
+    for sess=1:length(Session_type) % generate all data required for analyses
+        [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('drugs',Mouse,lower(Session_type{sess}),...
+            'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','linearposition');
+        
+        %     [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('drugs',Mouse,lower(Session_type{sess}),...
+        %         'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','linearposition');
+    end
+    
+    clearvars -except OutPutData Epoch1 NameEpoch CondSess FearSess Session_type Group bin_size
+    
+    Mouse=Drugs_Groups_UMaze_BM(Group);
+    Params={'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','linearposition'};
+    
+    for sess=1:length(Session_type)
+        for mouse=1:length(Mouse)
+            %         try
+            Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+            i=1;
+            clear ep ind_to_use
+            
+            for ep=1:length(Start(Epoch1.(Session_type{sess}){mouse, 3}))
+                
+                % for full 1s bin
+                for bin=1:ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, 3},ep)))/(bin_size*1e4)))-1 % bin of 2s or less
+                    
+                    % define bin
+                    SmallEpoch = intervalSet(Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))+(bin-1)*bin_size*1e4 , Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))+(bin)*bin_size*1e4);
+                    
+                    % param in this bin
+                    for par=1:length(Params)
+                        DATA.(Session_type{sess}).(Mouse_names{mouse})(par,i) = nanmedian(Data(Restrict(OutPutData.(Session_type{sess}).(Params{par}).tsd{mouse,1} , SmallEpoch)));
+                    end
+                    
+                    i=i+1;
+                end
+                
+                
+                % for what's left in the episode, <1s of freezing epoch
+                ind_to_use = ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, 3},ep)))/(bin_size*1e4)))-1; % se(Session_type{sess}) to last freezing episode indice
+                SmallEpoch = intervalSet(Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))+(ind_to_use)*bin_size*1e4 , Stop(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))); % last small epoch is a bin with time < 2s
+                for par=1:length(Params)
+                    DATA.(Session_type{sess}).(Mouse_names{mouse})(par,i) = nanmedian(Data(Restrict(OutPutData.(Session_type{sess}).(Params{par}).tsd{mouse,1} , SmallEpoch)));
+                end
+                
+                i=i+1;
+            end
+            
+            disp(Mouse_names{mouse})
+            %         end
+        end
+    end
+    
+    save(['/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_',GroupNames{gg},'_CondPost_2sbins.mat'],...
+        'DATA','Epoch1','Group','Mouse','Mouse_names','OutPutData','Params','Session_type','bin_size')
+    clear DATA Mouse_names
+end

@@ -1,0 +1,110 @@
+function A = Analysis(A)
+
+
+b = fir1(96,[0.000001 0.02]);
+
+A = getResource(A,'MidRipS1');
+A = getResource(A,'MidRipS2');
+A = getResource(A,'Sleep2Epoch');
+sleep2Epoch = sleep2Epoch{1};
+A = getResource(A,'Sleep1Epoch');
+sleep1Epoch = sleep1Epoch{1};
+A = getResource(A,'MazeEpoch');
+mazeEpoch = mazeEpoch{1};
+A = getResource(A,'SpikeData');
+
+nbCells = length(S)
+nbRipS2 = length(Range(midRipS2{1}))
+
+keyboard
+
+dset = current_dataset(A);
+[dummy1,dataset,dummy2] = fileparts(current_dir(A));
+
+%181021 : epoch = intervalSet(3800*10000,3900*10000);
+%181014 : epoch = intervalSet(4990*10000,5015*10000);
+%  epoch = intervalSet(4990*10000,5015*10000);
+%181014  epoch = intervalSet(3942*10000,3952*10000);
+epoch = sleep2Epoch;
+
+
+
+%load EEG
+
+eegfname = [dset filesep dataset 'eeg1.mat'];
+if exist([eegfname '.gz'])
+    display(['unzipping file ' eegfname]);
+    eval(['!gunzip ' eegfname '.gz']);
+end
+load(eegfname)
+display(['zipping file ' eegfname]);
+eval(['!gzip ' eegfname '.gz']);
+
+eegPfc2 = Restrict(EEG1,epoch);
+
+deegPfc2 = Data(eegPfc2);
+reegPfc2 = Range(eegPfc2);
+resampleVect = [1:length(reegPfc2)];
+resampleVect = ~mod(resampleVect,5);
+
+display('Filtering EEG...')
+eegPfc2Filt = filtfilt(b,1,Data(eegPfc2));
+eegPfc2Filt = tsd(reegPfc2(resampleVect),eegPfc2Filt(resampleVect));
+
+clear deegPfc2 reegPfc2 resampleVect
+
+%  
+%  eegfname = [dset filesep dataset 'eeg5.mat'];
+%  if exist([eegfname '.gz'])
+%      display(['unzipping file ' eegfname]);
+%      eval(['!gunzip ' eegfname '.gz']);
+%  end
+%  load(eegfname)
+%  display(['zipping file ' eegfname]);
+%  eval(['!gzip ' eegfname '.gz']);
+%  
+%  eegHc1 = Restrict(EEG5,sleep1Epoch);
+%  eegHc2 = Restrict(EEG5,sleep2Epoch);
+
+clear EEG1 EEG5
+
+
+display('Binning Spikes...')
+meanFRate = MakeQfromS(S,250);
+meanFRate = tsd(Range(meanFRate),full(mean(zscore(Data(meanFRate))'))');
+%  mFS1 = Restrict(meanFRate,sleep1Epoch);
+mFS2 = Restrict(meanFRate,epoch);
+clear meanFRate;
+
+% for long time scale plot, smooth mean zscore firing rates
+c = conv(gausswin(5),Data(mFS2));
+mFS2 = tsd(Range(mFS2),c(3:end-2));
+
+
+figure(1),clf
+hold on;
+%  plot(Range(eegPfc2)/10000,Data(eegPfc2),'Color','k');
+%  plot(Range(eegPfc2Filt)/10000,Data(eegPfc2Filt),'Color','k','LineWidth',3);
+%  plot(Range(mFS2)/10000,Data(mFS2),'Color','r');
+
+%  [AX,H1,H2] = plotyy(Range(eegPfc2Filt)/10000,Data(eegPfc2Filt),Range(mFS2)/10000,Data(mFS2))
+[AX,H1,H2] = plotyy(Range(eegPfc2)/10000,Data(eegPfc2),Range(mFS2)/10000,Data(mFS2))
+
+set(H2,'Color',[0.5 0.5 0.5],'LineWidth',3,'LineStyle','--')
+set(H1,'Color','k','LineWidth',2)
+
+plot(Range(Restrict(midRipS2{1},epoch))/10000,1,'Marker','v','MarkerFaceColor','k','MarkerEdgeColor','b','MarkerSize',12)
+hold off;
+
+
+%  
+%  figure(2),clf
+%  hold on;
+%  plot(Range(eegPfc2),Data(eegPfc2),'black');
+%  
+%  plot(Range(mF10msS2),Data(mF10msS2),'LineStyle','--')
+%  plot(Range(mF100msS2),Data(mF100msS2),'LineStyle','-.')
+%  plot(Range(midRipS2{1}),2,'Marker','v')
+%  hold off;
+
+keyboard;

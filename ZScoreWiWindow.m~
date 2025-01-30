@@ -1,0 +1,7 @@
+function OutMat=ZScoreWiWindow(InMat,Win)
+
+LineAv=mean(InMat);
+LineS
+
+
+end

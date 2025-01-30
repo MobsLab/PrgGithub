@@ -1,0 +1,49 @@
+load('/media/DataMOBsRAIDN/ProjectEmbReact/Mouse470/20161026/ProjetctEmbReact_M470_20161026_Cond/Cond5/LFPData/LFP4.mat')
+minFzEpLeng=4; % sec
+
+clear FreezeEpoch
+
+load('ChannelsToAnalyse/Bulb_deep.mat')
+chB=channel;
+load('ChannelsToAnalyse/PFCx_deep.mat')
+chP=channel;
+load('behavResources.mat')
+FreezeEpoch=FreezeEpoch-StimEpoch;
+dropShortIntervals(FreezeEpoch,minFzEpLeng*1e4);
+
+% Get low OB Spectrum
+load('B_Low_Spectrum.mat')
+flow=Spectro{3};
+SptsdBLow=tsd(Spectro{2}*1e4,Spectro{1});
+
+% Get high OB Spectrum
+load(['LFPData/LFP',num2str(chB),'.mat'])
+% Whitened high frequencies
+[y, ARmodel] = WhitenSignal(Data(LFP),[],1,[],2);
+% Spectrogram
+params.Fs=1/median(diff(Range(LFP,'s')));
+params.trialave=0;
+params.err=[1 0.0500];
+params.pad=2;
+params.fpass=[30 200];
+params.tapers=[2 3];
+movingwin=[0.1 0.013];
+disp('... Calculating spectrogramm.');
+[Sp,t,f]=mtspecgramc(y,movingwin,params);
+SptsdBHigh=tsd(t*1e4,Sp);
+fhigh=f;
+
+% Get average freq of freezing periods and teh troughs
+limvalf=find(flow>1.5,1,'first');
+for f=1:size(Start(FreezeEpoch),1)
+    Spectrtemp=flow.*mean(Data(Restrict(SptsdBLow,subset(FreezeEpoch,f))));
+    Spectrtemp=Spectrtemp(limvalf:end);
+    [val,ind]=max(Spectrtemp);
+    PeakFreq(f)=flow(ind+limvalf);
+    Output=GetPeakAndTroughFreqBand(Restrict(LFP,subset(FreezeEpoch,f)),[min(PeakFreq(f)-1.5,1) PeakFreq(f)+1.5]);
+end
+
+
+[M,S,t]=AverageSpectrogram(Stsd,f,Restrict(ts(Output),subset(FreezeEpoch,1)),20,100,1,0,1);
+
+[m1W{ss,1},s1,tps1W{ss,1},mW{ss,1}]=PhasePowerModulationExclusive(Restrict(LFP,(subset(FreezeEpoch,ss))),[2 4],Restrict(LFP,(subset(FreezeEpoch,ss))));

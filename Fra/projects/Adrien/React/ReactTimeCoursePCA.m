@@ -1,0 +1,159 @@
+function A = Analyse(A)
+
+
+A = getResource(A,'Sleep2Epoch');
+sleep2Epoch = sleep2Epoch{1};
+
+A = getResource(A,'Sleep1Epoch');
+sleep1Epoch = sleep1Epoch{1};
+
+A = getResource(A,'MazeEpoch');
+mazeEpoch = mazeEpoch{1};
+
+A = getResource(A,'CellNames');
+A = getResource(A,'SpikeData');
+A = getResource(A,'Tetrode');
+
+A = registerResource(A, 'ReactTimeCourseS1PCA', 'tsdArray', {[],1}, ...
+    'reactTimeCourseS1PCA', ...
+    'react time course during sleep1','mfile');
+
+A = registerResource(A, 'ReactTimeCourseS2PCA', 'tsdArray', {[],1}, ...
+    'reactTimeCourseS2PCA', ...
+    'react time course during sleep2','mfile');
+
+
+
+dataDir = parent_dir(A);
+Figures_dir = [dataDir filesep 'ReactTimeCourse' filesep 'PCA'];
+
+
+dset = current_dataset(A);
+[dummy1,dataset,dummy2] = fileparts(current_dir(A));
+%  
+%  eegfname = [dset filesep dataset 'eeg5.mat'];
+%  if exist([eegfname '.gz'])
+%      display(['unzipping file ' eegfname]);
+%      eval(['!gunzip ' eegfname '.gz']);
+%  end
+%  load(eegfname)
+%  display(['zipping file ' eegfname]);
+%  eval(['!gzip ' eegfname]);
+%  
+%  eegS1 = Restrict(EEG5,sleep1Epoch);
+%  eegS2 = Restrict(EEG5,sleep2Epoch);
+%  
+%  b = fir1(96,[0.005 0.01]);
+%  
+%  deegS1 = Data(eegS1);
+%  deegS1Filt = filtfilt(b,1,deegS1);
+%  eegS1std = std(deegS1Filt);
+%  eegS1Filt = tsd(Range(eegS1),deegS1Filt);
+%  
+%  deegS2 = Data(eegS2);
+%  deegS2Filt = filtfilt(b,1,deegS2);
+%  eegS2std = std(deegS2Filt);
+%  eegS2Filt = tsd(Range(eegS2),deegS2Filt);
+
+%  [thSt1 thEnd1] = findTheta(eegS1Filt,1.5*eegS1std,1.5*eegS1std)
+%  [thSt2 thEnd2] = findTheta(eegS2Filt,1.5*eegS2std,1.5*eegS2std)
+
+%  clear EEG5 eegS1 eegS2 eegS1Filt eegS2Filt
+
+
+%  keyboard
+cM = spkcorrcoef(S,1000,mazeEpoch,TT);
+nbCells = size(cM,2);
+
+[PCACoef, PCAvar, PCAexp] = pcacov(cM);
+
+Q = MakeQfromS(S,1000);
+
+QS1 = Restrict(Q,sleep1Epoch);
+QS1 = tsd(Range(QS1),zscore(full(Data(QS1))));
+dQS1 = Data(QS1);
+
+QS2 = Restrict(Q,sleep2Epoch);
+QS2 = tsd(Range(QS2),zscore(full(Data(QS2))));
+dQS2 = Data(QS2);
+
+
+
+nbBins1 = size(dQS1,1);
+R1 = zeros(nbBins1,1);
+nbBins2 = size(dQS2,1);
+R2 = zeros(nbBins2,1);
+
+normVect = sqrt(sum(dQS1'.*dQS1'));
+reactPCS1 = PCACoef'*dQS1'./(ones(nbCells,1)*normVect); %element by element division by norm of popVect
+
+normVect = sqrt(sum(dQS2'.*dQS2'));
+reactPCS2 = PCACoef'*dQS2'./(ones(nbCells,1)*normVect); %element by element division by norm of popVect
+
+%  
+%  for i=1:8
+%  	
+%  	R1 = reactPCS1(i,:);
+%  	R2 = reactPCS2(i,:);
+%  
+%  	fh = figure(1);clf;
+%  
+%  	subplot(1,2,1)
+%  		rg = [1:10:nbBins1];
+%  				
+%  		times = Range(QS1);
+%  		times = times(rg)/10000;
+%  	%  	thSt1 = Range(thSt1)/10000 - times(1);
+%  	%  	thEnd1 = Range(thEnd1)/10000 - times(1);
+%  	%  	if length(thEnd1)>length(thSt1); thEnd1(end)=[];end;
+%  		
+%  		Rsmooth = conv(R1,gausswin(1200))/sum(gausswin(1200));
+%  		Rsmooth = Rsmooth(600:end-600);
+%  		RsmF = Rsmooth(rg);
+%  		maxY = max(RsmF)+0.05;
+%  		minY = min(RsmF)-0.05;
+%  		
+%  		
+%  		hold on
+%  	%  	fill([thSt1';thSt1';thEnd1';thEnd1'],[minY maxY maxY minY]'*ones(1,length(thSt1)),'r')
+%  		plot(times - times(1),RsmF,'LineWidth',3,'Color','k')
+%  	
+%  	
+%  	subplot(1,2,2)
+%  		rg = [1:10:nbBins2];
+%  		
+%  		times = Range(QS2);
+%  		times = times(rg)/10000;
+%  		
+%  	%  	thSt2 = Range(thSt2)/10000 - times(1);
+%  	%  	thEnd2 = Range(thEnd2)/10000 - times(1);
+%  	%  	if length(thEnd2)>length(thSt2); thEnd2(end)=[];end;
+%  	
+%  		Rsmooth = conv(R2,gausswin(1200))/sum(gausswin(1200));
+%  		Rsmooth = Rsmooth(600:end-600);
+%  		RsmF = Rsmooth(rg);
+%  		maxY = max(RsmF)+0.05;
+%  		minY = min(RsmF)-0.05;
+%  		
+%  		hold on
+%  	%  	fill([thSt2';thSt2';thEnd2';thEnd2'],[minY maxY maxY minY]'*ones(1,length(thSt2)),'r')
+%  		plot(times - times(1),RsmF,'LineWidth',3,'Color','k')
+%  	
+%  	saveas(fh,[Figures_dir filesep dataset 'ReactTimeCourse100msBins2minGWPC' num2str(i)],'png');
+%  	
+%  end
+
+
+
+reactTimeCourseS1PCA = {tsd(Range(QS1),reactPCS1')};
+reactTimeCourseS2PCA = {tsd(Range(QS2),reactPCS2')};
+
+A = saveAllResources(A);
+
+
+
+
+
+
+
+

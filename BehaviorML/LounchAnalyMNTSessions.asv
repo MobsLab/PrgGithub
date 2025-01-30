@@ -1,0 +1,552 @@
+% toujours construire : ProjetOpto\Mouse127\MNT\Day1\Session1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% INPUTS  
+MotherFolder='C:\Users\Karim\Desktop\Data-Electrophy\ProjetOpto';
+erasePreviousA=0; % 0 to keep existing files, 1 otherwise
+A_Days=1:5;
+NbtrialPerSession=3;
+speed_thresh=20;% cm/s
+scrz=[1920 57 1280 948];
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DESCRIPTION EXPERIMENTS
+selectExperiment=4;
+
+if selectExperiment==1
+    % previous protocol
+    nameManipe={'MNT'};
+    Groups={[152 154 156 161 163 165 167],[153 155 157 162 164 166]};
+    A_Sessions=1; % sessions per day
+	GroupsName={'oldCTRL','oldDeprivation'};
+    A_Mice=unique([Groups{1},Groups{2}]);
+    
+    
+elseif selectExperiment==2
+    nameManipe={'MNT'};
+    Groups={[171 173 174 175 176 177],[191 192 193],[194 195 196]};%nulles[173 177]
+    GroupsName={'CTRL1','CTRL2','SD2'}; 
+    A_Sessions=1:2; % sessions per day
+    A_Mice=unique([Groups{1},Groups{2},Groups{3}]);
+elseif selectExperiment==3
+    nameManipe={'MNT'};
+    Groups={[171 174 175 176 191 192 193],[194 195 196],[173 177]};
+    GroupsName={'CTRL','SD','CTRLnulle'}; 
+    A_Sessions=1:2; % sessions per day
+    A_Mice=unique([Groups{1},Groups{2},Groups{3}]);
+elseif selectExperiment==4
+    nameManipe={'MNT'};
+    Groups={[171 174 175 176 191 192 205],[194 195 196 201 204]};% ctrl pb stimulator : 193 
+    GroupsName={'CTRL','SD'}; 
+    A_Sessions=1:2; % sessions per day
+    A_Mice=unique([Groups{1},Groups{2}]);  
+elseif selectExperiment==5
+    nameManipe={'MNT'};
+    Groups={[191 192 193],[194 195 196]};
+    GroupsName={'CTRL','SD'}; 
+    A_Sessions=1:2; % sessions per day
+    A_Mice=unique([Groups{1},Groups{2}]); 
+    
+elseif selectExperiment==6
+    nameManipe={'MNT2'};
+    Groups={[171 174 175 176],[173 177],[191 192 193],[194 196]};%nulles[173 177]
+    GroupsName={'CTRL1','CTRL1nulle','CTRL2','SD2'}; 
+    A_Sessions=1:2; % sessions per day
+    A_Mice=unique([Groups{1},Groups{2},Groups{3},Groups{4}]);
+    
+elseif selectExperiment==7
+    nameManipe={'MNT','MNT2'};
+    Groups={[191 192 193],[191 192 193]};
+    GroupsName=nameManipe; 
+    A_Sessions=1:2; % sessions per day
+    A_Mice=unique([Groups{1},Groups{2}]); 
+    
+elseif selectExperiment==8
+     nameManipe={'MNT'};
+     Groups={[201 204],[205]};
+     GroupsName={'CTRL','SD'};
+     A_Sessions=1; % sessions per day
+     A_Mice=unique([Groups{1},Groups{2}]);
+     A_Days=12;
+    NbtrialPerSession=1;
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% INITIATE
+if isempty(strfind(MotherFolder,'/')), mark='\'; else, mark='/'; end
+DelayPOS=2;
+
+PosMATTT=[];
+MATTT=[];
+MATTnames={'Mouse','Day','Session','Trial'};
+nbGroupParams=[5 14 25 33 36];
+NameGroupParams={'LearningStrength','ReferenceMemory','WorkingMemory','otherParameters'};
+MATTnames(5:13)={'Length Session (s)','runned distance(cm)','Speed outside stim (cm/s)',...
+    'Average speed (cm/s)','Mean speed (cm/s)','80th speed percentile (cm/s)',...% vitesse apprentissage
+    't in Stimulation (s)','%Tsession in stim','%Tvisit in stim'}; % stimulation received
+MATTnames(14:24)={'Entry in Rewarded ports (R)','t in R (s)','%Tsession in R','%Tvisit in R',... % good ports
+    'Entry in NONrewarded ports (NR)','t in NR (s)','%session t in NR','%Tvisit in NR',... % bad ports
+    '%Visit in R','%Visit in NR (REF ERROR)','nb stim'};
+MATTnames(25:32)={'nb REentry in R','%Visit REentry in R','%Tvisit REentry in R','%Tsession REentry in R',... % Working memory
+    'nb REentry in NR','%Visit REentry in NR','%Tvisit REentry in NR','%Tsession REentry in NR'};% Working memory
+MATTnames(33:35)={'delay before 1st Reward','Rank 1st stim','%Reward actually taken'};
+
+colori={'k' 'r' 'b' 'g' 'm' 'c' 'y'};
+coloriMouse=[];
+for gg=1:length(Groups)
+    for u=1:length(Groups{gg})
+        if length(nameManipe)==2 && gg==2, ;
+        else
+        colorvect=[0 0 0]; if gg<4, colorvect(gg)=1; else, colorvect=[0 0 1]; colorvect(gg-3)=1; end
+        coloriMouse{A_Mice==Groups{gg}(u)}=(1-(2*u-2)/(3*length(Groups{gg})))*colorvect;
+        end
+    end
+end
+%if length(A_Mice)<7, coloriMouse=colori; end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% COMPUTE MATTT
+for mi=1:length(A_Mice)
+    disp(' ')
+    disp(['          *   Mouse ',num2str(A_Mice(mi)),'   * ']);
+    for nm=1:length(nameManipe)
+        disp(['--------- Experiment ',nameManipe{nm},' -----------'])
+    for da=1:length(A_Days)        
+        for se=1:length(A_Sessions)
+            disp(['Day ',num2str(A_Days(da)),' - Session ',num2str(A_Sessions(se))])
+            
+            directName=[MotherFolder,mark,'Mouse',num2str(A_Mice(mi)),mark,nameManipe{nm},mark,'Day',num2str(A_Days(da)),mark,'Session',num2str(A_Sessions(se))];
+            lis=dir(directName);
+            
+            findfile=0;
+            for i=3:length(lis)
+                temp=lis(i).name;
+                if length(temp)>12 && strcmp(temp(end-12:end),'-wideband.mat')
+                    findfile=1;
+                    clear StimInPorts TimeInPorts RewardedPorts TpsStop TpsStart
+                    temp=temp(1:end-13);
+                    disp(['    ',temp])
+                    %----------------------------------------------------------
+                    % is the analysis already performed?
+                    Do_analysis=1;
+                    if exist([directName,mark,temp,'-A.mat'],'file') && erasePreviousA==0
+                        load([directName,mark,temp,'-A.mat'],'StimInPorts','TpsStart','TpsStop');
+                        if exist('StimInPorts','var') && exist('TpsStart','var') && exist('TpsStop','var')
+                            disp('    -> AnalyseMNT already done')
+                            Do_analysis=0;
+                        end
+                    end
+                    
+                    %----------------------------------------------------------
+                    % perform analysis
+                    if Do_analysis
+                        cd(directName)
+                        eval('AnalyseMNT(nameManipe{nm})')
+                        cd(MotherFolder)
+                    end
+                    
+                    %----------------------------------------------------------
+                    % TrueVisit
+                    % = port / delayWithLastPort / lasting
+                    load([directName,mark,temp,'-A.mat'],'TrueVisit','TrueVisit_5sDelay','TimeRealStim');
+                    load([directName,mark,temp,'-A.mat'],'StimInPorts','TimeInPorts','RewardedPorts','TpsStop','TpsStart');
+                    
+                    load([directName,mark,temp,'-A.mat'],'PosMatALL','Ratio_IMAonREAL','RewardedTimeInPorts')
+                    
+                    
+                    for tri=1:NbtrialPerSession
+                        %--------------------------------------------------
+                        % tracked position
+                        if tri==1
+                            tempPosMat=PosMatALL(PosMatALL(:,1)==tri,:);
+                        else
+                            tempPosMat=PosMatALL(PosMatALL(:,1)==tri,:);
+                            tempPosMat(:,2)=tempPosMat(:,2)+max(PosMatALL(PosMatALL(:,1)==tri-1,2));
+                        end
+                        
+                        tempSTIM=TimeRealStim(TimeRealStim(:,1)==tri,2);
+                        NoStimPeriod=IntervalSet(tempPosMat(1,2),tempPosMat(end,2))-IntervalSet(tempSTIM,tempSTIM+5);% attention en s !!!
+                        %                         for tR=1:length(tempSTIM)
+                        %                             indPos=find(tempPosMat(:,2)<=tempSTIM(tR) & tempPosMat(:,2)>tempSTIM(tR)-DelayPOS);
+                        %                             PosMATTT=[PosMATTT;[A_Mice(mi)*ones(length(indPos)+1,1),A_Days(da)*ones(length(indPos)+1,1),tri*ones(length(indPos)+1,1),...
+                        %                                 [tempPosMat(indPos,3);NaN],[tempPosMat(indPos,4);NaN]]];
+                        %                         end
+                        
+                        %--------------------------------------------------
+                        % caculate speed and runned distance
+                        indexPos=find(~isnan(tempPosMat(:,2)) & ~isnan(tempPosMat(:,3)) & ~isnan(tempPosMat(:,4)));
+                        MATXi=tempPosMat(indexPos(2:end),3);
+                        MATXe=tempPosMat(indexPos(1:end-1),3);
+                        MATYi=tempPosMat(indexPos(2:end),4);
+                        MATYe=tempPosMat(indexPos(1:end-1),4);
+                        MATt=diff(tempPosMat(indexPos,2));
+                        RunDist=sqrt((MATXi-MATXe).*(MATXi-MATXe)+(MATYi-MATYe).*(MATYi-MATYe))/Ratio_IMAonREAL;% distance (cm)
+                        RunSpeed=RunDist./MATt;
+                        for vv=1:length(RunSpeed)
+                            if vv>1 && RunSpeed(vv)>speed_thresh
+                                RunSpeed(vv)=RunSpeed(vv-1);
+                                RunDist(vv)=RunDist(vv-1);
+                            end
+                        end
+                        
+                        %--------------------------------------------------
+                        % fill tempMat
+                        Rports=RewardedPorts(RewardedPorts(:,1)==tri,2);
+                        NRports=find(~ismember([1:8],Rports));
+                        tempMAT(1,1:4)=[A_Mice(mi) A_Days(da) se tri];%'Mouse','Day','Session','Trial
+                        
+                        tempMAT(1,5)=TpsStop(tri)-TpsStart(tri);% 'Length Session (s)'
+                        tempMAT(1,6)=sum(RunDist)/100;%'runned distance(m)'
+                        tempMAT(1,7)=mean(Data(Restrict(tsd(tempPosMat(indexPos(2:end),2),RunSpeed),NoStimPeriod)));%'Average Speed outside stim (cm/s)'
+                        tempMAT(1,8)=mean(RunSpeed);%'Average speed (cm/s)'
+                        tempMAT(1,9)=median(RunSpeed);%'Median speed (cm/s)'
+                        tempMAT(1,10)=percentile(RunSpeed, 80);%'80th speed percentile (cm/s)'
+                        tempMAT(1,11)=sum(RewardedTimeInPorts(tri,Rports));% 't in Stimulation (s)'
+                        tempMAT(1,12)=100*tempMAT(1,11)/tempMAT(1,5);% '%Tsession in stim'
+                        tempMAT(1,13)=100*tempMAT(1,11)/sum(TimeInPorts(tri,:));% '%Tvisit in stim'
+                        
+                        tempMAT(1,14)=sum(ismember(TrueVisit_5sDelay(TrueVisit_5sDelay(:,1)==tri,2),Rports));% 'Entry in Rewarded ports'
+                        tempMAT(1,15)=sum(TimeInPorts(tri,Rports));% 't in R (s)'
+                        tempMAT(1,16)=100*tempMAT(1,15)/tempMAT(1,5);% '%Tsession in R'
+                        tempMAT(1,17)=100*tempMAT(1,15)/sum(TimeInPorts(tri,:));% '%Tvisit in R'
+                        tempMAT(1,18)=sum(ismember(TrueVisit_5sDelay(TrueVisit_5sDelay(:,1)==tri,2),NRports));% 'Entry in UNrewarded port
+                        tempMAT(1,19)=sum(TimeInPorts(tri,NRports));% 't in NR (s)
+                        tempMAT(1,20)=100*tempMAT(1,19)/tempMAT(1,5);% '%Tsession in NR'
+                        tempMAT(1,21)=100*tempMAT(1,19)/sum(TimeInPorts(tri,:));% '%Tvisit in NR'
+                        tempMAT(1,22)=100*tempMAT(1,14)/(tempMAT(1,14)+tempMAT(1,18));% '%Visit in R (REF Perf)'
+                        tempMAT(1,23)=100*tempMAT(1,18)/(tempMAT(1,14)+tempMAT(1,18));% '%Visit in NR (REF ERROR)'
+                        tempMAT(1,24)=sum(StimInPorts(tri,:));%Nb Stim
+                        
+                        tempMAT(1,25)=tempMAT(1,14)-sum(StimInPorts(tri,:));% 'nb REentry in R'
+                        tempMAT(1,26)=100*tempMAT(1,25)/(tempMAT(1,14)+tempMAT(1,18)); % '%Visit REentry in R (WORKING M)'
+                        tempMAT(1,27)=100*(tempMAT(1,15)-tempMAT(1,11))/sum(TimeInPorts(tri,:));% '%Tvisit REentry in R'
+                        tempMAT(1,28)=100*(tempMAT(1,15)-tempMAT(1,11))/tempMAT(1,5);% '%Tsession REentry in R'
+                        NRentries=TrueVisit_5sDelay(ismember(TrueVisit_5sDelay(TrueVisit_5sDelay(:,1)==tri,2),NRports),2);
+                        tempMAT(1,29)=length(NRentries)-length(unique(NRentries));% 'nb REentry in NR'
+                        tempMAT(1,30)=100*tempMAT(1,29)/(tempMAT(1,14)+tempMAT(1,18)); % '%Visit REentry in NR (WORKING M)'
+                        tempMAT(1,31)=100*sum(TrueVisit_5sDelay(ismember(TrueVisit_5sDelay(TrueVisit_5sDelay(:,1)==tri,2),NRports),4))/sum(TimeInPorts(tri,:));% '%Tvisit REentry in NR'
+                        tempMAT(1,32)=100*sum(TrueVisit_5sDelay(ismember(TrueVisit_5sDelay(TrueVisit_5sDelay(:,1)==tri,2),NRports),4))/tempMAT(1,5);% '%Tsession REentry in NR'
+                        
+                        visitedPorts=TrueVisit_5sDelay(TrueVisit_5sDelay(:,1)==tri,2);
+                        index1stReward=min(find(ismember(visitedPorts,Rports)));
+                        try tempMAT(1,33)=tempSTIM(1)-TpsStart(tri);catch, tempMAT(1,33)=NaN;end% 'delay before 1st Reward'
+                        tempMAT(1,34)=length(unique(visitedPorts(1:index1stReward)));% 'Rank 1st stim'
+                        tempMAT(1,35)=100*tempMAT(1,11)/(5*tempMAT(1,24));% '%Reward actually taken' for 5s stim
+
+                        MATTT=[MATTT;[tempMAT,nm]];
+                        
+                    end
+                    
+                end
+            end
+            
+            % cannot get file or incorrect data?
+            if findfile==0
+                disp(' ! ! ! ');disp(['Problem at Mouse',num2str(A_Mice(mi)),'\',nameManipe{nm},'\Day',num2str(A_Days(da)),'\Session',num2str(se)])
+                disp(' ')
+                for tri=1:NbtrialPerSession
+                    tempMAT(1,1:4)=[A_Mice(mi) A_Days(da) se tri];%'Mouse','Day','Session','Trial
+                    tempMAT(1,5:35)=NaN(1,31);
+                    MATTT=[MATTT;[tempMAT,nm]];
+                end
+            end
+            
+        end
+    end
+    end
+end
+
+U_Mice=unique(MATTT(:,1));
+U_Days=unique(MATTT(:,2));
+U_Sessions=unique(MATTT(:,3));
+U_Trials=unique(MATTT(:,4));
+nf=1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% PLOT ALL PARAMETERS PER TRIALS
+for np=1:length(nbGroupParams)-1
+    figure ('Color',[1 1 1],'Position',scrz),numF(nf)=gcf; 
+    tempMN=nameManipe{1}; leg=num2str(U_Mice);
+    for nm=2:length(nameManipe),tempMN=[tempMN,'-',nameManipe{nm}];leg=[leg;num2str(U_Mice)];end
+    nameF{nf}=[tempMN,'_Indiv_Trial_',NameGroupParams{np}]; nf=nf+1;
+    
+    tempParams=nbGroupParams(np):nbGroupParams(np+1)-1;
+    for p=1:length(tempParams)
+        for nm=1:length(nameManipe)
+            for mi=1:length(U_Mice)
+                indexMice=find(MATTT(:,1)==U_Mice(mi) & MATTT(:,end)==nm);
+                subplot(round(sqrt(length(tempParams))),ceil(sqrt(length(tempParams))),p), hold on,
+                ylabel(MATTnames{tempParams(p)}), xlabel('Trial')
+                nTrials=MATTT(indexMice,4)+(MATTT(indexMice,3)-1)*max(U_Trials)+max(U_Trials)*max(U_Sessions)*(MATTT(indexMice,2)-1);
+                plot(nTrials,MATTT(indexMice,tempParams(p)),'.-','Color',coloriMouse{mi+1000*(nm-1)})
+            end
+        end
+    end
+    legend(leg,'Location','Best');
+    subplot(round(sqrt(length(tempParams))),ceil(sqrt(length(tempParams))),2),
+    title(['Experiment ',tempMN,'  (n=',num2str(length(U_Mice)),', Mice ',num2str(U_Mice'),')'],'fontsize',12,'fontweight','b')
+    % drow line to separate days
+    for p=1:length(tempParams)
+        subplot(round(sqrt(length(tempParams))),ceil(sqrt(length(tempParams))),p), hold on,
+       for da=1:length(U_Days)
+            yl=ylim;
+            hold on, line(max(U_Sessions)*NbtrialPerSession*(da-1)*[1 1]+0.5,yl,'Color',[0.5 0.5 0.5],'LineWidth',2)
+            hold on, line(max(U_Sessions)*NbtrialPerSession*(da-1)*[1 1]+NbtrialPerSession+0.5,yl,'Color',[0.5 0.5 0.5])
+            xlim([0 length(U_Trials)*length(U_Sessions)*length(U_Days)])
+        end
+    end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% PLOT ALL PARAMETERS PER TRIALS POOLED PER GROUPS
+
+for mi=1:length(U_Mice)
+    for gg=1:length(Groups)
+        if ismember(U_Mice(mi),Groups{gg})
+            GroupMi(mi)=gg;
+        end
+    end
+end
+NTrial=length(U_Days)*length(U_Sessions)*NbtrialPerSession;
+for np=1:length(nbGroupParams)-1
+    figure ('Color',[1 1 1],'Position',scrz),numF(nf)=gcf; nameF{nf}=[nameManipe,'_Groups_Days_',NameGroupParams{np}]; nf=nf+1;
+    tempParams=nbGroupParams(np):nbGroupParams(np+1)-1;
+    for p=1:length(tempParams)
+        for mi=1:length(U_Mice)
+            for da=1:length(U_Days)
+                for se=1:length(U_Sessions)
+                    ntrialSe=(da-1)*max(U_Sessions)*NbtrialPerSession+(se-1)*NbtrialPerSession+[1:NbtrialPerSession];
+                    Av_mice(mi,ntrialSe)=MATTT(MATTT(:,1)==U_Mice(mi) & MATTT(:,2)==U_Days(da) & MATTT(:,3)==U_Sessions(se),tempParams(p))';
+                end
+            end
+        end
+        
+        subplot(round(sqrt(length(tempParams))),ceil(sqrt(length(tempParams))),p), hold on,
+        for gg=1:length(Groups)
+            plot([1:NTrial],nanmean(Av_mice(GroupMi==gg,:),1),['.-',colori{gg}],'Linewidth',2)
+            errorbar([1:NTrial],nanmean(Av_mice(GroupMi==gg,:),1),stdError(Av_mice(GroupMi==gg,:)),'Color',colori{gg})
+        end
+        saveylim=max(ylim);
+        
+        for gg=1:length(Groups)
+            for u=1:NTrial,
+                pval=ranksum(Av_mice(GroupMi==gg,1),Av_mice(GroupMi==gg,u));
+                if pval<0.05, text(u,(0.95-0.03*gg)*saveylim,'*','Color',colori{gg});
+                end
+            end
+        end
+        for u=1:NTrial,
+            pval=ranksum(Av_mice(GroupMi==1,u),Av_mice(GroupMi==2,u));
+            if pval<0.05, text(u,saveylim,'*','Color','g'); end
+        end
+        
+        ylabel(MATTnames{tempParams(p)});xlabel('Trial');
+        xlim([0.5 NTrial+0.5])
+        if ~isempty(strfind(MATTnames{tempParams(p)},'%Visit in R'))
+            line([0.5 NTrial+0.5],[0 0]+100*2/8,'Color',[0.5 0.5 0.5],'LineStyle','--')
+            text(NTrial/2,100*2/8,'Chance Level','Color',[0.5 0.5 0.5])
+        elseif ~isempty(strfind(MATTnames{tempParams(p)},'%Visit in NR'))
+            line([0.5 NTrial+0.5],[0 0]+100*6/8,'Color',[0.5 0.5 0.5],'LineStyle','--')
+            text(NTrial/2,100*6/8,'Chance Level','Color',[0.5 0.5 0.5])
+        end
+        % drow line to separate days and sessions
+        for da=1:length(U_Days)
+            yl=ylim;
+            hold on, line(max(U_Sessions)*NbtrialPerSession*(da-1)*[1 1]+0.5,yl,'Color',[0.5 0.5 0.5],'LineWidth',2)
+            hold on, line(max(U_Sessions)*NbtrialPerSession*(da-1)*[1 1]+NbtrialPerSession+0.5,yl,'Color',[0.5 0.5 0.5])
+            xlim([0 length(U_Trials)*length(U_Sessions)*length(U_Days)])
+        end
+        ylim([0 saveylim]);
+    end
+    leg=[]; for gg=1:length(Groups),leg=[leg,GroupsName(gg),num2str(Groups{gg})];end
+    legend(leg);
+    subplot(round(sqrt(length(tempParams))),ceil(sqrt(length(tempParams))),2),
+    title(['Experiment ',nameManipe{1},'  (n=',num2str(length(U_Mice)),', Mice ',num2str(U_Mice'),')'],'fontsize',10,'fontweight','b'),
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% PLOT ALL PARAMETERS PER SESSION
+
+for np=1:length(nbGroupParams)-1
+    figure ('Color',[1 1 1],'Position',scrz),numF(nf)=gcf; nameF{nf}=[nameManipe{1},'_Groups_Sessions_',NameGroupParams{np}]; nf=nf+1;
+    tempParams=nbGroupParams(np):nbGroupParams(np+1)-1;
+    for p=1:length(tempParams)
+        clear Av_mice
+        subplot(round(sqrt(length(tempParams))),ceil(sqrt(length(tempParams))),p), hold on,
+        for mi=1:length(U_Mice)
+            for da=1:length(U_Days)
+                 for se=1:length(U_Sessions)
+                     indexMice=find(MATTT(:,1)==U_Mice(mi) & MATTT(:,2)==U_Days(da) & MATTT(:,3)==U_Sessions(se));
+                     ylabel(MATTnames{tempParams(p)}), xlabel('Sessions')
+                     Av_mice(mi,(da-1)*max(U_Sessions)+se)=nanmean(MATTT(indexMice,tempParams(p)),1);
+                     Std_mice(mi,(da-1)*max(U_Sessions)+se)=stdError(MATTT(indexMice,tempParams(p)));
+                 end
+            end
+            plot(1:size(Av_mice,2),Av_mice(mi,:),'.-','Color',coloriMouse{mi})
+            errorbar(1:size(Av_mice,2),Av_mice(mi,:),Std_mice(mi,:),'Color',coloriMouse{mi})
+        end
+
+        ylabel(MATTnames{tempParams(p)});xlabel('Sessions');
+        xlim([0.5 length(U_Days)*max(U_Sessions)+0.5])
+        if ~isempty(strfind(MATTnames{tempParams(p)},'%Visit in R'))
+            line([0.5 length(U_Days)*max(U_Sessions)+0.5],[0 0]+100*2/8,'Color',[0.5 0.5 0.5],'LineStyle','--')
+            text(length(U_Days)*length(U_Sessions)/2,100*2/8,'Chance Level','Color',[0.5 0.5 0.5])
+        elseif ~isempty(strfind(MATTnames{tempParams(p)},'%Visit in NR'))
+            line([0.5 length(U_Days)*max(U_Sessions)+0.5],[0 0]+100*6/8,'Color',[0.5 0.5 0.5],'LineStyle','--')
+            text(length(U_Days)*length(U_Sessions)/2,100*6/8,'Chance Level','Color',[0.5 0.5 0.5])
+        end
+        
+         % drow line to separate days
+        for da=1:length(U_Days)
+            yl=ylim;
+            hold on, line([max(U_Sessions)*(da-1)+0.5 max(U_Sessions)*(da-1)+0.5],yl,'Color',[0.5 0.5 0.5])
+            xlim([0 length(U_Sessions)*length(U_Days)])
+        end
+    end
+    leg=[]; for gg=1:length(Groups),leg=[leg,GroupsName(gg),num2str(Groups{gg})];end
+    legend(leg);
+    subplot(round(sqrt(length(tempParams))),ceil(sqrt(length(tempParams))),2),
+    title(['Experiment ',nameManipe{1},'  (n=',num2str(length(U_Mice)),', Mice ',num2str(U_Mice'),')'],'fontsize',10,'fontweight','b'),
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% PLOT ALL PARAMETERS PER SESSION POOLED PER GROUPS
+
+for np=1:length(nbGroupParams)-1
+    figure ('Color',[1 1 1],'Position',scrz),numF(nf)=gcf; nameF{nf}=[nameManipe{1},'_Groups_Sessions_',NameGroupParams{np}]; nf=nf+1;
+    tempParams=nbGroupParams(np):nbGroupParams(np+1)-1;
+    for p=1:length(tempParams)
+        Av_mice=[];
+        for mi=1:length(U_Mice)
+            for da=1:length(U_Days)
+                for se=1:length(U_Sessions)
+                     indexmi=find(MATTT(:,1)==U_Mice(mi) & MATTT(:,2)==U_Days(da) & MATTT(:,3)==U_Sessions(se));
+                     Av_mice(mi,(da-1)*max(U_Sessions)+se)=nanmean(MATTT(indexmi,tempParams(p)),1);
+                end
+            end
+        end
+        
+        subplot(round(sqrt(length(tempParams))),ceil(sqrt(length(tempParams))),p), hold on,
+        for gg=1:length(Groups)
+            plot([1:length(U_Days)*length(U_Sessions)],nanmean(Av_mice(GroupMi==gg,:),1),['.-',colori{gg}],'Linewidth',2)
+            errorbar([1:length(U_Days)*length(U_Sessions)],nanmean(Av_mice(GroupMi==gg,:),1),stdError(Av_mice(GroupMi==gg,:)),'Color',colori{gg})
+            for u=1:length(U_Days)*length(U_Sessions),
+                pval=ranksum(Av_mice(GroupMi==gg,1),Av_mice(GroupMi==gg,u));
+                if pval<0.05, text(u,(0.7+0.1*gg)*max(ylim)+1,'*','Color',colori{gg});
+                end
+            end
+        end
+        for u=1:length(U_Days)*length(U_Sessions),
+            pval=ranksum(Av_mice(GroupMi==1,u),Av_mice(GroupMi==2,u));
+            if pval<0.05, text(u,max(ylim)+1,'*','Color','g'); end
+        end
+        
+        ylabel(MATTnames{tempParams(p)});xlabel('Sessions');
+        xlim([0.5 length(U_Days)*length(U_Sessions)+0.5])
+        if ~isempty(strfind(MATTnames{tempParams(p)},'%Visit in R'))
+            line([0.5 length(U_Days)*length(U_Sessions)+0.5],[0 0]+100*2/8,'Color',[0.5 0.5 0.5],'LineStyle','--')
+            text(length(U_Days)*length(U_Sessions)/2,100*2/8,'Chance Level','Color',[0.5 0.5 0.5])
+        elseif ~isempty(strfind(MATTnames{tempParams(p)},'%Visit in NR'))
+            line([0.5 length(U_Days)*length(U_Sessions)+0.5],[0 0]+100*6/8,'Color',[0.5 0.5 0.5],'LineStyle','--')
+            text(length(U_Days)*length(U_Sessions)/2,100*6/8,'Chance Level','Color',[0.5 0.5 0.5])
+        end
+        
+        % drow line to separate days
+        for da=1:length(U_Days)
+            yl=ylim;
+            hold on, line([max(U_Sessions)*(da-1)+0.5 max(U_Sessions)*(da-1)+0.5],yl,'Color',[0.5 0.5 0.5])
+            xlim([0 length(U_Sessions)*length(U_Days)])
+        end
+    end
+    leg=[]; for gg=1:length(Groups),leg=[leg,GroupsName(gg),num2str(Groups{gg})];end
+    legend(leg);
+    subplot(round(sqrt(length(tempParams))),ceil(sqrt(length(tempParams))),2),
+    title(['Experiment ',nameManipe{1},'  (n=',num2str(length(U_Mice)),', Mice ',num2str(U_Mice'),')'],'fontsize',10,'fontweight','b'),
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% COMPARE FIRST SESSIONS WITH LAST SESSIONS
+% PercChngeInter=zeros(length(U_Mice),length(U_Days)-1);
+% nsub=ceil(sqrt((length(MATTnames)-3)/2));
+% for p=1:length(MATTnames)-3
+%     if p==1 || p==nsub*nsub-1, figure ('Color',[1 1 1]);numF(nf)=gcf; nf=nf+1;asub=1;end
+%     
+%     Av_MiceI=[];Av_MiceE=[];
+%     for mi=1:length(U_Mice)
+%         for da=1:length(U_Days)
+%             indMat=find(MATTT(:,1)==U_Mice(mi) & MATTT(:,2)==U_Days(da) & ismember(MATTT(:,3),[1 2]));
+%             Av_miceI(mi,da)=mean(MATTT(indMat,p+3));
+%             indMat=find(MATTT(:,1)==U_Mice(mi) & MATTT(:,2)==U_Days(da) & ismember(MATTT(:,3),[3 4]));
+%             Av_miceE(mi,da)=mean(MATTT(indMat,p+3));
+%             try PercChngeInter(mi,da-1)=100*(Av_miceI(mi,da)-Av_miceE(mi,da-1))./Av_miceE(mi,da-1);end
+%         end
+%     end
+%     
+%     subplot(nsub,2*nsub,asub);asub=asub+1; hold on,
+%     for gg=1:length(Groups)
+%         plot([1:length(U_Days)],mean(Av_miceI(GroupMi==gg,:),1),['.-',colori{gg}],'Linewidth',2)
+%         errorbar([1:length(U_Days)],mean(Av_miceI(GroupMi==gg,:),1),stdError(Av_miceI(GroupMi==gg,:)),'Color',colori{gg})
+%         plot([1:length(U_Days)],mean(Av_miceE(GroupMi==gg,:),1),['.-',colori{gg}])
+%         errorbar([1:length(U_Days)],mean(Av_miceE(GroupMi==gg,:),1),stdError(Av_miceE(GroupMi==gg,:)),'Color',colori{gg})
+%     end
+%     for u=1:length(U_Days),
+%         pval=ranksum(Av_miceI(GroupMi==1,u),Av_miceI(GroupMi==2,u));
+%         if pval<0.05, text(u,max(ylim)+1,'*','Color','r'); end
+%         pval=ranksum(Av_miceE(GroupMi==1,u),Av_miceE(GroupMi==2,u));
+%         if pval<0.05, text(u,max(ylim)+1,'  *','Color','m'); end
+%     end
+%     ylabel(MATTnames{p+3});xlabel('days');
+%     xlim([0.5 length(U_Days)+0.5])
+%     
+%     subplot(nsub,2*nsub,asub);asub=asub+1; hold on,
+%     PercChngeIntra=100*(Av_miceE-Av_miceI)./Av_miceI;
+%     for gg=1:length(Groups)
+%         plot([1:length(U_Days)],mean(PercChngeIntra(GroupMi==gg,:),1),['.-',colori{gg}],'Linewidth',2)
+%         errorbar([1:length(U_Days)],mean(PercChngeIntra(GroupMi==gg,:),1),stdError(PercChngeIntra(GroupMi==gg,:)),'Color',colori{gg})
+%         plot([2:length(U_Days)],mean(PercChngeInter(GroupMi==gg,:),1),['.-',colori{gg}])
+%         errorbar([2:length(U_Days)],mean(PercChngeInter(GroupMi==gg,:),1),stdError(PercChngeInter(GroupMi==gg,:)),'Color',colori{gg})
+%         line([0.5 length(U_Days)+0.5],[0 0],'Color',[0.5 0.5 0.5])
+%     end
+%     xlim([0.5 length(U_Days)+0.5])
+%     ylabel('% change')
+%     
+%     if p==nsub-1 || p==length(MATTnames)-3
+%         leg=[]; for gg=1:length(Groups),leg=[leg,'IntraDay',GroupsName(gg),'InterDay',' ','zero'];end; legend(leg)
+%         leg=[]; for gg=1:length(Groups),leg=[leg,'First sessions',GroupsName(gg),'Last Sessions',' '];end;subplot(nsub,2*nsub,1),legend(leg)
+%         subplot(nsub,2*nsub,2),
+%         title(['Experiment ',nameManipe,'  (n=',num2str(length(U_Mice)),', Mice ',num2str(U_Mice'),')'],'fontsize',10,'fontweight','b'),
+%     end
+%     if ~isempty(strfind(MATTnames{p},'%Visit in R'))
+%         line([0.5 length(U_Days)+0.5],[0 0]+100*2/8,'Color',[0.5 0.5 0.5],'LineStyle','--')
+%         text(length(U_Days)/2,100*2/8,'Chance Level','Color',[0.5 0.5 0.5])
+%     elseif ~isempty(strfind(MATTnames{p},'%Visit in NR'))
+%         line([0.5 length(U_Days)+0.5],[0 0]+100*6/8,'Color',[0.5 0.5 0.5],'LineStyle','--')
+%         text(length(U_Days)/2,100*6/8,'Chance Level','Color',[0.5 0.5 0.5])
+%     end
+% end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SAVE FIGURES
+if 1
+    disp('Keyboard to change figures before saving'); keyboard;
+    FolderSave=uigetdir('Where to save Figures?',pwd);
+    if FolderSave~=0
+        disp(['Saving figures in ',FolderSave])
+        for nf=1:length(numF)
+            saveFigure(numF(nf),nameF{nf},FolderSave)
+        end
+    end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% PLOT TRAJECTORIES
+if 0
+    figure ('Color',[1 1 1]),
+    for mi=1:length(U_Mice)
+        for da=1:length(U_Days)
+            subplot(ceil(sqrt(length(U_Mice))),ceil(length(U_Mice)/ceil(sqrt(length(U_Mice)))),mi), hold on,
+            ind=find(PosMATTT(:,1)==U_Mice(mi) & PosMATTT(:,2)==U_Days(da));
+            plot(PosMATTT(ind,4),PosMATTT(ind,5),'Color',colori{da});
+        end
+        title(['Mouse ',num2str(U_Mice(mi))])
+        ylim([0 300]); xlim([0 300])
+    end
+    
+end

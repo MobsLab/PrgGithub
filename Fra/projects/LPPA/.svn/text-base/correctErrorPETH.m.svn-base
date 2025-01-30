@@ -1,0 +1,91 @@
+function A = correctErrorPETH(A)
+
+fontSize = 12;
+A = getResource(A, 'CellNames');
+A = getResource(A, 'SpikeData');
+
+A= getResource(A, 'TrialOutcome');
+trialOutcome = trialOutcome{1};
+
+A = getResource(A, 'StartTrial');
+startTrial = startTrial{1};
+
+A = getResource(A, 'CorrectError');
+correctError = correctError{1};
+
+[success, message, messageid] = mkdir(parent_dir(A), 'PETHs');
+
+pethdir = [parent_dir(A), filesep 'PETHs'];
+[p,ds,e] = fileparts(current_dir(A));
+
+ce = Data(correctError);
+
+correctTrials = find(ce==1);
+errorTrials = find(ce ==0);
+
+
+for i = 1:length(S)
+
+    figure(1), clf
+    [fh1, rasterAx1, histAx1] = RasterPETH(S{i}, subset(startTrial, correctTrials), -50000, 100000, ...
+        'Markers', { subset(trialOutcome, correctTrials)} , ...
+        'MarkerTypes',{ 'r.' }, 'MarkerSize', 20, 'BinSize', 200);
+
+    title([cellnames{i} ' start correct'], 'interpreter', 'none', ...
+        'FontSize', fontSize, 'FontName', 'Verdana' );
+    set(rasterAx1, 'FontSize', fontSize, 'FontName', 'Verdana');
+    set(histAx1, 'FontSize', fontSize, 'FontName', 'Verdana');
+
+
+    figure(2), clf
+    [fh2, rasterAx2, histAx2] = RasterPETH(S{i}, subset(startTrial, errorTrials), -50000, 100000, ...
+        'Markers', {subset(trialOutcome, errorTrials) }, ...
+        'MarkerTypes',{ 'r.' }, 'MarkerSize', 20, 'BinSize', 200);
+    title([cellnames{i} ' start error'], 'interpreter', 'none', ...
+        'FontSize', fontSize, 'FontName', 'Verdana');
+    set(rasterAx2, 'FontSize', fontSize, 'FontName', 'Verdana');
+    set(histAx2, 'FontSize', fontSize, 'FontName', 'Verdana');
+    setSameAxisLim({histAx1, histAx2}, 'y');
+    setSameAxisLim({rasterAx1, rasterAx2}, 'y');
+
+    integerTicks(histAx1, 'y');
+    integerTicks(histAx2, 'y');
+    saveas(fh1, [pethdir filesep ds '_' cellnames{i} 'startCorrectPETH'], 'png');
+    saveas(fh2, [pethdir filesep ds '_' cellnames{i} 'startErrorPETH'], 'png');
+
+
+
+    figure(1), clf
+    [fh1, rasterAx1, histAx1] = RasterPETH(S{i}, subset(trialOutcome, correctTrials), -100000, 50000, ...
+        'Markers', {subset(startTrial, correctTrials)} , ...
+        'MarkerTypes',{ 'r.' }, 'MarkerSize', 20, 'BinSize', 200);
+
+    title([cellnames{i} ' end correct'], 'interpreter', 'none', ...
+        'FontSize', fontSize, 'FontName', 'Verdana');
+    set(rasterAx1, 'FontSize', fontSize, 'FontName', 'Verdana');
+    set(histAx1, 'FontSize', fontSize, 'FontName', 'Verdana');
+
+
+
+
+    figure(2), clf
+    [fh2, rasterAx2, histAx2]  = RasterPETH(S{i}, subset(trialOutcome, errorTrials), -100000, 50000, ...
+        'Markers', { subset(startTrial, errorTrials)}, ...
+        'MarkerTypes',{ 'r.' }, 'MarkerSize', 20, 'BinSize', 200);
+
+    title([cellnames{i} ' end error'], 'interpreter', 'none', ...
+        'FontSize', fontSize, 'FontName', 'Verdana');
+    set(rasterAx2, 'FontSize', fontSize, 'FontName', 'Verdana');
+    set(histAx2, 'FontSize', fontSize, 'FontName', 'Verdana');
+
+    setSameAxisLim({histAx1, histAx2}, 'y');
+    setSameAxisLim({rasterAx1, rasterAx2}, 'y');
+    integerTicks(histAx1, 'y');
+    integerTicks(histAx2, 'y');
+
+    saveas(fh1, [pethdir filesep ds '_' cellnames{i} 'trialOutcomeCorrectPETH'], 'png');
+    saveas(fh2, [pethdir filesep ds '_' cellnames{i} 'trialOutcomeErrorPETH'], 'png');
+    
+
+end
+

@@ -1,0 +1,76 @@
+res=pwd;
+
+Dir=PathForExperimentsML('PLETHYSMO');
+colori={'b','r','k','g','c','m','b','r','k','g','c','m','b','r','k','g','c','m'};
+typo={ '-','-','-','-','-','-','--','--','--','--','--','--','-.','-.','-.','-.','-.','-.'};
+% NameEpochs={'SWSEpoch','REMEpoch','MovEpoch'};
+nameSpectre={'Bulb'};
+extent='_deep';
+nameSp={'BO'};
+scrsz = get(0,'ScreenSize');
+
+
+ploStateEpoch=0;
+
+
+for man=1:length(Dir.path)
+    nameMan=Dir.path{man}(strfind(Dir.path{man},'Mouse'):end);
+    
+    disp(['* * * ',nameMan,' * * *'])
+    clear listLFP
+    load([Dir.path{man},'/listLFP.mat'],'listLFP')
+    load([Dir.path{man},'/LFPData.mat'],'LFP','TidalVolume','Frequency','RespiTSD')
+    load([Dir.path{man},'/StateEpoch.mat'],'SWSEpoch','REMEpoch','MovEpoch')
+    
+    for ll=1:length(nameSpectre)
+        
+        if sum(strcmp(listLFP.name,nameSpectre{ll}))~=0
+            
+            clear UniqueChannelBO
+
+            StructName=nameSpectre{ll};
+            StructNickName=nameSp{ll};
+            %FileToSave=[Dir.path{man},'/AnalyseFreq.mat'];
+            %load(FileToSave,['UniqueChannel',StructNickName]);
+            %eval(['UniqueChannel=UniqueChannel',nameSp{ll},';'])
+            temp=load(['ChannelsToAnalyse/',StructName,extent,'.mat']);
+            UniqueChannel=temp.channel;
+            
+            
+            DataRESPI=Data(RespiTSD);
+            RangeRESPI=Range(RespiTSD,'s');
+            DataTV=Data(TidalVolume);
+            RangeTV=Range(TidalVolume,'s');
+            
+            % ----------------
+            % display
+            figure('Color',[1 1 1],'Position',[2 scrsz(4)/2 scrsz(3)/2 scrsz(4)/2]),
+            subplot(2,1,1)
+            plot(Range(Restrict(LFP{UniqueChannelBO},MovEpoch),'s'),30*Data(Restrict(LFP{UniqueChannelBO},MovEpoch)),'b')
+%             try, hold on, plot(Range(Restrict(LFP{UniqueChannelBO},SWSEpoch),'s'),30*Data(Restrict(LFP{UniqueChannelBO},SWSEpoch)),'r');end
+%             try, hold on, plot(Range(Restrict(LFP{UniqueChannelBO},REMEpoch),'s'),30*Data(Restrict(LFP{UniqueChannelBO},REMEpoch)),'g');end
+            %hold on, plot(RangeRESPI(DataRESPI<0),DataRESPI(DataRESPI<0),'k.')
+            hold on, plot(Range(RespiTSD,'s'),Data(RespiTSD)-0.1,'k');
+            
+%             for i=1:length(DataTV)
+%                 hold on, line([RangeTV(i) RangeTV(i)],[0 DataTV(i)],'Color','m','Linewidth',2)
+%             end
+%             legend({'LFP' 'Respi<0' 'TidalVolume'})
+            legend({'LFP' 'Respi'})
+            title(Dir.path{man}(strfind(Dir.path{man},'Mouse'):end))
+                
+            subplot(2,1,2)
+            scatter(Range(Frequency,'s'),DataTV(1:end-1),20,Data(Frequency),'filled')
+            colorbar; title('TidalVolume (mL) colored by Frequency'); ylim([0 0.04])
+            
+        else
+            disp('No LFP bulb')
+        end
+    end
+end
+
+
+
+
+
+

@@ -1,0 +1,121 @@
+%%MeanCurvesMUAGangulyWaves
+% 05.09.2019 KJ
+%
+% Infos
+%   meancurves mua on fake delta waves of deep PFC
+%
+% see
+%    MeanCurvesMUAFakeDeltaSup MeanCurvesMUAFakeDeltaDeepPlot
+%    
+
+
+clear
+Dir = PathForExperimentsFakeSlowWave('allsup');
+
+
+for p=1:length(Dir.path)
+    
+    disp(' ')
+    disp('****************************************************************')
+    cd(Dir.path{p})
+    disp(pwd)
+    
+    clearvars -except Dir p muawaves_res
+    
+    muawaves_res.path{p}   = Dir.path{p};
+    muawaves_res.manipe{p} = Dir.manipe{p};
+    muawaves_res.name{p}   = Dir.name{p};
+    muawaves_res.date{p}   = Dir.date{p};
+    
+    %params
+    binsize_mua = 10;
+    binsize_met = 10;
+    nbBins_met  = 160; 
+
+
+    %LFP
+    load('ChannelsToAnalyse/PFCx_deep.mat')
+    load(['LFPData/LFP' num2str(channel) '.mat'])
+    PFCdeep = LFP;
+    load('ChannelsToAnalyse/PFCx_sup.mat')
+    load(['LFPData/LFP' num2str(channel) '.mat'])
+    PFCsup = LFP;
+    
+    %MUA
+    MUA = GetMuaNeurons_KJ('PFCx', 'binsize',binsize_mua); 
+    %down states
+    down_PFCx = GetDownStates('area','PFCx');
+    st_down = Start(down_PFCx);
+    muawaves_res.nb_down{p} = length(st_down);
+    
+    %ganguly detections
+    load('GangulyWaves.mat','SlowOcsci','deltaDetect')
+
+    %delta waves
+    load('DeltaWaves.mat', 'deltas_PFCx')
+    
+    
+    %% MUA response
+    
+    %diff
+    [m,~,tps] = mETAverage(Start(deltas_PFCx), Range(MUA), Data(MUA), binsize_met, nbBins_met);
+    muawaves_res.met_mua.diff{p}(:,1) = tps; muawaves_res.met_mua.diff{p}(:,2) = m;
+    %SO
+    [m,~,tps] = mETAverage(Start(SlowOcsci), Range(MUA), Data(MUA), binsize_met, nbBins_met);
+    muawaves_res.met_mua.so{p}(:,1) = tps; muawaves_res.met_mua.so{p}(:,2) = m;
+    %delta
+    [m,~,tps] = mETAverage(Start(deltaDetect), Range(MUA), Data(MUA), binsize_met, nbBins_met);
+    muawaves_res.met_mua.delta{p}(:,1) = tps; muawaves_res.met_mua.delta{p}(:,2) = m;
+    
+        
+    %% LFP response
+    
+    %Deep
+    [m,~,tps] = mETAverage(Start(deltas_PFCx), Range(PFCdeep), Data(PFCdeep), binsize_met, nbBins_met);
+    muawaves_res.met_deep.diff{p}(:,1) = tps; muawaves_res.met_deep.diff{p}(:,2) = m;
+    
+    [m,~,tps] = mETAverage(Start(SlowOcsci), Range(PFCdeep), Data(PFCdeep), binsize_met, nbBins_met);
+    muawaves_res.met_deep.so{p}(:,1) = tps; muawaves_res.met_deep.so{p}(:,2) = m;
+    
+    [m,~,tps] = mETAverage(Start(deltaDetect), Range(PFCdeep), Data(PFCdeep), binsize_met, nbBins_met);
+    muawaves_res.met_deep.delta{p}(:,1) = tps; muawaves_res.met_deep.delta{p}(:,2) = m;
+    
+    %Sup
+    [m,~,tps] = mETAverage(Start(deltas_PFCx), Range(PFCsup), Data(PFCsup), binsize_met, nbBins_met);
+    muawaves_res.met_sup.diff{p}(:,1) = tps; muawaves_res.met_sup.diff{p}(:,2) = m;
+    
+    [m,~,tps] = mETAverage(Start(SlowOcsci), Range(PFCsup), Data(PFCsup), binsize_met, nbBins_met);
+    muawaves_res.met_sup.so{p}(:,1) = tps; muawaves_res.met_sup.so{p}(:,2) = m;
+    
+    [m,~,tps] = mETAverage(Start(deltaDetect), Range(PFCsup), Data(PFCsup), binsize_met, nbBins_met);
+    muawaves_res.met_sup.delta{p}(:,1) = tps; muawaves_res.met_sup.delta{p}(:,2) = m;
+    
+    
+    %% number of down linked to deltas
+    
+    %diff
+    [~,~,Istat] = GetIntersectionsEpochs(deltas_PFCx, down_PFCx);
+    muawaves_res.diff.precision(p) = Istat.precision;
+    muawaves_res.diff.recall(p)    = Istat.recall;
+    
+    %SO
+    downpart = intervalSet(Start(SlowOcsci), (Start(SlowOcsci)+End(SlowOcsci))/2);
+    [~,~,Istat] = GetIntersectionsEpochs(downpart, down_PFCx);
+    muawaves_res.so.precision(p) = Istat.precision;
+    muawaves_res.so.recall(p)    = Istat.recall;
+    
+    %delta
+    downpart = intervalSet(Start(deltaDetect), (Start(deltaDetect)+End(deltaDetect))/2);
+    [~,~,Istat] = GetIntersectionsEpochs(deltaDetect, down_PFCx);
+    muawaves_res.delta.precision(p) = Istat.precision;
+    muawaves_res.delta.recall(p)    = Istat.recall;
+    
+    
+end
+
+
+%saving data
+cd(FolderDeltaDataKJ)
+save MeanCurvesMUAGangulyWaves.mat muawaves_res
+
+

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-05-25T10:43:10.993826Z"
+   url="file:///home/battagli/svn/matlab/trunk/projects/Patrick"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="doHipEEGPeth.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="bcf2a789fad657af9c73a780798c8ad0"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="getSpikesFromMarkers.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="60958670de3adffbf4df7c10194e5cd2"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="showRuns.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="593112fd77c792e1d3a0ea3f53a67f64"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="extractSpikes.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="34f4b390ee7a409245ea2159f01e9c5c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="doPFCEEGPeth.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a8a7a757f1b2e1378af7b00de15e0baf"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="doHipEEGPethBis.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="62cae3ebb2ae5a59dc2659a2a8bd75a6"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+</wc-entries>

@@ -1,0 +1,93 @@
+function AO = DIRACRuns(A)
+  
+  
+
+  
+  
+  warning off
+  load([current_dir(A) filesep 'DIRACPosFile0627']);
+  warning on
+  
+ 
+
+  A = getResource(A, 'Maze_Epoch');
+
+  A = registerResource(A, 'RunsUp', 'cell', {1,1}, ...
+		       'runs_up', ...
+		       ['intervalSet for the tiem spent running in the ',...
+		    '"up" direction']);
+  
+   A = registerResource(A, 'RunsDown', 'cell', {1,1}, ...
+		       'runs_down', ...
+		       ['intervalSet for the tiem spent running in the ',...
+		    '"down" direction']);
+    A = registerResource(A, 'LapsUp', 'cell', {1,1}, ...
+		       'laps_up', ...
+		       ['intervalSet one for each lap in the up direction']);
+  
+   A = registerResource(A, 'RunsDown', 'cell', {1,1}, ...
+		       'runs_down', ...
+		       ['intervalSet oen for each lap in the ',...
+		    '"down" direction']);
+
+   A = registerResource(A, 'RunsAll', 'cell', {1,1}, ...
+		       'runs_all', ...
+		       ['intervalSet for the tiem spent running ']);
+		   
+
+   A = registerResource(A, 'Reward1', 'cell', {1,1}, ...
+		       'reward1', ...
+		       ['intervalSet for the tiem spent at reward site 1 ']);
+		   
+
+   A = registerResource(A, 'Reward2', 'cell', {1,1}, ...
+		       'reward2', ...
+		       ['intervalSet for the tiem spent at reward site 2 ']);
+		   
+  A = registerResource(A, 'Reward', 'cell', {1,1}, ...
+		       'reward', ...
+		       ['intervalSet for the tiem spent at reward sites  ']);
+		   
+
+   
+   A = registerResource(A, 'MazeStill', 'cell', {1,1}, ...
+ 		       'maze_still', ...
+		       ['intervalSet for the time spent on the maze ', ...
+		       'without running (e.g. at reward sites)']);
+    
+   Maze = Maze{1};
+  
+   runs_up = intervalSet(tvup_start, tvup_end);
+   runs_down = intervalSet(tvdown_start, tvdown_end);
+   runs_all = union(runs_up, runs_down);
+   maze_still = diff(Maze, runs_all);
+   reward1 = intervalSet(start_reward1, end_reward1, '-fixit');
+   reward2 = intervalSet(start_reward2, end_reward2, '-fixit');
+   reward = union(reward1, reward2);
+   
+  
+    t1 = End(reward1);
+    t2 = ts(Start(reward2));
+    t2 = Restrict(t2, t1, 'align', 'next');
+    
+    laps_up = intervalSet(t1, Data(t2));
+    
+    
+     t1 = End(reward2);
+    t2 = ts(Start(reward1));
+    t2 = Restrict(t2, t1, 'align', 'next');
+    
+    laps_down = intervalSet(t1, Data(t2));
+    
+    
+    
+    
+
+  
+  A = saveAllResources(A);
+      
+  
+  AO = A;
+  
+  
+  

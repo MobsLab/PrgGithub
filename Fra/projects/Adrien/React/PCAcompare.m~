@@ -1,0 +1,51 @@
+dset = 'Rat20/200102';
+
+
+A = getResource(A,'Sleep1Epoch',dset);
+sleep1Epoch = sleep1Epoch{1};
+A = getResource(A,'Sleep2Epoch',dset);
+sleep2Epoch = sleep2Epoch{1};
+A = getResource(A,'MazeEpoch',dset);
+mazeEpoch = mazeEpoch{1};
+
+A = getResource(A,'CellNames',dset);
+
+A = getResource(A,'SpikeData',dset);
+%  A = getResource(A,'CM',dset); 
+%  cM = cM{1};
+
+nbCells = length(S);
+
+
+cMS1 =  spkLogcorrcoef(S,100,sleep1Epoch,cellnames);
+cMS2 =  spkLogcorrcoef(S,100,sleep2Epoch,cellnames);
+cM =  spkLogcorrcoef(S,1000,mazeEpoch,cellnames);
+
+[PCACoefS2, PCAvarS2, PCAexpS2] = pcacov(cMS2);
+[PCACoefS1, PCAvarS1, PCAexpS1] = pcacov(cMS1);
+[PCACoef, PCAvar, PCAexp] = pcacov(cM);
+
+S1S2 = PCACoefS2'*PCACoefS1;
+MS2 = PCACoefS2'*PCACoef;
+MS1 = PCACoefS1'*PCACoef;
+
+%  
+%  figure(1),clf
+%  hold on;
+%  plot([1:nbCells],abs(S1S2))
+%  plot([1:nbCells],abs(MS1),'r')
+%  plot([1:nbCells],abs(MS2),'g')
+
+figure(2),clf
+imagesc(abs(S1S2))
+colorbar
+
+
+figure(3),clf
+imagesc(abs(MS2))
+colorbar
+
+
+figure(4),clf
+imagesc(abs(MS1))
+colorbar

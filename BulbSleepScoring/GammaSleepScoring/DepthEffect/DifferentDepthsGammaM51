@@ -1,0 +1,64 @@
+cd /media/DataMOBsRAID/ProjetAstro/Mouse051/20121227/BULB-Mouse-51-27122012
+
+ChToDo=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+load('StateEpochSB.mat','NoiseEpoch','GndNoiseEpoch')
+load(['LFPData/LFP',num2str(ChToDo(1))])
+TotEpoch=intervalSet(0,max(Range(LFP)));
+TotEpoch=TotEpoch-GndNoiseEpoch-NoiseEpoch;
+smootime=3;
+
+figure
+for cc=8:length(ChToDo)
+    load(['LFPData/LFP',num2str(ChToDo(cc))])
+    FilGamma=FilterLFP(LFP,[50 70],1024);
+    HilGamma=hilbert(Data(FilGamma));
+    H=abs(HilGamma);
+    tot_ghi=Restrict(tsd(Range(LFP),H),TotEpoch);
+    smooth_ghi=tsd(Range(tot_ghi),runmean(Data(tot_ghi),ceil(smootime/median(diff(Range(tot_ghi,'s'))))));
+    clear FilGamma HilGamma
+    sm_ghi=Data(Restrict(smooth_ghi,TotEpoch));
+    save(['Gamma_ch_',num2str(ChToDo(cc)),'.mat'],'smooth_ghi','-v7.3')
+    clear smooth_ghi
+    subplot(5,3,cc)
+    hist(log(sm_ghi),500)
+    clear sm_ghi
+end
+
+ChToDoOrder=[10,13,5,2,6,1,7,0,4,3,8,15,9,14,11,12];
+figure
+for cc=1:length(ChToDoOrder)
+% subplot(16,1,cc)
+    load(['Gamma_ch_',num2str(ChToDo(cc)),'.mat'])
+    sm_ghi=Data(Restrict(smooth_ghi,TotEpoch));
+    [X{cc},Y{cc}]=hist(log(sm_ghi),500);
+
+end
+
+x=[-1:0.05:2.5];
+figure,
+clear Histresample
+cols=paruly(length(ChToDoOrder));
+for cc=1:length(ChToDoOrder)
+    [C,I]=max(X{cc});
+plot(Y{cc}-Y{cc}(I)+cc,X{cc},'color',cols(cc,:))
+Histresample(cc,:)=interp1(Y{cc}-Y{cc}(I),X{cc},x);
+
+hold on,
+end
+
+
+%// Define the x values
+x = x.';
+xMat = repmat(x, 1, 16); %// For plot3
+%// Define y values
+y = 1:2:32;
+yMat = repmat(y, numel(x), 1); %//For plot3
+figure
+%// Define z values
+zMat=Histresample';
+plot3(xMat, yMat, zMat,'linewidth',3,'color','k'); %// Make all traces blue
+grid;
+xlabel('x'); ylabel('y'); zlabel('z');
+view(40,40); %// Adjust viewing angle so you can clearly see data
+
+

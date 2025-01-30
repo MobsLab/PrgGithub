@@ -1,0 +1,62 @@
+function [A,t,f]=QuantifFear(filename,fac,lim)
+
+OBJ = mmreader(filename);
+numFrames = get(OBJ, 'numberOfFrames');
+dur = get(OBJ, 'Duration');
+dt=dur/numFrames;
+f=1/dt;
+
+
+
+try 
+    lim;
+catch
+    lim=numFrames;
+end
+
+
+%h = waitbar(0, 'Tracking...');
+
+%pas=floor(fac/2);
+pas=fac;
+
+a=1;
+figure('color',[1 1 1])
+num=gcf;
+
+t=[1:pas:lim-fac]*dt;
+
+for ind=1:pas:lim-fac
+
+    vidFrames1 = read(OBJ,ind);
+    vidFrames2 = read(OBJ,ind+fac);
+    Mov1=vidFrames1(:,:,3,1);
+    Mov2=vidFrames2(:,:,3,1);
+    Im1=single(Mov1(1:300,200:400));
+    Im2=single(Mov2(1:300,200:400));
+    Im1(Im1>50)=50;
+    Im2(Im2>50)=50;
+    A(a)=sqrt(sum(sum(((Im2-Im1).*(Im2-Im1)))));
+
+  %  waitbar(ind/numFrames, h);
+   
+    figure(num), clf
+    subplot(2,3,1),imagesc(vidFrames1(1:200,1:300,:,1))    
+    subplot(2,3,2),imagesc(vidFrames2(1:200,1:300,:,1))
+    subplot(2,3,3),imagesc(Im2-Im1), caxis([-50 50])
+    subplot(2,3,4:6),plot(t(1:a),(A),'k','linewidth',2), title([num2str(t(floor(a))),' s'])
+    try
+        xlim([t(a)-20 t(a)])
+    end
+        ylim([0 1500])
+    
+    a=a+1;    
+end
+
+
+
+%close(h)
+
+
+
+

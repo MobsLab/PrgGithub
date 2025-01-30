@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-05-25T10:43:10.993826Z"
+   url="file:///home/battagli/svn/matlab/trunk/m2html"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="GPL"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="20454dadc46049e7bdeb066e14dc7a68"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="LICENSE"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="f43cb9b37f89db739cb6237b26f0c8ee"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="INSTALL"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="0e31d897a665c8e657650f62c33b9e98"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   name="private"
+   kind="dir"/>
+<entry
+   name="@template"
+   kind="dir"/>
+<entry
+   committed-rev="1"
+   name="README"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="d9d04a4a24205f67959781ffc78d66b1"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   name="templates"
+   kind="dir"/>
+<entry
+   committed-rev="1"
+   name="m2html.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="419585bd8894276654e9406b1f12bc7f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+<entry
+   committed-rev="1"
+   name="mdot.m"
+   text-time="2006-06-01T11:59:11.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="882adfd580fda35c798fcbe51147dfc3"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:11.000000Z"/>
+</wc-entries>

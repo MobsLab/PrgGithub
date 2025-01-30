@@ -1,0 +1,179 @@
+%%OccurenceRipplesDetectionGangulyPlot
+% 13.11.2019 KJ
+%
+% Infos
+%   script about real and fake slow waves : MUA and down
+%
+% see
+%    OccurenceRipplesDetectionGanguly OccurenceRipplesFakeDeltaDeepPlot
+
+
+% load
+clear
+load(fullfile(FolderDeltaDataKJ,'OccurenceRipplesDetectionGanguly.mat'))
+
+for p=1:length(ripples_res.path)
+    list_names{p,1} = [ripples_res.name{p}];
+end
+animals = unique(list_names);
+
+smoothing = 2;
+normalized = 1;
+
+%init
+cc_all.down.y = [];
+cc_all.diff.y = [];
+cc_all.so.y = [];
+cc_all.delta.y = [];
+
+
+for m=1:length(animals)
+    
+    
+    %% global down down2 and diff deltas
+    
+    cc_mouse.down.y = [];
+    cc_mouse.diff.y = [];
+    cc_mouse.so.y = [];
+    cc_mouse.delta.y = [];
+    
+    %loop over records of animals
+    for p=1:length(ripples_res.path)
+        if strcmpi(list_names{p},animals{m})
+            
+            %x
+            cc_mouse.down.x = ripples_res.down{p}(:,1);
+            cc_mouse.diff.x = ripples_res.diff{p}(:,1);
+            cc_mouse.so.x   = ripples_res.so{p}(:,1);
+            cc_mouse.delta.x = ripples_res.delta{p}(:,1);
+            
+            %normalisation factor
+            if normalized
+                x_norm = cc_mouse.down.x<-800;
+                normfact.down = mean(ripples_res.down{p}(x_norm,2));
+                normfact.diff = mean(ripples_res.diff{p}(x_norm,2));
+                normfact.so = mean(ripples_res.so{p}(x_norm,2));
+                normfact.delta = mean(ripples_res.delta{p}(x_norm,2));
+            else
+                normfact.down = 1; 
+                normfact.diff = 1; 
+                normfact.so = 1; 
+                normfact.delta = 1; 
+            end
+            
+            %y
+            cc_mouse.down.y = [cc_mouse.down.y runmean(ripples_res.down{p}(:,2) / normfact.down, smoothing)];
+            cc_mouse.diff.y = [cc_mouse.diff.y runmean(ripples_res.diff{p}(:,2) / normfact.diff, smoothing)];
+            cc_mouse.so.y = [cc_mouse.so.y runmean(ripples_res.so{p}(:,2) / normfact.so, smoothing)];
+            cc_mouse.delta.y = [cc_mouse.delta.y runmean(ripples_res.delta{p}(:,2) / normfact.delta, smoothing)];
+        end
+    end
+        
+    %average of mouse
+    cc_meanmouse.down.y{m} = mean(cc_mouse.down.y,2);
+    cc_meanmouse.diff.y{m} = mean(cc_mouse.diff.y,2);
+    cc_meanmouse.so.y{m}   = mean(cc_mouse.so.y,2);
+    cc_meanmouse.delta.y{m} = mean(cc_mouse.delta.y,2);
+    %x
+    cc_meanmouse.down.x{m} = cc_mouse.down.x;
+    cc_meanmouse.diff.x{m} = cc_mouse.diff.x;
+    cc_meanmouse.so.x{m}   = cc_mouse.so.x;
+    cc_meanmouse.delta.x{m} = cc_mouse.delta.x;
+    
+    %concatenate all
+    cc_all.down.y = [cc_all.down.y cc_meanmouse.down.y{m}];
+    cc_all.diff.y = [cc_all.diff.y cc_meanmouse.diff.y{m}];
+    cc_all.so.y   = [cc_all.so.y cc_meanmouse.so.y{m}];
+    cc_all.delta.y = [cc_all.delta.y cc_meanmouse.delta.y{m}];
+    
+    
+end
+
+
+%x
+cc_all.down.x = cc_meanmouse.down.x{1};
+cc_all.diff.x = cc_meanmouse.diff.x{1};
+cc_all.so.x   = cc_meanmouse.so.x{1};
+cc_all.delta.x = cc_meanmouse.delta.x{1};
+
+
+%down
+Cc.down.X     = cc_all.down.x;
+Cc.down.stdY  = std(cc_all.down.y,0,2) / sqrt(size(cc_all.down.y,2));
+Cc.down.meanY = mean(cc_all.down.y,2);
+%diff
+Cc.diff.X     = cc_all.diff.x;
+Cc.diff.stdY  = std(cc_all.diff.y,0,2) / sqrt(size(cc_all.diff.y,2));
+Cc.diff.meanY = mean(cc_all.diff.y,2);
+%so
+Cc.so.X     = cc_all.so.x;
+Cc.so.stdY  = std(cc_all.so.y,0,2) / sqrt(size(cc_all.so.y,2));
+Cc.so.meanY = mean(cc_all.so.y,2);
+%delta 
+Cc.delta.X     = cc_all.delta.x;
+Cc.delta.stdY  = std(cc_all.delta.y,0,2) / sqrt(size(cc_all.delta.y,2));
+Cc.delta.meanY = mean(cc_all.delta.y,2);
+
+
+
+%% Plot
+
+col_mean = 'k';
+col_curve = [0.4 0.4 0.4];
+col_down = 'r';
+col_downcurve = [0.8 0.1 0.5];
+
+YL = [0 2.8];
+fontsize = 20;
+
+%% Cross plot
+figure, hold on
+
+%down
+subplot(1,4,1), hold on
+for m=1:length(animals)
+    plot(Cc.down.X, cc_meanmouse.down.y{m}, 'color', col_downcurve, 'linewidth',1);
+end
+area(Cc.down.X, Cc.down.meanY','FaceColor',col_down,'facealpha',0.4,'edgealpha',0);
+plot(Cc.down.X, Cc.down.meanY, 'color',col_down, 'linewidth',2),
+set(gca,'ylim',YL, 'fontsize', fontsize),
+line([0 0], ylim,'Linewidth',1,'color',[0.5 0.5 0.5]), hold on
+ylabel('correlation index'), 
+title('Down states'),
+
+
+%delta diff
+subplot(1,4,2), hold on
+for m=1:length(animals)
+    plot(Cc.diff.X, cc_meanmouse.diff.y{m}, 'color', col_curve, 'linewidth',1);
+end
+area(Cc.down.X, Cc.down.meanY','FaceColor',col_down,'facealpha',0.2,'edgealpha',0);
+plot(Cc.diff.X, Cc.diff.meanY, 'color',col_mean, 'linewidth',2),
+set(gca,'ylim',[0 3.8], 'fontsize', fontsize),
+line([0 0], ylim,'Linewidth',1,'color',[0.5 0.5 0.5]), hold on
+xlabel('time from ripples (ms)'),
+title('Diff'),
+
+%so
+subplot(1,4,3), hold on
+for m=1:length(animals)
+    plot(Cc.so.X, cc_meanmouse.so.y{m}, 'color', col_curve, 'linewidth',1);
+end
+area(Cc.down.X, Cc.down.meanY','FaceColor',col_down,'facealpha',0.2,'edgealpha',0);
+plot(Cc.so.X, Cc.so.meanY, 'color',col_mean, 'linewidth',2),
+set(gca,'ylim',[0 3.8], 'fontsize', fontsize),
+line([0 0], ylim,'Linewidth',1,'color',[0.5 0.5 0.5]), hold on
+title('SO'),
+
+%delta diff
+subplot(1,4,4), hold on
+for m=1:length(animals)
+    plot(Cc.delta.X, cc_meanmouse.delta.y{m}, 'color', col_curve, 'linewidth',1);
+end
+area(Cc.down.X, Cc.down.meanY','FaceColor',col_down,'facealpha',0.2,'edgealpha',0);
+plot(Cc.delta.X, Cc.delta.meanY, 'color',col_mean, 'linewidth',2),
+set(gca,'ylim',[0 3.8], 'fontsize', fontsize),
+line([0 0], ylim,'Linewidth',1,'color',[0.5 0.5 0.5]), hold on
+title('delta'),
+
+

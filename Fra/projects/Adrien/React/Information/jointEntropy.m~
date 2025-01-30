@@ -1,0 +1,45 @@
+function jointEntropy = jointEntropy(XY)
+
+nbCells = size(XY,2);
+jointEntropy = ones(nbCells);
+nbSamples = size(XY,1);
+
+for i=1:nbCells
+
+	for j=i+1:nbCells
+		
+
+		p11 = 0;
+		p10 = 0;
+		p01 = 0;
+		p00 = 0;
+		X = XY(:,i);
+		Y = XY(:,j);
+		normFact = length(X);		
+		
+		p11 = length(find(X.*Y == 1))/normFact;
+		for ix=1:nbSamples
+			if ((X(ix) == 1) && (Y(ix) == 0)) p10 = p10 + 1;end;
+			if ((X(ix) == 0) && (Y(ix) == 1)) p01 = p01 + 1;end;
+			if ((X(ix) == 0) && (Y(ix) == 0)) p00 = p00 + 1;end;
+		end;
+
+		p10 = p10/normFact;
+		p01 = p01/normFact;
+		p00 = p00/normFact;
+		jointEntropy(i,j) = -plog(p11) - plog(p10) - plog(p01) - plog(p00);
+		jointEntropy(j,i) = jointEntropy(i,j);
+		
+
+	end
+
+end
+
+function y = plog(x)
+
+if x==0
+	y = 0;
+else
+	y = x*log2(x);
+end;	
+

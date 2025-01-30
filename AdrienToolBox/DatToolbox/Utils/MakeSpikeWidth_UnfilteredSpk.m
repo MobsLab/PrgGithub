@@ -1,0 +1,83 @@
+function MakeSpikeWidth_UnfilteredSpk(fbasename)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% this program computes Spk waveform features from unfiltered spikes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+xmldata = LoadXml(fbasename);
+
+analysisDir = ['Analysis' filesep];
+
+spkfname = [analysisDir 'SpkWaveForms.mat'];
+
+try
+    if ~exist(spkfname,'file')
+        error('Needs to compute forst average waveforms');
+    end
+
+    load(spkfname,'waveM_AllShanks');
+    nbC=0;
+    for ii=1:length(waveM_AllShanks)
+        nbC = nbC + size(waveM_AllShanks{ii},1);
+    end
+    fs = xmldata.SampleRate;
+    halfPkWidth = zeros(nbC,1);
+    pk2Val = zeros(nbC,1);
+    maxEch = zeros(nbC,1);
+    invertedSpk = zeros(nbC,1);
+    
+    cellIx = 0;
+    for sh=1:length(waveM_AllShanks)
+      meanWaveF = waveM_AllShanks{sh};
+      
+      for c=1:size(meanWaveF,1)
+      
+          w = squeeze(meanWaveF(c,:,:));
+          hp=0;
+          p2v=0;
+          if ~any(isnan(w))
+            [dummy,mxE] = max(std(w'));
+            wu = w(mxE,:);
+            wu = wu-mean([wu(1:2) wu(end-1:end)]);
+            wu = resample(wu,10,1);
+            nSamples = length(wu);
+
+            t = [0:1/(fs*10):(nSamples-1)/(fs*10)]*1000;
+            [minVal,minPos] = min(wu);
+            [maxVal,maxPos] = max(wu);
+            if abs(maxVal)>abs(minVal) && minPos>maxPos
+                invertedSpk(c)=1;
+                wu = -wu;
+            end
+            [minVal,minPos] = min(wu(1:floor(length(wu)/2)));
+            [maxVal,maxPos] = max(wu(minPos+1:end));
+            maxPos = maxPos+minPos;
+
+            wun = wu/minVal;
+            ix = match(0.5,wun(1:maxPos),0.1,1);
+            %keyboard
+            if length(ix)==2
+              hp = t(ix(2))-t(ix(1));
+              p2v = t(maxPos)-t(minPos);
+            end
+          end
+           if p2v>2
+               keyboard
+           end
+          cellIx = cellIx+1;
+          halfPkWidth(cellIx) = hp;
+          pk2Val(cellIx) = p2v;
+          maxEch(cellIx) = mxE;
+      end
+    
+    end
+    
+      save([analysisDir 'SpikeWidth'],'halfPkWidth','pk2Val','maxEch','invertedSpk');
+
+catch
+    warning(lasterr)
+    keyboard
+end
+
+

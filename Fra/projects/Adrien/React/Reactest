@@ -1,0 +1,3 @@
+A = getResource(A,'CM',dset);
+A = getResource(A,'FiringS1',dset);
+A = getResource(A,'FiringS2',dset);

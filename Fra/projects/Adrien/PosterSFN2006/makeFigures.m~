@@ -1,0 +1,101 @@
+%interpolation on post Outcome Left/Rigth
+%  
+%  e=4;
+%  c=3;
+%  
+%  YMax = max(highContCells{e,c});
+%  [a,b,r,p] = regression_line([1:nbDays]',highContCells{e,c});
+%  corr = corrcoef(highContCells{e,c});
+%  
+%  fh = figure(1),clf;
+%  set(fh,'Name',[epoch{e}],'Position',[300, 300, 1000, 500]);	
+%  
+%  hold on;
+%  h = plot([1:nbDays],highContCells{e,c});
+%  set(h,'LineWidth',3);
+%  h = plot([1:nbDays],[1:nbDays]*b+a); 
+%  set(h,'LineWidth',1);
+%  set(h,'LineStyle','--','color','k');
+%  t = text (51,11,['r = ' num2str(round(100*r)/100) ', p = ' num2str(round(p*1000)/1000)]) ;
+%  set(t,'fontsize',14,'fontname','arial','fontweight','bold');
+%  
+%  set(gca,'YLim',[0 YMax*1.2],'FontName','Arial','FontWeight','bold','FontSize',14)
+%  
+%  hold off;
+
+%  saveas(fh,['Interp_LightPos_' epoch{e}],'fig');
+%  saveas(fh,['Interp_LightPos_' epoch{e}],'png');
+%  saveas(fh,['Interp_LigtPos_' epoch{e}],'eps');
+
+
+
+%  %Correct/Erroe % Perf Plot
+%  
+%  e=1;
+%  c=1;
+%  
+%  fh = figure(1),clf;
+%  hold on;
+%  YMax = max(highContCells{e,c});
+%  [AX,H1,H2] = plotyy([1:nbDays],highContCells{e,c},[1:nbDays],100*perf);
+%  set(fh,'Name',[epoch{e}],'Position',[300, 300, 1000, 500]);	
+%  set(H1,'LineWidth',3)
+%  set(H2,'LineStyle','--')
+%  %  set(AX(1),'YLim',[0 70]);
+%  %  set(AX(2),'YLim',[30 100]);
+%  
+%  %  set(AX(1),'fontname','Arial')
+%  %  set(AX(1),'fontweight','bold');
+%  %  set(AX(1),'fontsize',14);
+%  %  set(AX(2),'fontname','Arial','fontweight','bold','fontsize',14)
+%  
+%  for i=1:length(shiftDays)
+%  	line([shiftDays(i)+0.5 shiftDays(i)+0.5],[0 100],'LineStyle',':','color','k','LineWidth',2);
+%  end
+%  
+%  	saveas(fh,[parent_dir filesep 'Figures' filesep 'Plot_CE-Perf_' epoch{e}],'fig');
+%  	saveas(fh,[parent_dir filesep 'Figures' filesep 'Plot_CE-Perf_' epoch{e}],'png');
+%  	saveas(fh,[parent_dir filesep 'Figures' filesep 'Plot_CE-Perf_' epoch{e}],'eps');
+%  
+%  
+%  hold off;
+
+%Correct/Error % Perf Scatter Plot
+
+
+e=3;
+c=1;
+
+[a,b,r,p] = regression_line(highContCells{e,c},100*perf);
+
+
+fh = figure(2),clf;
+set(fh,'Name',[epoch{e}],'Position',[300, 300, 1000, 500]);
+
+hold on;
+YMax = max(highContCells{e,c});
+scatter(highContCells{e,c},100*perf,'filled');
+plot([0:100],[0:100]*b+a)
+hold off;
+
+set(gca,'YLim',[0 100],'XLim',[0 100])
+set(gca,'fontsize',14);
+set(gca,'fontname','arial');
+set(gca,'fontweight','bold');
+
+t = text (70,80,['r = ' num2str(round(100*r)/100) ', p = ' num2str(p)]) ;
+set(t,'fontsize',14,'fontname','arial','fontweight','bold');
+
+saveas(fh,[parent_dir filesep 'Figures' filesep 'Scatter_CE-Perf_' epoch{e}],'fig');
+saveas(fh,[parent_dir filesep 'Figures' filesep 'Scatter_CE-Perf_' epoch{e}],'png');
+saveas(fh,[parent_dir filesep 'Figures' filesep 'Scatter_CE-Perf_' epoch{e}],'eps');
+
+
+
+
+
+
+
+
+
+

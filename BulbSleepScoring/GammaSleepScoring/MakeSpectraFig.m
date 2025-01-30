@@ -1,0 +1,50 @@
+%% Look at spectra using movement based scoring
+struc={'B','H','PF','Pa'};
+
+m=1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M51/19122012/';
+chan(m,:)=[17,9,12,3];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M51/27122012/';
+chan(m,:)=[17,9,12,3];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M60/20130415/';
+chan(m,:)=[1,10,4,13];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M60/20130416/';
+chan(m,:)=[1,10,4,13];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M61/20130415/';
+chan(m,:)=[7,8,3,4];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M61/20130416/';
+chan(m,:)=[7,8,3,4];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M82/20130729/';
+chan(m,:)=[2,9,10,7];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M82/20130730/';
+chan(m,:)=[2,9,10,7];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M83/20130729/';
+chan(m,:)=[6,10,5,13];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M83/20130730/';
+chan(m,:)=[6,10,5,13];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M147/';
+chan(m,:)=[2,13,8,14];
+m=m+1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M148/20140828/';
+chan(m,:)=[4,13,8,14];
+
+
+for file=1:m
+    file
+    cd(filename2{file})
+    for st=2:4
+        if not(isnan(chan(file,st)))
+            HighSpectrum(filename2{file},chan(file,st),struc{st});
+        end
+    end
+end

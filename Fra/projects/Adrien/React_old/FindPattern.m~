@@ -1,0 +1,136 @@
+function cellsMayBeInPatterns = FindPattern(pairCovObj)
+%  
+%  NGDF = FindPatter(pairCovObj) returns a array
+%  NGDF: Array of
+%  	1 - NeuroxidenceStat (by G. Pipa)
+%  	2 - data in GDF format
+% 	3 - cellsMayBeInPatterns (vector of cells  number)
+%
+%  Adrien Peyrache 2006
+
+NeuroXidenceStat = 0;
+dataGDF = 0;
+
+
+% Parameters
+
+minSleepCorrDifference = 0.01;
+minMCorr = 0.1;
+pairsMayBeInPatterns = [];
+nbPairs = length(pairCovObj.cellPair);
+
+for i=1:nbPairs
+
+	if pairCovObj.CMVect(i) > minMCorr
+	
+		if pairCovObj.CS2Vect(i) - pairCovObj.CS1Vect(i) > minSleepCorrDifference
+			pairsMayBeInPatterns = [pairsMayBeInPatterns i];
+		end
+	end
+
+end
+
+cellsHighCovFq = zeros(pairCovObj.nbCells,1);
+
+
+
+for i=1:length(pairsMayBeInPatterns)
+
+	cells = pairCovObj.cellPair{pairsMayBeInPatterns(i)};
+	cellsHighCovFq(cells(1)) = cellsHighCovFq(cells(1)) + 1;
+	cellsHighCovFq(cells(2)) = cellsHighCovFq(cells(2)) + 1;
+
+end
+
+cellsMayBeInPatterns = find(cellsHighCovFq > 1);
+cellsHighCovFq = cellsHighCovFq(cellsMayBeInPatterns);
+
+nbCorrPairs = length(pairsMayBeInPatterns);
+removedPairs = 0;
+
+if nbCorrPairs
+	
+	load(['~/Data/LPPA/' pairCovObj.dset 'AdrienData.mat']);
+	load(['~/Data/LPPA/' pairCovObj.dset 'AdrienData2.mat']);
+
+	
+	ix = 1;
+	for i=1:nbCorrPairs
+		
+			cells = pairCovObj.cellPair{pairsMayBeInPatterns(i)};
+			
+			TT1 = cellnames{cells(1)};
+			TT2 = cellnames{cells(2)};
+			
+			if TT1(3) ~= TT2(3)
+				
+	
+				[hS1s tS1s] = CrossCorr(Range(Restrict(S{cells(1)},sleep1Epoch)),Range(Restrict(S{cells(2)},sleep1Epoch)),10,80);
+				hS1(tS1s == 0) = 0;
+				[hS2s tS2s] = CrossCorr(Range(Restrict(S{cells(1)},sleep2Epoch)),Range(Restrict(S{cells(2)},sleep2Epoch)),10,80);
+				hS2(tS2s == 0) = 0;
+				[hMs tMs] = CrossCorr(Range(Restrict(S{cells(1)},mazeEpoch)),Range(Restrict(S{cells(2)},mazeEpoch)),10,40);
+				hM(tMs == 0) = 0;
+				[hS1 tS1] = CrossCorr(Range(Restrict(S{cells(1)},sleep1Epoch)),Range(Restrict(S{cells(2)},sleep1Epoch)),50,100);
+				hS1(tS1 == 0) = 0;
+				[hS2 tS2] = CrossCorr(Range(Restrict(S{cells(1)},sleep2Epoch)),Range(Restrict(S{cells(2)},sleep2Epoch)),50,100);
+				hS2(tS2 == 0) = 0;
+				[hM tM] = CrossCorr(Range(Restrict(S{cells(1)},mazeEpoch)),Range(Restrict(S{cells(2)},mazeEpoch)),50,300);
+				hM(tM == 0) = 0;
+				
+	
+				h = figure(ix),clf;
+				set(h,'position',[300 300 1200 400]);
+	
+				subplot(2,3,1);
+					bar(tS1s,hS1s);
+					title(['xCorr cells ' TT1 ' and ' TT2 ' Sleep1 Epoch'])	
+				subplot(2,3,2);
+					bar(tMs,hMs);
+					title(['xCorr cells ' TT1 ' and ' TT2 ' Maze Epoch'])	
+				subplot(2,3,3);
+					bar(tS2s,hS2s);
+					title(['xCorr cells ' TT1 ' and ' TT2 ' Seep2 Epoch'])	
+	
+	
+				subplot(2,3,4);
+					bar(tS1,hS1);
+					title(['xCorr cells ' TT1 ' and ' TT2 ' Sleep1 Epoch'])	
+				subplot(2,3,5);
+					bar(tM,hM);
+					title(['xCorr cells ' TT1 ' and ' TT2 ' Maze Epoch'])	
+				subplot(2,3,6);
+					bar(tS2,hS2);
+					title(['xCorr cells ' TT1 ' and ' TT2 ' Seep2 Epoch'])	
+				
+				ix = ix + 1; % index of next figure
+				
+			else
+
+				fprintf(['Cells ' TT1 ' and cells ' TT2 ' come from the same TT. Have not been taken into account\n' ]);
+				removedPairs = removedPairs + 1;	
+
+			end
+
+
+			
+		end
+	end
+
+nbGoodPairs = nbCorrPairs-removedPairs;
+
+fprintf([ ' *********************************************************** \n' ]);
+fprintf([ ' * Statistics :                                            * \n' ]);
+fprintf([ ' * nbCells            : ' num2str(pairCovObj.nbCells)       '\n' ]);
+fprintf([ ' * nbPairs            : ' num2str(nbPairs)                  '\n' ]);
+fprintf([ ' * #Pair w/ high corr : ' num2str(nbCorrPairs)              '\n' ]);
+fprintf([ ' * ...not from same TT: ' num2str(nbGoodPairs)              '\n' ]);
+fprintf([ ' * percentage         : ' num2str(nbGoodPairs/nbPairs*100)  '\n' ]);
+fprintf([ ' *********************************************************** \n' ]);
+
+	
+%	trialInterval = intervalSet(Range(startTrial)-10000 , Range(trialOutcome) + 10000);
+%	NGDF{1} = Fra2GDF(S,cellsMayBeInPatterns,trialInterval);
+%  	NGDF{2} = NeuroX(NGDF{s1},length(cellsMayBeInPatterns))
+	
+end

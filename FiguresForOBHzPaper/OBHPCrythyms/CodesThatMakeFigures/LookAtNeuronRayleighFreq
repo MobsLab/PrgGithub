@@ -1,0 +1,107 @@
+smofact=0.8;
+colormap jet
+for s=3:size(ph.HPC1,1)
+    figure
+    
+    RemColBar=[];
+    subplot(251)
+    AllHist=[];
+    for f=1:length(FreqRange)
+        [Y,X]=hist(ph.HPC1{s,f}.Transf,60);
+        Y=Y/sum(Y);
+        AllHist=[AllHist;Y];
+    end
+    imagesc([-pi+2*pi/60:2*pi/60:pi],mean(FreqRange),SmoothDec(AllHist,smofact)), axis xy
+    title('HPC non loc')
+    RemColBar=[RemColBar,clim];
+    
+    subplot(252)
+    if isfield(ph,'HPCLoc')
+        AllHist=[];
+        for f=1:length(FreqRange)
+            [Y,X]=hist(ph.HPCLoc{s,f}.Transf,60);
+            Y=Y/sum(Y);
+            AllHist=[AllHist;Y];
+        end
+        imagesc([-pi+2*pi/60:2*pi/60:pi],mean(FreqRange),SmoothDec(AllHist,smofact)), axis xy
+        RemColBar=[RemColBar;clim];
+        
+    end
+    title('HPC loc')
+    
+    subplot(253)
+    AllHist=[];
+    for f=1:length(FreqRange)
+        [Y,X]=hist(ph.OB1{s,f}.Transf,60);
+        Y=Y/sum(Y);
+        AllHist=[AllHist;Y];
+    end
+    imagesc([-pi+2*pi/60:2*pi/60:pi],mean(FreqRange),SmoothDec(AllHist,smofact)), axis xy
+    title('OB non loc')
+    RemColBar=[RemColBar;clim];
+    
+    subplot(254)
+    if isfield(ph,'OBLoc')
+        AllHist=[];
+        for f=1:length(FreqRange)
+            [Y,X]=hist(ph.OBLoc{s,f}.Transf,60);
+            Y=Y/sum(Y);
+            AllHist=[AllHist;Y];
+        end
+        imagesc([-pi+2*pi/60:2*pi/60:pi],mean(FreqRange),SmoothDec(AllHist,smofact)), axis xy
+        RemColBar=[RemColBar;clim];
+        
+    end
+    title('OBLoc')
+    
+    
+    subplot(255)
+    AllHist=[];
+    for f=1:length(FreqRange)
+        [Y,X]=hist(ph.PFCx{s,f}.Transf,60);
+        Y=Y/sum(Y);
+        AllHist=[AllHist;Y];
+    end
+    imagesc([-pi+2*pi/60:2*pi/60:pi],mean(FreqRange),SmoothDec(AllHist,smofact)), axis xy
+    title('PFCx')
+    RemColBar=[RemColBar;clim];
+    for i=1:5
+        subplot(2,5,i)
+        clim([min(RemColBar(:,1)),max(RemColBar(:,2))])
+    end
+    colormap jet
+    
+    
+    RemColBar=[];
+    AllHist=[];
+    for f=1:length(FreqRange)
+        [Y,X]=hist(mod(ph.HPC1{s,f}.Transf-0.05*pi/3,2*pi),60);
+        Y=Y/sum(Y);
+        AllHist=[AllHist;Y];
+    end
+    subplot(256)
+    imagesc([-pi+2*pi/60:2*pi/60:pi],mean(FreqRange),SmoothDec((AllHist),smofact)), axis xy
+    RemColBar=[RemColBar,clim];
+    
+    AllHist2=[];
+    for f=1:length(FreqRange)
+        [Y,X]=hist(mod(ph.OB1{s,f}.Transf+1.2*pi/2,2*pi),60);
+        Y=Y/sum(Y);
+        AllHist2=[AllHist2;Y];
+    end
+    subplot(258)
+    RemColBar=[RemColBar,clim];
+    imagesc([-pi+2*pi/60:2*pi/60:pi],mean(FreqRange),SmoothDec((AllHist2),smofact)), axis xy
+    subplot(2,5,10)
+    
+    imagesc([-pi+2*pi/60:2*pi/60:pi],mean(FreqRange),SmoothDec((AllHist+AllHist2)/2,smofact)), axis xy
+    RemColBar=[RemColBar,clim];
+    for i=1:5
+        subplot(2,5,5+i)
+        clim([min(RemColBar(:,1)),max(RemColBar(:,2))])
+    end
+    colormap jet
+    
+    pause
+    close all
+end

@@ -1,0 +1,5 @@
+names = fieldnames(saline);
+Data = zeros(length(names), 47);
+for i=1:length(names)
+    Data(i) = saline(i);
+end

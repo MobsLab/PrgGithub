@@ -1,0 +1,36 @@
+% ParcoursFluoIntraGLR
+
+cd H:\GFEC-P20_GFP\FluoIntraG
+
+listdir=dir('Cell1');
+
+% a=1;
+
+   Rt=[];
+
+        
+        
+for Filenum=1:length(listdir)
+   
+    cd 'H:\GFEC-P20_GFP\FluoIntraG\Cell1'
+    
+    if listdir(Filenum).isdir==1&listdir(Filenum).name(1)~='.'    %doit être un dossier et sa 1ère lettre différente d un point
+
+        cd (listdir(Filenum).name)
+
+        R=FluoIntraGSingleCellLR;
+        Rt=[Rt;R];
+        clear R
+    
+    
+    end
+    
+    
+    
+end
+
+cd 'H:\GFEC-P20_GFP\FluoIntraG\Cell1'
+
+save Results Rt Rt2
+    
+   

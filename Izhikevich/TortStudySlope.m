@@ -1,0 +1,199 @@
+%TortStudySlope
+
+
+%[Vlt,firings,Ne,Nfs,No]=TortSpkWaveForm(t,Ek,Eapp,FSk,FSapp,noiselevel,Nnetwork)
+% Nnetwork optionnal
+
+noiselevel=0;
+spkwidth=60;
+linw=1;
+try
+    choixcurve;
+catch
+    choixcurve=1;
+end
+
+%------------------------------------------------------------------------
+% Pyramidal cells
+%------------------------------------------------------------------------
+
+
+
+if choixcurve==1
+
+Eapp=90;
+    
+Ek05=0.5;
+Ek07=0.7;
+Ek09=0.9;
+Ek1=1;
+
+else
+    
+Eapp=90;    
+    
+Ek05=0.2;
+Ek07=0.4;
+Ek09=0.6;
+Ek1=0.8;
+
+end
+
+
+%------------------------------------------------------------------------
+% FS internuerons
+%------------------------------------------------------------------------
+
+
+
+if choixcurve==1
+
+FSapp=95;
+
+FSk05=0.5;
+FSk07=0.7;
+FSk09=0.9;
+FSk1=1;
+
+else
+    
+FSapp=95; 
+
+FSk05=0.2;
+FSk07=0.4;
+FSk09=0.6;
+FSk1=0.8;
+
+end
+
+
+
+
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+
+
+
+
+if 1
+    
+
+[Vlt05,firings05,Ne,Nfs,No]=TortSpkWaveForm(300,Ek05,Eapp,FSk05,FSapp,noiselevel); close
+[B05,R05,K05]=TortPlotSingleSlope(Vlt05,spkwidth,firings05,Ne,Nfs,No);
+[Vlt07,firings07,Ne,Nfs,No]=TortSpkWaveForm(300,Ek07,Eapp,FSk07,FSapp,noiselevel); close
+[B07,R07,K07]=TortPlotSingleSlope(Vlt07,spkwidth,firings07,Ne,Nfs,No);
+[Vlt09,firings09,Ne,Nfs,No]=TortSpkWaveForm(300,Ek09,Eapp,FSk09,FSapp,noiselevel); close
+[B09,R09,K09]=TortPlotSingleSlope(Vlt09,spkwidth,firings09,Ne,Nfs,No);
+[Vlt1,firings1,Ne,Nfs,No]=TortSpkWaveForm(300,Ek1,Eapp,FSk1,FSapp,noiselevel); close
+[B1,R1,K1]=TortPlotSingleSlope(Vlt1,spkwidth,firings1,Ne,Nfs,No);
+
+end
+
+
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+
+if 0
+
+        figure('Color',[1 1 1])
+
+
+        subplot(5,3,1), imagesc(K05)
+        caxis([-60 0])
+        subplot(5,3,4), imagesc(K07)
+        caxis([-60 0])
+        subplot(5,3,7), imagesc(K09)
+        caxis([-60 0])
+        subplot(5,3,10), imagesc(K1)
+        caxis([-60 0])
+
+        subplot(5,3,13), hold on
+        plot(mean(K05),'Color',[0.8 0.8 0.8],'linewidth',linw)
+        plot(mean(K07),'Color',[0.6 0.6 0.6],'linewidth',linw)
+        plot(mean(K09),'Color',[0.3 0.3 0.3],'linewidth',linw)
+        plot(mean(K1),'Color',[0 0 0],'linewidth',linw)
+
+        xlim([0 20*spkwidth])
+        title(['Pyramidal cell,  Ek :   ',num2str(Ek05), ' / ',num2str(Ek07),' / ',num2str(Ek09),' / ',num2str(Ek1)])
+
+
+        subplot(5,3,2), imagesc(R05)
+        caxis([-80 -20])
+        subplot(5,3,5), imagesc(R07)
+        caxis([-80 -20])
+        subplot(5,3,8), imagesc(R09)
+        caxis([-80 -20])
+        subplot(5,3,11), imagesc(R1)
+        caxis([-80 -20])
+
+
+        subplot(5,3,14), hold on
+        plot(mean(R05),'Color',[1 0.6 0.6],'linewidth',linw)
+        plot(mean(R07),'Color',[1 0.3 0.3],'linewidth',linw)
+        plot(mean(R09),'Color',[1 0.15 0.15],'linewidth',linw)
+        plot(mean(R1),'Color',[1 0 0],'linewidth',linw)
+
+        xlim([0 20*spkwidth])
+        title(['FS interneuron,  Ek :   ',num2str(FSk05), ' / ',num2str(FSk07),' / ',num2str(FSk09),' / ',num2str(FSk1)])
+
+
+
+        subplot(5,3,3), imagesc(B05)
+        caxis([-80 -20])
+        subplot(5,3,6), imagesc(B07)
+        caxis([-80 -20])
+        subplot(5,3,9), imagesc(B09)
+        caxis([-80 -20])
+        subplot(5,3,12), imagesc(B1)
+        caxis([-80 -20])
+
+        subplot(5,3,15), hold on
+        plot(mean(B05),'Color',[0.6 0.6 1],'linewidth',linw)
+        plot(mean(B07),'Color',[0.3 0.3 1],'linewidth',linw)
+        plot(mean(B09),'Color',[0.15 0.15 1],'linewidth',linw)
+        plot(mean(B1),'Color',[0 0 1],'linewidth',linw)
+
+        xlim([0 20*spkwidth])
+        title('B unchange')
+
+
+end
+
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+
+
+
+
+
+linw=2;
+
+
+figure('Color',[1 1 1])
+
+subplot(2,1,1), hold on
+plot(mean(K05),'Color',[0.8 0.8 0.8],'linewidth',linw)
+plot(mean(K07),'Color',[0.6 0.6 0.6],'linewidth',linw)
+plot(mean(K09),'Color',[0.3 0.3 0.3],'linewidth',linw)
+plot(mean(K1),'Color',[0 0 0],'linewidth',linw)
+
+xlim([0 20*spkwidth])
+ylim([-60 -25])
+title(['Pyramidal cell,  Ek :   ',num2str(Ek05), ' / ',num2str(Ek07),' / ',num2str(Ek09),' / ',num2str(Ek1)])
+
+subplot(2,1,2), hold on
+plot(mean(R05),'Color',[1 0.6 0.6],'linewidth',linw)
+plot(mean(R07),'Color',[1 0.45 0.45],'linewidth',linw)
+plot(mean(R09),'Color',[1 0.3 0.3],'linewidth',linw)
+plot(mean(R1),'Color',[1 0 0],'linewidth',linw)
+
+xlim([0 20*spkwidth])
+ylim([-100 -25])
+title(['FS interneuron,  Ek :   ',num2str(FSk05), ' / ',num2str(FSk07),' / ',num2str(FSk09),' / ',num2str(FSk1)])
+
+
+
+

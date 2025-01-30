@@ -1,0 +1,535 @@
+function [cS12t,cS34t,cREMt,cWaket,cWakeThetat,cWakeNonThetat,params,movingwin,Problem]=ParcoursCohPlethy_ML(NameDir,struct1,struct2,saveFig,prof,params,movingwin)
+
+
+% function ParcoursCohPlethy_ML(NameDir,struct1,struct2,saveFig,prof,params,movingwin)
+%
+% inputs:
+% NameDir = see PathForExperimentsML.m
+% struct1 =
+% struct2 =
+% saveFig (optional) = 1 if figures must be saved, 0 otherwise (default)
+% prof (optional) = default 'deep'
+% params (optional)
+% movingwin (optional)
+%% MANUAL INPUTS
+strongBO=1; % Do only strong BO oscillation
+erasepreviousanalysis=0;
+disp(' ')
+disp(NameDir)
+if erasepreviousanalysis, disp('existing analyzis would be erased');end
+
+%% check inputs
+if ~exist('NameDir','var') || ~exist('struct1','var') || ~exist('struct2','var') 
+    error('Not enough input arguments')
+end
+
+if ~exist('saveFig','var') 
+    saveFig=0;
+end
+
+if ~exist('prof','var')
+    prof='deep';
+end
+
+if ~exist('params','var')
+    params.tapers=[3 9];
+    params.pad=1;
+    params.fpass=[0 100];
+    params.err=[1 0.05];
+end
+
+if ~exist('movingwin','var')
+    movingwin=[3 0.1];
+end
+
+%% initialization
+
+%if strcmp(NameDir,'PLETHYSMO')
+    cd /media/DataMOBsRAID5/ProjetAstro/DataPlethysmo
+    res=pwd;
+%end
+Dir=PathForExperimentsML(NameDir);
+
+folderToSave=['Analyse_Coherence/',NameDir,'Tapers',num2str(params.tapers(1)),num2str(params.tapers(2)),'Mov',num2str(movingwin(1)),'/',struct1];
+if ~exist(folderToSave,'dir')
+    mkdir(folderToSave);
+end
+
+
+
+%% Retreive saved data
+if erasepreviousanalysis==0
+try 
+    load([res,'/',folderToSave,'/DataCoherence_',NameDir,'_',struct1,'Vs',struct2,'_',prof,'.mat']); 
+    disp(['Loading DataCoherence_',NameDir,'_',struct1,'Vs',struct2,'_',prof,'.mat'])
+end
+try
+    load([res,'/',folderToSave,'/DataGranger_',NameDir,'_',struct1,'Vs',struct2,'_',prof,'.mat']); 
+    disp(['Loading DataGranger_',NameDir,'_',struct1,'Vs',struct2,'_',prof,'.mat'])
+end
+
+end
+%% Compute 
+if ~exist('cS12t','var') || ~exist('GxS12t','var') 
+
+    %----------------------------------------------------------------------
+    %----------------------- initiate variables ---------------------------
+    if ~exist('cS12t','var')
+        compute_coh=1;
+        cS12t=[];
+        cS34t=[];
+        cREMt=[];
+        cWaket=[];
+        cWakeThetat=[];
+        cWakeNonThetat=[];
+        Problem=ones(1,length(Dir.path));
+    else
+        compute_coh=0;
+    end
+    
+    if~exist('GxS12t','var')
+        compute_gran=1;
+        ProblemG=ones(1,length(Dir.path));
+    else
+        compute_gran=0;
+    end
+    %----------------------------------------------------------------------
+compute_gran=0;
+    for man=1:length(Dir.path)
+        cd(Dir.path{man})
+        disp(['   * * * ',Dir.name{man},' * * * '])
+
+        % state epochs
+        
+        clear S12 S34 REMEpoch WakeEpoch SleepStages ThetaEpoch SWSEpoch
+        try
+            load SleepStagesPaCxDeep
+            S12;
+            disp('Loading SleepStagesPaCxDeep')
+            
+        catch
+            disp('No defined SleepStages');
+        end
+        
+        try
+        if strongBO || ~exist('S12','var')
+            load DistinctOBepochs/DistinctOBepochsSWSEpoch OBEp FreqBOoscil
+            disp(['!! Computing only strong BO oscillation [',num2str(FreqBOoscil),']Hz epochs !!']);
+            disp('S12 = top 25% oscillations, S34 = bottom 25%')
+            S12 =OBEp{1}; S34=OBEp{2};
+            
+        end
+        
+        load StateEpoch ThetaEpoch SWSEpoch 
+        if ~exist('REMEpoch','var'), load StateEpoch REMEpoch;end
+        if ~exist('WakeEpoch','var'), load StateEpoch MovEpoch; WakeEpoch=MovEpoch;end
+        
+        
+        %------------------------------------------------------------------
+        % ----------------------- load LFPs -------------------------------
+        clear LFP LFP1 LFP2 channel RespiTSD channelToAnalyse
+        
+        % Respi
+        if strcmp(struct1,'Respi') 
+            load LFPData RespiTSD
+            LFP1=RespiTSD;
+        elseif strcmp(struct2,'Respi') 
+            load LFPData RespiTSD
+            LFP2=RespiTSD;
+        end
+        
+        % struct1
+        try
+            if ~exist('LFP1','var')
+                try
+                    eval(['load ChannelsToAnalyse/',struct1,'_',prof])
+                catch
+                    if strcmp(struct1,'Bulb') && strcmp(prof,'deep')
+                        load('SpectrumDataL/UniqueChannelBulb.mat')
+                        channel=channelToAnalyse;
+                    end
+                end
+                eval(['load LFPData/LFP',num2str(channel)])
+                LFP1=LFP;
+            end
+        catch
+            disp(['No LFP ',struct1,'_',prof])
+        end
+        
+        % struct2
+        clear LFP channel channelToAnalyse
+        try
+            if ~exist('LFP2','var')
+                try
+                    eval(['load ChannelsToAnalyse/',struct2,'_',prof])
+                catch
+                    if strcmp(struct2,'Bulb') && strcmp(prof,'deep')
+                        load('SpectrumDataL/UniqueChannelBulb.mat')
+                        channel=channelToAnalyse;
+                    end
+                end
+                eval(['load LFPData/LFP',num2str(channel)])
+                LFP2=LFP;
+            end
+        catch
+            disp(['No LFP ',struct2,'_',prof])
+        end
+        %------------------------------------------------------------------
+        
+        
+        clear cS12 cS34 cREM cWake cWakeTheta cWakeNonTheta
+        
+        try
+            load behavResources PreEpoch
+            LFP1=Restrict(LFP1,PreEpoch);
+            LFP2=Restrict(LFP2,PreEpoch);
+        catch
+            if ~strcmp(NameDir,'PLETHYSMO')
+                disp('Problem PreEpoch')
+            end
+        end
+        %------------------------------------------------------------------
+        % ----------------------- CohPlethy -------------------------------
+        if compute_coh
+            clear C t f cS12 cS34 cREM cWake cWakeTheta cWakeNonTheta cSWS
+            try
+                try
+                    load AnalyCohPlethy C t f cS12 cS34 cREM cWake cWakeTheta cWakeNonTheta cSWS
+                    cS12;
+                catch
+                    [C,t,f,cS12,cS34,cREM,cWake,cWakeTheta,cWakeNonTheta,cSWS]=CohPlethy(LFP1,LFP2,S12,S34,REMEpoch,WakeEpoch,SleepStages,params,movingwin);
+                    title(Dir.name{man})
+                    close
+                    disp('saving in AnalyCohPlethy')
+                    save AnalyCohPlethy C t f cS12 cS34 cREM cWake cWakeTheta cWakeNonTheta cSWS
+                end
+                cS12t(man,:)=cS12';
+                cS34t(man,:)=cS34';
+                cREMt(man,:)=cREM';
+                cSWSt(man,:)=cSWS';
+                cWaket(man,:)=cWake';
+                cWakeThetat(man,:)=cWakeTheta';
+                cWakeNonThetat(man,:)=cWakeNonTheta';
+                
+                Problem(man)=0;
+            catch
+                disp('Failed at CohPlethy')
+            end
+        end
+        
+        %------------------------------------------------------------------
+        % ----------------------- Granger -------------------------------
+        if compute_gran
+            try
+                
+                clear granger2 granger_F granger_pvalue Fx2y Fy2x
+                
+                disp('S12')
+                [granger2, granger_F, granger_pvalue,Fx2y,Fy2x,freqBin]= GrangerMarie(LFP1,LFP2,S12);
+                GpS12t(man,1:3)={granger2, granger_F, granger_pvalue};
+                GxS12t(man,:)=Fx2y';
+                GyS12t(man,:)=Fy2x';
+                disp('S34')
+                [granger2, granger_F, granger_pvalue,Fx2y,Fy2x]= GrangerMarie(LFP1,LFP2,S34);
+                GpS34t(man,1:3)={granger2, granger_F, granger_pvalue};
+                GxS34t(man,:)=Fx2y';
+                GyS34t(man,:)=Fy2x';
+                disp('REMEpoch')
+                [granger2, granger_F, granger_pvalue,Fx2y,Fy2x]= GrangerMarie(LFP1,LFP2,REMEpoch);
+                GpREMt(man,1:3)={granger2, granger_F, granger_pvalue};
+                GxREMt(man,:)=Fx2y';
+                GyREMt(man,:)=Fy2x';
+                disp('SWSEpoch')
+                [granger2, granger_F, granger_pvalue,Fx2y,Fy2x]= GrangerMarie(LFP1,LFP2,SWSEpoch);
+                GpSWSt(man,1:3)={granger2, granger_F, granger_pvalue};
+                GxSWSt(man,:)=Fx2y';
+                GySWSt(man,:)=Fy2x';
+                
+                disp('WakeEpoch')
+                [granger2, granger_F, granger_pvalue,Fx2y,Fy2x]= GrangerMarie(LFP1,LFP2,WakeEpoch);
+                GpWaket(man,1:3)={granger2, granger_F, granger_pvalue};
+                GxWaket(man,:)=Fx2y';
+                GyWaket(man,:)=Fy2x';
+                disp('and(WakeEpoch,ThetaEpoch)')
+                [granger2, granger_F, granger_pvalue,Fx2y,Fy2x]= GrangerMarie(LFP1,LFP2,and(WakeEpoch,ThetaEpoch));
+                GpWakeThetat(man,1:3)=[{granger2} {granger_F} {granger_pvalue}];
+                GxWakeThetat(man,:)=Fx2y';
+                GyWakeThetat(man,:)=Fy2x';
+                disp('WakeEpoch-ThetaEpoch')
+                [granger2, granger_F, granger_pvalue,Fx2y,Fy2x]= GrangerMarie(LFP1,LFP2,mergeCloseIntervals(WakeEpoch-ThetaEpoch,1));
+                GpWakeNonThetat(man,1:3)=[{granger2} {granger_F} {granger_pvalue}];
+                GxWakeNonThetat(man,:)=Fx2y';
+                GyWakeNonThetat(man,:)=Fy2x';
+                
+                ProblemG(man)=0;
+            catch
+               disp('Failed at GrangerMarie') 
+            end
+        end
+       end  
+    end
+    if compute_coh
+        save([res,'/',folderToSave,'/DataCoherence_',NameDir,'_',struct1,'Vs',struct2,'_',prof],'cS12t','cS34t','cREMt','cSWSt','cWaket','cWakeThetat','cWakeNonThetat','params','movingwin','Problem','Dir');
+    end
+    if compute_gran
+        save([res,'/',folderToSave,'/DataGranger_',NameDir,'_',struct1,'Vs',struct2,'_',prof],'GpS12t','GxS12t','GyS12t','GpS34t','GxS34t','GyS34t');
+        save([res,'/',folderToSave,'/DataGranger_',NameDir,'_',struct1,'Vs',struct2,'_',prof],'-append','GpREMt','GxREMt','GyREMt','GpSWSt','GxSWSt','GySWSt');
+        save([res,'/',folderToSave,'/DataGranger_',NameDir,'_',struct1,'Vs',struct2,'_',prof],'-append','GpWaket','GxWaket','GyWaket','GpWakeThetat','GxWakeThetat','GyWakeThetat','GpWakeNonThetat','GxWakeNonThetat','GyWakeNonThetat');
+        save([res,'/',folderToSave,'/DataGranger_',NameDir,'_',struct1,'Vs',struct2,'_',prof],'-append','ProblemG','freqBin');
+    end
+   
+end
+cd(res)
+
+
+%% pool same mice
+nameCoher={'S12' 'S34' 'REM' 'SWS' 'Wake' 'WakeTheta' 'WakeNonTheta'};
+MiceNames=unique(Dir.name);
+Strains=unique(Dir.group);
+
+mat_Strain=nan(length(MiceNames),1);
+for i=1:length(nameCoher)
+    eval(['mat_c',nameCoher{i},'t=nan(length(MiceNames),size(c',nameCoher{i},'t,2));']);
+    eval(['mat_Gx',nameCoher{i},'t=nan(length(MiceNames),size(Gx',nameCoher{i},'t,2));']);
+    eval(['mat_Gy',nameCoher{i},'t=nan(length(MiceNames),size(Gy',nameCoher{i},'t,2));']);
+
+    for uu=1:length(MiceNames)
+        index=find(strcmp(Dir.name,MiceNames{uu}) & ~Problem);
+        if ~isempty(index)
+            try eval(['mat_c',nameCoher{i},'t(uu,:)=nanmean(c',nameCoher{i},'t(index,:),1);']); end
+            try eval(['mat_Gx',nameCoher{i},'t(uu,:)=nanmean(Gx',nameCoher{i},'t(index,:),1);']);  end
+            try eval(['mat_Gy',nameCoher{i},'t(uu,:)=nanmean(Gy',nameCoher{i},'t(index,:),1);']); end
+            mat_Strain(uu)=find(strcmp(unique(Dir.group(index)),Strains));
+            
+            for ggg=1:3
+                a=zeros(2,2); compt=0;
+                for ind=index
+                    try eval(['if sum(sum(isnan(Gp',nameCoher{i},'t{ind,ggg})))==0, a=a+Gp',nameCoher{i},'t{ind,ggg};compt=compt+1;end;']);end
+                end
+                 if compt~=0, eval(['mat_Gp',nameCoher{i},'t{uu,ggg}=a./compt;']);end
+            end
+            
+        end
+        clear index
+    end
+end
+
+
+
+%% set Display variables
+scrsz = get(0,'ScreenSize');
+figure('color',[1 1 1],'position',scrsz), NumF=gcf;
+colori={'b' [0 0.4 0] 'r' 'g' 'k' 'm'};
+freq=[params.fpass(1):0.1:params.fpass(2)];
+smo=1;
+maa=0.8;
+
+
+yl=0.2;
+try
+    xl;
+    xl(2)=xl(2)-3;
+catch
+    disp('calcul xl')
+    xl=[params.fpass(1) params.fpass(2)-3];
+end
+%xl=[0 40];
+xl=[0 15];
+
+wt=find(mat_Strain==find(strcmp(Strains,'WT')));
+ko=find(mat_Strain==find(strcmp(Strains,'dKO')));
+    
+
+%% Display coherence
+
+
+subplot(3,3,1),hold on, 
+for i=[1:3,5]
+    try eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(wt,:),1),smo),''color'',colori{i},''linewidth'',2)']);end
+end
+ylim([yl maa]),xlim(xl)
+title(['WT ',struct1,'-',struct2])
+ylabel(['Coherence ',struct1,' vs. ',struct2,', ',prof])
+
+subplot(3,3,4),hold on,
+for i=[1:3,5]
+    try  eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(ko,:),1),smo),''color'',colori{i},''linewidth'',2)']);end
+end
+ylim([yl maa]),xlim(xl)
+legend(nameCoher([1:3,5]))
+title(['dKO ',struct1,'-',struct2])
+ylabel(['Coherence ',struct1,' vs. ',struct2,', ',prof])
+
+
+
+%% Display coherence all sleep stages
+inx=[2,3,5,6];
+
+for i=1:4
+    subplot(3,3,inx(i)), hold on
+    try
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(wt,:),1),smo),''k'',''linewidth'',2)'])
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(ko,:),1),smo),''r'',''linewidth'',2)'])
+        ylim([yl maa]),xlim(xl)
+        title(nameCoher{i})
+    end
+    try
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(wt,:),1)+stdError(mat_c',nameCoher{i},'t(wt,:)),smo),''k'')'])
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(ko,:),1)+stdError(mat_c',nameCoher{i},'t(ko,:)),smo),''r'')'])
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(wt,:),1)-stdError(mat_c',nameCoher{i},'t(wt,:)),smo),''k'')'])
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(ko,:),1)-stdError(mat_c',nameCoher{i},'t(ko,:)),smo),''r'')'])
+        
+        ylim([yl maa]),xlim(xl)
+    end
+    
+end
+
+%% display coherence wake
+
+for i=5:7
+    subplot(3,3,i+2), hold on
+    try
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(wt,:),1),smo),''k'',''linewidth'',2)'])
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(ko,:),1),smo),''r'',''linewidth'',2)'])
+        ylim([yl maa]),xlim(xl)
+    end
+    title(nameCoher{i})
+    if i==5, ylabel(['Coherence ',struct1,' vs. ',struct2,', ',prof]);
+    elseif i==7, legend({['WT (n=',num2str(length(wt)),')'] ['dKO (n=',num2str(length(ko)),')']});
+    end
+    
+    try
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(wt,:),1)+stdError(mat_c',nameCoher{i},'t(wt,:)),smo),''k'')'])
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(ko,:),1)+stdError(mat_c',nameCoher{i},'t(ko,:)),smo),''r'')'])
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(wt,:),1)-stdError(mat_c',nameCoher{i},'t(wt,:)),smo),''k'')'])
+        eval(['plot(freq,SmoothDec(nanmean(mat_c',nameCoher{i},'t(ko,:),1)-stdError(mat_c',nameCoher{i},'t(ko,:)),smo),''r'')'])
+        
+        ylim([yl maa]),xlim(xl)
+    catch
+        keyboard
+    end
+end
+
+
+
+
+%% display Granger
+
+figure('color',[1 1 1],'position',scrsz), NumG=gcf;
+
+Y_lim=[];
+wtG=wt;
+koG=ko;
+
+nameGranger={'S12' 'S34' 'REM' 'Wake'}; % 'WakeTheta' 'WakeNonTheta
+
+Awt=nan(length(wtG),length(nameGranger));Awtp=Awt;
+Ako=nan(length(koG),length(nameGranger));Akop=Ako;
+Bwt=nan(length(wtG),length(nameGranger));Bwtp=Bwt;
+Bko=nan(length(koG),length(nameGranger));Bkop=Bko;
+for i=1:length(nameGranger)
+    
+    subplot(2,3,1), hold on,
+    try 
+        %eval(['plot(freqBin,SmoothDec(nanmean(Gx',nameGranger{i},'t(wtG,:),1),smo),colori{i},''linewidth'',2);']);
+    eval(['plot(freqBin,nanmean(mat_Gx',nameGranger{i},'t(wtG,:),1),''color'',colori{i},''linewidth'',2);']);
+        Y_lim=[Y_lim,ylim]; ylabel('Granger')
+    end
+    
+    subplot(2,3,2), hold on,
+    try 
+        %eval(['plot(freqBin,SmoothDec(nanmean(Gx',nameGranger{i},'t(koG,:),1),smo),colori{i},''linewidth'',2);'])
+        eval(['plot(freqBin,nanmean(mat_Gx',nameGranger{i},'t(koG,:),1),''color'',colori{i},''linewidth'',2);']);
+        Y_lim=[Y_lim,ylim];ylabel('Granger')
+    end
+    
+    subplot(2,3,4), hold on,
+    try 
+        %eval(['plot(freqBin,SmoothDec(nanmean(Gy',nameGranger{i},'t(wtG,:),1),smo),colori{i},''linewidth'',2);'])
+        eval(['plot(freqBin,nanmean(mat_Gy',nameGranger{i},'t(wtG,:),1),''color'',colori{i},''linewidth'',2);']);
+        Y_lim=[Y_lim,ylim];ylabel('Granger')
+    end
+    
+    subplot(2,3,5), hold on,
+    try 
+        %eval(['plot(freqBin,SmoothDec(nanmean(Gy',nameGranger{i},'t(koG,:),1),smo),colori{i},''linewidth'',2);']);
+        eval(['plot(freqBin,nanmean(mat_Gy',nameGranger{i},'t(koG,:),1),''color'',colori{i},''linewidth'',2);']);
+        Y_lim=[Y_lim,ylim];ylabel('Granger')
+    end
+    
+    for man=1:length(wtG)
+        try eval(['Awt(man,i)=mat_Gp',nameGranger{i},'t{wtG(man),1}(2,1);']);end
+        try eval(['Awtp(man,i)=mat_Gp',nameGranger{i},'t{wtG(man),3}(2,1);']);end
+    end
+    for man=1:length(koG)
+        try eval(['Ako(man,i)=mat_Gp',nameGranger{i},'t{wtG(man),1}(2,1);']);end
+        try eval(['Akop(man,i)=mat_Gp',nameGranger{i},'t{wtG(man),3}(2,1);']);end
+    end
+    for man=1:length(wtG)
+        try eval(['Bwt(man,i)=mat_Gp',nameGranger{i},'t{wtG(man),1}(1,2);']);end
+        try eval(['Bwtp(man,i)=mat_Gp',nameGranger{i},'t{wtG(man),3}(1,2);']);end
+    end
+    for man=1:length(koG)
+        try eval(['Bko(man,i)=mat_Gp',nameGranger{i},'t{wtG(man),1}(1,2);']);end
+        try eval(['Bkop(man,i)=mat_Gp',nameGranger{i},'t{wtG(man),3}(1,2);']);end
+    end
+    
+end
+
+subplot(2,3,1), title(['WT-  ',struct1,'->',struct2]); legend(nameGranger);  ylim([0 max(Y_lim)]);xlim([0 max(freqBin)]);
+subplot(2,3,2), title(['dKO-  ',struct1,'->',struct2]); legend(nameGranger); ylim([0 max(Y_lim)]);xlim([0 max(freqBin)]);
+subplot(2,3,4), title(['WT-  ',struct2,'->',struct1]); legend(nameGranger); ylim([0 max(Y_lim)]);xlim([0 max(freqBin)]); 
+subplot(2,3,5), title(['dKO-  ',struct2,'->',struct1]); legend(nameGranger); ylim([0 max(Y_lim)]);xlim([0 max(freqBin)]);
+
+
+
+if 0
+    subplot(2,3,3)
+    bar([nanmean(Awt,1);nanmean(Ako,1)])
+    set(gca,'xticklabel',{'WT' 'dKO'})
+    legend(nameGranger);colormap summer;
+    title([struct1,'->',struct2]);colormap summer;ylim([0 0.2]);
+    
+    subplot(2,3,6)
+    bar([nanmean(Bwt,1);nanmean(Bko,1)])
+    set(gca,'xticklabel',{'WT' 'dKO'})
+    legend(nameGranger);colormap summer;
+    title([struct2,'->',struct1]);colormap summer;ylim([0 0.2]);
+    
+else
+    subplot(2,3,3)
+    try 
+        bar([nanmean(Awt,1);nanmean(Ako,1)]'); 
+    catch
+        if ~isempty(Awt), try bar([nanmean(Awt,1);zeros(size(nanmean(Awt,1)))]');end;end
+        if ~isempty(Ako), try bar([nanmean(Ako,1);zeros(size(nanmean(Ako,1)))]');end;end
+    end
+    set(gca,'xticklabel',nameGranger)
+    set(gca,'xtick',[1:length(nameGranger)])
+    try hold on, errorbar([1:length(nameGranger)]-0.15,nanmean(Awt,1),stdError(Awt),'k+');end
+    try hold on, errorbar([1:length(nameGranger)]+0.15,nanmean(Ako,1),stdError(Ako),'k+');end
+    legend([{['WT (n=',num2str(length(wtG)),')']} {['dKO (n=',num2str(length(koG)),')']}]);
+    title([struct1,'->',struct2]);colormap summer; ylim([0 0.05]);
+    
+    subplot(2,3,6)
+    try
+        bar([nanmean(Bwt,1);nanmean(Bko,1)]')
+    catch
+        if ~isempty(Bwt), try bar([nanmean(Bwt,1);zeros(size(nanmean(Bwt,1)))]');end;end
+        if ~isempty(Bko), try bar([nanmean(Bko,1);zeros(size(nanmean(Bko,1)))]');end;end
+    end    
+    set(gca,'xticklabel',nameGranger)
+    set(gca,'xtick',[1:length(nameGranger)])
+    try hold on, errorbar([1:length(nameGranger)]-0.15,nanmean(Bwt,1),stdError(Bwt),'k+');end
+    try hold on, errorbar([1:length(nameGranger)]+0.15,nanmean(Bko,1),stdError(Bko),'k+');end
+    legend([{['WT (n=',num2str(length(wtG)),')']} {['dKO (n=',num2str(length(koG)),')']}]);
+    title([struct2,'->',struct1]);colormap summer; ylim([0 0.05]);
+    
+end
+
+
+%% save figures
+if saveFig
+    saveFigure(NumF,['DataCoherence_',NameDir,'_',struct1,'Vs',struct2,'_',prof],folderToSave);
+    saveFigure(NumG,['DataGranger_',NameDir,'_',struct1,'Vs',struct2,'_',prof],folderToSave);
+end

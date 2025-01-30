@@ -1,0 +1,151 @@
+% PlotHabDistanceAndMovt
+% 02.12.2015
+%cd('/media/DataMOBsRAID/ProjetAversion/PAIN/manip6souris_test')
+res=pwd;
+list=dir(res);
+
+% ActivityFolder=([res '/PAIN2_activity_6souris_test']);
+% RearingFolder=([res '/PAIN2_rearing_6souris_test']);
+% rearingsuffix='-03122015-01-PAIN';
+% ActivityFolder=([res '/HAB2_activity_22souris_sham-obx']);
+% RearingFolder=([res '/HAB2_rearing_22souris_sham-obx']);
+% rearingsuffix='-02122015-01-HABenvtest';
+
+ActivityFolder=([res '/PAIN_activity_22souris_sham-obx']);
+RearingFolder=([res '/PAIN_rearing_22souris_sham-obx']);
+rearingsuffix='-04122015-01-COND';
+
+a=1;
+%% define groups
+obxNb=[269:279];
+for k=1:length(obxNb)
+    obx{k}=num2str(obxNb(k));
+end
+obxmice=obx';
+%shamNb=[280:290];
+shamNb=[281:290];
+for k=1:length(shamNb)
+    sham{k}=num2str(shamNb(k));
+end
+shammice=sham';
+
+% shammice={'263';'264';'265';'266';'267';'268'};
+% obxmice={};
+rearTh=1.5;
+
+Dist=nan(2, max(length(shammice), length(obxmice)));
+Movt=nan(2, max(length(shammice), length(obxmice)));
+RearTotal=nan(2, max(length(shammice), length(obxmice)));
+JumpTotal=nan(2, max(length(shammice), length(obxmice)));
+LickTotal=nan(2, max(length(shammice), length(obxmice)));
+
+
+expgroup={shammice,obxmice};
+groupname={'sham','bulb'};
+for  g=1:2
+    group=expgroup{g};
+%     groupFig=figure('Position', [503  101  1327  834]);%503 496 3147  439
+
+    for mousenb=1:length(group)
+    indivFig{g,mousenb}=figure;
+        try
+            %% distance and movement
+            cd([ ActivityFolder '/M' num2str(group{mousenb}) ])
+            load('Behavior.mat');
+            %subplot(2,10,mousenb)
+            
+            %subplot(length(group), 5, (mousenb-1)*5+[2:5])
+            subplot(2, 5,[1:5])
+            plot(Range(Movtsd,'s'),Data(Movtsd),'k'), hold on
+            X=PosMat(:,2);
+            Y=PosMat(:,3);
+            %plot(X,Y)
+            d=sqrt(diff(X).*diff(X)+diff(Y).*diff(Y));
+            Dist(g,mousenb)=nansum(d);
+            Movt(g,mousenb)=nansum(Data(Movtsd));
+            title([ 'M' num2str(group{mousenb}) '  '  sprintf('%.0f',nansum(d)) 'cm'])
+            
+        end
+            %% rearing, licking, jump
+            cd([ RearingFolder '/FEAR-Mouse-' num2str(group{mousenb}) rearingsuffix ]) ;
+            
+            load('Behavior.mat');
+            subplot(2, 5,[6:10]);hold on 
+            RearEp=thresholdIntervals(Movtsd,rearTh,'Direction','Below', 'b');
+            AutoRearMatrix=Start(RearEp)'*1E-4;
+            RearTotal(g,mousenb)=length(Start(RearEp));
+            JumpTotal(g,mousenb)=length(JumpMatrix);
+            LickTotal(g,mousenb)=length(LickMatrix);
+            % plot
+            if ~isempty(RearMatrix), plot(RearMatrix,10,'.r'); end
+            if ~isempty(JumpMatrix), plot(JumpMatrix,12,'*c'); end
+            if ~isempty(LickMatrix), plot(LickMatrix,15,'*g'); end
+            
+            plot(Range(Movtsd,'s'),Data(Movtsd)), hold on 
+            if ~isempty(Start(RearEp))
+                for k=1:(length(Start(RearEp)))
+                    plot(Range(Restrict(Movtsd,subset(RearEp,k)),'s'),Data(Restrict(Movtsd,subset(RearEp,k))),'k'),
+                end
+            end
+            legend({'rearing ';'jump';'lick'})
+            
+            RampeSize=15;
+            for i=1:RampeSize
+                %final_time=floor(max(Range(Movtsd, 's')));
+                final_time=900;
+                interval_deb=(i-1)/RampeSize*final_time;
+                interval_fin=(i)/RampeSize*final_time;
+                AutoRearNb{g}(mousenb,i)=sum(AutoRearMatrix>interval_deb & AutoRearMatrix<interval_fin);
+                RearNb{g}(mousenb,i)=sum(RearMatrix>interval_deb & RearMatrix<interval_fin);
+                LickNb{g}(mousenb,i)=sum(LickMatrix>interval_deb & LickMatrix<interval_fin);
+                JumpNb{g}(mousenb,i)=sum(JumpMatrix>interval_deb & JumpMatrix<interval_fin);
+            end
+            
+        %end
+        cd(res)
+    end
+    
+x_axisNb=[30:45];
+for k=1:length(x_axisNb)
+    x_axis_label{k}=num2str(x_axisNb(k));
+end
+    
+painfig=figure('Position', [ 1640 94 337 880]);
+subplot(4,1,1),PlotErrorBarN(RearNb{1,g},0,1); ylabel('rear');ylim([0 15]); set(gca,'XTick',[1:16]);set(gca,'XTickLabel',x_axis_label);title(groupname{g})
+subplot(4,1,2),PlotErrorBarN(AutoRearNb{1,g},0,1); ylabel('auto-rear');ylim([0 15]); set(gca,'XTick',[1:16]);set(gca,'XTickLabel',x_axis_label);
+subplot(4,1,3),PlotErrorBarN(JumpNb{1,g},0,1); ylabel('jump'); set(gca,'XTick',[1:16]);set(gca,'XTickLabel',x_axis_label);
+subplot(4,1,4),PlotErrorBarN(LickNb{1,g},0,1); ylabel('lick'); set(gca,'XTick',[1:16]);set(gca,'XTickLabel',x_axis_label);
+
+saveas(painfig, ['pain_' groupname{g} '.fig'])
+end
+PlotErrorBarN(Dist',1,0);%1=newfig, 0=unpaired; default test=ranksum
+ylabel('travelled distance');
+set(gca,'XTick',[1:2]);
+set(gca,'XTickLabel',{'sham','obx'});
+saveas(painfig, ['travelled_distance.fig'])
+PlotErrorBarN(Movt',1,0);
+ylabel('movement');
+set(gca,'XTick',[1:2]);
+set(gca,'XTickLabel',{'sham','obx'});
+saveas(painfig, ['movement.fig'])
+
+% 
+% for i=1:length(list)
+%      if list(i).isdir==1&list(i).name(1)~='.' &list(i).name(1)=='M'  % if the folder is indeed a mouse name folder
+%         %cd([res '/' list(i).name(1)])
+%         cd([ res '/' list(i).name])
+%         load('Behavior.mat');
+%         subplot(2,10,i)
+%         %plot(Range(Movtsd,'s'),Data(Movtsd),'k')
+%         X=PosMat(:,2);
+%         Y=PosMat(:,3);
+%         plot(X,Y)
+%         d=sqrt(diff(X).*diff(X)+diff(Y).*diff(Y));
+%         Dist=[Dist;nansum(d)];
+%         title([ list(i).name '  '  sprintf('%.0f',nansum(d)) 'cm'])
+%         
+%         a=a+1;
+% 
+%      end
+%      cd(res)
+% end

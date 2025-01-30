@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="11"
+   name=""
+   committed-date="2006-06-05T15:43:32.457573Z"
+   url="file:///home/battagli/svn/matlab/trunk/projects/ReactRateCortex/private"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   prop-time="2006-06-06T06:42:16.000000Z"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="intervalShuffleClosest_c.c"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="117a0930b6be42b8c71d8467fd6446a1"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="intervalShuffle_c.c"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6c4ce24984d643682587698f0197dcfd"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+<entry
+   committed-rev="1"
+   name="Qpearson_c.c"
+   text-time="2006-06-01T11:59:00.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="2b5c804ce1d2de95107afd599a4c391d"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:00.000000Z"/>
+</wc-entries>

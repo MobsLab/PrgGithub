@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="11"
+   name=""
+   committed-date="2006-06-05T15:43:32.457573Z"
+   url="file:///home/battagli/svn/matlab/trunk/UtilsEEG"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   prop-time="2006-06-06T06:42:15.000000Z"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="ThetaPhase.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="401cb71d08b2fffca6fed7ee778391d3"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="NormSine.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="7c104cb8d066cc852cfde2c6ff5d2296"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="SpindleSparsity.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5452ab74aff904238a24293b4a93aedd"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="ComputePhase.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="3a0ba96d97f5e3bf8971d431b33663ce"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PhasePositionTsd.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="423de482c56f26f0b6f543cc8302a2dc"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="PETH.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="51907613cb60bc2c35f1a3096636da64"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="NormSineImpl.c"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a1fdb3540ee19f391c1fad215e75053c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="findTheta.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="f774e8716a196319cf8eba2f24d266d2"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="SpindleSegmentCorr.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="12d76aa6e896f1d9314329473a31b53e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="NonRippleTimes.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e68c3579f755f44e47449d6c431caf17"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="RankSpikes.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="7e3edf0d833563266d128092338d178c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="findRipples.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ab6758a164fd4376c3857746eacc58bd"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="SpindleSegment.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5b630c3ac1635e9b6f0b4ce4e01c9778"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="RipplesMidPoint.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="3b5a049daa9f370901c85b62dda0bfb3"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="findSpindles.m"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="06c6f5f4696de7b1e8d380dea907ce3a"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+<entry
+   committed-rev="1"
+   name="._.DS_Store"
+   text-time="2006-06-01T11:58:59.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="96c68b79bc82b883258762468d5a38a3"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:59.000000Z"/>
+</wc-entries>

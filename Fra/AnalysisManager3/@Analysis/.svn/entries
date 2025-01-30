@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="39"
+   name=""
+   committed-date="2006-09-13T12:12:06.298439Z"
+   url="svn+ssh://uvavpn/home/battagli/svn/matlab/branches/AnalysisManager/@Analysis"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   repos="svn+ssh://uvavpn/home/battagli/svn/matlab"
+   revision="50"/>
+<entry
+   committed-rev="39"
+   name="run.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-09-13T12:12:06.298439Z"
+   checksum="e9c527aa59993e386798a0ee276d20a6"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="1"
+   name="checkDimensions.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="1e93d5573b5cc06f1a08a00f79395bbd"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="1"
+   name="saveResource.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6f3f5f70560719e8eb5f8b0801c2d91f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="1"
+   name="current_dataset.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="c8838b66dd71d20a0ffa0c9a920ec7da"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="19"
+   name="getResource.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-07-03T20:36:43.225503Z"
+   checksum="8ad1b97e34dd3b2f4b4572a85f638501"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="1"
+   name="parent_dir.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="54538e180dc7d3819ef1fee2994d56f0"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="1"
+   name="saveGlobalResource.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="05d7e2f73fdd6bee670fef2dbb926802"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="1"
+   name="getDim.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="011cc84000bf7e67486e7abe609fc541"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="38"
+   name="registerResource.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-09-12T11:41:53.786999Z"
+   checksum="dfe34e892282c4db4b6cbe9feb2552b9"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   name="private"
+   kind="dir"/>
+<entry
+   committed-rev="1"
+   name="current_dir.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="15b8a739f1966557bdb0f71da4864395"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="1"
+   name="saveAllResources.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="186154b5a8b9ff486d40ac838a93ba60"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+<entry
+   committed-rev="38"
+   name="Analysis.m"
+   text-time="2006-09-23T15:05:48.000000Z"
+   committed-date="2006-09-12T11:41:53.786999Z"
+   checksum="0112bd28dce14c47222375a9c6dd7c6b"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-09-23T15:05:48.000000Z"/>
+</wc-entries>

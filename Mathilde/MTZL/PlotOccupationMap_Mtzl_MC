@@ -1,0 +1,33 @@
+
+clear nn xx yy
+
+SalMice = [756 758 761 763 765];
+for i = 1:length(SalMice)
+    
+    [nn(i,:,:),xx(i,:,:),yy(i,:,:)]=AnlaysisDensity_MC(['/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/MethimazoleBehaviourExperiment/4DqysPost/FEAR-Mouse-',num2str(SalMice(i)),'-16062018-Hab_00']);
+    
+    nn(i,:,:) = SmoothDec(squeeze(nn(i,:,:)),1);
+    nn(i,:,:) = nn(i,:,:)/sum(sum(nn(i,:,:)));
+end
+
+
+MtzlMice = [757 759 760 762 764];
+for j = 1:length(MtzlMice)
+    
+    [nnl(j,:,:),xxl(j,:,:),yyl(j,:,:)]=AnlaysisDensity_MC(['/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/MethimazoleBehaviourExperiment/4DqysPost/FEAR-Mouse-',num2str(MtzlMice(j)),'-16062018-Hab_00']);
+    nnl(j,:,:) = SmoothDec(squeeze(nnl(j,:,:)),1);
+    nnl(j,:,:) = nnl(j,:,:)/sum(sum(nnl(j,:,:)));
+    
+end
+
+
+figure
+subplot(121)
+imagesc(xx(i,:), yy(i,:),squeeze(mean(nn(:,:,:))))
+title('saline')
+clim([0 2*1e-3])
+
+subplot(122)
+imagesc(xxl(j,:), yyl(j,:),squeeze(mean(nnl(:,:,:))))
+title('mtzl')
+clim([0 2*1e-3])

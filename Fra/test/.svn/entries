@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="16"
+   name=""
+   committed-date="2006-06-30T09:02:16.554641Z"
+   url="file:///home/battagli/svn/matlab/trunk/test"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="callee.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="717a900e633babf92955561c7bd9b576"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="test_tsd.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="7f41e368bceffcc0581fb8c78ffa33e3"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="16"
+   name="testAmyphys.m"
+   text-time="2006-06-30T11:27:47.000000Z"
+   committed-date="2006-06-30T09:02:16.554641Z"
+   checksum="4f027645152e43fe40c93c2cfc638c2f"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-30T11:27:47.000000Z"/>
+<entry
+   committed-rev="15"
+   name="testLPPA.m"
+   text-time="2006-06-07T15:30:23.000000Z"
+   committed-date="2006-06-09T10:59:02.976581Z"
+   checksum="bea3989aa95a9fe76d1b002ce7029697"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-06T06:42:19.000000Z"/>
+<entry
+   committed-rev="1"
+   name="x.log"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="c7a7cc95ce2cc74dd79bcfedf8251011"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="test2.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="9a3515cd3631a61d08c7af529fa864cb"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="caller.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="85eb688d17d507ecca7ba44c9d510220"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="calee.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="93e1cd8779f760c5c90f2dd3fb69a8de"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="testHyper5.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="feef901182761227db6591418bada63e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="testWarprat.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="720ff50ff8a147d0b3728a18991a42a8"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="fixResources.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5bdb4fd9d40ea3f4ec90b8e5240c4a39"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="testHDTheta.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="78de319e8a5ea00d93d4ec30edc8bc9b"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="test_dictarray.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e6ae7f70e7848a4c3a83351b057509ca"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="testDIRAC.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ed7cdd9ef4b79b75271afb6912a067b8"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="test_Analysis.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="2add49105ed1826a52e904259b1ff3af"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+<entry
+   committed-rev="1"
+   name="testCRAM.m"
+   text-time="2006-06-01T11:58:58.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="dc4fc5c0dbd954c06dc42bb17c80d382"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:58:58.000000Z"/>
+</wc-entries>

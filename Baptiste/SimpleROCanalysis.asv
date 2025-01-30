@@ -1,0 +1,13 @@
+function [RocVal,alpha,beta] = SimpleROCanalysis(data,output)
+% Do the ROC analysis 
+alpha=[];
+beta=[];
+minval=min([data]);
+maxval=max([data]);
+
+delval=(maxval-minval)/20;
+ValsToTest= prctile(data,[5
+
+RocVal=sum(beta-alpha)/length(beta)+0.5;
+
+end

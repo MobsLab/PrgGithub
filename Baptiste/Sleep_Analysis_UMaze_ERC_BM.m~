@@ -1,0 +1,273 @@
+
+
+clear all
+close all
+
+%%
+Drug_Group={'Novel','Known','UMazePAG','StimMFBWake'};
+for group=1:length(Drug_Group)
+    DIR.(Drug_Group{group}) = PathForExperimentsERC(Drug_Group{group});
+    for mouse=1:length(DIR.(Drug_Group{group}).path)
+        Dir.(Drug_Group{group}){mouse} = DIR.(Drug_Group{group}).path{mouse};
+    end
+end
+
+%% basic parameters
+States={'Sleep','Wake','NREM','REM_s_l_e_e_p','REM_t_o_t_a_l'};
+window_size = 60; % in minutes, starting from recording beginning
+window_size2 = 40; % after first sleep for REM
+window_size3 = 5; % for HR
+smootime = 1;
+SpeedLim = 1;
+
+%% data collection
+clear Prop_bin
+for group=1:length(Drug_Group)
+    disp(Drug_Group{group})
+    for mouse=1:length(Dir.(Drug_Group{group}))
+        try
+            
+            clear Wake Sleep SWSEpoch REMEpoch EKG Epoch EKG Vtsd TotalNoiseEpoch
+            
+            try
+                load([Dir.(Drug_Group{group}){mouse}{1} 'SleepScoring_Accelero.mat'], 'Wake' , 'Sleep' , 'SWSEpoch' ,...
+                    'REMEpoch', 'Epoch' , 'TotalNoiseEpoch')
+            end
+            load([Dir.(Drug_Group{group}){mouse}{1} 'behavResources.mat'], 'Vtsd','SessionEpoch')
+            %             Speed_smooth = tsd(Range(Vtsd) , runmean(Data(Vtsd) , ceil(smootime/median(diff(Range(Vtsd,'s'))))));
+            %             Moving = thresholdIntervals(Vtsd , SpeedLim ,'Direction', 'Above');
+            %             try
+            %                 load([Dir.(Drug_Group{group}){mouse}{1} 'HeartBeatInfo.mat'])
+            %             end
+            
+            
+            % ERC specificity
+            Epoch = SessionEpoch.PostSleep;
+            Wake = and(Wake , SessionEpoch.PostSleep);
+            Sleep = and(Sleep , SessionEpoch.PostSleep);
+            SWSEpoch = and(SWSEpoch , SessionEpoch.PostSleep);
+            REMEpoch = and(REMEpoch , SessionEpoch.PostSleep);
+            TotalNoiseEpoch = and(TotalNoiseEpoch , SessionEpoch.PostSleep);
+            
+            Wake = or(Wake , TotalNoiseEpoch);
+            Tot = or(Epoch , TotalNoiseEpoch);
+            
+            Long_Sleep = dropShortIntervals(Sleep , 20e4);
+            St = Start(Long_Sleep);
+            Start_Sleep = St(1);
+            
+            for state=1:length(States)
+                try
+                    if state==1 % sleep
+                        Epoch_to_use{1} = Sleep;
+                        Epoch_to_use{1} = mergeCloseIntervals(Epoch_to_use{1} , 2e4);
+                        Epoch_to_use{1} = dropShortIntervals(Epoch_to_use{1} , 20e4);
+                        Epoch_to_use{1} = and(Epoch_to_use{1} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                        Epoch_to_use{2} = Tot;
+                        Epoch_to_use{2} = and(Epoch_to_use{2} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                    elseif state==2 % wake
+                        Epoch_to_use{1} = Wake;
+                        Epoch_to_use{1} = mergeCloseIntervals(Epoch_to_use{1} , 2e4);
+                        Epoch_to_use{1} = dropShortIntervals(Epoch_to_use{1} , 5e4);
+                        Epoch_to_use{1} = and(Epoch_to_use{1} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                        Epoch_to_use{2} = Tot;
+                        Epoch_to_use{2} = and(Epoch_to_use{2} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                    elseif state==3 % NREM
+                        Epoch_to_use{1} = SWSEpoch;
+                        Epoch_to_use{1} = and(Epoch_to_use{1} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                        Epoch_to_use{2} = Sleep;
+                        Epoch_to_use{2} = and(Epoch_to_use{2} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                    elseif state==4 % REM over sleep
+                        Epoch_to_use{1} = REMEpoch;
+                        Epoch_to_use{1} = and(Epoch_to_use{1} , intervalSet(Start_Sleep,Start_Sleep+window_size2*60e4));
+                        Epoch_to_use{2} = Sleep;
+                        Epoch_to_use{2} = and(Epoch_to_use{2} , intervalSet(Start_Sleep,Start_Sleep+window_size2*60e4));
+                    elseif state==5 % REM over tot
+                        Epoch_to_use{1} = REMEpoch;
+                        Epoch_to_use{1} = and(Epoch_to_use{1} , intervalSet(Start_Sleep,Start_Sleep+window_size2*60e4));
+                        Epoch_to_use{2} = Tot;
+                        Epoch_to_use{2} = and(Epoch_to_use{2} , intervalSet(Start_Sleep,Start_Sleep+window_size2*60e4));
+                    end
+                    %
+                    Prop.(States{state}){group}(mouse) = sum(DurationEpoch(Epoch_to_use{1}))/sum(DurationEpoch(Epoch_to_use{2}));
+                    MeanDur.(States{state}){group}(mouse) = nanmean(DurationEpoch(Epoch_to_use{1}))/1e4;
+                    MedianDur.(States{state}){group}(mouse) = nanmedian(DurationEpoch(Epoch_to_use{1}))/1e4;
+                    EpNumb.(States{state}){group}(mouse) = length(Start(Epoch_to_use{1}));
+                    try
+                        LatencyToState_pre.(States{state}){group}{mouse} = Start(Epoch_to_use{1})/1e4;
+                        State_Duration.(States{state}){group}{mouse} = DurationEpoch(Epoch_to_use{1})/1e4;
+                        LatencyToState.(States{state}){group}(mouse) = LatencyToState_pre.(States{state}){group}{mouse}(find(State_Duration.(States{state}){group}{mouse}>20,1));
+                    end
+                    Dur.(States{state}){group}(mouse) = sum(DurationEpoch(Epoch_to_use{1}))/60e4;
+                    SFI.(States{state}){group} = EpNumb.(States{state}){group}./Dur.(States{state}){group}(mouse);
+                    
+                    for bin=1:window_size/10
+                        Prop_bin.(States{state}){group}(mouse,bin) = ...
+                            sum(DurationEpoch(and(Epoch_to_use{1} , intervalSet(Start(SessionEpoch.PostSleep)+10*(bin-1)*60e4,Start(SessionEpoch.PostSleep)+10*bin*60e4))))/...
+                            sum(DurationEpoch(and(Epoch_to_use{2} , intervalSet(Start(SessionEpoch.PostSleep)+10*(bin-1)*60e4,Start(SessionEpoch.PostSleep)+10*bin*60e4))));
+                    end
+                    %
+                end
+            end
+            HR_Wake{group}(mouse) = nanmean(Data(Restrict(EKG.HBRate , and(Wake , intervalSet(0,window_size3*60e4)))));
+            HR_Wake_Moving{group}(mouse) = nanmean(Data(Restrict(EKG.HBRate , and(and(Wake,Moving) , intervalSet(0,window_size3*60e4)))));
+            heartRate = Restrict(EKG.HBRate , and(Wake , intervalSet(0,window_size3*60e4)));
+            speed = Restrict(Vtsd , heartRate);
+            [meanHeartRatesInBins{group}(mouse,:) , ~] = HeartRateVsSpeed_Curve_BM(speed, heartRate);
+            try, TotDur{group}(mouse) = sum(DurationEpoch(Epoch1{mouse,1}))/3600e4; end
+            
+            HR_REM{group}(mouse) = nanmean(Data(Restrict(EKG.HBRate , and(Sleep , intervalSet(Start_Sleep,Start_Sleep+60*60e4))-Moving)));
+        end
+        disp(mouse)
+    end
+    try
+        HR_Wake{group}(HR_Wake{group}==0) = NaN;
+        HR_Wake_Moving{group}(HR_Wake_Moving{group}==0) = NaN;
+        meanHeartRatesInBins{group}(meanHeartRatesInBins{group}==0) = NaN;
+    end
+end
+
+
+%% figures
+Cols2 = {'','b','','r'};
+Cols = {[0 0 1],[1 .5 0],[1 0 0],[0 1 0]};
+X = [1:4];
+Legends = Drug_Group;
+NoLegends = {'',''};
+
+figure
+subplot(262)
+MakeSpreadAndBoxPlot3_SB(Prop.Wake,Cols,X,Legends,'showpoints',1,'paired',0)
+ylabel('Wake proportion')
+
+subplot(265)
+MakeSpreadAndBoxPlot3_SB(Prop.REM_s_l_e_e_p,Cols,X,Legends,'showpoints',1,'paired',0)
+ylabel('REM/sleep proportion')
+
+n=1;
+for state=[2 4]
+    subplot(2,2,n+2)
+    for group=[2 4]
+        errorbar([10:10:window_size] , nanmean(Prop_bin.(States{state}){group}) , stdError(Prop_bin.(States{state}){group}) , Cols2{group}), hold on
+    end
+    try
+        for bin=1:window_size/10
+            [p.(States{state})(bin)] = ranksum(Prop_bin.(States{state}){1}(:,bin) , Prop_bin.(States{state}){2}(:,bin));
+        end
+        y = ylim; Y = ones(1,9)*y(2)*1.1; X2 = [10:10:window_size];
+        plot(X2(p.(States{state})<.05) , Y(p.(States{state})<.05) , '*k'), ylim([0 Y(1)])
+    end
+    makepretty
+    xlabel('time (min)'), xlim([0 window_size])
+    if state==2, ylabel('Wake proportion')
+    elseif state==4, ylabel('REM/sleep proportion')
+    elseif state==5, ylabel('REM/total proportion'), end
+    if state==1, legend(Legends{1},Legends{2}), end
+    n=n+1;
+end
+
+%% old
+for cond=1:4
+    if cond==1
+        DIR = Dir_novel;
+    elseif cond==2
+        DIR = Dir_known;
+    elseif cond==3
+        DIR = Dir_pag;
+    elseif cond==4
+        DIR = Dir_mfb;
+    end
+    try
+        for mouse=1:length(DIR.path)
+            
+            cd(DIR.path{mouse}{1})
+            clear Wake_ob Wake_acc Wake Sleep SWSEpoch REMEpoch
+            
+            load('behavResources.mat', 'SessionEpoch')
+            
+            load('SleepScoring_Accelero.mat', 'Wake' , 'Sleep' , 'SWSEpoch' , 'REMEpoch')
+            Wake_acc = and(SessionEpoch.PostSleep , Wake);
+            try
+                load('SleepScoring_OBGamma.mat', 'Wake' , 'Sleep' , 'SWSEpoch' , 'REMEpoch')
+                Wake_ob = and(SessionEpoch.PostSleep , Wake);
+            end
+            try
+                if 1%abs(sum(DurationEpoch(Wake_acc)) - sum(DurationEpoch(Wake_ob)))/60e4>10
+                    disp(num2str(abs(sum(DurationEpoch(Wake_acc)) - sum(DurationEpoch(Wake_ob)))/60e4))
+                    %                 keyboard
+                end
+            end
+            
+            Epoch1{mouse,1} = SessionEpoch.PostSleep;
+            Epoch1{mouse,2} = and(Wake , SessionEpoch.PostSleep);
+            Epoch1{mouse,3} = and(Sleep , SessionEpoch.PostSleep);
+            Epoch1{mouse,4} = and(SWSEpoch , SessionEpoch.PostSleep);
+            Epoch1{mouse,5} = and(REMEpoch , SessionEpoch.PostSleep);
+            
+            for state=1:length(States)
+                if state==1 % sleep
+                    Epoch_to_use{1} = Epoch1{mouse,3};
+                    Epoch_to_use{1} = mergeCloseIntervals(Epoch_to_use{1} , 2e4);
+                    Epoch_to_use{1} = dropShortIntervals(Epoch_to_use{1} , 20e4);
+                    Epoch_to_use{1} = and(Epoch_to_use{1} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                    Epoch_to_use{2} = Epoch1{mouse,1};
+                    Epoch_to_use{2} = and(Epoch_to_use{2} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                elseif state==2 % wake
+                    Epoch_to_use{1} = Epoch1{mouse,2};
+                    Epoch_to_use{1} = mergeCloseIntervals(Epoch_to_use{1} , 2e4);
+                    Epoch_to_use{1} = dropShortIntervals(Epoch_to_use{1} , 5e4);
+                    Epoch_to_use{1} = and(Epoch_to_use{1} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                    Epoch_to_use{2} = Epoch1{mouse,1};
+                    Epoch_to_use{2} = and(Epoch_to_use{2} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                    Epoch_to_use{3} = Epoch1{mouse,3};
+                    Epoch_to_use{3} = and(Epoch_to_use{3} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                elseif state==3 % NREM
+                    Epoch_to_use{1} = Epoch1{mouse,4};
+                    Epoch_to_use{1} = and(Epoch_to_use{1} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                    Epoch_to_use{2} = Epoch1{mouse,3};
+                    Epoch_to_use{2} = and(Epoch_to_use{2} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                elseif state==4 % REM
+                    Epoch_to_use{1} = Epoch1{mouse,5};
+                    Epoch_to_use{1} = and(Epoch_to_use{1} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                    Epoch_to_use{2} = Epoch1{mouse,3};
+                    Epoch_to_use{2} = and(Epoch_to_use{2} , intervalSet(Start(SessionEpoch.PostSleep),Start(SessionEpoch.PostSleep)+window_size*60e4));
+                end
+                
+                Prop.(Cond{cond}).(States{state})(mouse) = sum(DurationEpoch(Epoch_to_use{1}))/sum(DurationEpoch(Epoch_to_use{2}));
+                %                 Dur.(Cond{cond}).(States{state})(mouse) = sum(DurationEpoch(Epoch_to_use{1}))/60e4;
+                
+            end
+        end
+    end
+end
+
+L = load(['/media/nas7/ProjetEmbReact/DataEmbReact/ThesisData/Sleep_BehavGroup_corrected' num2str(window_size) '.mat'],'Prop');
+Prop.Eyelid.Wake = L.Prop.Wake{2};
+Prop.Eyelid.REM = L.Prop.REM{2};
+
+
+Cols = {[0 0 1],[1 .5 0],[1 0 0],[0 1 0],[0 .5 1]};
+X = [1:5];
+Legends = Cond; Legends{5} = 'Eyelid';
+
+
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({Prop.Novel.Wake Prop.Known.Wake Prop.PAG.Wake Prop.MFB.Wake Prop.Eyelid.Wake},Cols,X,Legends,'showpoints',1,'paired',0);
+ylabel('Wake prop')
+
+subplot(122)
+MakeSpreadAndBoxPlot3_SB({Prop.Novel.REM Prop.Known.REM Prop.PAG.REM Prop.MFB.REM Prop.Eyelid.REM},Cols,X,Legends,'showpoints',1,'paired',0);
+ylabel('REM prop')
+
+
+
+
+
+
+
+
+
+
+
+

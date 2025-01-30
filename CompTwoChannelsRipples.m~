@@ -1,0 +1,146 @@
+function [ripEvt,Ripples,Ripples2]=CompTwoChannelsRipples(LFP,v,Epoch,v2,vnoise)
+
+
+paramRip=[3 5];
+samplingRate = 1250;
+
+durations = [-200 200]/1000;
+
+nBins = floor(samplingRate*diff(durations)/2)*2+1;
+
+
+
+
+try
+    vnoise;
+    
+catch
+    vnoise=0;
+end
+
+
+%----------------------------------------
+%----------------------------------------
+%Find Ripples
+%----------------------------------------
+%----------------------------------------
+
+
+
+FilRip=FilterLFP(Restrict(LFP{v},Epoch),[130 200],96);
+rgFil=Range(FilRip,'s');
+filtered=[rgFil-rgFil(1) Data(FilRip)];
+
+
+% try
+% [ripples,stdev,noise] = FindRipples(filtered,'thresholds',paramRip,'restrict',[debPeriodRip finPeriodRip]);
+% catch
+% [ripples,stdev,noise] = FindRipples(filtered,'thresholds',paramRip);    
+% end
+
+
+
+%----------------------------------------
+
+if vnoise>0
+    
+        NoiseRip=FilterLFP(LFP{vnoise},[130 200],96);
+        rgNoise=Range(vnoise,'s');
+        filteredNoise=[rgNoise-rgNoise(1) Data(NoiseRip)];
+        
+        FilTsd=tsd(filtered(:,1),filtered(:,2));
+        FilNoiseTsd=tsd(filteredNoise(:,1),filteredNoise(:,2));
+        
+        FilNoiseTsd=Restrict(FilNoiseTsd,FilTsd);
+        
+        filteredNoise2(:,1)=Range(FilNoiseTsd);
+        filteredNoise2(:,2)=Data(FilNoiseTsd);
+        
+        filteredNoise=filteredNoise2;
+        
+        [ripples,stdev,noise] = FindRipples(filtered,'thresholds',paramRip,'noise',filteredNoise,'show','off');
+
+else  
+%         try
+%         [ripples,stdev,noise] = FindRipples(filtered,'thresholds',paramRip,'restrict',[debPeriodRip finPeriodRip]);
+%         catch
+        [ripples,stdev,noise] = FindRipples(filtered,'thresholds',paramRip);    
+%         end
+
+end
+
+
+
+%----------------------------------------
+%----------------------------------------
+%----------------------------------------
+
+
+%[maps,data,stats] = RippleStats(filtered,ripples);
+%PlotRippleStats(ripples,maps,data,stats)
+
+ripEvt=intervalSet((ripples(:,2)-0.1)*1E4,(ripples(:,2)+0.1)*1E4);
+
+%----------------------------------------
+%----------------------------------------
+%----------------------------------------
+
+
+
+
+
+rg2=Range((Restrict(LFP{v},Epoch)),'s');
+
+Ripp=[rg2-rg2(1) Data(Restrict(LFP{v},Epoch))];
+[r,i] = Sync(Ripp,ripples(:,2),'durations',durations);
+Ripples = SyncMap(r,i,'durations',durations,'nbins',nBins,'smooth',0);
+
+
+
+figure('Color',[1 1 1])
+subplot(1,2,1), hold on
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),Ripples,'k');
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(Ripples),'r','linewidth',2);
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(Ripples)+std(Ripples),'r--');
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(Ripples)-std(Ripples),'r--');
+title(['Voie LFP ',num2str(v)])
+subplot(1,2,2), hold on
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),zscore(Ripples')','k');
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(zscore(Ripples')'),'r','linewidth',2);
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(zscore(Ripples')')+std(zscore(Ripples')'),'r--');
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(zscore(Ripples')')-std(zscore(Ripples')'),'r--');
+title(['zscore, voie LFP ',num2str(v)])
+
+
+
+    
+rg3=Range(Restrict(LFP{v2},Epoch),'s');
+
+Ripp2=[rg3-rg3(1) Data(Restrict(LFP{v2},Epoch))];
+[r2,i2] = Sync(Ripp2,ripples(:,2),'durations',durations);
+Ripples2 = SyncMap(r2,i2,'durations',durations,'nbins',nBins,'smooth',0);
+
+
+
+figure('Color',[1 1 1])
+subplot(1,2,1), hold on
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),Ripples2,'k');
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(Ripples2),'r','linewidth',2);
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(Ripples2)+std(Ripples2),'r--');
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(Ripples2)-std(Ripples2),'r--');
+title(['Voie LFP ',num2str(v2)])
+subplot(1,2,2), hold on
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),zscore(Ripples2')','k');
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(zscore(Ripples2')'),'r','linewidth',2);
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(zscore(Ripples2')')+std(zscore(Ripples2')'),'r--');
+plot(((1:nBins)'-ceil(nBins/2))/nBins*diff(durations),mean(zscore(Ripples2')')-std(zscore(Ripples2')'),'r--');
+title(['zscore, voie LFP ',num2str(v2)])
+
+
+
+%----------------------------------------
+%----------------------------------------
+%----------------------------------------
+
+
+%---------------------------------------------------------------------------------------------------------------

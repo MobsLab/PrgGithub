@@ -1,0 +1,109 @@
+function A = SleepSpecgramGlobal(A)
+
+
+cd(parent_dir(A));
+
+A = getResource(A, 'Sleep1Epoch');
+sleep1Epoch = sleep1Epoch{1};
+A = getResource(A, 'Sleep2Epoch');
+sleep2Epoch = sleep2Epoch{1};
+
+
+specfigdir = [ parent_dir(A) filesep 'specgrams'];
+
+
+
+
+A = registerResource(A, 'Sleep1Specgram', 'tsdArray', {6,1},...
+    'sleep1Specgram', ...
+    ['specgram  for each  EEG channel', ...
+    'for the entire sleep 1 period'],'mfile');
+
+A = registerResource(A, 'Sleep2Specgram', 'tsdArray', {6,1},...
+    'sleep2Specgram', ...
+    ['specgram  for each  EEG channel', ...
+    'for the entire sleep 2 period'],'mfile');
+
+A = registerResource(A, 'SleepSpecgramFreq', 'numeric',  {[],1}, ...
+    'sleepSpecgramFreq', ...
+    ['frequencies for the sleep specgrams'],'mfile');
+
+cd(current_dir(A));
+sleepEpochs = {sleep1Epoch, sleep2Epoch};
+
+sleep1Specgram = tsdArray(6,1);
+sleep2Specgram = tsdArray(6,1);
+
+for tr =1:6
+    display(['channel ' num2str(tr)]);
+    
+    [p,dset,e] = fileparts(current_dir(A));
+    eegfname = [dset 'eeg' num2str(tr) '.mat'];
+
+    if exist([eegfname '.gz'])
+        display(['unzipping file ' eegfname]);
+        eval(['!gunzip ' eegfname '.gz']);
+    end
+        load(eegfname)
+        eval(['EEG = EEG' num2str(tr), ';']);
+        eval(['clear EEG' num2str(tr) ';']);    
+	display(['zipping file ' eegfname]);
+        eval(['!gzip ' eegfname]);
+
+    for iEpoch = 1:2
+        display(['sleep ' num2str(iEpoch)]);
+    
+
+        
+        EEGsleep = Restrict(EEG, sleepEpochs{iEpoch});
+       % clear EEG 
+        display 'a'
+    
+        st = StartTime(EEGsleep);
+        FsOrig = 1 / median(diff(Range(EEGsleep, 's')));
+        times = Range(EEGsleep);
+        dp = Data(EEGsleep);
+        clear EEGsleep
+        deeg = resample(dp, 600, 6250);
+        clear dp
+        display 'b'
+        params.Fs = 200;
+        params.fpass = [0 40];
+        params.err = [2, 0.95];
+        params.trialave = 0;
+        movingwin = [2, 1];
+
+        [S,t,f,Serr]=mtspecgramc(deeg,movingwin,params);
+        display 'c'
+        clear deeg
+        sleepSpecgramFreq = f(:);
+
+        
+        
+        
+        %all this fuss is necessary to accommodate for EEG recordigns with possible
+        %gaps in them
+        t1 = 0:(1/FsOrig):((1/FsOrig)*(length(times)-1));
+        [t2, ix] = Restrict(ts(t1), t-movingwin(1)/2);
+        times = times(ix);
+        figure(1), clf
+        imagesc(times/10000, sleepSpecgramFreq, log10(abs(S')+eps));
+        set(gcf, 'position', [54   532   917   380]);
+        axis xy
+        drawnow
+        display 'd'
+        saveas(gcf, [specfigdir filesep dset 'ch' num2str(tr) 'sleep' num2str(iEpoch) ], 'png');
+        if iEpoch == 1
+            sleep1Specgram{tr} = tsd(times, S);
+
+        else 
+            sleep2Specgram{tr} = tsd(times, S);
+        end
+        
+        clear S 
+    end
+
+end
+%  save sleepSpecgram sleep1Specgram sleep2Specgram
+cd(parent_dir(A));
+A = saveAllResources(A);

@@ -1,0 +1,327 @@
+
+load SleepScoring_OBGamma.mat
+% REMEp  =mergeCloseIntervals(REMEpochWiNoise,1E4);
+% SWSEp = mergeCloseIntervals(SWSEpochWiNoise,1E4);
+% WakeEp =  mergeCloseIntervals(WakeWiNoise,1E4);
+
+REMEp  = mergeCloseIntervals(REMEpochWiNoise,3E4);
+SWSEp = SWSEpochWiNoise - REMEpochWiNoise;
+WakeEp =  WakeWiNoise - REMEpochWiNoise;
+
+load('H_Low_Spectrum');
+SpectroH=Spectro;
+freqH=Spectro{3};
+sptsdH= tsd(SpectroH{2}*1e4, SpectroH{1});
+
+% to find optogenetic stimulations
+REMEpochWiNoise  = mergeCloseIntervals(REMEpochWiNoise,1E4);
+SWSEpochWiNoise = mergeCloseIntervals(SWSEpochWiNoise,1E4);
+WakeWiNoise =  mergeCloseIntervals(WakeWiNoise,1E4);
+
+load LFPData/DigInfo4
+digTSD = DigTSD;
+
+TTLEpoch = thresholdIntervals(digTSD,0.99,'Direction','Above');  % column of time above .99 to get ON stim
+TTLEpoch_merged= mergeCloseIntervals(TTLEpoch,1e4); % merge all stims times closer to 1s to avoid slots and replace it with an entire step of 1 min
+
+Stim = Start(TTLEpoch_merged)/1E4;  % to find opto stimulations
+Stimts = ts(Stim*1e4);
+% Stimts_1s =ts((Stim-1)*1e4);
+
+StimWake = Range(Restrict(Stimts,WakeWiNoise));
+StimSWS = Range(Restrict(Stimts,SWSEpochWiNoise));
+StimREM = Range(Restrict(Stimts,REMEpochWiNoise));
+
+events=Stim;
+
+ %%%
+    minduration=3;
+    LowThetaEpochMC=thresholdIntervals(SmoothTheta,2.2,'Direction','Above'); %2
+    LowThetaEpochMC = mergeCloseIntervals(LowThetaEpochMC, minduration*1E4);
+    LowThetaEpochMC = dropShortIntervals(LowThetaEpochMC, minduration*1E4);
+    
+    save('SleepScoring_OBGamma','LowThetaEpochMC','-append')
+    
+%%ChangeThetaThresh_MC pour changer le seuil theta pendant eveil
+%Spectro around stims
+[MH_wake,SH_wake,tps]=AverageSpectrogram(sptsdH,freqH,Restrict(ts(events*1E4),and(WakeWiNoise,LowThetaEpochMC)),500,500,0);
+[MH_REM,SH_REM,tps]=AverageSpectrogram(sptsdH,freqH,Restrict(ts(events*1E4),REMEpochWiNoise),500,500,0);
+[MH_SWS,SH_SWS,tps]=AverageSpectrogram(sptsdH,freqH,Restrict(ts(events*1E4),SWSEpochWiNoise),500,500,0);
+
+% [MH_wake,SH_wake,tps]=AverageSpectrogram(sptsdH,freqH,Restrict(ts(Start(WakeEp)),and(WakeEp,LowThetaEpochMC)),500,500,0);
+% [MH_wake,SH_wake,tps]=AverageSpectrogram(sptsdH,freqH,Restrict(ts(End(WakeEp)),WakeEp),500,500,0);
+% [MH_REM,SH_REM,tps]=AverageSpectrogram(sptsdH,freqH,Restrict(ts(End(REMEp)),REMEp),500,500,0);
+% [MH_SWS,SH_SWS,tps]=AverageSpectrogram(sptsdH,freqH,Restrict(ts(End(SWSEp)),SWSEp),500,500,0);
+
+% SpREM=MH_REM;
+% SpSWS=MH_SWS;
+% SpWake=MH_wake;
+
+SpREM=MH_REM/median(MH_REM(:)); % normalisation
+SpSWS=MH_SWS/median(MH_SWS(:));
+SpWake=MH_wake/median(MH_wake(:));
+
+runfac=4;
+temps=tps/1E3;
+
+freq=[1:size(SpREM,1)]/size(SpREM,1)*20;
+% freqS=[1:size(SpectroSWS,1)]/size(SpectroSWS,1)*20;
+% freqW=[1:size(SpectroWake,1)]/size(SpectroWake,1)*20;
+
+idx1=find(freq>6&freq<9);
+tpsidx=find(temps>-15&temps<0);
+
+valThetaREM=mean(SpREM(idx1,:),1);
+valThetaSWS=mean(SpSWS(idx1,:),1);
+valThetaWake=mean(SpWake(idx1,:),1);
+
+facREM=mean(valThetaREM(tpsidx));
+facSWS=mean(valThetaSWS(tpsidx));
+facWake=mean(valThetaWake(tpsidx));
+
+stdfacREM=std(valThetaREM(tpsidx));
+stdfacSWS=std(valThetaSWS(tpsidx));
+stdfacWake=std(valThetaWake(tpsidx));
+
+figure('color',[1 1 1]),
+
+    %%Theta 
+    subplot(343), imagesc(temps,freq, SpREM), axis xy, caxis([0 5]), colormap(jet)
+    line([0 0], ylim,'color','w','linestyle',':')
+    xlim([-30 +30])
+    xlabel('Time (s)')
+    ylabel('Frequency (Hz)')
+    colorbar
+    title('HPC REM')    
+    set(gca,'FontSize', 14)
+
+    subplot(347), imagesc(temps,freq, SpSWS), axis xy, caxis([0 5]), colormap(jet)
+    line([0 0], ylim,'color','w','linestyle',':')
+    xlim([-30 +30])
+    xlabel('Time (s)')
+    ylabel('Frequency (Hz)')
+    colorbar
+    title('HPC NREM')    
+    set(gca,'FontSize', 14)
+
+    subplot(3,4,11), imagesc(temps,freq, SpWake), axis xy, caxis([0 5]), colormap(jet)
+    line([0 0], ylim,'color','w','linestyle',':')
+    xlim([-30 +30])
+    xlabel('Time (s)')
+    ylabel('Frequency (Hz)')
+    colorbar
+    title('HPC Wake')        
+    set(gca,'FontSize', 14)
+    
+    subplot(344), 
+    plot(temps,mean(SpREM(idx1,:)/facREM,1),'k','linewidth',1,'linestyle',':'), xlim([temps(1) temps(end)])
+    hold on 
+    plot(temps,runmean(mean(SpREM(idx1,:),1)/facREM,runfac),'g','linewidth',2), xlim([temps(1) temps(end)])
+%     line([temps(1) temps(end)],[facREM facREM]/facREM,'linewidth',1)
+%     line([temps(1) temps(end)],[facREM+stdfacREM facREM+stdfacREM]/facREM,'linestyle',':','linewidth',1)
+%     line([temps(1) temps(end)],[facREM-stdfacREM facREM-stdfacREM]/facREM,'linestyle',':','linewidth',1)
+    xlim([-30 +30])
+    xlabel('time (s)')
+    ylim([0.2 1.6])
+    ylabel('theta power')
+    line([0 0], ylim,'color','k','linestyle',':')    
+    set(gca,'FontSize', 14)
+
+    subplot(348), 
+    plot(temps,mean(SpSWS(idx1,:)/facSWS,1),'k','linewidth',1,'linestyle',':'), xlim([temps(1) temps(end)])
+    hold on 
+    plot(temps,runmean(mean(SpSWS(idx1,:),1)/facSWS,runfac),'r','linewidth',2), xlim([temps(1) temps(end)])
+%     line([temps(1) temps(end)],[facREM facREM]/facREM,'linewidth',1)
+%     line([temps(1) temps(end)],[facREM+stdfacREM facREM+stdfacREM]/facREM,'linestyle',':','linewidth',1)
+%     line([temps(1) temps(end)],[facREM-stdfacREM facREM-stdfacREM]/facREM,'linestyle',':','linewidth',1)
+    xlim([-30 +30])
+    xlabel('time (s)')
+    ylim([0.2 1.6])
+    ylabel('theta power')
+    line([0 0], ylim,'color','k','linestyle',':')    
+    set(gca,'FontSize', 14)
+    
+    subplot(3,4,12), 
+    plot(temps,mean(SpWake(idx1,:)/facWake,1),'k','linewidth',1,'linestyle',':'), xlim([temps(1) temps(end)])
+    hold on 
+    plot(temps,runmean(mean(SpWake(idx1,:),1)/facWake,runfac),'b','linewidth',2), xlim([temps(1) temps(end)])
+
+    % line([temps(1) temps(end)],[facREM facREM]/facREM,'linewidth',1)
+    % line([temps(1) temps(end)],[facREM+stdfacREM facREM+stdfacREM]/facREM,'linestyle',':','linewidth',1)
+    % line([temps(1) temps(end)],[facREM-stdfacREM facREM-stdfacREM]/facREM,'linestyle',':','linewidth',1)
+    xlim([-30 +30])
+    xlabel('time (s)')
+    ylim([0.2 1.6])
+    ylabel('theta power')
+    line([0 0], ylim,'color','k','linestyle',':')    
+    set(gca,'FontSize', 14)
+    
+    %%%%GAMMA
+    
+    load('B_High_Spectrum');
+    %load('Bulb_deep_High_Spectrum');
+    SpectroG=Spectro;
+    freqG=Spectro{3};
+    sptsdG= tsd(SpectroG{2}*1e4, SpectroG{1});
+    
+% %average spectro Start/End stims
+% [MG_wake,SG_wake,tps]=AverageSpectrogram(sptsdG,freqG,ts(Start(WakeEp)),500,500,0);
+% [MG_REM,SG_REM,tps]=AverageSpectrogram(sptsdG,freqG,ts(End(REMEp)),500,500,0);
+% [MG_SWS,SG_SWS,tps]=AverageSpectrogram(sptsdG,freqG,ts(End(SWSEp)),500,500,0);
+
+% [MG_wake,SG_wake,tps]=AverageSpectrogram(sptsdG,freqG,Restrict(ts(Start(WakeEp)),WakeEp),500,500,0);
+% [MG_REM,SG_REM,tps]=AverageSpectrogram(sptsdG,freqG,Restrict(ts(End(REMEp)),REMEp),500,500,0);
+% [MG_SWS,SG_SWS,tps]=AverageSpectrogram(sptsdG,freqG,Restrict(ts(End(SWSEp)),SWSEp),500,500,0);
+
+% SpREM=MH_REM;
+% SpSWS=MH_SWS;
+% SpWake=MH_wake;
+
+%%Normalisation
+% SpectroREMG=MG_REM/median(MG_REM(:));
+% SpectroSWSG=MG_SWS/median(MG_SWS(:));
+% SpectroWakeG=MG_wake/median(MG_wake(:));
+
+%average spectro accross stims
+[MG_wake,SG_wake,tps]=AverageSpectrogram(sptsdG,freqG,Restrict(ts(events*1E4),WakeWiNoise), 500,500,0);
+[MG_REM,SG_REM,tps]=AverageSpectrogram(sptsdG,freqG,Restrict(ts(events*1E4),REMEpochWiNoise),500,500,0);
+[MG_SWS,SG_SWS,tps]=AverageSpectrogram(sptsdG,freqG,Restrict(ts(events*1E4),SWSEpochWiNoise),500,500,0);
+
+
+runfac=4;
+temps=tps/1E3;
+
+freq=freqG;
+freqS=freqG;
+freqW=freqG;
+
+idx1_gamma=find(freq>40&freq<60);
+tpsidx_gamma=find(temps>-15&temps<0);
+
+facnormwake=mean(MG_wake(idx1_gamma,:),1);
+
+SpectroREMG=MG_REM/median(facnormwake(:));
+SpectroSWSG=MG_SWS/median(facnormwake(:));
+SpectroWakeG=MG_wake/median(facnormwake(:));
+
+% SpectroREMG=MG_REM/median(MG_REM(:));
+% SpectroSWSG=MG_SWS/median(MG_SWS(:));
+% SpectroWakeG=MG_wake/median(MG_wake(:));
+
+freqG=[1:size(SpectroREMG,1)]/size(SpectroREMG,1)*100;
+
+% SpectroREMG=MG_REM;
+% SpectroSWSG=MG_SWS;
+% SpectroWakeG=MG_wake;
+
+
+valGammaREMG=mean(SpectroREMG(idx1_gamma,:),1);
+valGammaSWSG=mean(SpectroSWSG(idx1_gamma,:),1);
+valGammaWakeG=mean(SpectroWakeG(idx1_gamma,:),1);
+
+%   valGammaWakeG=valGammaWakeG/median(valGammaWakeG);
+%   valGammaSWSG=valGammaSWSG/median(valGammaWakeG);
+%   valGammaREMG=valGammaREMG/median(valGammaWakeG);
+
+facREMG=mean(valGammaREMG(tpsidx_gamma));
+facSWSG=mean(valGammaSWSG(tpsidx_gamma));
+facWakeG=mean(valGammaWakeG(tpsidx_gamma));
+
+stdfacREMG=std(valGammaREMG(tpsidx_gamma));
+stdfacSWSG=std(valGammaSWSG(tpsidx_gamma));
+stdfacWakeG=std(valGammaWakeG(tpsidx_gamma));
+
+    subplot(341), imagesc(temps,freqG, SpectroREMG), axis xy, colormap(jet), caxis([0 2])
+    line([0 0], ylim,'color','w','linestyle',':')
+    xlim([-30 +30])
+    ylim([35 +100])
+    xlabel('Time (s)')
+    ylabel('Frequency (Hz)')
+    colorbar
+    title('OB REM')
+    set(gca,'FontSize', 14)
+
+    subplot(345), imagesc(temps,freqG, SpectroSWSG), axis xy,  colormap(jet), caxis([0 2])
+    line([0 0], ylim,'color','w','linestyle',':')
+    xlim([-30 +30])
+    ylim([35 +100])
+    xlabel('Time (s)')
+    ylabel('Frequency (Hz)')
+    colorbar
+    title('OB NREM')
+    set(gca,'FontSize', 14)
+
+    
+    subplot(3,4,9), imagesc(temps,freqG, SpectroWakeG), axis xy, colormap(jet), caxis([0 2])
+    line([0 0], ylim,'color','w','linestyle',':')
+    xlim([-30 +30])
+    ylim([35 +100])
+    xlabel('Time (s)')
+    ylabel('Frequency (Hz)')
+    colorbar
+    title('OB Wake')
+    set(gca,'FontSize', 14)
+    
+    subplot(342),
+    plot(temps,mean(SpectroREMG(idx1_gamma,:),1),'k','linewidth',1,'linestyle',':'), xlim([temps(1) temps(end)])
+    hold on 
+    plot(temps,runmean(mean(SpectroREMG(idx1_gamma,:),1),runfac),'g','linewidth',2), xlim([temps(1) temps(end)])
+%     line([temps(1) temps(end)],[facREMG facREMG],'linewidth',1)
+%     line([temps(1) temps(end)],[facREMG+stdfacREMG facREMG+stdfacREMG],facWakeW,'linestyle',':','linewidth',1)
+%     line([temps(1) temps(end)],[facREMG-stdfacREMG facREMG-stdfacREMG],facWakeW,'linestyle',':','linewidth',1)
+    xlim([-30 +30])
+    xlabel('time (s)')
+    ylim([0 1.5])
+    ylabel('Gamma power')
+    line([0 0], ylim,'color','k','linestyle',':')
+    set(gca,'FontSize', 14)
+    
+    subplot(346),
+    plot(temps,mean(SpectroSWSG(idx1_gamma,:),1),'k','linewidth',1,'linestyle',':'), xlim([temps(1) temps(end)])
+    hold on
+    plot(temps,runmean(mean(SpectroSWSG(idx1_gamma,:),1),runfac),'r','linewidth',2), xlim([temps(1) temps(end)])
+%     line([temps(1) temps(end)],[facSWSG facSWSG]/facSWSG,'linewidth',1)
+%     line([temps(1) temps(end)],[facSWSG+stdfacSWSG facSWSG+stdfacSWSG]/,facWakeS,'linestyle',':','linewidth',1)
+%     line([temps(1) temps(end)],[facSWSG-stdfacSWSG facWakeG-stdfacSWSG]/,facWakeS,'linestyle',':','linewidth',1)
+    xlim([-30 +30])
+    xlabel('time (s)')
+    ylim([0 1.5])
+    ylabel('Gamma power')
+    line([0 0], ylim,'color','k','linestyle',':')
+    set(gca,'FontSize', 14)
+    
+    subplot(3,4,10),
+    plot(temps,mean(SpectroWakeG(idx1_gamma,:),1),'k','linewidth',1,'linestyle',':'), xlim([temps(1) temps(end)])
+    hold on
+    plot(temps,runmean(mean(SpectroWakeG(idx1_gamma,:),1),runfac),'b','linewidth',2), xlim([temps(1) temps(end)])
+%     line([temps(1) temps(end)],[facWakeG facWakeG]/facWakeG,'linewidth',1)
+%     line([temps(1) temps(end)],[facWakeG+stdfacWakeG facWakeG+stdfacWakeG]/facWakeG,'linestyle',':','linewidth',1)
+%     line([temps(1) temps(end)],[facWakeG-stdfacWakeG facWakeG-stdfacWakeG]/facWakeG,'linestyle',':','linewidth',1)
+    xlim([-30 +30])
+    xlabel('time (s)')
+    ylabel('Gamma power')
+    line([0 0], ylim,'color','k','linestyle',':')
+    set(gca,'FontSize', 14)
+    
+%     %suptitle('M1052 200527')
+%     saveas(gcf,'Theta_Gamma_aroundStim.png')
+%     saveas(gcf,'Theta_Gamma_aroundStim.fig')
+
+    %%%%%subplotGammaPower-Normalized on wake
+    
+    subplot(3,4,[3,4,7,8]);
+    plot(temps,runmean(mean(SpectroREMG(idx1_gamma,:),1),runfac),'g','linewidth',2), xlim([temps(1) temps(end)])
+%     line([temps(1) temps(end)],[facREMG facREMG],'linewidth',1)
+%     line([temps(1) temps(end)],[facREMG+stdfacREMG facREMG+stdfacREMG],facWakeW,'linestyle',':','linewidth',1)
+%     line([temps(1) temps(end)],[facREMG-stdfacREMG facREMG-stdfacREMG],facWakeW,'linestyle',':','linewidth',1)
+    xlim([-30 +30])
+    xlabel('time (s)')
+    ylim([0 1.5])
+    ylabel('Gamma power')
+    line([0 0], ylim,'color','k','linestyle',':')
+    set(gca,'FontSize', 14)
+    
+    hold on 
+    plot(temps,runmean(mean(SpectroSWSG(idx1_gamma,:),1),runfac),'r','linewidth',2), xlim([temps(1) temps(end)])  
+    hold on
+    plot(temps,runmean(mean(SpectroWakeG(idx1_gamma,:),1),runfac),'b','linewidth',2), xlim([temps(1) temps(end)])

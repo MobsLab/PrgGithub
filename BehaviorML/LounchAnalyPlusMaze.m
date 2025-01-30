@@ -1,0 +1,82 @@
+
+
+%% INPUTS
+res=pwd;
+nameExpe='PlusMaze';
+% toujours construire : ProjetBULB\PlusMaze
+erasePreviousA=0; % 0 to keep existing files, 1 otherwise
+
+
+%% initiate
+if sum(strfind(res,'/'))==0
+    mark='\';
+else
+    mark='/';
+end
+
+lis=dir(res);
+
+for i=3:length(lis)
+    
+    if length(lis(i).name)>4 && strcmp(lis(i).name(1:5),'Mouse')
+        
+        % number of the mouse
+        nameMouse=lis(i).name(7:end);
+        k=1; numMouse=[];
+        while isempty(numMouse),
+            try
+                numMouse=str2num(nameMouse(k:end));
+                k=k+1;
+            end
+        end
+        
+        disp(' ')
+        disp(['           * * * Mouse ',nameMouse,' * * *'])
+        listi=dir([res,mark,lis(i).name]);
+        
+        for j=3:length(listi)
+            
+            if strcmp(listi(j).name,nameExpe)
+                listiji=dir([res,mark,lis(i).name,mark,listi(j).name]);
+                
+                for k=3:length(listiji)
+                    disp(listiji(k).name)
+                    filename=[res,mark,lis(i).name,mark,listi(j).name,mark,listiji(k).name];
+                    
+                    %---------------------------------------------------------------
+                    % get infos
+                    index=strfind(listiji(k).name,'-');
+                    index=index(index>strfind(listiji(k).name,'Mouse-'));
+                    n_mouse=str2num(listiji(k).name(index(1)+1:index(2)-1));
+                    n_day=str2num(listiji(k).name(strfind(listiji(k).name,'Day')+3));
+                    n_session=str2num(listiji(k).name(strfind(listiji(k).name,'Session')+7));
+                    
+%                     % do Tracking_offline if not already
+%                     try
+%                         Trackin_offline_OnFrames(filename);
+%                     catch
+%                         disp('skipped')
+%                     end
+%                     % ---------------------------------------------------------------
+                    % get ref mask PosOFF
+                    clear ref mask PosOFF
+                    load([filename,mark,'TrackingOFFline.mat'],'ref','mask','PosOFF');
+                    
+                    
+                    % ---------------------------------------------------------------
+                    % AnalysePlusMaze
+                    
+                    MatNumber=AnalysePlusMaze(PosOFF,mask,ref,1);
+                    title(filename(max(strfind(filename,mark))+1:end))
+
+                    disp('Done.. press enter to continue')
+                    pause;
+                    %close;
+                end
+            end
+            
+        end
+    end
+end
+
+

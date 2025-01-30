@@ -1,0 +1,62 @@
+% MethodesLisa
+%
+%--------------------------------------------------------------------------
+%%crosscorelogramm entre Y et F--------------------------------------------
+%--------------------------------------------------------------------------
+% 
+%
+% [Cl,lag,p1,CPM,CPm] = StatsXcorr(F,Y,chF,100);
+% 
+% figure('color',[1 1 1]), hold on, 
+% plot(lag/chF,Cl,'r'), 
+% plot(lag/chF,CPM,'Color',[0.6 0.6 0.6]), 
+% plot(lag/chF,CPm,'Color',[0.6 0.6 0.6])
+% yl=ylim;
+% line([0 0],[yl(1) yl(2)],'Color','k')
+% 
+% 
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+% 
+% 
+% plott=1;
+% CrossCorrParticularFrequency
+% 
+% 
+% 
+% 
+%
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%
+%
+%
+%[C,CP,f,pb,phi,S1l,S2l,fl,Cerr]=CoherencyMitralField(Fup); %default value Fup=1;
+%
+%
+%
+%
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+%
+%
+%
+
+
+
+
+genotype='Ctrl';
+cd /Users/karimbenchenane/Documents/Data/DataEnCours/Lisa/NewPaper/DataNewPaper/DataMitralKO/OLD/Ctrl60mV % dossier ctrl
+AnalysisSWSOB
+
+genotype='doKO';
+cd /Users/karimbenchenane/Documents/Data/DataEnCours/Lisa/NewPaper/DataNewPaper/DataMitralKO/OLD/doKO60mV % dossier doKO
+AnalysisSWSOB
+
+
+
+
+

@@ -1,0 +1,57 @@
+%function A = ShowCorrDifference(A)
+
+dataDir = '/media/sdb6/Data';
+cd(dataDir);
+
+A = Analysis(pwd);
+dataset = List2Cell('datasets_corrdiff.list');
+
+A = getResource(A,'PMS2',dataset);
+
+A = getResource(A,'PMS1',dataset);
+
+slopeDiff = zeros(length(dataset),1);
+
+nbTransition = 8;
+
+startStr = zeros(8,1);
+stopStr = zeros(8,1);
+
+startStr(1) = 1;
+stopStr(1) = 6;
+
+startStr(2) = 8;
+stopStr(2) = 9;
+
+startStr(3) = 9;
+stopStr(3) = 12;
+
+startStr(4) = 13;
+stopStr(4) = 18;
+
+startStr(5) = 18;
+stopStr(5) = 19;
+
+startStr(6) = 19;
+stopStr(6) = 22;
+
+startStr(7) = 22;
+stopStr(7) = 24;
+
+startStr(8) = 29;
+stopStr(8) = 30;
+
+for i=1:length(dataset)
+
+	slopeDiff(i) = pMS2{i}(1) - pMS1{i}(1);
+
+end
+
+figure(1),clf
+hold on;
+for i=1:nbTransition
+	h = line([startStr(i)-0.4 stopStr(i)+0.4],[1.4+0.1*mod(i,2) 1.4+0.1*mod(i,2)])
+	set(h,'LineWidth',10,'Color',[mod(i,3)/2 mod(i+1,3)/2 mod(i+2,3)/2]);
+end
+bar(slopeDiff)
+hold off;

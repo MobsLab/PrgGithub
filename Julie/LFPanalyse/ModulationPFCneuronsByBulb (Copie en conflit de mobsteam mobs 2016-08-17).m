@@ -1,0 +1,265 @@
+function ModulationPFCneuronsByBulb(FreqRange,lim2,lim3, varargin)
+
+clear numNeurons Modul modulatedNeurons
+sig=0.05;
+% FreqRange= [2 4] for example 
+
+% parameter
+Kth=0.06; % threshold for Kappa
+pthres=0.05; % threshold for significance
+
+% default values if strongperonly=0, modified if strongperonly=1
+criterion=NaN;
+PercTimeval=100;
+
+% default values for varargin
+strongperonly=0;
+suffix='';
+
+% Parse options
+for i = 1:2:length(varargin),
+	if ~ischar(varargin{i}),
+		error(['Parameter ' num2str(i+3) ' is not a property (type ''help <a href="matlab:help RefSubtraction">RefSubtraction</a>'' for details).']);
+	end
+	switch(lower(varargin{i})),
+		case 'strongperonly',
+			strongperonly = varargin{i+1};
+			if ~isdscalar(strongperonly,'>=0'),
+				error('Incorrect value for property ''strongperonly'' ');
+            end
+		case 'suffix',
+			suffix = varargin{i+1};
+		
+	end
+end
+
+% for titles
+BandFq=[num2str(FreqRange(1)), '-' ,num2str(FreqRange(2))];
+
+%% Load spike and LFP data
+load behavResources FreezeEpoch
+FreezingTime=sum(End(FreezeEpoch)-Start(FreezeEpoch));
+if ~exist('InfoLFP','var') 
+    load LFPData/InfoLFP.mat
+end
+chans=InfoLFP.channel(strcmp(InfoLFP.structure,'PFCx'));
+if ~exist('S','var')
+    load SpikeData.mat
+end
+    
+% get LFP Bulb
+res=pwd;
+load([res,'/ChannelsToLookAt/OB_deep']); 
+load([res,'/LFPData/LFP',num2str(channel)]);
+if strongperonly==1
+    lim1=FreqRange;
+    criterion=9;
+    load([res,'/SpectrumDataL/Spectrum',num2str(channel)]);
+    [StrongOscAndFreezeEpoch,PercTimeval,val2]=FindStrongOsc(Sp,t,f,FreezeEpoch,1,lim1, lim2,lim3);% plo=1
+    PercTimeval=PercTimeval(criterion);
+end
+
+if ~isdir('SpikeModulationBulb');
+    mkdir('SpikeModulationBulb');
+end
+
+%% get the n° of the neurons of PFCx
+numtt=[]; % nb tetrodes ou montrodes du PFCx
+for cc=1:length(chans) 
+    for tt=1:length(tetrodeChannels) % tetrodeChannels= tetrodes ou montrodes (toutes)
+        if ~isempty(find(tetrodeChannels{tt}==chans(cc)))
+            numtt=[numtt,tt];
+        end
+    end
+end
+numNeurons=[]; % neurones du PFCx
+for i=1:length(S);
+    if ismember(TT{i}(1),numtt)
+      numNeurons=[numNeurons,i];  
+    end
+end
+
+numMUA=[];
+for k=1:length(numNeurons)
+    j=numNeurons(k);
+    if TT{j}(2)==1
+        numMUA=[numMUA, j];
+    end
+end
+%% PFC Spike modulation by OB
+
+hfigMod=figure('Position',  [100 20  1800 900]);
+fil=FilterLFP(LFP,FreqRange,2048);
+a=1;
+for i=1:length(numNeurons)
+    %build the plot
+    u=(TT{i}(1)-1)*5+ TT{i}(2);
+    subplot(4,5,u);
+    if strongperonly==1
+        [ph,mu, Kappa, pval,B,C]=ModulationTheta(S{numNeurons(i)},fil,StrongOscAndFreezeEpoch{criterion},30,0);
+    elseif strongperonly==0
+        [ph,mu, Kappa, pval,B,C]=ModulationTheta(S{numNeurons(i)},fil,FreezeEpoch,30,0);
+    end
+    if a==1
+        text(-0.5,1.15, [BandFq ' Hz'],'units','normalized')
+        text(-0.5,1.05, [num2str(round(FreezingTime*1E-4*PercTimeval*1E-2)) ' sec'],'units','normalized')
+        if strongperonly==1
+            text(-0.5,1.25, ['Strong Osc Per Only Crit' num2str(criterion)],'units','normalized')
+        elseif strongperonly==0
+            text(-0.5,1.25, 'All FreezeEpochs included','units','normalized')
+        end
+    end
+    KappaAll(a)=Kappa;
+    pvalAll(a)=pval;
+    phAll{a}=ph;
+    meanPh(a)=circ_mean(Data(ph{1}));
+    a=a+1;
+end
+cd ([res '/SpikeModulationBulb'])
+if strongperonly==1
+    suffix=[suffix num2str(criterion)];
+end
+saveas(hfigMod,(['Modul_' BandFq '_' suffix '.fig']))
+saveFigure(hfigMod,(['Modul_' BandFq '_' suffix ]),[res '/SpikeModulationBulb'])
+
+% percentage of modulated neurons
+hperc=figure('Position', [918 600 1002  405]);
+% select neurons with significant modulation an kappa > a threshold
+subplot(1,3,1)
+modulatedNeurons=numNeurons((pvalAll<pthres) & (KappaAll>Kth));
+scatter(log10(pvalAll), KappaAll,'MarkerFaceColor','b','MarkerEdgeColor','k')
+hold on, scatter(log10(pvalAll((pvalAll<pthres) & (KappaAll>Kth))), KappaAll((pvalAll<pthres) & (KappaAll>Kth)), 'MarkerFaceColor','r','MarkerEdgeColor','k')
+scatter(log10(pvalAll(numMUA)), KappaAll(numMUA),'Marker', '+','MarkerEdgeColor',[0.8 0.8 0.8])
+legend({'no modulation', ['p < ' num2str(pthres) ' & K > ' num2str(Kth) ], 'MUA'}, 'Location', 'NorthWest')
+title([ BandFq ' ' suffix ' ' num2str(round(FreezingTime*1E-4*PercTimeval*1E-2)) ' sec']), xlabel('log 10 (p)'), ylabel ('kappa')
+
+% Kappa/phase diagram, pval color-coded
+subplot(1,3,2), hold on
+A=round(abs(log10(pvalAll)));
+% cols=jet(max(A)+1);
+cols=jet(2*(max(A)+1));
+cols(1:max(A)+1, :)=[];
+for nn=numNeurons
+    if pvalAll(nn)>pthres
+    scatter(meanPh(nn), KappaAll(nn),'MarkerFaceColor','b','MarkerEdgeColor','k'),hold on
+    else
+    scatter(meanPh(nn), KappaAll(nn),'MarkerFaceColor',cols(round(abs(log10(pvalAll(nn))))+1, :),'MarkerEdgeColor','k'),hold on
+    end
+    if ismember(nn, numMUA)
+        scatter(meanPh(nn), KappaAll(nn),'Marker', '+','MarkerEdgeColor',[0.8 0.8 0.8])
+    end
+end
+title([ 'p : green = 0.05 red =  10 - ' num2str(max(A))]), xlabel('phase'), ylabel ('kappa')
+
+% Distribution of Kappa values
+Kmean=mean(KappaAll);
+PercModulatedNeurons=(length(pvalAll((pvalAll<pthres) & (KappaAll>Kth)))/length(pvalAll))*100;
+subplot(1,3,3), hist(KappaAll,20)
+hold on, title(['Kappa Distrib ',' - Kmean = ', sprintf('%.2f',Kmean),' - %modulated = ',sprintf('%.0f',PercModulatedNeurons),'%'])
+Y=ylim;
+plot([Kth Kth],[Y(1) Y(2)], ':r')
+saveFigure(hperc,(['K_Distrib_',BandFq , '_OB_' suffix ]),[res '/SpikeModulationBulb'])
+saveas(hperc,(['K_Distrib_',BandFq , '_OB_' suffix '.fig']))
+
+save(['Modul_',BandFq '_' suffix '.mat'], 'KappaAll', 'pvalAll','phAll', 'strongperonly', 'criterion', 'numNeurons', 'numMUA', 'Kth', 'modulatedNeurons')
+cd(res)
+%verification
+%[ph,mu,Kappa, pval,B,C,nmbBin,Cc,dB,vm]=ModulationThetaCorrection(S{numNeurons(1)},fil,FreezeEpoch,30); % nmbbin=100
+
+
+% Rayleigh Freq 2
+
+for n=numNeurons
+    if strongperonly==1
+        %[HS,Ph,ModTheta,EpochSelected]=RayleighFreq2(Restrict(LFP, FreezeEpoch),Restrict(S{n}, FreezeEpoch),0.05,20,512,'H',10,2,'strongosc','quantile'); % sig=0.05  fre= 20
+        [H,HS,Ph,ModTheta, EpochSelected]=RayleighFreq2(Restrict(LFP, FreezeEpoch),Restrict(S{n}, FreezeEpoch),0.05,20,512,'H',10,2,'strongosc','compabovebelow'); % sig=0.05  fre= 20
+        ModThetaAllNeurons{n}=ModTheta;
+    elseif strongperonly==0
+        [H,HS,Ph,ModTheta, EpochSelected]=RayleighFreq2(Restrict(LFP, FreezeEpoch),Restrict(S{n}, FreezeEpoch),0.05,20,512,'H',10,2,'strongosc','no'); % sig=0.05  fre= 20
+        ModThetaAllNeurons{n}=ModTheta;
+    end
+    title(['neuron ' num2str(n)])
+    if ismember(n,numMUA)
+        ModThetaAllNeurons{n}.NeuronName=['MUA ' num2str(n)];
+    else
+        ModThetaAllNeurons{n}.NeuronName=['neuron ' num2str(n)];
+    end
+    title(ModThetaAllNeurons{n}.NeuronName)
+    saveFigure(gcf,(['Rayleigh_n',num2str(n)  '_OB_' suffix ]),[res '/SpikeModulationBulb'])
+    saveas(gcf,(['Rayleigh_n',num2str(n) , '_OB_' suffix '.fig']))
+end
+
+save (['RayleighFreq2_' suffix '.mat'],  'ModThetaAllNeurons', 'numNeurons')
+
+% Plot Bilan de RayleighFreq 2 : neurones modulés pour toutes les frequences
+for i=1:20
+    Filt=[-0.5+i 2+0.5+i];
+    ab(i)=mean(Filt); 
+end
+
+
+for i=1:length(ab) 
+    PercModulatedNeuronsAllFq(i)=0;
+    for n=numNeurons
+         ModThetaAllNeurons{n}.pval(i)
+        if ModThetaAllNeurons{n}.pval(i)<sig
+            
+            PercModulatedNeuronsAllFq(i)=PercModulatedNeuronsAllFq(i)+1; 
+            ModulatedNeuronsAllFq(n,i)=numNeurons(n); 
+            Kappa(n,i)=[ModThetaAllNeurons{n}.Kappa(i)];
+            mu(n,i)=[ModThetaAllNeurons{n}.mu(i)];
+        else
+            ModulatedNeuronsAllFq(n,i)=NaN; 
+            Kappa(n,i)=NaN;
+            mu(n,i)=NaN;
+            
+        end
+    end
+end
+figure('Position', [640   540   788   385])
+subplot(1,3,1), 
+ff=[];
+for i=1:length(ab) 
+    ff=[ff ab(i)*ones(length(numNeurons),1)];
+end
+subplot(1,3,1), 
+plot(ff,ModulatedNeuronsAllFq,'+'), hold on
+xlim([1 20])
+title(suffix)
+ylabel ('neurons'), xlabel ('frequencies')
+
+subplot(1,3,2), 
+plot(ff,Kappa,'+'), hold on
+xlim([1 20])
+Y=ylim;
+ylim([0 Y(2)])
+ylabel ('Kappa'), xlabel ('frequencies')
+
+subplot(1,3,3), 
+plot(ff,mu,'+'), hold on
+xlim([1 20])
+Y=ylim;
+ylim([0 Y(2)])
+ylabel ('Phase'), xlabel ('frequencies')
+saveas(gcf, ['RayleighFreq2_' suffix '.fig'])
+
+
+
+
+
+
+
+% % % prepare the needed variables
+% thtps_immob=2;
+% th_immob=1.5;
+% try 
+%     load behavResources FreezeEpoch
+% catch
+%     load behavResources Movtsd %, attention valable seulement pour file comportment car fichier sleep= doubletracking=pixratio pas appliqué
+%     FreezeEpoch=thresholdIntervals(Movtsd,th_immob,'Direction','Below');
+% 
+% end
+% FreezeEpoch=mergeCloseIntervals(FreezeEpoch,0.3*1E4);
+% FreezeEpoch=dropShortIntervals(FreezeEpoch,thtps_immob*1E4);
+
+% save behavResources FreezeEpoch Movtsd thtps_immob th_immob PosMat -Append

@@ -1,0 +1,101 @@
+clear all
+cd /home/mobsrick/Documents/Data_PaperSBBM
+% Load sleep
+Sleep = load('Data_Physio_Sleep_Saline.mat');
+% Load Fear
+Fear  = load('Data_Physio_Freezing_Saline_all_Fear_2sFullBins.mat');
+
+MouseNum = size(Fear.OutPutData.Fear.respi_freq_bm.mean,1);
+
+for mouse = 1:MouseNum
+    
+    % SleepPostParams
+    TotEpoch =  Sleep.Epoch1.sleep_post{mouse,1};
+    Wake = Sleep.Epoch1.sleep_post{mouse,2};
+    SleepEpoch = Sleep.Epoch1.sleep_post{mouse,3};
+    SWSEpoch = Sleep.Epoch1.sleep_post{mouse,4};
+    REMEpoch = Sleep.Epoch1.sleep_post{mouse,5};
+    
+    if not(isempty(Wake))
+        
+        SleepRes.TotDur(mouse) = sum(TotEpoch},'s') - Start(TotEpoch,'s'));
+        Sleep_FirstHour = and(SleepEpoch,intervalSet(0,3600*1e4));
+        SleepRes.SleepProp(mouse) = sum(Stop(Sleep_FirstHour) - Start(Sleep_FirstHour))/(3600*1e4);
+        
+        for i = 1:9
+            LitEpoch = intervalSet((i-1)*60*10*1E4,i*60*10*1E4);
+            if sum(DurationEpoch(and(TotEpoch,LitEpoch)))/1E4 >590
+                [~,SleepRes.WakeProp(i,mouse)] = DurationEpoch(and(Wake,LitEpoch));
+                [~,SleepRes.SWSProp(i,mouse)] = DurationEpoch(and(SWSEpoch,LitEpoch));
+                [~,SleepRes.REMProp(i,mouse)] = DurationEpoch(and(REMEpoch,LitEpoch));
+            else
+                SleepRes.WakeProp(i,mouse) = NaN;
+                SleepRes.SWSProp(i,mouse) = NaN;
+                SleepRes.REMProp(i,mouse) = NaN;
+            end
+        end
+    else
+        SleepRes.TotDur(mouse) = NaN;
+        SleepRes.SleepProp(mouse) = NaN;
+        SleepRes.WakeProp(1:9,mouse) = NaN;
+        SleepRes.SWSProp(1:9,mouse) = NaN;
+        SleepRes.REMProp(1:9,mouse) = NaN;
+    end
+    
+    
+    % Fear parameters
+    FearRes.TotDur(mouse) =  sum(Stop(Fear.Epoch1.Fear{mouse,1},'s') - Start(Fear.Epoch1.Fear{mouse,1},'s'));
+    SafeFreeze = Fear.Epoch1.Fear{mouse,6};
+    ShockFreeze = Fear.Epoch1.Fear{mouse,5};
+    FearRes.SafeDur(mouse) = sum(Stop(SafeFreeze,'s') - Start(SafeFreeze,'s'));
+    FearRes.ShockDur(mouse) = sum(Stop(ShockFreeze,'s') - Start(ShockFreeze,'s'));
+    if not(isempty(Fear.OutPutData.Fear.ripples_density.tsd{mouse,1}))
+        FearRes.TotRipples(mouse) = sum(Data(Fear.OutPutData.Fear.ripples_density.tsd{mouse,1}));
+    else
+     FearRes.TotRipples(mouse) = NaN;
+    end
+    
+end
+
+
+GoodMice = ((not(isnan(SleepRes.TotDur))));
+
+SleepRes.TotDur = SleepRes.TotDur(GoodMice);
+FearRes.TotDur = FearRes.TotDur(GoodMice);
+FearRes.TotRipples = FearRes.TotRipples(GoodMice);
+SleepRes.SleepProp = SleepRes.SleepProp(GoodMice);
+FearRes.SafeDur = FearRes.SafeDur(GoodMice);
+FearRes.ShockDur = FearRes.ShockDur(GoodMice);
+
+PAGMice = [1:7];
+SalMice = [15:sum(GoodMice)];
+plot(SleepRes.SleepProp(SalMice),FearRes.TotRipples(SalMice),'.')
+
+
+
+
+
+
+
+
+
+%
+% % Max comparable with Baptiste ripple data
+%  % saline short BM first Maze
+%  Mouse=[1144 1146 1147 1170 1171 9184 1189 9205 1391 1392 1393 1394];
+%
+%
+%
+%  [OutPutData.(Session_type{sess}).(Drug_Group{group}) , Epoch1.(Session_type{sess}).(Drug_Group{group}) , NameEpoch] =...
+%      MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ripples','heartrate','heartratevar','ob_low','hpc_low');
+%
+%
+
+
+%
+%
+%     'UMazeCond_EyeShock' 'UMazeCondBlockedShock_EyeShock' 'UMazeCondBlockedSafe_EyeShock'
+% 'SleepPost_EyeShock'
+%
+% UMazeCond
+% SleepPostUMaze

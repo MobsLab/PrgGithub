@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="17"
+   name=""
+   committed-date="2006-06-30T12:20:20.485057Z"
+   url="file:///home/battagli/svn/matlab/trunk/projects"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   revision="17"/>
+<entry
+   name="ReactRateCortex"
+   kind="dir"/>
+<entry
+   name="ReactRateFigures"
+   kind="dir"/>
+<entry
+   name="posterSFN04"
+   kind="dir"/>
+<entry
+   name="ADTheta"
+   kind="dir"/>
+<entry
+   name="ReactRate"
+   kind="dir"/>
+<entry
+   name="ReactRateHippo"
+   kind="dir"/>
+<entry
+   name="amyphys"
+   kind="dir"/>
+<entry
+   name="entoGrid"
+   kind="dir"/>
+<entry
+   name="LPPA"
+   kind="dir"/>
+<entry
+   name="Patrick"
+   kind="dir"/>
+</wc-entries>

@@ -1,0 +1,39 @@
+function plotLFPevents(LFP,voies,LFPevent,delay, sp,plo)
+
+try
+    plo;
+catch
+    plo=1;
+end
+try
+    sp;
+catch
+    sp=1000;
+end
+
+
+LFPeventLargeEpoch=intervalSet(LFPevent(:,1)*10-delay*1E4,LFPevent(:,3)*10+delay*1E4);
+LFPeventEpoch=intervalSet(LFPevent(:,1)*10,LFPevent(:,3)*10);
+
+if plo
+figure
+end
+
+tps=Range(Restrict(LFP{1},LFPeventLargeEpoch),'s');
+tpssub=Range(Restrict(LFP{1},LFPeventEpoch),'s');
+
+for i=1:length(voies)
+    try
+    hold on, 
+    plot(tps-tps(1),(i-1)*sp+Data(Restrict(LFP{voies(i)},LFPeventLargeEpoch)),'k')
+    plot(tpssub-tpssub(1)+1,(i-1)*sp+Data(Restrict(LFP{voies(i)},LFPeventEpoch)),'r')
+    end
+end
+
+
+
+
+
+
+
+

@@ -1,0 +1,147 @@
+%% $RCSfile: simaqvi.tlc,v $
+%% $Revision: 1.1.6.6 $ 
+%% $Date: 2010/10/15 14:20:04 $
+%%
+%% Copyright 2004-2010 The MathWorks, Inc.
+%%
+%% Abstract: Gets video frames from video input device
+
+%implements simaqvi "C"
+
+%include "imaqlib.tlc"
+
+%% Function: BlockTypeSetup ==============================================
+%function BlockTypeSetup(block, system) void
+
+    %<Include_header(block,"viruntime","video input runtime")>
+	
+	%% Define the run time source files.
+    %assign helper_source  = "viruntime"
+    %assign helper_c       = helper_source + ".c"
+
+    %% Define the source and model directories.
+    %assign file_sep       = FEVAL("filesep")
+    %assign matlab_root    = FEVAL("matlabroot")
+    %assign iat_src_dir    = FEVAL("fullfile",matlab_root,"toolbox","imaq","imaqblks","include",file_sep)
+    %assign model_dir      = FEVAL("rtwprivate","rtwattic","getBuildDir") + file_sep
+	
+    %% Copy needed source files to project directory and add to build.
+    %% Note, use LibAddToModelSources to only copy if files are not already there.
+    %if ! LibAddToModelSources(helper_source) 
+        %<FEVAL("copyfile", "%<iat_src_dir>%<helper_c>", "%<model_dir>%<helper_c>")>
+    %endif
+
+%endfunction %% BlockTypeSetup
+
+%% Function: BlockInstanceSetup ==============================================
+%%
+%function BlockInstanceSetup(block, system) void
+
+  %assign RED_OUTPORT	= 0
+  %assign BLUE_OUTPORT	= 1
+  %assign GREEN_OUTPORT = 2
+
+  %assign devID         = SFcnParamSettings.DeviceID
+  %assign devName		= SFcnParamSettings.DeviceName
+  %assign outFormat		= SFcnParamSettings.OutFormatName
+  %assign outWidth		= SFcnParamSettings.OutputWidth
+  %assign outHeight		= SFcnParamSettings.OutputHeight
+  %assign fps			= SFcnParamSettings.FramesPerSecond
+  %assign dataType		= SFcnParamSettings.VideoDataType
+  %%
+
+  %assign block = block + RED_OUTPORT + GREEN_OUTPORT + BLUE_OUTPORT ...
+				+ devID + devName + outFormat + outWidth + outHeight + fps ...
+				+ dataType
+
+%endfunction %% BlockInstanceSetup
+
+
+%% Function: Start ==========================================================
+%%
+%function Start(block, system) Output
+{
+    /* Image Acquisition Video Input Block (%<ParamSettings.FunctionName>) - '%<Name>' - Start */
+    
+    /* Access the requested device. */
+    %<LibBlockDWork(VideoInputObj, "", "", 0)> = 
+	    exMWIMAQ_Wvi_Create(%<devID>, "%<devName>", "%<outFormat>", %<outWidth>, %<outHeight>, 
+						    %<fps>, %<dataType>);
+
+    /* Verify library and device were available. */
+    if ( %<LibBlockDWork(VideoInputObj, "", "", 0)> == NULL ){
+        const char* errMsg = exMWIMAQ_Wvi_GetLibaryErrorMessage();
+        %<RTMSetErrStat("errMsg")>;
+        %<RTMSetStopRequested(1)>;
+        return;   
+    }else if ( exMWIMAQ_Wvi_HasError( %<LibBlockDWork(VideoInputObj, "", "", 0)> ) ){
+        const char* errMsg = exMWIMAQ_Wvi_GetErrorMessage( %<LibBlockDWork(VideoInputObj, "", "", 0)> );
+        %<RTMSetErrStat("errMsg")>;
+        %<RTMSetStopRequested(1)>;
+        return;
+    }
+
+    /* Start the device. */
+    exMWIMAQ_Wvi_Start(%<LibBlockDWork(VideoInputObj, "", "", 0)>);
+
+    /* Verify device was accessible. */
+    if ( exMWIMAQ_Wvi_HasError( %<LibBlockDWork(VideoInputObj, "", "", 0)> ) ){
+        const char* errMsg = exMWIMAQ_Wvi_GetErrorMessage( %<LibBlockDWork(VideoInputObj, "", "", 0)> );
+        %<RTMSetErrStat("errMsg")>;
+        %<RTMSetStopRequested(1)>;
+        return;
+    }
+    
+    /* Cache the pointer to the data output function. */
+    %<LibBlockDWork(OutputFcnPtr, "", "", 0)> = exMWIMAQ_Wvi_GetRGBOutputFcnPtr();
+}
+%endfunction %% Start
+
+
+
+
+%% Function: Outputs ==========================================================
+%%
+%function Outputs(block, system) Output
+{
+    /* Image Acquisition Video Input Block (%<ParamSettings.FunctionName>) - '%<Name>' - Outputs */
+    
+    /* Access the pointer to the data output function. */
+    MWIMAQ_WVI_RGBOUTPUTS_FUNC outFcnPtr = 
+        (MWIMAQ_WVI_RGBOUTPUTS_FUNC)%<LibBlockDWork(OutputFcnPtr, "", "", 0)>;
+    
+    /* Access the acquired data by copying it into the buffers provided. */
+    outFcnPtr(%<LibBlockDWork(VideoInputObj, "", "", 0)>, 
+						    %<LibBlockOutputSignalAddr( RED_OUTPORT,  "", "", 0)>,
+						    %<LibBlockOutputSignalAddr( BLUE_OUTPORT,  "", "", 0)>,
+						    %<LibBlockOutputSignalAddr( GREEN_OUTPORT,  "", "", 0)>);
+}
+%endfunction %% Outputs
+
+
+
+%% Function: Update ==========================================================
+%%
+%function Update(block, system) Output
+
+%endfunction %% Update
+
+
+
+
+%% Function: Terminate ==========================================================
+%%
+%function Terminate(block, system) Output
+{
+    /* Image Acquisition Video Input Block (%<ParamSettings.FunctionName>) - '%<Name>' - Terminate */
+    
+    /* Terminate the device communication. */
+    if (%<LibBlockDWork(VideoInputObj, "", "", 0)> != NULL){
+        exMWIMAQ_Wvi_Terminate(%<LibBlockDWork(VideoInputObj, "", "", 0)>);
+    }
+}
+%endfunction %% Terminate
+
+
+
+%% [EOF] simaqvi.tlc

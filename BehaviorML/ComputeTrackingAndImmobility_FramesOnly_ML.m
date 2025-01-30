@@ -1,0 +1,336 @@
+function [Pos,PosTh,Vit,Movtsd,Fs]=ComputeTrackingAndImmobility_FramesOnly_ML(FramesFolder,OutFreq,plo,ref,mask,BW_threshold,smaller_object_size,th_immob,thtps_immob,Fsamp)
+%
+% function ComputeTrackingAndImmobility_FramesOnly_ML
+%
+% inputs
+% - FramesFolder = Folder containing all frames
+% - OutFreq = desired frequency of Pos
+% - [ref,mask,siz] = cf ComputeImageRef.m
+% - Fsamp (optional) = sampling tracking. default = 5Hz
+% - lux (optional) = dafault
+% - smoothFactor (optional) = 
+% - plot (optional) = 
+
+manual_remove_artifacts=1;
+tic;
+
+%% inputs
+if ~exist('FramesFolder','var') || ~exist('OutFreq','var')
+    error('Missing inputs arguments')
+end
+
+if ~exist('ref','var') ||  ~exist('mask','var')
+    try 
+        load([FramesFolder,'/Ref.mat']); ref; mask;
+        disp('loading ref.mat in the actual directory')
+    catch
+        try
+            ref;
+        catch
+            ind_ref_temp=0;
+            while ind_ref_temp==0
+                disp(' ')
+                names1=input('Enter name of frame 1 for creating ref (e.g. frame002101): ','s');
+                names2=input('Enter name of frame 2 for creating ref: ','s');
+                load([FramesFolder,'/',names1]);
+                frame_ref1=datas.image;
+                load([FramesFolder,'/',names2]);
+                frame_ref2=datas.image;
+                
+                figure('Color',[1 1 1])
+                ref_temp{1}=[frame_ref1(1:floor(size(frame_ref1,1)/2),:);frame_ref2(floor(size(frame_ref2,1)/2)+1:end,:)]; 
+                ref_temp{2}=[frame_ref2(1:floor(size(frame_ref2,1)/2),:);frame_ref1(floor(size(frame_ref1,1)/2)+1:end,:)]; 
+                ref_temp{3}=[frame_ref1(:,1:floor(size(frame_ref1,2)/2)),frame_ref2(:,floor(size(frame_ref2,2)/2)+1:end)]; 
+                ref_temp{4}=[frame_ref2(:,1:floor(size(frame_ref2,2)/2)),frame_ref1(:,floor(size(frame_ref1,2)/2)+1:end)]; 
+                for i=1:4
+                    subplot(2,2,i),imagesc(ref_temp{i}), title(['Ref ',num2str(i)]);
+                end
+                ind_ref_temp=input('Enter num of good ref, 0 if none: ');
+                if ind_ref_temp~=0, ref=ref_temp{ind_ref_temp}; end
+                close
+            end
+        end
+        
+        ok='n';
+        while ok~='y'
+            figure('Color',[1 1 1]),
+            imagesc(ref), title('delimiter le centre du cercle')
+            [yc,xc]=ginput(1);
+            hold on, plot(yc,xc,'ko'); title('delimiter le rayon du cercle')
+            [y,x]=ginput(1);
+            close
+            
+            Rad=sqrt((y-yc)^2+(x-xc)^2);
+            [XGrid,YGrid]=meshgrid(1:size(ref,1),1:size(ref,2));
+            A=sqrt((YGrid-yc).*(YGrid-yc)+(XGrid-xc).*(XGrid-xc));
+            mask=A';
+            mask(find(mask<=Rad))=0;
+            mask(find(mask>Rad))=1;
+            mask=1-abs(mask);
+            R=ref;
+            R(find(mask==0))=0;
+            
+            figure('Color',[1 1 1])
+            subplot(2,1,1), imagesc(ref)
+            subplot(2,1,2), imagesc(2*R+ref), title('Is the area ok (y/n)? ')
+            ok=input('Is the area ok (y/n)? ','s');
+            close
+        end
+        
+        %BW_threshold
+        subimage = abs(ref-frame_ref1); 
+        figure('Color',[1 1 1])
+        for i=1:10
+            diff_im2 = im2bw(subimage,1/i).*mask;
+            subplot(3,5,i), imagesc(diff_im2)
+            title(['BW threshold=',num2str(1/i)])
+        end
+        BW_threshold=input('Enter best BW_threshold: ');
+        diff_im=im2bw(subimage,BW_threshold);
+        close 
+        
+        % smaller_object_size
+        figure('Color',[1 1 1])
+        a=0;
+        for i=70:20:450
+            a=a+1;diff_im2 = bwareaopen(diff_im,i);
+            subplot(4,5,a), imagesc(diff_im2);
+            title(['object size=',num2str(i)])
+        end
+        smaller_object_size=input('Enter best object_size : ');
+        close
+        
+        try save([FramesFolder,'/Ref'],'mask','ref','BW_threshold','smaller_object_size','subimage'); catch, keyboard;end
+    end
+end
+
+if ~exist('Fsamp','var') 
+    Fsamp=5; % 5Hz sampling tracking
+end
+if ~exist('plo','var')
+    plo=0;
+end
+if ~exist('BW_threshold','var')
+    BW_threshold=0.1;
+    save([FramesFolder,'/Ref.mat'],'-append','BW_threshold')
+end
+if ~exist('smaller_object_size','var')
+    smaller_object_size=400;
+    save([FramesFolder,'/Ref.mat'],'-append','smaller_object_size')
+end
+if ~exist('th_immob','var') || ~exist('thtps_immob','var') 
+    th_immob=2;
+    thtps_immob=2;
+    save([FramesFolder,'/Ref.mat'],'-append','th_immob','thtps_immob')
+end
+%% read frames
+
+lis=dir(FramesFolder);
+indexFrames=[];
+for i=1:length(lis)
+    if strfind(lis(i).name,'frame')
+        indexFrames=[indexFrames,i];
+    end
+end
+
+
+%% sampling frequency
+load([FramesFolder,'/',lis(indexFrames(1)).name]);
+t_start=datas.time(6)+60*datas.time(5)+360*datas.time(4);
+
+load([FramesFolder,'/',lis(indexFrames(end)).name]);
+t_stop=datas.time(6)+60*datas.time(5)+360*datas.time(4);
+
+MeanSampFreq=length(indexFrames)/(t_stop-t_start);
+pas=floor(MeanSampFreq/Fsamp);
+
+%% begin tracking
+
+disp(['   pas = ',num2str(pas),'      Begin tracking...'])
+h = waitbar(0, 'Tracking and Immobility...');
+
+if plo, figure('Color',[1 1 1]), numFig=gcf; title('Tracking');end
+
+
+indx=1;
+for ind=1:pas:length(indexFrames);
+    waitbar(ind/length(indexFrames), h);
+    
+    load([FramesFolder,'/',lis(indexFrames(ind)).name]);
+    
+    IM=datas.image;
+    t=datas.time(6)+60*datas.time(5)+360*datas.time(4);
+    
+    % ----------------------
+    % code gab
+    subimage = abs(ref-IM);
+    
+    diff_im = im2bw(subimage,BW_threshold);
+    diff_im = bwareaopen(diff_im,smaller_object_size);
+    diff_im = diff_im.*mask;
+    
+    % immobility
+    if ind~=1, 
+        immob_IM = diff_im - diff_im_temp;
+        immob_val(indx)=sqrt(sum(sum(((immob_IM).*(immob_IM)))))/12000/2*100;
+    end
+    
+    % tracking
+    bw = bwlabel(diff_im, 8);
+    stats = regionprops( bw, 'Centroid','Area');
+    centroids = cat(1, stats.Centroid);
+    
+    if size(centroids) == [1 2]
+        nodetect=0;
+        %position on occupation map
+        x_oc = max(round(centroids(1)),1);
+        y_oc = max(round(centroids(2)),1);
+        Pos(indx,2)=x_oc;
+        Pos(indx,3)=y_oc;
+        
+        % display
+        if plo
+            figure(numFig),
+            subplot(2,2,1)
+            hold off, imagesc(subimage)
+            hold on, plot(x_oc,y_oc,'y+')
+            subplot(2,2,2)
+            hold off, imagesc(diff_im)
+            hold on, plot(x_oc,y_oc,'y+')
+            if ind~=1, 
+                subplot(2,2,4)
+                hold off, imagesc(immob_IM)
+            end
+        end
+
+    else
+        centroids = 'undefined';
+        nodetect=1;
+        Pos(indx,2)=NaN;
+        Pos(indx,3)=NaN;
+        
+        if plo
+            figure(numFig),
+            subplot(2,2,1)
+            hold off, imagesc(subimage)
+            text(floor(size(subimage,2)/2),floor(size(subimage,1)/2),'NaN','Color','w')
+            subplot(2,2,2)
+            hold off, imagesc(diff_im)
+            text(floor(size(subimage,2)/2),floor(size(subimage,1)/2),'NaN','Color','w')
+            if ind~=1, 
+                subplot(2,2,4)
+                hold off, imagesc(immob_IM)
+            end
+        end
+    end
+    % ----------------------
+
+    Pos(indx,1)=t-t_start;
+    Pos(indx,4)=nodetect;
+    indx=indx+1;
+
+    diff_im_temp=diff_im;
+
+    clear IM t datas
+end
+close(h);
+
+%% Freezing computation and Save
+Pos_immob=Pos(2:end,:);
+immob_time=Pos_immob(Pos_immob(:,4)==0,1);
+immob_val=immob_val(Pos_immob(:,4)==0);
+
+Movtsd=tsd(immob_time*1E4',SmoothDec(immob_val',1));
+Freeze=thresholdIntervals(Movtsd,th_immob,'Direction','Below');
+Freeze2=dropShortIntervals(Freeze,thtps_immob*1E4);
+
+save(FramesFolder,'Movtsd','Freeze','Freeze2');
+
+%% remove manual artifacts
+if manual_remove_artifacts
+    
+    figure('Color',[1 1 1])
+    plot(Pos(:,2),Pos(:,3))
+    ylim([0,size(ref,1)]);xlim([0,size(ref,2)])
+    title(FramesFolder)
+    
+    ok=input('Is there artefacts you want to remove manually (y/n) ? ','s');
+    while ok=='y'
+        disp('delimitate square area on figure');
+        for i=1:4
+            [x_art(i),y_art(i)]=ginput(1);
+            hold on, plot(x_art(i),y_art(i),'k+')
+        end
+        
+        x_art_lim=[min(x_art),max(x_art)];
+        y_art_lim=[min(y_art),max(y_art)];
+        [i,j]=find(Pos(:,2)>x_art_lim(1) & Pos(:,2)<x_art_lim(2) & Pos(:,3)>y_art_lim(1) & Pos(:,3)<y_art_lim(2));
+        Pos(i,:)= [];
+        
+        hold off, plot(Pos(:,2),Pos(:,3))
+        ylim([0,size(ref,1)]);xlim([0,size(ref,2)])
+        title(FramesFolder)
+        ok=input('Is there other artefacts you want to remove manually (y/n) ? ','s');
+    end
+    close
+end
+
+%% adjust output frequency
+
+Pos(isnan(Pos(:,2))|isnan(Pos(:,3)),:)=[];
+xi=Pos(1,1):1/OutFreq:Pos(end,1);
+Pos_interpol = interp1q(Pos(:,1),Pos(:,2:end),xi');
+Pos=[xi',Pos_interpol];
+
+%% Speed
+for i=1:length(Pos)-1
+    Ndt=Pos(i+1,1)-Pos(i,1);
+    Vx = (Pos(i,2)-Pos(i+1,2))/(Ndt);
+    Vy = (Pos(i,3)-Pos(i+1,3))/(Ndt);
+    Vitesse(i) = sqrt(Vx^2+Vy^2);
+end;
+
+Vit=SmoothDec(Vitesse',1);
+% M=M(Vit>vitTh,:);
+
+
+% Remove low speed + Remove artefacts - too high speed
+
+vitTh=percentile(Vit,20);
+PosTh=Pos(Vit>vitTh & Vit<10*median(Vit),:);
+% PosTh=Pos(find(Vit>vitTh,:);
+toc;
+
+%% save Pos
+
+file = fopen([FramesFolder,'.pos'],'w');
+
+for i = 1:length(Pos),
+    fprintf(file,'%f\t',Pos(i,2));
+    fprintf(file,'%f\t',Pos(i,3));
+    fprintf(file,'%f\n',Pos(i,4));
+end
+
+
+fclose(file);
+% end
+
+LowTh=vitTh;
+HighTh=10*median(Vit);
+
+disp(['   Sampling frequency :',num2str(1/median(diff(Pos(:,1)))),'Hz']);
+
+Fs=1/median(diff(Pos(:,1)));
+
+save(FramesFolder,'-append','Pos','PosTh','Vit','Fs','LowTh','HighTh');
+
+
+%% final display
+figure('Color',[1 1 1])
+subplot(1,2,1), plot(Pos(:,2),Pos(:,3))
+hold on, plot(PosTh(:,2),PosTh(:,3),'r')
+ylim([0,size(ref,1)]);xlim([0,size(ref,2)])
+title([FramesFolder,' Tracking'])
+
+subplot(1,2,2),plot(Range(Movtsd,'s'),Data(Movtsd))
+title([FramesFolder,' Immobility'])  

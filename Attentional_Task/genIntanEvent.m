@@ -1,0 +1,386 @@
+%genIntanEvent
+
+res=pwd;
+load([res,'/LFPData/LFP',num2str(0)]);
+
+%---------------------------------------------------
+%---------------------------------------------------
+
+clear signalTone tpsTone
+signalTone=Data(LFP);
+tpsTone=Range(LFP);
+
+%---------------------------------------------------
+A=find(signalTone>35); % remove all signal > 54 (noise)
+signalTone(A)=[];
+tpsTone(A)=[];
+A=find(signalTone<0); % remove all signal < 30 (basal)
+signalTone(A)=[];
+tpsTone(A)=[];
+
+%---------------------------------------------------
+% selection of Digital Input 6
+%---------------------------------------------------
+SignalEvt6=signalTone;
+TempsEvt6=tpsTone;
+
+A=find(SignalEvt6<29); % keep only Event 5 signal (which reach 50)
+SignalEvt6(A)=[];
+TempsEvt6(A)=[];
+Event6a=[];
+
+a=1;
+B=find(SignalEvt6==31);
+
+for i=1:length(B)-1
+    if TempsEvt6(B(i+1))-TempsEvt6(B(i))>1000
+        Event6(a)=TempsEvt6(B(i));
+        a=a+1;
+    end
+end
+Event6=Event6';
+
+%---------------------------------------------------
+% selection of Digital Input 5
+%---------------------------------------------------
+SignalEvt5=signalTone;
+TempsEvt5=tpsTone;
+
+A=find(SignalEvt5<12); % keep only EVent 5 signal (which reach 50)
+SignalEvt5(A)=[];
+TempsEvt5(A)=[];
+Event5a=[];
+
+a=1;
+B=find(SignalEvt5==16);
+
+for i=1:length(B)-1
+    if mean(SignalEvt5(B(i):B(i+1)))>14
+        if mean(SignalEvt5(B(i):B(i+1)))<17
+            Event5a(a,1)=TempsEvt5(B(i));
+            a=a+1;
+        end
+    end
+end
+
+a=1;
+Event5=[];
+for i=1:length(Event5a)-1
+    if Event5a(i+1)-Event5a(i)>10000
+        Event5(a,1)=Event5a(i+1);
+        a=a+1;
+    end
+end
+
+%---------------------------------------------------
+% selection of Digital Input 4
+%---------------------------------------------------
+SignalEvt4=signalTone;
+TempsEvt4=tpsTone;
+
+A=find(SignalEvt4<6); % keep only Event 5 signal (which reach 50)
+SignalEvt4(A)=[];
+TempsEvt4(A)=[];
+Event4a=[];
+
+a=1;
+B=find(SignalEvt4==8);
+
+for i=1:length(B)-1
+    if mean(SignalEvt4(B(i):B(i+1)))>7
+        if mean(SignalEvt4(B(i):B(i+1)))<9
+            Event4a(a,1)=TempsEvt4(B(i));
+            a=a+1;
+        end
+    end
+end
+
+a=1;
+Event4=[];
+for i=1:length(Event4a)-1
+    if Event4a(i+1)-Event4a(i)>1000
+        Event4(a,1)=Event4a(i+1);
+        a=a+1;
+    end
+end
+
+
+%---------------------------------------------------
+% selection of Digital Input 3
+%---------------------------------------------------
+SignalEvt3=signalTone;
+TempsEvt3=tpsTone;
+
+A=find(SignalEvt3<3); % keep only Event 5 signal (which reach 50)
+SignalEvt3(A)=[];
+TempsEvt3(A)=[];
+Event3a=[];
+
+a=1;
+B=find(SignalEvt3==4);
+
+for i=1:length(B)-1
+    if mean(SignalEvt3(B(i):B(i+1)))>3.5
+        if mean(SignalEvt3(B(i):B(i+1)))<4.5
+            Event3a(a,1)=TempsEvt3(B(i));
+            a=a+1;
+        end
+    end
+end
+
+a=1;
+Event3=[];
+for i=1:length(Event3a)-1
+    if Event3a(i+1)-Event3a(i)>1000
+        Event3(a,1)=Event3a(i+1);
+        a=a+1;
+    end
+end
+
+%---------------------------------------------------
+% selection of Digital Input 2
+%---------------------------------------------------
+SignalEvt2=signalTone;
+TempsEvt2=tpsTone;
+
+A=find(SignalEvt2<1.2); % keep only Event 5 signal (which reach 50)
+SignalEvt2(A)=[];
+TempsEvt2(A)=[];
+Event2a=[];
+
+a=1;
+B=find(SignalEvt2==2);
+
+for i=1:length(B)-1
+    if mean(SignalEvt2(B(i):B(i+1)))>1.8
+        if mean(SignalEvt2(B(i):B(i+1)))<2.2
+            Event2a(a,1)=TempsEvt2(B(i));
+            a=a+1;
+        end
+    end
+end
+
+a=1;
+Event2=[];
+for i=1:length(Event2a)-1
+    if Event2a(i+1)-Event2a(i)>1000
+        Event2(a,1)=Event2a(i);
+        a=a+1;
+    end
+end
+
+%---------------------------------------------------
+% selection of Digital Input 1
+%---------------------------------------------------
+SignalEvt1=signalTone;
+TempsEvt1=tpsTone;
+
+A=find(SignalEvt1<0.5); % keep only Event 5 signal (which reach 50)
+SignalEvt1(A)=[];
+TempsEvt1(A)=[];
+Event1a=[];
+
+a=1;
+B=find(SignalEvt1==1);
+for i=1:length(B)-1
+    if B(i+1)-B(i)<1.1
+        C(a,1)=B(i);
+        a=a+1;
+    end
+end
+
+a=1;
+for i=1:length(C)-1
+    if mean(SignalEvt1(C(i):C(i+1)))==1
+        Event1a(a,1)=TempsEvt1(C(i));
+        a=a+1;
+    end
+end
+
+a=1;
+Event1=[];
+for i=1:length(Event1a)-1
+    if Event1a(i+1)-Event1a(i)>1000
+        Event1(a,1)=Event1a(i);
+        a=a+1;
+    end
+end
+
+
+%--------------------------------------------------------
+figure, plot(Range(LFP,'s'),Data(LFP),'k')
+hold on, plot(Event1/1E4,1,'ro','markerfacecolor','r');
+hold on, plot(Event2/1E4,2,'bo','markerfacecolor','r');
+hold on, plot(Event3/1E4,4,'go','markerfacecolor','r');
+hold on, plot(Event4/1E4,8,'co','markerfacecolor','r');
+hold on, plot(Event5/1E4,17,'ko','markerfacecolor','r');
+hold on, plot(Event6/1E4,32,'yo','markerfacecolor','r');
+hold on, axis([Event1(1)/1E4-10 tpsTone(length(tpsTone))/1E4 0 40])
+%--------------------------------------------------------
+
+%---------------------------------------------------
+%      Suppression des doublons de détéctions
+%---------------------------------------------------
+for i=1:length(Event6);
+    a=Event6(i);
+    test=find(Event5(:,1)<a+100 & Event5(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event5(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+for i=1:length(Event6);
+    a=Event6(i);
+    test=find(Event4(:,1)<a+100 & Event4(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event4(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+for i=1:length(Event6);
+    a=Event6(i);
+    test=find(Event3(:,1)<a+100 & Event3(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event3(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+for i=1:length(Event6);
+    a=Event6(i);
+    test=find(Event2(:,1)<a+100 & Event2(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event2(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+for i=1:length(Event6);
+    a=Event6(i);
+    test=find(Event1(:,1)<a+100 & Event1(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event1(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+
+%---------------------------------------------------
+for i=1:length(Event5);
+    a=Event5(i);
+    test=find(Event4(:,1)<a+100 & Event4(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event4(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+for i=1:length(Event5);
+    a=Event5(i);
+    test=find(Event3(:,1)<a+100 & Event3(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event3(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+for i=1:length(Event5);
+    a=Event5(i);
+    test=find(Event2(:,1)<a+100 & Event2(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event2(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+for i=1:length(Event5);
+    a=Event5(i);
+    test=find(Event1(:,1)<a+100 & Event1(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event1(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+
+%---------------------------------------------------
+for i=1:length(Event4);
+    a=Event4(i);
+    test=find(Event3(:,1)<a+100 & Event3(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event3(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+for i=1:length(Event4);
+    a=Event4(i);
+    test=find(Event2(:,1)<a+100 & Event2(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event2(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+for i=1:length(Event4);
+    a=Event4(i);
+    test=find(Event1(:,1)<a+100 & Event1(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event1(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+
+
+%---------------------------------------------------
+for i=1:length(Event3);
+    a=Event3(i);
+    test=find(Event2(:,1)<a+100 & Event2(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event2(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+for i=1:length(Event3);
+    a=Event3(i);
+    test=find(Event1(:,1)<a+100 & Event1(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event1(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+
+%---------------------------------------------------
+for i=1:length(Event2);
+    a=Event2(i);
+    test=find(Event1(:,1)<a+100 & Event1(:,1)>a-100);
+    ahah=isempty(test);
+    if ahah==0
+        Event1(test)=[];
+        disp(['ahah:  ',num2str(test)])
+    end
+end
+
+
+%---------------------------------------------------
+hold on, plot(Event1/1E4,1,'ro','markerfacecolor','b');
+hold on, plot(Event2/1E4,2,'bo','markerfacecolor','b');
+hold on, plot(Event3/1E4,4,'go','markerfacecolor','b');
+hold on, plot(Event4/1E4,8,'co','markerfacecolor','b');
+hold on, plot(Event5/1E4,17,'ko','markerfacecolor','b');
+hold on, plot(Event6/1E4,32,'yo','markerfacecolor','b');
+hold on, axis([Event1(1)/1E4-10 tpsTone(length(tpsTone))/1E4 0 40])
+%---------------------------------------------------
+
+%-------------------------------------------------------------
+save EventIntanDIGin Event1 Event2 Event3 Event4 Event5 Event6 
+%-------------------------------------------------------------
+
+
+
+

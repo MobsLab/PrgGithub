@@ -1,0 +1,79 @@
+%% Comodulation in three states : REM, SWS, Locomotion
+clear all
+
+
+Files=PathForExperimentsEmbReact('Habituation');
+% Params
+LowFreqRg=[2 15];
+HighFreqRg=[30 250];
+LowFreqBW=[1 1];
+LowFreqStep=1;
+HighFreqStep=4;
+BinNumbers=18;
+NumSurrogates=200;
+Struc={'HPC','OB','PFCx'};
+DidntWork={};d=1;
+LowFreqVals=[LowFreqRg(1):LowFreqStep:LowFreqRg(2)];
+for pp=1:length(Files.path)
+    pp
+    for c=1
+        try
+            cd(Files.path{pp}{c})
+            try
+                load('ChannelsToAnalyse/dHPC_deep.mat')
+                Channel.HPC=channel;
+            catch
+                
+                load('ChannelsToAnalyse/dHPC_rip.mat')
+                Channel.HPC=channel;
+            end
+            load('ChannelsToAnalyse/Bulb_deep.mat')
+            Channel.OB=channel;
+            load('ChannelsToAnalyse/PFCx_deep.mat')
+            Channel.PFCx=channel;
+            
+            for ss=1:length(Struc)
+                load(['LFPData/LFP',num2str(eval(['Channel.',Struc{ss}])),'.mat']);
+                
+                temp=FilterRangeOfBdWidths(LFP,LowFreqRg,LowFreqStep,LowFreqBW,1);
+                eval(['MultiFilLFP.',Struc{ss},'.Low=temp;']);
+                
+                for ff=1:length(LowFreqVals)
+                    temp=FilterRangeOfBdWidths(LFP,HighFreqRg,HighFreqStep,[LowFreqVals(ff) LowFreqVals(ff)],1);
+                    eval(['MultiFilLFP.',Struc{ss},'.High.FilLFP{',num2str(ff),'}=temp.FilLFP;']);
+                    eval(['MultiFilLFP.',Struc{ss},'.High.FreqRange{',num2str(ff),'}=temp.FreqRange;']);
+                end
+            end
+            
+            Epoch=intervalSet(0,max(Range(LFP)));
+            
+            for ss=1:3
+                ss
+                for sss=1:3
+                    [LowFreqVals,HighFreqVals,Dkl{ss,sss},DklSurr,Prc99]=ComoduloPreFiltered(eval(['MultiFilLFP.',Struc{ss},'.Low.FilLFP']), eval(['MultiFilLFP.',Struc{sss},'.High.FilLFP']),...
+                        LowFreqRg,HighFreqRg,LowFreqStep,HighFreqStep,BinNumbers,1,0);
+                end
+            end
+            
+            save('CoModulo3StrucWhit.mat','Dkl')
+            clear Dkl Prc99
+        catch
+            DidntWork{d}=Files.path{pp}{c};
+            disp([Files.path{pp}{c},' fail'])
+            d=d+1;
+        end
+    end
+end
+
+figure
+            for ss=1:3
+                ss
+                for sss=1:3
+subplot(3,3,(ss-1)*3+sss)
+imagesc(LowFreqVals,HighFreqVals,Dkl{ss,sss}'), axis xy
+                end
+            end
+
+
+
+

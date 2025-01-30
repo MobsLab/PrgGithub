@@ -1,0 +1,279 @@
+function FigBILANObsFreez(folder,varargin)
+%folder='ManipBulbectomie'
+% 23.12.2014 aims at giving an overview of the behavioral results of Fear Conditionning(oct-nov2014)
+% produce
+% a figure for each mouse of PSTH (averaged CS-, first CS+, last CS+)
+% a matrix for all mice of PSTH (averaged CS-, first CS+, last CS+)  (color
+% coded)
+
+
+ for i = 1:2:length(varargin),
+
+              switch(lower(varargin{i})),
+
+                case 'smoothing',
+                  smo = varargin{i+1};
+                  if ~isa(smo,'numeric'),
+                    error('Incorrect value for property ''smoothing'' ');
+                  end
+                  
+                case 'figure',
+                  plo = varargin{i+1};
+                  if ~isa(plo,'numeric'),
+                    error('Incorrect value for property ''figure'' ');
+                  end   
+  
+                case 'save',
+                  sav = varargin{i+1};            
+                                    
+              end
+ end
+ 
+lim=100; % nb bins
+bi=1000; % bin size
+smo=1;
+
+cd (['C:\Users\Clémence\Desktop\chgtordinateur\Fear\DATA-ACQUISITION\' folder])
+list=dir; %list of mouse folders
+
+% Matrix of data; mice in lines
+C2=[]; % COND  first CS+    
+C3=[];%        last CS+
+C1=[]; %       CS-
+P2=[]; % PLETH 
+P3=[];
+P1=[];
+E2=[]; % ENV B
+E3=[];
+E1=[];
+a=1; %counter for MouseList COND
+
+for i=1:length(list)
+    cd (['C:\Users\Clémence\Desktop\chgtordinateur\Fear\DATA-ACQUISITION\' folder])
+    if list(i).isdir==1&list(i).name(1)~='.'&list(i).name(1)=='M' % if the folder is indeed a mouse name folder
+        
+        eval(['cd(list(',num2str(i),').name)'])
+        
+        % store the names of the mice for Y tick labeling
+        Mousename=list(i).name;
+        MouseListC{a}=Mousename;
+        a=a+1;
+        if plo
+            hFigIndiv=figure('Color',[1 1 1]);
+            set(hFigIndiv,'Position', [1000 80 560 900])
+        end
+        listdir=dir;
+        %%%%%%%%%%%%%%%%%%%%%%%%%  COND  %%%%%%%%%%%%%%%%%%%%%%%%%
+        % go the the COND folder
+        cond_ind=[];
+        for j=1:size(listdir,1)
+            if ~isempty(strfind(listdir(j).name, 'COND'))
+                cond_ind=[cond_ind j];
+            end
+        end
+        
+        eval(['cd(listdir(' num2str(cond_ind) ').name)'])
+
+        load Behavior.mat
+        csp=StimInfo(StimInfo(:,2)==7,1); % times of CS+
+        csm=StimInfo(StimInfo(:,2)==5,1); % times of CS-
+        
+        % compute PSTH
+        [m2,s2,t2]=mETAverage(csp(1:4)*1E4,Range(Movtsd),Data(Movtsd),bi,lim); 
+        [m3,s3,t3]=mETAverage(csp(5:end)*1E4,Range(Movtsd),Data(Movtsd),bi,lim);
+        [m1,s1,t1]=mETAverage(csm*1E4,Range(Movtsd),Data(Movtsd),bi,lim);
+
+        C2=[C2,m2];
+        C3=[C3,m3];
+        C1=[C1,m1];
+        if plo
+            subplot(3,1,1);
+            PlotPSTH(lim, bi, smo, m2,s2,t2,m3,s3,t3,m1,s1,t1,cd,1)
+            ylim([0 40])
+        end
+        cd .. % go backward
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%  PLETH  %%%%%%%%%%%%%%%%%%%%%%%%%
+        % go the the EXTpleth folder
+        try
+            pleth_ind=[];
+            for j=1:size(listdir,1)
+                if ~isempty(strfind(listdir(j).name, 'EXTpleth'))
+                    pleth_ind=[pleth_ind j];
+                end
+            end
+
+            eval(['cd(listdir(' num2str(pleth_ind) ').name)'])
+
+            if ((exist('Behavior.mat'))~=0)
+                load Behavior.mat
+                csp=StimInfo(StimInfo(:,2)==7,1);
+                csm=StimInfo(StimInfo(:,2)==5,1);
+
+                [m2,s2,t2]=mETAverage(csp(1:4)*1E4,Range(Movtsd),Data(Movtsd),bi,lim);
+                [m3,s3,t3]=mETAverage(csp(5:end)*1E4,Range(Movtsd),Data(Movtsd),bi,lim);
+                [m1,s1,t1]=mETAverage(csm*1E4,Range(Movtsd),Data(Movtsd),bi,lim);
+            else
+                m2=NaN*ones(size((P2),1),1);
+                m3=NaN*ones(size((P2),1),1);
+                m1=NaN*ones(size((P2),1),1);
+            end
+
+            P2=[P2,m2];
+            P3=[P3,m3];
+            P1=[P1,m1];
+            if plo
+                subplot(3,1,2);
+                PlotPSTH(lim, bi, smo, m2,s2,t2,m3,s3,t3,m1,s1,t1,cd,2)
+                ylim([0 10])
+            end
+        
+        end % try pleth
+        
+        cd ..
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%   ENVT B %%%%%%%%%%%%%%%%%%%%%%%%%  
+        % go the the EXTenvB folder
+        try
+            envB_ind=[];
+            for j=1:size(listdir,1)
+                if ~isempty(strfind(listdir(j).name, 'EXTenvB')) & isempty(strfind(listdir(j).name, 'EXTenvB2'))
+                    envB_ind=[envB_ind j];
+                end
+            end
+
+            eval(['cd(listdir(' num2str(envB_ind) ').name)'])
+            clear m
+            clear m3
+            clear m1
+
+            load Behavior.mat
+            csp=StimInfo(StimInfo(:,2)==7,1);
+            csm=StimInfo(StimInfo(:,2)==5,1);
+
+            [m2,s2,t2]=mETAverage(csp(1:4)*1E4,Range(Movtsd),Data(Movtsd),bi,lim);
+            [m3,s3,t3]=mETAverage(csp(5:end)*1E4,Range(Movtsd),Data(Movtsd),bi,lim);
+            [m1,s1,t1]=mETAverage(csm*1E4,Range(Movtsd),Data(Movtsd),bi,lim);
+
+            E2=[E2,m2];
+            E3=[E3,m3];
+            E1=[E1,m1];
+            if plo
+                subplot(3,1,3);
+                PlotPSTH(lim, bi, smo, m2,s2,t2,m3,s3,t3,m1,s1,t1,cd, 3)
+                ylim([0 20])
+            end
+        end % try pleth
+        
+        cd ..
+        if sav && plo
+            saveas(hFigIndiv, 'PSTH.fig')
+            set(hFigIndiv,'PaperPosition',[0 0 12 20])
+            saveas(hFigIndiv, 'PSTH.png')
+        end
+    end
+       
+end
+% 
+% % Sort matrices to correspond to BULBECTOMY (1:7) and SHAM (7:14)
+ MouseListC=MouseListC(:,[[1:4] [8:10] [11:14] [5:7]]);
+C2=C2(:,[[1:4] [8:10] [11:14] [5:7]]);% first CS+
+E2=E2(:,[[1:4] [8:10] [11:14] [5:7]]);
+P2=P2(:,[[1:4] [8:10] [11:14] [5:7]]);
+
+C3=C3(:,[[1:4] [8:10] [11:14] [5:7]]);% last CS+
+E3=E3(:,[[1:4] [8:10] [11:14] [5:7]]);
+P3=P3(:,[[1:4] [8:10] [11:14] [5:7]]);
+
+C1=C1(:,[[1:4] [8:10] [11:14] [5:7]]);% CS-
+E1=E1(:,[[1:4] [8:10] [11:14] [5:7]]);
+P1=P1(:,[[1:4] [8:10] [11:14] [5:7]]);
+
+
+
+% Figure BILAN
+cd ('C:\Users\Clémence\Desktop\chgtordinateur\Fear\DATA-ACQUISITION\ManipBulbectomie\BilanFreezing')
+save BulbectomiePSTHdata.mat C2 E2 P2 C3 E3 P3 C1 E1 P1 smo lim bi
+
+PlotPSTHmatrix(t2,t3,t1,C2,P2,E2,C3,P3,E3,C1,P1,E1,MouseListC,0,1) % PSTH
+PlotPSTHmatrix(t2,t3,t1,C2,P2,E2,C3,P3,E3,C1,P1,E1,MouseListC,1,1) % zscore PSTH
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%% AVERAGE PSTH by group Bulb/Sham
+% plot by group
+figure('Color',  [1 1 1])
+set(gcf, 'Position',[ 8  91  1819 887]);
+% first CS+
+subplot(3,3,1), PlotAveragePSTHmatrix(C2,'r','Cond', 'cs+ (1-4)',sav)
+hleg=legend('bulb');set(hleg, 'Location','NorthWest')
+subplot(3,3,2), PlotAveragePSTHmatrix(P2,'r','Pleth','cs+ (1-4)',sav)
+subplot(3,3,3), PlotAveragePSTHmatrix(E2,'r','EnvB','cs+ (1-4)',sav)
+% last CS+
+colorLastCSp=[0.7 0.2 0];
+subplot(3,3,4), PlotAveragePSTHmatrix(C3,colorLastCSp,'Cond','cs+ (end)',sav) % rouge foncé
+hleg=legend('bulb');set(hleg, 'Location','NorthWest')
+subplot(3,3,5), PlotAveragePSTHmatrix(P3,colorLastCSp,'Pleth','cs+ (end)',sav)
+subplot(3,3,6), PlotAveragePSTHmatrix(E3,colorLastCSp,'EnvB','cs+ (end)',sav)
+% CS-
+colorCSm=[0 0.5 0]; % vert foncé
+subplot(3,3,7), PlotAveragePSTHmatrix(C1,colorCSm,'Cond','cs-',sav)
+hleg=legend('bulb');set(hleg, 'Location','NorthWest')
+subplot(3,3,8), PlotAveragePSTHmatrix(P1,colorCSm,'Pleth','cs-',sav)
+subplot(3,3,9), PlotAveragePSTHmatrix(E1,colorCSm,'EnvB','cs-',sav)
+
+  
+%%%%%% PSTH : comparison PRE/ DURING sound
+figure('Color',  [1 1 1])
+set(gcf, 'Position',[ 8  91  1819 887]);
+PreSound=[35:49]; % 15sec before sound
+Sound=[51:80]; % 15sec before sound
+subplot(3,3,1),BarPlotPrePost(C2,PreSound,Sound),title('Cond'), ylabel('cs+ (1-4)'), xlabel('Pre -15 0   Post  0  30'),
+subplot(3,3,2),BarPlotPrePost(P2,PreSound,Sound),title('Pleth'), set(gca, 'XTick', [])
+subplot(3,3,3),BarPlotPrePost(E2,PreSound,Sound),title('EnvB'), set(gca, 'XTick', [])
+
+subplot(3,3,4),BarPlotPrePost(C3,PreSound,Sound),ylabel('cs+ (5-end)')
+subplot(3,3,5),BarPlotPrePost(P3,PreSound,Sound)
+subplot(3,3,6),BarPlotPrePost(E3,PreSound,Sound)
+
+subplot(3,3,7),BarPlotPrePost(C1,PreSound,Sound),ylabel('cs-'),
+subplot(3,3,8),BarPlotPrePost(P1,PreSound,Sound)
+subplot(3,3,9),BarPlotPrePost(E1,PreSound,Sound)
+set(gca, 'XTick', [1 2 3 4 ],'XTickLabel', {'sham Pre', 'sham Post', 'bulb Pre', 'bulb Post'} )
+if sav
+    set(gcf,'PaperPosition', [1 1 28 21])
+    saveas (gcf, 'MvtPrePostSound.fig')
+    saveas (gcf, 'MvtPrePostSound.png')
+end
+
+end
+
+function BarPlotPrePost(matrix, PreSound, Sound)
+PlotErrorbar4(nanmean(matrix(PreSound,8:14))',nanmean(matrix(Sound,8:14))',nanmean(matrix(PreSound,1:7))',nanmean(matrix(Sound,1:7))',0,2)
+set(gca, 'XTick', [])
+end
+
+function PlotAveragePSTHmatrix(matrix, color,plottitle, yaxistitle,sav)
+
+    shadedErrorBar([-50:50],nanmean((matrix(:,1:7)'))',stdError((matrix(:,1:7)')), {'Color', color},1), hold on;
+    shadedErrorBar([-50:50],nanmean((matrix(:,8:14)'))',stdError((matrix(:,8:14)')),'-k',1);
+%         shadedErrorBar([-50:50],nanmean((matrix(:,1:7)'))',nanstd((matrix(:,1:7)')), {'Color', color},1), hold on;
+%         shadedErrorBar([-50:50],nanmean((matrix(:,8:14)'))',nanstd((matrix(:,8:14)')),'-k',1);
+    ylabel(yaxistitle)
+    title(plottitle)
+    xlim([-50 50])
+    if strcmp(plottitle, 'Cond')
+        ylim([0 20])
+    elseif strcmp(plottitle, 'Pleth')
+        ylim([0 10])
+    elseif strcmp(plottitle, 'EnvB')
+        ylim([0 20])
+    end
+    
+    if sav
+        set(gcf,'PaperPosition', [1 1 28 21])
+        saveas (gcf, 'PSTHaveraged.fig')
+        saveas (gcf, 'PSTHaveraged.png')
+    end
+end
+
+

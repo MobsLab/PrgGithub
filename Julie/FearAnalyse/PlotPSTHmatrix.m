@@ -1,0 +1,56 @@
+function PlotPSTHmatrix(t2,t3,t1,C2,P2,E2,C3,P3,E3,C1,P1,E1,MouseListC,StepName,zsc,sav)
+
+% code � finir � mettre en sous fonction dans
+% %FigBILANObsFreezManipBulbectomie
+
+if zsc
+    C1=zscore(C1);% COND  CS-
+    P1=zscore(P1);% PLETH CS-
+    E1=zscore(E1);% ENV B CS-
+    
+    C2=zscore(C2);% COND  first CS+ 
+    P2=zscore(P2);% PLETH first CS+ 
+    E2=zscore(E2);% ENV B first CS+
+    
+    C3=zscore(C3);% COND  last CS+
+    P3=zscore(P3);% PLETH last CS+ 
+    E3=zscore(E3);% ENV B last CS+
+end
+
+figure('color',[1 1 1]),
+set(gcf, 'Position',[ 8  91  1819 887]);
+
+subplot(3,3,1),imagesc(t2/1E3,[1:size(C2,2)],C2'),ylabel('cs+ (1-4)'),title(StepName{2}), hold on, line([0 0],[0.5 size(C2,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+if zsc
+    text(-80, -2,'PSTH zscores', 'FontSize', 20)
+else
+    text(-80, -2,'PSTH', 'FontSize', 20)
+end
+subplot(3,3,2),imagesc(t2/1E3,[1:size(P2,2)],P2'),title(StepName{3}), hold on, line([0 0],[0.5 size(P2,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 size(P2,2)+0.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+subplot(3,3,3),imagesc(t2/1E3,[1:size(E2,2)],E2'),title(StepName{4}), hold on, line([0 0],[0.5 size(E2,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 size(E2,2)+0.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+
+subplot(3,3,4),imagesc(t3/1E3,[1:size(C2,2)],C3'),ylabel('cs+ (end)'), hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+subplot(3,3,5),imagesc(t3/1E3,[1:size(C2,2)],P3'), hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+subplot(3,3,6),imagesc(t3/1E3,[1:size(C2,2)],E3'), hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+
+subplot(3,3,7),imagesc(t1/1E3,[1:size(C2,2)],C1'),ylabel('cs-'), hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+subplot(3,3,8),imagesc(t1/1E3,[1:size(C2,2)],P1'), hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+subplot(3,3,9),imagesc(t1/1E3,[1:size(C2,2)],E1'), hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+
+set(gcf,'PaperPosition',[ 0  0 27 18])
+if zsc
+    saveas(gcf,'FigBilanMAPFreezing_PSTH_zcores.fig')
+    saveas(gcf,'FigBilanMAPFreezing_PSTH_zscores.png')
+else
+    saveas(gcf,'FigBilanMAPFreezing_PSTH.fig')
+    saveas(gcf,'FigBilanMAPFreezing_PSTH.png')
+end

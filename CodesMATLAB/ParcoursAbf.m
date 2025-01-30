@@ -1,0 +1,64 @@
+%  ParcoursAbf
+
+try 
+freq;
+catch
+freq=10000;
+end
+
+
+cd H:\Data_electrophy_astros\2008\OB
+
+listdir=dir;
+
+for mois=1:length(listdir)
+%  for mois=1:7
+
+	cd H:\Data_electrophy_astros\2008\OB
+
+	if listdir(mois).isdir==1&listdir(mois).name(1)~='.'
+
+%  	disp('ok step 1')
+
+	cd (listdir(mois).name)
+
+	listsousdir=dir;
+
+		for i=1:length(listsousdir)
+%  		for i=1:3
+
+
+			nom=listsousdir(i).name;
+			le=length(listsousdir(i).name);
+			
+
+			try
+				if nom(le-2:le)=='abf';
+				nom	
+
+	
+				data=abfloadKB(nom);
+	
+				nbtraces=size(data,2)-1;
+				
+				mkdir(pwd,nom(1:le-4))
+	
+				eval(['cd ', nom(1:le-4)])
+
+				save Data data freq nbtraces nom 
+				cd ..
+
+
+				end
+			end
+
+
+
+		end
+
+	end
+
+
+
+
+end

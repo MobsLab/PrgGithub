@@ -1,0 +1,52 @@
+function A = firingRatesByInterval(A)
+
+dset = current_dataset(A);
+
+A = getResource(A,'SpikeData',dset);
+A = getResource(A,'StartTrial',dset);
+startTrial = startTrial{1};
+
+A = getResource(A,'TrialOutcome',dset);
+trialOutcome = trialOutcome{1};
+
+A = getResource(A,'GoodCells',dset);
+goodCells = goodCells{1};
+
+cellsIx = find(goodCells);
+nbCells = length(cellsIx);
+
+st = Range(startTrial);
+to = Range(trialOutcome);
+
+nbTrials = length(st);
+
+A = registerResource(A,'PreTrialFiring','cell',{[],1},'preTrialFiring',...
+	'trials by trial Cells firing rate on preTrial interval');
+A = registerResource(A,'FirstHalfTrialFiring','cell',{[],1},'firstHalfTrialFiring',...
+	'trials by trial Cells firing rate on first half of trial');
+A = registerResource(A,'SecHalfTrialFiring','cell',{[],1},'secHalfTrialFiring',...
+	'trials by trial Cells firing rate on second half of trials');
+A = registerResource(A,'PostOutcomeFiring','cell',{[],1},'postOutcomeFiring',...
+	'trials by trial Cells firing rate on post Outcome interval');
+
+preTrialEpoch = intervalSet(st - 3000,st);
+earlyTrialEpoch = intervalSet(st,(to+st)/2);
+lateTrialEpoch = intervalSet((to+st)/2,to);
+postOutcomeEpoch = intervalSet(to,to+3000);
+
+for c=1:nbCells
+
+	preTrialFiring{c} = Data(intervalRate(S{cellsIx(c)},preTrialEpoch));
+	firstHalfTrialFiring{c} = Data(intervalRate(S{cellsIx(c)},earlyTrialEpoch));
+	secHalfTrialFiring{c} = Data(intervalRate(S{cellsIx(c)},lateTrialEpoch));
+	postOutcomeFiring{c} = Data(intervalRate(S{cellsIx(c)},postOutcomeEpoch));
+
+end
+
+preTrialFiring = {preTrialFiring};
+firstHalfTrialFiring = {firstHalfTrialFiring};
+secHalfTrialFiring = {secHalfTrialFiring};
+postOutcomeFiring = {postOutcomeFiring};
+
+
+A = saveAllResources(A);

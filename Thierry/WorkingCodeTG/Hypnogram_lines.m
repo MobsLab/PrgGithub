@@ -1,0 +1,58 @@
+disp('loading stim times')
+        % Attention Digin2 pour ancien protocoles et Digin6 pour BCI protocol
+        load('LFPData/DigInfo4.mat')
+        TTLEpoch = thresholdIntervals(DigTSD,0.99,'Direction','Above');
+        % TTL = colonne de temps au dessus de 0.99 pour avoir les 1 = stim ON
+        
+        TTLEpoch_merged = mergeCloseIntervals(TTLEpoch,1e4);
+        % merge tous les temps des stim plus proche de 1 sec pour éviter les créneaux et le remplacer par un step entier d'une min
+        
+        for k = 1:length(Start(TTLEpoch_merged))
+            LittleEpoch = subset(TTLEpoch_merged,k);
+            Freq_Stim(k) = round(1./(median(diff(Start(and(TTLEpoch,LittleEpoch),'s')))));
+            Time_Stim(k) = min(Start(and(TTLEpoch,LittleEpoch)));
+        end
+        events=Start(TTLEpoch_merged)/1E4;
+
+load SleepScoring_Accelero SmoothTheta tsdMovement
+load SleepScoring_OBGamma.mat
+subplot(2,1,1);
+hold on
+plot(Range(Restrict(tsdMovement,Wake),'s'),Data(Restrict(tsdMovement,Wake)),'b')
+plot(Range(Restrict(tsdMovement,SWSEpoch),'s'),Data(Restrict(tsdMovement,SWSEpoch)),'r')
+plot(Range(Restrict(tsdMovement,REMEpoch),'s'),Data(Restrict(tsdMovement,REMEpoch)),'g')
+title({'Movement during stages'})
+ylabel('Movement')
+xlabel('Time')
+xlim([0 3E4])
+set(gca,'FontSize', 16)
+
+subplot(2,1,2);
+hold on
+plot(Range(Restrict(tsdMovement,Wake),'s'),Data(Restrict(tsdMovement,Wake)),'b')
+plot(Range(Restrict(tsdMovement,SWSEpoch),'s'),Data(Restrict(tsdMovement,SWSEpoch)),'r')
+plot(Range(Restrict(tsdMovement,REMEpoch),'s'),Data(Restrict(tsdMovement,REMEpoch)),'g')
+title({'Movement during stages'})
+ylabel('Movement')
+xlabel('Time')
+xlim([0 3E4])
+set(gca,'FontSize', 16)
+line([events(1) events(1)], ylim)
+for i = 1:length(events) line(gca,[events(i) events(i)], ylim, 'color', 'm'); end
+savefig(fullfile(pathname2,'Movement during stages with stim'))
+
+savefig(fullfile(pathname2,'Movement during stages'))
+
+
+PlotSleepStage(WakeWiNoise,SWSEpochWiNoise,REMEpochWiNoise,1)
+hold on
+line([events(1) events(1)], ylim)
+for i = 1:length(events) line(gca,[events(i) events(i)], ylim, 'color', 'b'); end
+
+
+PlotSleepStage(WakeWiNoise,SWSEpochWiNoise,REMEpochWiNoise,1)
+hold on
+title('Example Hypnogram Stim 1076 200723')
+line([2.7200*1E4 2.7200*1E4],ylim,'color','b')
+line([3.2540*1E4 3.2540*1E4],ylim,'color','b')
+

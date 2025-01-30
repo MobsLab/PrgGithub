@@ -1,0 +1,13 @@
+% 
+% 09.05.2017
+
+
+chans=InfoLFP.channel(strcmp(InfoLFP.structure,'PFCx'));
+if ~exist('S','var')
+    load SpikeData.mat
+end
+    
+% get LFP Bulb
+res=pwd; 
+load([res,'/ChannelsToAnalyse/Bulb_deep']); 
+load([res,'/LFPData/LFP',num2str(channel)]);

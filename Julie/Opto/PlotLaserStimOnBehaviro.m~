@@ -1,0 +1,87 @@
+
+%07.05.2016
+% for mouse 366
+% /media/DataMobs31/OPTO_CHR2_DATA/Mouse-366/behavior/FEAR-Mouse-366-24062016-01-EXT_2h
+th_immob=1; % default 1
+thtps_immob=2;
+
+% ouvrir FigBilan.fig, 1er subplot
+set(gcf,'Position',[1987         368        1768         564])
+ylim([-2 50])
+load Behavior.mat
+
+% load TTL2 qui contient les CS- (valeur 3) et les CS+ (valeur 4) 
+load TTL2
+%line([TTL2(TTL2(:,2)==3,1) TTL2(TTL2(:,2)==3,1)+5],zeros(size(TTL2(TTL2(:,2)==3,:))),'Color','g','LineWidth',3)
+%line([TTL(TTL(:,2)==4,1) TTL(TTL(:,2)==4,1)+5],zeros(size(TTL(TTL(:,2)==4,:))),'Color','r','LineWidth',3)
+%line([TTL(TTL(:,2)==6,1) TTL(TTL(:,2)==7,1)],-1*ones(size(TTL(TTL(:,2)==6,:))),'Color','b','LineWidth',3, 'LineStyle','-')
+
+%plot([TTL2(TTL2(:,2)==3,1) TTL2(TTL2(:,2)==3,1)+5],zeros(size(TTL2(TTL2(:,2)==3,:))),'Color','k','LineWidth',3)
+%plot([TTL(TTL(:,2)==4,1) TTL(TTL(:,2)==4,1)+5],zeros(size(TTL(TTL(:,2)==4,:))),'Color','r','LineWidth',3)
+
+CSminus=TTL2(:,2)==3;
+CSplus=TTL(:,2)==4;
+plot([TTL2(CSminus,1) TTL2(CSminus,1)+5],zeros(size(CSminus,2),2),'Color','k','LineWidth',3)
+plot([TTL(CSplus,1) TTL(CSplus,1)+5],zeros(size(CSplus,2),2),'Color','r','LineWidth',3)
+CSminusInt=intervalSet(TTL2(CSminus,1)*1E4, (TTL2(CSminus,1)+60)*1E4);
+CSplusInt=intervalSet(TTL(CSplus,1)*1E4, (TTL(CSplus,1)+60)*1E4);
+
+% plot les stim laser
+StartStimON=TTL(:,2)==6;
+StartEndON=TTL(:,2)==7;
+b= TTL(StartEndON,1);
+a=TTL(StartStimON,1);
+laserON=intervalSet(a*1E4,b*1E4);
+laserOFF_CSminus_ctrlPer=diff(CSminusInt,laserON);
+laserOFF_CSplus_ctrlPer=diff(CSplusInt,laserON);
+% plot([TTL(TTL(:,2)==6,1) TTL(TTL(:,2)==7,1)],-1*ones(size(TTL(TTL(:,2)==6,:))),'Color','b','LineWidth',3, 'LineStyle','-')
+% 
+% plot([TTL(StartStimON,1) TTL(StartEndON,1)],zeros(size(TTL(StartStimON,:))),'Color','b','LineWidth',3, 'LineStyle','-')
+% plot([TTL(StartStimON,1) TTL(StartEndON,1)],zeros(size(TTL(StartStimON,:))),'*b','LineWidth',3, 'LineStyle','-')
+
+for k=1:length(a)
+    %plot([TTL(StartStimON(k),1) TTL(StartEndON(k),1)],[0 0],':r','LineWidth',3, 'LineStyle',':')
+    %line([TTL(StartStimON(k),1) TTL(StartEndON(k),1)],[10 10],'Color','r','LineWidth',3, 'LineStyle',':')
+     line([a(k) b(k)],[0 0],'Color','k','LineWidth',3, 'LineStyle',':')
+end
+
+%plot(TTL(StartStimON,1),zeros(size(TTL(StartStimON,1))),'*b','LineWidth',3)
+%plot(TTL(StartEndON,1),zeros(size(TTL(StartEndON,1))),'*k','LineWidth',3)
+
+FreezeEpoch=thresholdIntervals(Movtsd,th_immob,'Direction','Below');
+FreezeEpoch=mergeCloseIntervals(FreezeEpoch,0.3*1E4);
+FreezeEpoch=dropShortIntervals(FreezeEpoch,thtps_immob*1E4);
+
+FrDur_laserON_byCS=[];
+FrDur_laserOFF_CSm=[];
+FrDur_laserOFF_CSp=[];
+for k=1:length(a)
+    FrDur_laserON_byCS=[FrDur_laserON_byCS; sum(End(intersect(FreezeEpoch,subset(laserON,k)),'s')-Start(intersect(FreezeEpoch,subset(laserON,k)),'s'))];
+end
+for k=1:length(Start(laserOFF_CSminus_ctrlPer))
+    FrDur_laserOFF_CSm=[FrDur_laserOFF_CSm; sum(End(intersect(FreezeEpoch,subset(laserOFF_CSminus_ctrlPer,k)),'s')-Start(intersect(FreezeEpoch,subset(laserOFF_CSminus_ctrlPer,k)),'s'))];
+end
+for k=1:length(Start(laserOFF_CSplus_ctrlPer))
+    FrDur_laserOFF_CSp=[FrDur_laserOFF_CSp; sum(End(intersect(FreezeEpoch,subset(laserOFF_CSplus_ctrlPer,k)),'s')-Start(intersect(FreezeEpoch,subset(laserOFF_CSplus_ctrlPer,k)),'s'))];
+end
+
+subplot(2,3,4), hold on
+plot(CSm_freez(1:2)','-k')
+plot(FrDur_laserON_byCS(1:2)',':k')
+subplot(2,3,5), hold on
+plot(CSp_freez(1:2)','-r')
+plot(FrDur_laserON_byCS(3:4),':r')
+set(gca,'XTicklabel',{'CS-1','CS-2'})
+legend('ON
+
+subplot(2,3,5), hold on
+plot(FrDur_laserOFF_CSm)
+plot(FrDur_laserOFF_CSp)
+plot(FrDur_laserON_byCS)
+set(gca,'XTicklabel',{'CS+1','CS+2'})
+
+
+FreezingDuration_laserON=sum(End(intersect(FreezeEpoch,laserON),'s')-Start(intersect(FreezeEpoch,laserON),'s'));
+laserDuration=sum(End(laserON,'s')-Start(laserON,'s'));
+
+FreezingDuration_total=sum(End(FreezeEpoch,'s')-Start(FreezeEpoch,'s'));

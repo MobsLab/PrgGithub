@@ -1,0 +1,451 @@
+function [wON,wOFF,wDopaON,wDopaOFF,tgts,celltype]=TortMakeNetwork(choix,Mat,ixE,ixFS,ixO,Nmod,Ne,Nfs,No,N,GE_FS,GE_O,GFS_E,GFS_FS,GFS_O,GO_E,GO_FS,InterIntra,fig)
+
+
+%choix
+%
+% 1 all to all
+% 2 all to all with noise
+% 3 with Module
+% 4 with module and connection inter-module (inter=intra)
+% 5 with module with noise
+% 6 with module, with noise and connection inter-module (inter=intra)
+% 7 with module and connection inter-module (inter < intra) 
+% 8 with module with noise and connection inter-module (inter < intra) 
+
+try
+    BruitUniform;
+catch
+    BruitUniform=1; % 0: , 1: wON(find(wRef==0))=0;
+end
+
+try
+    fig;
+catch
+    fig=0;
+end
+
+try
+    InterIntra;
+catch
+    InterIntra=2;
+end
+
+
+%% MAKE NETWORK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+for i=1:Ne
+celltype{i}='P';
+end
+for i=Ne+1:Ne+Nfs
+celltype{i}='F';
+end
+for i=Ne+Nfs+1:Ne+Nfs+No
+celltype{i}='O';
+end
+
+
+% tgt matrix, all to all connectivity within module....
+tgts = zeros(N);
+tgts(ixE,:) = [zeros(Ne) repmat(ixFS,Ne,1) repmat(ixO,Ne,1)];
+tgts(ixFS,:) = [repmat(ixE,Nfs,1) repmat(ixFS,Nfs,1) repmat(ixO,Nfs,1)];
+tgts(ixO,:) = [repmat(ixE,No,1) repmat(ixFS,No,1) zeros(No)];
+
+
+switch choix
+    
+    case 1
+
+    % make weight matrix out of this....
+    % note: have removed re-scaling by tau (i.e (Ne * tau_E))..
+    wON = zeros(N);
+    wON(ixE,ixFS) = GE_FS / Ne;      % E cells project to all FS and O neurons
+    wON(ixE,ixO) = GE_O / Ne;
+
+    wON(ixFS,ixE) = GFS_E / Nfs;   % FS interneurons project to everything (including themselves)
+    wON(ixFS,ixFS) = GFS_FS / Nfs;
+    wON(ixFS,ixO) = GFS_O / Nfs;   
+
+    wON(ixO,ixE) = GO_E / No;       % OL-M targets all E cells and FS cells                 
+    wON(ixO,ixFS) = GO_FS / No;
+
+    % to test individual firing...
+    wOFF = zeros(N); 
+
+
+    %-------------------------------------------------------------------------
+    %modification Network.....
+    %-------------------------------------------------------------------------
+
+    wRef=wON;
+
+
+
+
+    wON(ixFS,ixFS)=wON(ixFS,ixFS)-diag(diag(wON(ixFS,ixFS))); % no projection to themselves %MODIFIE!!!!!!!!!!!!!!!!!
+
+    % wON(find(wRef==0))=0;
+    wDopaOFF=wON;
+    wDopaON=wON;
+        
+    
+    
+        case 2
+
+    % make weight matrix out of this....
+    % note: have removed re-scaling by tau (i.e (Ne * tau_E))..
+    wON = zeros(N);
+    wON(ixE,ixFS) = GE_FS / Ne;      % E cells project to all FS and O neurons
+    wON(ixE,ixO) = GE_O / Ne;
+
+    wON(ixFS,ixE) = GFS_E / Nfs;   % FS interneurons project to everything (including themselves)
+    wON(ixFS,ixFS) = GFS_FS / Nfs;
+    wON(ixFS,ixO) = GFS_O / Nfs;   
+
+    wON(ixO,ixE) = GO_E / No;       % OL-M targets all E cells and FS cells                 
+    wON(ixO,ixFS) = GO_FS / No;
+
+    % to test individual firing...
+    wOFF = zeros(N); 
+
+
+    %-------------------------------------------------------------------------
+    %modification Network.....
+    %-------------------------------------------------------------------------
+
+    wRef=wON;
+
+    wON=wON+rand(N,N)*Mat;
+    wON(wON<0)=0;
+
+
+    wON(ixFS,ixFS)=wON(ixFS,ixFS)-diag(diag(wON(ixFS,ixFS))); % no projection to themselves %MODIFIE!!!!!!!!!!!!!!!!!
+    
+    if BruitUniform
+    wON(find(wRef==0))=0;
+    end
+    
+    wDopaOFF=wON;
+    wDopaON=wON;
+    
+    
+    
+    
+    case 3
+
+    %-------------------------------------------------------------------------
+    % Network with modules.....
+    %-------------------------------------------------------------------------
+    % Ne = 10*Nmod;   Nfs = 20*Nmod;  No = 20*Nmod; N = Ne + Nfs + No;
+    % Nmod=5; %number of modules
+
+    Nec=Ne/Nmod;
+    Nfsc=Nfs/Nmod;
+    Noc=No/Nmod;
+    
+        wON = zeros(N);
+
+    for i=1:Nmod
+
+%         wON(ixE((i-1)*Nec+1:i*Nec),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GE_FS / (Ne);      % E cells project to all FS and O neurons
+%         wON(ixE((i-1)*Nec+1:i*Nec),ixO((i-1)*Noc+1:i*Noc)) = GE_O / (Ne);
+% 
+%         wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixE((i-1)*Nec+1:i*Nec)) = GFS_E / (Nfs);   % FS interneurons project to everything (including themselves)
+%         wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GFS_FS / (Nfs);
+%         wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixO((i-1)*Noc+1:i*Noc)) = GFS_O / (Nfs);   
+% 
+%         wON(ixO((i-1)*Noc+1:i*Noc),ixE((i-1)*Nec+1:i*Nec)) = GO_E / (No);       % OL-M targets all E cells and FS cells                 
+%         wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (No);
+
+        wON(ixE((i-1)*Nec+1:i*Nec),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GE_FS / (Nec);      % E cells project to all FS and O neurons
+        wON(ixE((i-1)*Nec+1:i*Nec),ixO((i-1)*Noc+1:i*Noc)) = GE_O / (Nec);
+
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixE((i-1)*Nec+1:i*Nec)) = GFS_E / (Nfsc);   % FS interneurons project to everything (including themselves)
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GFS_FS / (Nfsc);
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixO((i-1)*Noc+1:i*Noc)) = GFS_O / (Nfsc);   
+
+        wON(ixO((i-1)*Noc+1:i*Noc),ixE((i-1)*Nec+1:i*Nec)) = GO_E / (Noc);       % OL-M targets all E cells and FS cells                 
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+        
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+            
+    end
+
+        wRef=wON;
+        
+        wON(ixFS,ixFS)=wON(ixFS,ixFS)-diag(diag(wON(ixFS,ixFS))); % no projection to themselves %MODIFIE!!!!!!!!!!!!!!!!!
+        
+        
+        wOFF = zeros(N); 
+        wDopaOFF=wON;
+        wDopaON=wON;
+   
+        
+            case 4
+
+    %-------------------------------------------------------------------------
+    % Network with modules.....
+    %-------------------------------------------------------------------------
+    % Ne = 10*Nmod;   Nfs = 20*Nmod;  No = 20*Nmod; N = Ne + Nfs + No;
+    % Nmod=5; %number of modules
+
+    Nec=Ne/Nmod;
+    Nfsc=Nfs/Nmod;
+    Noc=No/Nmod;
+    
+        wON = zeros(N);
+
+    for i=1:Nmod
+
+%         wON(ixE((i-1)*Nec+1:i*Nec),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GE_FS / (Ne);      % E cells project to all FS and O neurons
+%         wON(ixE((i-1)*Nec+1:i*Nec),ixO((i-1)*Noc+1:i*Noc)) = GE_O / (Ne);
+% 
+%         wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixE((i-1)*Nec+1:i*Nec)) = GFS_E / (Nfs);   % FS interneurons project to everything (including themselves)
+%         wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GFS_FS / (Nfs);
+%         wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixO((i-1)*Noc+1:i*Noc)) = GFS_O / (Nfs);   
+% 
+%         wON(ixO((i-1)*Noc+1:i*Noc),ixE((i-1)*Nec+1:i*Nec)) = GO_E / (No);       % OL-M targets all E cells and FS cells                 
+%         wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (No);
+
+        wON(ixE((i-1)*Nec+1:i*Nec),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GE_FS / (Nec);      % E cells project to all FS and O neurons
+        wON(ixE((i-1)*Nec+1:i*Nec),ixO((i-1)*Noc+1:i*Noc)) = GE_O / (Nec);
+
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixE((i-1)*Nec+1:i*Nec)) = GFS_E / (Nfsc);   % FS interneurons project to everything (including themselves)
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GFS_FS / (Nfsc);
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixO((i-1)*Noc+1:i*Noc)) = GFS_O / (Nfsc);   
+
+        wON(ixO((i-1)*Noc+1:i*Noc),ixE((i-1)*Nec+1:i*Nec)) = GO_E / (Noc);       % OL-M targets all E cells and FS cells                 
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+        
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+            
+    end
+
+        wRef=wON;
+        
+        wON(ixFS,ixFS)=wON(ixFS,ixFS)-diag(diag(wON(ixFS,ixFS))); % no projection to themselves %MODIFIE!!!!!!!!!!!!!!!!!
+        wON(ixO,ixE)=GO_E / (Noc); 
+        
+        wOFF = zeros(N); 
+        wDopaOFF=wON;
+        wDopaON=wON;
+        
+        
+        
+    case 5
+        
+        
+           %-------------------------------------------------------------------------
+    % Network with modules.....
+    %-------------------------------------------------------------------------
+    % Ne = 10*Nmod;   Nfs = 20*Nmod;  No = 20*Nmod; N = Ne + Nfs + No;
+    % Nmod=5; %number of modules
+
+    Nec=Ne/Nmod;
+    Nfsc=Nfs/Nmod;
+    Noc=No/Nmod;
+    
+        wON = zeros(N);
+
+    for i=1:Nmod
+
+
+        wON(ixE((i-1)*Nec+1:i*Nec),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GE_FS / (Nec);      % E cells project to all FS and O neurons
+        wON(ixE((i-1)*Nec+1:i*Nec),ixO((i-1)*Noc+1:i*Noc)) = GE_O / (Nec);
+
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixE((i-1)*Nec+1:i*Nec)) = GFS_E / (Nfsc);   % FS interneurons project to everything (including themselves)
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GFS_FS / (Nfsc);
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixO((i-1)*Noc+1:i*Noc)) = GFS_O / (Nfsc);   
+
+        wON(ixO((i-1)*Noc+1:i*Noc),ixE((i-1)*Nec+1:i*Nec)) = GO_E / (Noc);       % OL-M targets all E cells and FS cells                 
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+        
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+            
+    end
+
+        wRef=wON;
+        wON=wON+rand(N,N)*Mat;
+        wON(wON<0)=0;
+    
+    if BruitUniform
+    wON(find(wRef==0))=0;
+    end
+        
+        wON(ixFS,ixFS)=wON(ixFS,ixFS)-diag(diag(wON(ixFS,ixFS))); % no projection to themselves %MODIFIE!!!!!!!!!!!!!!!!!
+        
+        
+        wOFF = zeros(N); 
+        wDopaOFF=wON;
+        wDopaON=wON;
+        
+        
+    case 6
+        
+        
+           %-------------------------------------------------------------------------
+    % Network with modules.....
+    %-------------------------------------------------------------------------
+    % Ne = 10*Nmod;   Nfs = 20*Nmod;  No = 20*Nmod; N = Ne + Nfs + No;
+    % Nmod=5; %number of modules
+
+    Nec=Ne/Nmod;
+    Nfsc=Nfs/Nmod;
+    Noc=No/Nmod;
+    
+        wON = zeros(N);
+
+    for i=1:Nmod
+
+
+        wON(ixE((i-1)*Nec+1:i*Nec),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GE_FS / (Nec);      % E cells project to all FS and O neurons
+        wON(ixE((i-1)*Nec+1:i*Nec),ixO((i-1)*Noc+1:i*Noc)) = GE_O / (Nec);
+
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixE((i-1)*Nec+1:i*Nec)) = GFS_E / (Nfsc);   % FS interneurons project to everything (including themselves)
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GFS_FS / (Nfsc);
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixO((i-1)*Noc+1:i*Noc)) = GFS_O / (Nfsc);   
+
+        wON(ixO((i-1)*Noc+1:i*Noc),ixE((i-1)*Nec+1:i*Nec)) = GO_E / (Noc);       % OL-M targets all E cells and FS cells                 
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+        
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+            
+    end
+
+        wRef=wON;
+        wON(ixO,ixE)=GO_E / (Noc);  
+        
+        wON=wON+rand(N,N)*Mat;
+        wON(wON<0)=0;
+                
+    if BruitUniform
+    wON(find(wRef==0))=0;
+    end
+                
+        wON(ixFS,ixFS)=wON(ixFS,ixFS)-diag(diag(wON(ixFS,ixFS))); % no projection to themselves %MODIFIE!!!!!!!!!!!!!!!!!
+        
+        
+        wOFF = zeros(N); 
+        wDopaOFF=wON;
+        wDopaON=wON;
+        
+        
+        
+        case 7
+        
+        
+           %-------------------------------------------------------------------------
+    % Network with modules.....
+    %-------------------------------------------------------------------------
+    % Ne = 10*Nmod;   Nfs = 20*Nmod;  No = 20*Nmod; N = Ne + Nfs + No;
+    % Nmod=5; %number of modules
+
+    Nec=Ne/Nmod;
+    Nfsc=Nfs/Nmod;
+    Noc=No/Nmod;
+    
+        wON = zeros(N);
+        wON(ixO,ixE)=GO_E / (Noc)/InterIntra; 
+        
+    for i=1:Nmod
+
+%         wON(ixE((i-1)*Nec+1:i*Nec),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GE_FS / (Ne);      % E cells project to all FS and O neurons
+%         wON(ixE((i-1)*Nec+1:i*Nec),ixO((i-1)*Noc+1:i*Noc)) = GE_O / (Ne);
+% 
+%         wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixE((i-1)*Nec+1:i*Nec)) = GFS_E / (Nfs);   % FS interneurons project to everything (including themselves)
+%         wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GFS_FS / (Nfs);
+%         wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixO((i-1)*Noc+1:i*Noc)) = GFS_O / (Nfs);   
+% 
+%         wON(ixO((i-1)*Noc+1:i*Noc),ixE((i-1)*Nec+1:i*Nec)) = GO_E / (No);       % OL-M targets all E cells and FS cells                 
+%         wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (No);
+
+        wON(ixE((i-1)*Nec+1:i*Nec),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GE_FS / (Nec);      % E cells project to all FS and O neurons
+        wON(ixE((i-1)*Nec+1:i*Nec),ixO((i-1)*Noc+1:i*Noc)) = GE_O / (Nec);
+
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixE((i-1)*Nec+1:i*Nec)) = GFS_E / (Nfsc);   % FS interneurons project to everything (including themselves)
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GFS_FS / (Nfsc);
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixO((i-1)*Noc+1:i*Noc)) = GFS_O / (Nfsc);   
+
+        wON(ixO((i-1)*Noc+1:i*Noc),ixE((i-1)*Nec+1:i*Nec)) = GO_E / (Noc);       % OL-M targets all E cells and FS cells                 
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+        
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+            
+    end
+
+        wRef=wON;
+        
+        wON(ixFS,ixFS)=wON(ixFS,ixFS)-diag(diag(wON(ixFS,ixFS))); % no projection to themselves %MODIFIE!!!!!!!!!!!!!!!!!
+        
+        
+        wOFF = zeros(N); 
+        wDopaOFF=wON;
+        wDopaON=wON;
+        
+        
+    case 8
+        
+        
+           %-------------------------------------------------------------------------
+    % Network with modules.....
+    %-------------------------------------------------------------------------
+    % Ne = 10*Nmod;   Nfs = 20*Nmod;  No = 20*Nmod; N = Ne + Nfs + No;
+    % Nmod=5; %number of modules
+
+    Nec=Ne/Nmod;
+    Nfsc=Nfs/Nmod;
+    Noc=No/Nmod;
+    
+        wON = zeros(N);
+        wON(ixO,ixE)=GO_E / (Noc)/InterIntra; 
+
+    for i=1:Nmod
+
+
+        wON(ixE((i-1)*Nec+1:i*Nec),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GE_FS / (Nec);      % E cells project to all FS and O neurons
+        wON(ixE((i-1)*Nec+1:i*Nec),ixO((i-1)*Noc+1:i*Noc)) = GE_O / (Nec);
+
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixE((i-1)*Nec+1:i*Nec)) = GFS_E / (Nfsc);   % FS interneurons project to everything (including themselves)
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GFS_FS / (Nfsc);
+        wON(ixFS((i-1)*Nfsc+1:i*Nfsc),ixO((i-1)*Noc+1:i*Noc)) = GFS_O / (Nfsc);   
+
+        wON(ixO((i-1)*Noc+1:i*Noc),ixE((i-1)*Nec+1:i*Nec)) = GO_E / (Noc);       % OL-M targets all E cells and FS cells                 
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+        
+        wON(ixO((i-1)*Noc+1:i*Noc),ixFS((i-1)*Nfsc+1:i*Nfsc)) = GO_FS / (Noc);
+            
+    end
+
+        wRef=wON;
+
+        
+        wON=wON+rand(N,N)*Mat;
+        wON(wON<0)=0;
+    
+    if BruitUniform
+    wON(find(wRef==0))=0;
+    end
+        
+        wON(ixFS,ixFS)=wON(ixFS,ixFS)-diag(diag(wON(ixFS,ixFS))); % no projection to themselves %MODIFIE!!!!!!!!!!!!!!!!!
+        
+        
+        wOFF = zeros(N); 
+        wDopaOFF=wON;
+        wDopaON=wON;
+        
+        
+        
+end
+
+
+
+if fig
+
+figure('Color',[1 1 1])
+imagesc(wON),axis xy, colorbar
+set(gca,'ytick',[1:length(celltype)])
+set(gca,'yticklabel',celltype)
+set(gca,'xtick',[1:length(celltype)])
+set(gca,'xticklabel',celltype)
+
+end
+

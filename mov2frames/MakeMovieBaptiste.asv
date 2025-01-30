@@ -1,0 +1,43 @@
+% MakeMovieBaptiste
+
+%list=1:130; nam='1'; % ok nam='1';
+list=88:180; nam='2'; % ok
+% list=348:393; nam='3'; %ok
+% list=561:671; nam='4'; %ok
+% list=581:631; nam='5'; %ok
+% list=631:681; nam='6'; %ok
+
+[frames,combinedImage]=mov2frames('/Users/karimbenchenane/Dropbox/Mac/Downloads/convert Video to JPG/jpg',list);
+
+clear pos I
+
+J = imadjust(combinedImage(:,:,1));
+K = imadjust(combinedImage(:,:,2));
+L = imadjust(combinedImage(:,:,3));
+I(:,:,1)=J; I(:,:,2)=K;I(:,:,3)=L; 
+combinedImageAdjusted=I;
+
+a=1;
+for i=1:2:length(frames)
+centroid=RedSpot2XY(frames{i}(:,:,:));
+pos(a,:)=centroid;
+a=a+1;
+end
+
+figure('color',[1 1 1]), hold on, 
+imagesc(combinedImage)
+plot(pos(:,1),pos(:,2),'k.-')
+scatter(pos(:,1),pos(:,2),50,1:length(pos),'filled')
+axis xy
+colormap(hot), colorbar
+num=gcf;
+saveFigure(num,['Figure',nam],pwd);
+
+figure('color',[1 1 1]), hold on, 
+imagesc(combinedImageAdjusted)
+plot(pos(:,1),pos(:,2),'k.-')
+scatter(pos(:,1),pos(:,2),50,1:length(pos),'filled')
+axis xy
+colormap(hot), colorbar
+num=gcf;
+saveFigure(num,['FigureAdjusted',nam],pwd);

@@ -1,0 +1,76 @@
+%% $RCSfile: imaqlib.tlc,v $
+%% $Revision: 1.1.6.4 $
+%% $Date: 2007/06/18 22:22:13 $
+%%
+%% Copyright 2003-2007 The MathWorks, Inc.
+%%
+
+%% Function: JustCreatedCompiledModelRecord ==================================
+%% Abstract:
+%%   Checks for CompiledModel.recordName
+%%   If record already exists, return with a 0 (false)
+%%   If record does not exist,
+%%        create recordName under CompiledModel
+%%        return with 1 (true)
+%%
+%%   Example usage:
+%%
+%%     %if JustCreatedCompiledModelRecord("my_cache")
+%%        %% This is the first time the record was created
+%%        %% <first-time code goes here>
+%%     %else
+%%        %% 2nd or subsequent call (record already exists!)
+%%        %% <subsequent code goes here>
+%%     %endif
+%%
+%function JustCreatedCompiledModelRecord(recordName) void
+
+    %assign fullRecordName = "::CompiledModel." + recordName
+    %%
+    %if !EXISTS("%<fullRecordName>")
+        %assign retval = 1  %% First call
+
+        %% Create record since it does not yet exist:
+        %assign %<recordName> = 1
+        %assign ::CompiledModel = ::CompiledModel + %<recordName>
+        %undef %<recordName>  %% Remove from current scope
+    %else
+        %assign retval = 0  %% Subsequent call
+
+    %endif
+    %return retval
+
+%endfunction %% JustCreatedCompiledModelRecord
+
+
+%% Function: Include_header ===============================================
+%%
+%% Abstract:
+%%    Add a #include file
+%%
+%% Example usage:
+%%     %<Include_header(block, "foo")>
+%%
+%%     This will add:
+%%
+%%            #include "foo.h"
+%%
+%%     to the model_private.h file.
+%%
+%function Include_header(block, libName, comment) void
+
+    %assign recName = libName + "_include"
+
+    %if JustCreatedCompiledModelRecord(recName)
+        %openfile buffer
+            %assign fileDotH = libName + ".h"
+            #include "%<fileDotH>" /* Image Acquisition %<comment> header file */
+        %closefile buffer
+        %<LibCacheDefine(buffer)>
+    %endif
+
+%endfunction %% Include_header
+
+
+
+%% [EOF] imaqlib.tlc

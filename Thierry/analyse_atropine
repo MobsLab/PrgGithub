@@ -1,0 +1,16 @@
+%On load les
+
+cd /media/nas5/Thierry_DATA/Atropine_Treatment/923_926_927_928_Baseline1_24092019_190924_085150/M923
+load('SleepScoring_OBGamma.mat', 'Wake','REMEpoch','SWSEpoch','Sleep')
+REMEpoch923_B=REMEpoch
+Sleep923_B=Sleep
+SWSEpoch923_B=SWSEpoch
+Wake923_B=Wake
+
+cd /media/nas5/Thierry_DATA/Atropine_Treatment/923_926_927_928_Baseline1_24092019_190924_085150/M926
+load('SleepScoring_OBGamma.mat', 'Wake','REMEpoch','SWSEpoch','Sleep')
+REMEpoch926_B=REMEpoch
+Sleep926_B=Sleep
+SWSEpoch926_B=SWSEpoch
+Wake926_B=Wake
+

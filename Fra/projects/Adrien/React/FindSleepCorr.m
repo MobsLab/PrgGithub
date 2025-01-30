@@ -1,0 +1,142 @@
+
+displayFig = 0;
+
+
+
+dataDir = '/media/sdb6/Data';
+cd(dataDir)
+A = Analysis(dataDir);
+%  datasets = List2Cell([ dataDir filesep 'datasets_noYMPpb.list' ] );
+
+datasets = {'Rat19/190226'};
+
+binSizeSleep = 1000;
+binSizeMaze = 1000;
+
+for day=1:length(datasets)
+	
+	display(datasets{day})
+	goOn = 1;
+	cd([dataDir filesep datasets{day}]);
+	[merde dset machin] = fileparts(pwd);
+	
+	if exist('sleepSpecgram.mat')
+		load sleepSpecgram;
+	else 
+		goOn = 0;
+	end;
+	
+	cd(dataDir)
+	
+	if goOn
+	
+		A = getResource(A,'CellNames',datasets{day});
+		A = getResource(A,'MazeEpoch',datasets{day});
+		mazeEpoch = mazeEpoch{1};
+		binSpk = MakeQfromS(S,binSizeSleep)
+		cM = spkZcorrcoef(S,binSizeMaze,mazeEpoch);
+		
+		nbCells = size(zFiringS2,2);
+		
+		for i=1:nbCells
+		
+			for j=i+1:nbCells
+				cell1 = cellnames{i};
+				cell2 = cellnames{j};
+				if (cell1(3) == cell2(3))
+					cM(i,j) = 0;
+					cM(j,i) = 0;
+				end
+			end
+		
+		end
+		
+		zFiringS1 = Data(Restrict(binSpk,sleep1Epoch));
+		zFiringS1 = full(zscore(zFiringS1));
+		zFiringS2 = Data(Restrict(binSpk,sleep2Epoch));
+		zFiringS2 = full(zscore(zFiringS2));	
+	
+		nbBins1 = size(zFiringS1,1);
+		nbBins2 = size(zFiringS2,1);
+		
+		corrMS1 = zeros(nbBins1,1);
+		corrMS2 = zeros(nbBins2,1);
+
+		for i = 1:nbBins1;
+		
+			popVect = zFiringS1(i,:)';
+			norm = (popVect'*popVect);
+			if (norm ~= 0) corrMS1(i) = popVect'*(cM)*popVect/norm;end;
+		
+		end;
+		
+		for i = 1:nbBins2;
+		
+			popVect = zFiringS2(i,:);
+			norm = (popVect'*popVect);
+			if (norm ~= 0) corrMS2(i) = popVect'*(cM)*popVect/norm;end;
+		
+		end;
+		
+		clear norm popVect
+
+		%Check for too much correlated cells
+
+		corrMS1Cell = [];
+		corrMS2Cell = [];
+
+		for i=1:nbCells
+				
+			corr = corrcoef([corrMS1 firingS1(:,i)]);
+			corrMS1Cell = [corrMS1Cell ; corr(1,2)];
+		
+			corr = corrcoef([corrMS2 firingS2(:,i)]);
+			corrMS2Cell = [corrMS2Cell ; corr(1,2)];	
+
+		end
+
+		corrMSCell = [corrMS1Cell corrMS2Cell]
+
+		if displayFig
+
+
+			t = [-40:40];
+			sigma = 10; % var = 1s = 10*100ms
+			gauss = 1/sqrt(2*pi*sigma)*exp(-t.*t/(2*sigma^2));
+								
+			corrMS2Smooth = conv(gauss,corrMS2);
+			corrMS2Smooth = corrMS2Smooth(41:end-40);
+			corrMS2Smooth = resample(corrMS2Smooth,1,10);
+			
+			corrMS1Smooth = conv(gauss,corrMS1);
+			corrMS1Smooth = corrMS1Smooth(41:end-40);
+			corrMS1Smooth = resample(corrMS1Smooth,1,10);
+			
+			corrMS2SmoothNorm = 150*corrMS2Smooth/max(([corrMS1Smooth;corrMS2Smooth]));
+			corrMS1SmoothNorm = 150*corrMS1Smooth/max(([corrMS1Smooth;corrMS2Smooth]));		
+		
+			nbBins1 = length(corrMS1SmoothNorm);
+			nbBins2 = length(corrMS2SmoothNorm);
+			
+			clear corrMS1Smooth corrMS2Smooth corrMS1 corrMS1 gauss t sigma
+
+			fh = figure(2),clf
+			subplot(1,2,1)
+				hold on
+				imagesc(log(Data(sleep1Specgram{6})'))
+				plot([1:nbBins1],corrMS1SmoothNorm,'Color','r')
+				hold off
+			subplot(1,2,2)
+				hold on
+				imagesc(log(Data(sleep2Specgram{6})'))
+				plot([1:nbBins2],corrMS2SmoothNorm,'Color','r')
+				hold off
+			
+			saveas(fh,[dataDir filesep 'CovSpecgrams' filesep dset],'png')
+			saveas(fh,[dataDir filesep 'CovSpecgrams' filesep dset],'fig')
+			
+		end;
+
+	end;
+
+end;

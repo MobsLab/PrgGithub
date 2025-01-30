@@ -1,0 +1,362 @@
+% CoherencyAstroFieldLR
+
+
+function [C,CP,f,p,phi,S1l,S2l,fl]=CoherencyAstroFieldforLoopLR
+
+
+% try
+%     fi;
+% catch
+%     fi=pwd;
+% end
+% 
+% eval(['cd(''',fi,''')'])
+    
+
+    
+try                                       
+load Data
+end
+
+
+% voie=2;
+
+        colorUp=[207 35 35]/255;
+        colorDown=[32 215 28]/255;
+        colorBox=[205 225 255]/255; %[197 246 255]/255;
+        
+
+
+% if nbtraces>1
+
+    try 
+    
+    load DataCompLFP
+    
+    catch
+%       attention au 'end'!
+    
+        disp('Calcul')
+        
+            try
+                chF;
+            catch
+                % chF=50;    %freqce voulue finale en Hz, pas trop loin de la freqce qu'on veut analyser
+                chF=1;
+            end
+
+            resamp=10000/chF;
+
+
+            Y=resample(data(:,2),1,resamp);
+            %resample d'un facteur 1/resamp, doit rester un facteurs de 10, ou des
+            %entiers
+            F=resample(data(:,3),1,resamp);
+
+
+            Y=smooth(Y,5);                      %pour enlever le 50Hz,pour virer le bruit
+            F=smooth(F,5);
+
+            Y=Y(20:end-20);                     % pour éviter les effets de bords
+            F=F(20:end-20);
+            tps=[0:length(Y)-1]/chF;
+            % dataRes=[[0:length(Y)-1]'/chF, Y,F];   %matrice resamplée à 50Hz, temps rééchantillonné
+
+            %--------------------------------------------------------------------------
+            % Pour ajuster la baseline: moyenne locale sur une fenêtre de 200sec,
+            % décalage de 10sec à chaque itération
+
+            Y=locdetrend(Y,chF,[200,10]);                                   
+            F=locdetrend(F,chF,[200,10]);  
+
+
+            % Fs           (sampling frequency) - optional. Default 1
+            % movingwin    (length of moving window, and stepsize) [window winstep] -
+            % optional. Ici 200 et 10
+
+
+            % dataBas=[[0:length(Y)-1]'/chF, Y,F]; 
+   
+    
+    %----------------------------------------------------------------------
+%     Ajustement manuel des limites de l'enregistrement à analyser
+
+
+            figure('Color',[1 1 1]),
+            plotyy(tps,F,tps,Y)
+%             hold on, plot(F,'r')
+            s=input('Do you want to adjust the data (y:n)? ','s');
+            if s=='y'
+            limInf=input('limite inf= ');
+            limSup=input('limite sup= ');
+            else
+            limInf=[];
+            limSup=[];                
+            end
+            
+            if length(limInf)==0;
+            limInf=1;
+            end
+
+            if length(limSup)==0;
+            limSup=length(F);
+            end
+
+            Y=Y(limInf:limSup);
+            F=F(limInf:limSup);
+            tps=tps(limInf:limSup);
+            
+            
+            save DataCompLFP Y F tps chF
+            
+            
+            close
+    end
+
+
+% --------------------------------------------------------------------
+% Début figure finale
+
+            figure('Color',[1 1 1])
+            subplot(4,1,1)
+            [AX,H1,H2] = plotyy(tps,F,tps,Y,'plot');
+            set(H1,'Color','b')
+            set(AX,'xlim',[tps(1) tps(end)])
+            %             xlim([tps(1) tps(end)])
+            set(H2,'Color','r')
+%             xlim([tps(1) tps(end)])
+            set(AX,'xlim',[tps(1) tps(end)])
+            
+            %             hold on, plot(tps,Y,'b')
+%             hold on, plot(tps,F,'r')
+
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+
+L = length(Y);
+NFFT = 2^nextpow2(L); % Next power of 2 from length of y
+yf  = fft(Y-mean(Y),NFFT)/L;
+fl = chF*1/2*linspace(0,1,NFFT/2+1);
+
+S1l=abs(yf(1:NFFT/2+1));
+
+%-------------------------------------------------------------------------
+
+L = length(F);
+NFFT = 2^nextpow2(L); % Next power of 2 from length of y
+yf  = fft(F-mean(F),NFFT)/L;
+fl = chF*1/2*linspace(0,1,NFFT/2+1);
+
+S2l=abs(yf(1:NFFT/2+1));
+
+fl=fl';
+
+
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+
+
+%--------------------------------------------------------------------------
+            % Params coherency:
+
+                try
+                    chF;
+                catch 
+                    chF=1;
+                end
+
+            m=200; %movingwin
+
+            % lF=5/data(end,1);
+            % limitF=min(lF,0.005);
+            limitF=0;
+
+            % Fup=min(1,chF/2);
+            % Fup=chF/2;
+            Fup=0.1;
+
+            Fpass=[limitF Fup];
+            % Fpass=[0 0.5];
+            params.fpass = Fpass;
+
+            params.Fs=chF;
+            % params.pad=0;
+            params.trialave = 0;
+            params.err = [2 0.05];
+
+            params.tapers=[3 5];
+            % params.tapers=[10 19];
+
+            params.pad=2;
+
+   %--------------------------------------------------------------------------
+
+            [C,phi,S12,S1,S2,f,confC,phierr,Cerr] = coherencyc(Y,F,params);
+            % [C, lag] = xcorr(Y,F,'coeff');
+
+
+            % figure
+            % plot(f,C,'k','linewidth',2)
+
+  %------------------------------------------------------------------------
+%   suite figure finale
+
+            subplot(4,1,4), hold on  
+            plot(f,C,'r','linewidth',2)
+            plot(f,Cerr)
+
+            p=(C>confC);    
+            YL=ylim;    
+            boxbottom = YL(1);
+            boxhight = YL(2);
+            tt=p(2:end).*(1-diff(p));
+            F=f(find(tt==1));
+            for i=1:length(F)-1
+                rectangle('Position', [F(i) boxbottom 2*median(diff(f)) boxhight-boxbottom], 'LineStyle', 'none', 'FaceColor', colorBox);
+            end             
+            plot(f,C,'r','linewidth',2)
+            plot(f,Cerr)
+            line(Fpass,[confC confC],'Color','k')
+            
+
+            
+
+            subplot(4,1,2)
+            plot(fl(fl<0.1),smoot(S1l(fl<0.1))/max(S1l(fl<0.1)),'r','linewidth',2)
+            hold on, plot(fl(fl<0.1),(S2l(fl<0.1))/max(S2l(fl<0.1)),'b','linewidth',2)
+            
+%             plot(f,10*log10(S1),'r','linewidth',2)
+%             hold on, plot(f,10*log10(S2),'b','linewidth',2)
+
+            subplot(4,1,3), hold on
+            plot(f,mod(phi,2*pi),'r.','linewidth',2)
+            plot(f,mod(phi+phierr,2*pi),'g.')
+            plot(f,mod(phi-phierr,2*pi),'b.')
+            plot(f,2*pi+mod(phi,2*pi),'r.','linewidth',2)
+            plot(f,2*pi+mod(phi+phierr,2*pi),'g.')
+            plot(f,2*pi+mod(phi-phierr,2*pi),'b.')
+            line(Fpass,[2*pi 2*pi],'Color','k')
+            line(Fpass,[4*pi 4*pi],'Color','k')
+            
+            YL=ylim;    
+            boxbottom = 0;
+            boxhight = 4*pi;
+
+            for i=1:length(F)-1
+                rectangle('Position', [F(i) boxbottom 2*median(diff(f)) boxhight-boxbottom], 'LineStyle', 'none', 'FaceColor', colorBox);
+            end
+            
+            plot(f,mod(phi,2*pi),'r.','linewidth',2)
+            plot(f,mod(phi+phierr,2*pi),'g.')
+            plot(f,mod(phi-phierr,2*pi),'b.')
+            plot(f,2*pi+mod(phi,2*pi),'r.','linewidth',2)
+            plot(f,2*pi+mod(phi+phierr,2*pi),'g.')
+            plot(f,2*pi+mod(phi-phierr,2*pi),'b.')
+            line(Fpass,[2*pi 2*pi],'Color','k')
+            line(Fpass,[4*pi 4*pi],'Color','k')          
+            ylim([0 4*pi])
+
+            % saveFigure(1,'Crosscorrelogram',pwd);
+
+            % Output:
+            %         C (magnitude of coherency - frequencies x trials if trialave=0; dimension frequencies if trialave=1)
+            %         phi (phase of coherency - frequencies x trials if trialave=0; dimension frequencies if trialave=1)
+            %         S12 (cross spectrum -  frequencies x trials if trialave=0; dimension frequencies if trialave=1)
+            %         S1 (spectrum 1 - frequencies x trials if trialave=0; dimension frequencies if trialave=1)
+            %         S2 (spectrum 2 - frequencies x trials if trialave=0; dimension frequencies if trialave=1)
+            %         f (frequencies)
+            %         confC (confidence level for C at 1-p %) - only for err(1)>=1
+            %         phierr (error bars for phi) - only for err(1)>=1
+            %         Cerr  (Jackknife error bars for C - use only for Jackknife - err(1)=2)
+
+            %--------------------------------------------------------------------------
+
+            Num=gcf;
+            
+            set(Num,'paperPositionMode','auto')
+
+            eval(['print -f',num2str(Num),' -dpng ','Cohenrency1','.png'])
+            % eval(['print -f',num2str(1),' -dpng ','CrossCorr','.png'])
+
+            eval(['print -f',num2str(Num),' -painters',' -depsc2 ','Cohenrency1','.eps'])
+            % eval(['print -f',num2str(1),' -painters',' -depsc2 ','CrossCorr','.eps'])
+            
+            
+
+
+
+figure('Color',[1 1 1])
+hold on
+
+plot(f,C,'r','linewidth',2)
+% plot(f,Cerr)
+
+p=(C>confC);    
+YL=ylim;    
+boxbottom = YL(1);
+boxhight = YL(2);
+tt=p(2:end).*(1-diff(p));
+F=f(find(tt==1));
+for i=1:length(F)-1
+    rectangle('Position', [F(i) boxbottom 2*median(diff(f)) boxhight-boxbottom], 'LineStyle', 'none', 'FaceColor', colorBox);
+end             
+plot(f,C,'r','linewidth',2)
+% plot(f,Cerr)
+line(Fpass,[confC confC],'Color','k')
+xlim(Fpass)
+
+
+ft=f(p==1);
+Ct=C(p==1);
+Pt=phi(p==1);
+Pit=phierr(p==1);
+fac=100;
+
+for i=1:length(find(p==1))
+
+    arrow([ft(i) Ct(i)],[ft(i)+Pit(i)/fac*cos(Pt(i)) Ct(i)+Pit(i)/fac*sin(Pt(i))],'length',2)
+
+end
+
+xlabel('Frequency (Hz)')
+ylabel('Coherence')
+
+Num=gcf;
+
+set(Num,'paperPositionMode','auto')
+
+eval(['print -f',num2str(Num),' -dpng ','Cohenrency2','.png'])
+% eval(['print -f',num2str(1),' -dpng ','CrossCorr','.png'])
+
+eval(['print -f',num2str(Num),' -painters',' -depsc2 ','Cohenrency2','.eps'])
+         
+% close all
+
+  CP=C;
+  CP(p==0)=0;
+  
+  
+  
+%-------------------------------------------------------------------------  
+%-------------------------------------------------------------------------  
+
+
+
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+
+
+% S1l=10*log10(S1);
+% S2l=10*log10(S2);
+
+  
+  save Coherency C CP p phi S12 S1 S2 S1l S2l f confC phierr Cerr params  
+            
+%    else
+%     
+%     disp('Pas de LFP')
+% end
+
+% clear fi

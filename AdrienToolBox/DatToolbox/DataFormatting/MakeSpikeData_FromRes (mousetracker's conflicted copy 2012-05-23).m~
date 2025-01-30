@@ -1,0 +1,15 @@
+function MakeSpikeData_FromRes(fbasename,channels)
+
+analysisDir = 'Analysis';
+if ~exist(analysisDir,'dir')
+   mkdir(analysisDir);   
+end
+
+spkFile = [analysisDir filesep 'SpikeData.mat'];
+%muaFile = [analysisDir filesep 'MUAData.mat'];
+
+[S,shank,cellIx ] = LoadSpikeData(fbasename);
+
+fprintf('      Number of Cells: %d\n',length(S))
+save(spkFile,'S','shank','cellIx');
+%save(muaFile,'MUA');

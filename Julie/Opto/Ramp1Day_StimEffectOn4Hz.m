@@ -1,0 +1,297 @@
+% Ramp1Day_StimEffectOn4Hz.m
+% 27.02.2017
+
+
+% this codes evalues the efficiency of the stimulation for each mouse
+% (computes power in the stimulation band)
+
+% FIGURES
+% - power before stim (---) & during stim (continuous) for all mice separately
+% for all mice averaged : 
+% - power before stim (---) & during stim (continuous) 
+% - difference of power during-before
+
+% OUTPUT
+% 
+
+if 0
+    cd /media/DataMOBsRAIDN/ProjetAversion/RampOver1dayQuantif/Ramp_4_no_selection
+    load(['DataRampOver1DayQuantif_no_selection.mat']);
+    disp(['Loading existing data from DataRampOver1DayQuantif_no_selection.mat']);
+end
+
+structlist={'Bulb_deep_right','Bulb_deep_left','PFCx_deep_right','PFCx_deep_left'};
+colori={'b','b','r','r'};
+res=pwd;
+margin=0.5; % with of the frequency band: ex : [7Hz-margin 7Hz+margin]
+sav=1;
+%% power at stimulation frequency - MOUSE BY MOUSE
+
+BefDurPlot=figure('Position',[   1968         113        1782         862]);        
+DiffPercPlot=figure('Position',[   1968         113        1782         862]);  
+clear Mx_mean_before Mx_std_before Mx_mean_during Mx_std_during
+Mx_mean_before=nan(length(Dir.path),length(structlist),nb_fq);
+Mx_std_before=nan(length(Dir.path),length(structlist),nb_fq);
+Mx_mean_during=nan(length(Dir.path),length(structlist),nb_fq);
+Mx_std_during=nan(length(Dir.path),length(structlist),nb_fq);
+DiffPerc_mean=nan(length(Dir.path),length(structlist),nb_fq);
+DiffPerc_std=nan(length(Dir.path),length(structlist),nb_fq);
+
+
+for man=1:length(Dir.path), 
+
+clear  bbb_mean ddd_mean bbb_std ddd_std
+
+    %evtplot=figure('Position',[2130          66         306         911]); 
+    
+    for i=1:length(structlist)
+%             figure(evtplot)
+%             subplot(4,1,i)
+        for fq=1:nb_fq
+
+            bbb=squeeze(LFPpower_Before(1,i,man,:,:,fq));% bb before
+            ddd=squeeze(LFPpower(1,i,man,:,:,fq));% dd during
+            ind_zero=~(nansum(ddd,2)==0);
+
+            %StimFreq=[fq_list(fq)-margin fq_list(fq)+margin];
+            StimFreq=[1 4];
+            ind_StiFq=(f1>StimFreq(1) & f1<StimFreq(2));
+            
+            bbb=bbb(ind_zero,ind_StiFq);
+            ddd=ddd(ind_zero,ind_StiFq);
+            
+            Mx_mean_before(man,i,fq)=nanmean(nanmean(bbb,2));
+            Mx_std_before(man,i,fq)=nanstd(nanmean(bbb,2));
+
+            Mx_mean_during(man,i,fq)=nanmean(nanmean(ddd,2));
+            Mx_std_during(man,i,fq)=nanstd(nanmean(ddd,2));      
+            
+            DiffPerc_mean(man,i,fq)=nanmean(nanmean(ddd-bbb,2)./nanmean(bbb,2));
+            DiffPerc_std(man,i,fq)=nanstd(nanmean(ddd-bbb,2)./nanmean(bbb,2));
+
+            
+            %plot(fq_list(fq),nanmean(ddd(ind_zero,ind_StiFq),2),'o','Color',colori{i}), hold on
+        end
+
+        bbb_mean=squeeze(Mx_mean_before(man,:,:));
+        bbb_std=squeeze(Mx_std_before(man,:,:));
+
+        ddd_mean=squeeze(Mx_mean_during(man,:,:));
+        ddd_std=squeeze(Mx_std_during(man,:,:));
+
+        perc_mean=squeeze(DiffPerc_mean(man,:,:));
+        perc_std=squeeze(DiffPerc_std(man,:,:));
+        
+        figure(BefDurPlot)
+        subplot(4,length(Dir.path),(i-1)*length(Dir.path)+man)
+        errorbar(fq_list, bbb_mean(i,:),bbb_std(i,:),'Color',colori{i},'LineStyle','--'), hold on
+        errorbar(fq_list, ddd_mean(i,:),ddd_std(i,:),'Color',colori{i}, 'LineWidth', 2)
+%         if strfind(structlist{i}, 'Bulb')
+%             ylim([0 4E5])
+%         elseif strfind(structlist{i}, 'PFC')
+%             ylim([0 1E5])
+%         end
+        xlim([0 20 ])
+        if i==1, title([Dir.path{man}(end-11:end-9) '-' Dir.path{man}(end-7:end)]), end
+        if man==1, ylabel(structlist{i}), end
+        if i==1 && man==1, text(-0.5, 1.3,'Before Stim  --  / During Stim continuous','units','normalized'),end
+        
+        
+        figure(DiffPercPlot)
+        subplot(4,length(Dir.path),(i-1)*length(Dir.path)+man)
+        errorbar(fq_list, perc_mean(i,:),perc_std(i,:),'Color',colori{i}, 'LineWidth', 2)
+        
+        if i==1, title([Dir.path{man}(end-11:end-9) '-' Dir.path{man}(end-7:end)]), end
+        if man==1, ylabel(structlist{i}), end
+        xlim([0 20 ])
+%         if strfind(structlist{i}, 'Bulb')
+%             ylim([0 50])
+%         elseif strfind(structlist{i}, 'PFC')
+%             ylim([0 15])
+%         end
+        if i==1 && man==1, text(-0.5, 1.3,'Percentage','units','normalized'),end
+    end
+end
+
+if sav
+    saveas(BefDurPlot,'4Hz_power_at_stim_fq_mouse_by_mouse.fig')
+    saveFigure(BefDurPlot,'4Hz_power_at_stim_fq_mouse_by_mouse',res)
+end
+
+if sav
+    saveas(DiffPercPlot,'4Hz_powerperc_at_stim_fq_mouse_by_mouse.fig')
+    saveFigure(DiffPercPlot,'4Hz_powerperc_at_stim_fq_mouse_by_mouse',res)
+end
+
+%% power at stimulation frequency - AVERAGE ON ALL MICE
+%% BEFORE AND DURING
+
+h_mice_mean=figure('Position',[2130          66         306         911]); 
+
+for i=1:4
+    
+    mm_dur=squeeze(Mx_mean_during(:,i,:));
+    mm_bef=squeeze(Mx_mean_before(:,i,:));
+
+    subplot(4,1,i)
+    errorbar(fq_list, nanmean(mm_dur,1), nanstd(mm_dur,1),colori{i},'LineWidth',2), hold on
+    errorbar(fq_list, nanmean(mm_bef,1), nanstd(mm_bef,1),colori{i},'LineStyle','--')
+   
+    if strfind(structlist{i}, 'Bulb')
+        ylim([0 4E5])
+    elseif strfind(structlist{i}, 'PFC')
+        ylim([0 5E4])
+    end
+    if i==1,  title(' Power difference During-Before '), end
+    YL=ylim;
+    for fq=1:8
+        p=signrank(Mx_mean_during(:,i,fq),Mx_mean_before(:,i,fq));
+        if p<0.01
+            text(fq_list(fq), 0.9*YL(2),'**')
+        elseif p<0.05
+            text(fq_list(fq), 0.9*YL(2),'*')
+        end
+    end        
+end
+if sav
+    saveas(h_mice_mean,'4Hz_power_all_mice.fig')
+    saveFigure(h_mice_mean,'4Hz_power_all_mice',res)
+end
+%%  DURING - BEFORE
+h_mice_dur_bef=figure('Position',[2130          66         306         911]); 
+for i=1:4
+    
+    mm_dur=squeeze(Mx_mean_during(:,i,:));
+    mm_bef=squeeze(Mx_mean_before(:,i,:));
+
+    subplot(4,1,i)
+    errorbar(fq_list, nanmean(mm_dur-mm_bef,1), nanstd(mm_dur-mm_bef,1),colori{i},'LineWidth',2),
+%     errorbar(fq_list, nanmean(mm_dur-mm_bef,1).*fq_list', nanstd(mm_dur-mm_bef,1),colori{i},'LineWidth',2),
+   
+%     if strfind(structlist{i}, 'Bulb')
+%         ylim([0 4E5])
+%     elseif strfind(structlist{i}, 'PFC')
+%         ylim([0 5E4])
+%     end
+    if i==1,  title(' Power difference During-Before '), end
+    YL=ylim;
+    for fq=1:8
+        p=signrank(Mx_mean_during(:,i,fq),Mx_mean_before(:,i,fq));
+        if p<0.01
+            text(fq_list(fq), 0.9*YL(2),'**')
+        elseif p<0.05
+            text(fq_list(fq), 0.9*YL(2),'*')
+        end
+    end        
+end
+%%  DURING - BEFORE * FREQUNCY
+h_mice_dur_bef=figure('Position',[2130          66         306         911]); 
+for i=1:4
+    
+    mm_dur=squeeze(Mx_mean_during(:,i,:));
+    mm_bef=squeeze(Mx_mean_before(:,i,:));
+
+    subplot(4,1,i)
+    %errorbar(fq_list, nanmean(mm_dur-mm_bef,1), nanstd(mm_dur-mm_bef,1),colori{i},'LineWidth',2),
+    errorbar(fq_list, nanmean(mm_dur-mm_bef,1).*fq_list', nanstd(mm_dur-mm_bef,1),colori{i},'LineWidth',2),
+   
+%     if strfind(structlist{i}, 'Bulb')
+%         ylim([0 4E5])
+%     elseif strfind(structlist{i}, 'PFC')
+%         ylim([0 5E4])
+%     end
+    if i==1,  title(' ( During-Before) * frequency'), end
+    YL=ylim;
+    for fq=1:8
+        p=signrank(Mx_mean_during(:,i,fq),Mx_mean_before(:,i,fq));
+        if p<0.01
+            text(fq_list(fq), 0.9*YL(2),'**')
+        elseif p<0.05
+            text(fq_list(fq), 0.9*YL(2),'*')
+        end
+    end        
+end
+if sav
+    saveas(h_mice_mean,'4Hz_power_during-before_all_mice.fig')
+    saveFigure(h_mice_mean,'4Hz_power_during-before_all_mice',res)
+end
+
+%%  PERCENTAGE
+h_mice_perc=figure('Position',[2130          66         306         911]); 
+for i=1:4
+    
+    mm_perc=squeeze(DiffPerc_mean(:,i,:));
+
+    subplot(4,1,i) 
+    errorbar(fq_list, nanmean(mm_perc,1), nanstd(mm_perc,1),colori{i},'LineWidth',2),
+%     if strfind(structlist{i}, 'Bulb')
+%         ylim([0 4E5])
+%     elseif strfind(structlist{i}, 'PFC')
+%         ylim([0 5E4])
+%     end
+%     if i==1
+%         title(' Power difference During-Before ')
+%     end
+    YL=ylim;
+    for fq=1:8
+        p=signrank(Mx_mean_during(:,i,fq),Mx_mean_before(:,i,fq));
+        if p<0.01
+            text(fq_list(fq), 0.9*YL(2),'**')
+        elseif p<0.05
+            text(fq_list(fq), 0.9*YL(2),'*')
+        end
+    end
+    XL=xlim;
+    hold on, plot([0 XL(2)], [0 0],'-k')
+                
+end
+if sav
+    saveas(h_mice_mean,'4Hz_power_perc_all_mice.fig')
+    saveFigure(h_mice_mean,'4Hz_power_perc_all_mice',res)
+end
+
+
+
+
+ 
+ 
+ %% power at 1-4Hz
+
+StimFreq=[1 4];
+ind_StiFq=(f1>StimFreq(1) & f1<StimFreq(2));
+Mx_low=[];
+Mx_low_mean=nan(length(Dir.path),length(structlist),nb_fq);
+for man=1:length(Dir.path), 
+    for i=1:length(structlist)
+        for fq=1:nb_fq
+
+            
+        bbb=squeeze(LFPpower_Before(1,i,man,:,:,fq));
+        ind_zero=~(nansum(bbb,2)==0);
+        
+        
+            
+        %Mx_low=[Mx_low;bbb(ind_zero,ind_StiFq)];
+        Mx_low_mean(man,i,fq)=nanmean(nanmean(bbb(ind_zero,ind_StiFq)));
+        end
+
+    end
+end
+
+
+ for fq=1:nb_fq
+     freqname{fq}=num2str(fq_list);
+ end
+ colori={'b','b','r','r'};
+ figure, 
+ for i=1:length(structlist) 
+     aa=squeeze(Mx_low_mean(:,i,:));
+     errorbar(nanmean(aa), nanstd(aa)./sqrt(size(aa,1)), 'Color',colori{i}, 'LineWidth', 1), hold on; 
+     plot(1:nb_fq,nanmean(aa), 'o', 'Color',colori{i},'MarkerFaceColor',colori{i}, 'LineWidth', 2), hold on; 
+ end
+   set(gca,'XTick',[1:8])
+ set(gca,'XTickLabel',freqname)
+ xlabel('stimulation frequency')
+ ylabel('power at 1-4Hz')
+ title('selection Strong Oscillation')
+ saveas(gcf,'power_at_1-4Hz_as_a_fct_if stimfq.fig')

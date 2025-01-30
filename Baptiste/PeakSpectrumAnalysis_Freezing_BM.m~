@@ -1,0 +1,533 @@
+
+clear all
+GetEmbReactMiceFolderList_BM
+
+Session_type={'Fear','Cond','Ext','CondPre','CondPost'};
+cd('/media/nas6/ProjetEmbReact/Mouse1189/20210420/ProjectEmbReact_M11189_20210420_UMazeCondBlockedShock_PostDrug/Cond2'); load('B_Low_Spectrum.mat')
+Drug_Group={'SalineSB','ChronicFlx','AcuteFlx','Midazolam','SalineBM_Short','Diazepam_Short','SalineBM_Long','Diazepam_Long'};
+Side={'All','Shock','Safe'}; Side_ind=[3 5 6];
+X = [1:8];
+Cols = {[0, 0, 1],[1, 0, 0],[1, 0.5, 0.5],[0, 0.5, 0],[0.3, 0.745, 0.93],[0.85, 0.325, 0.098],[0.2, 0.645, 0.83],[0.75, 0.225, 0]};
+Legends_Drugs ={'SalineSB' 'Chronic Flx' 'Acute Flx' 'Midazolam','Saline_Short','DZP_Short','Saline_Long','DZP_Long'};
+NoLegends_Drugs ={'', '', '', '','','','',''};
+
+for sess=1:length(Session_type) % generate all data required for analyses
+    [TSD_DATA.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch]=MeanValuesPhysiologicalParameters_BM(Mouse,lower(Session_type{sess}),'respi_freq_BM');
+end
+
+for sess=1:length(Session_type) % generate all data required for analyses
+        
+        if sess==1
+            FolderList=FearSess;
+        elseif sess==2
+            FolderList=CondSess;
+        elseif sess==3
+            FolderList=ExtSess;
+        elseif sess==4
+            FolderList=CondPreSess;
+        elseif sess==5
+            FolderList=CondPostSess;
+        end
+        
+        for mouse = 1:length(Mouse_names)
+            
+            for side=1:length(Side)
+                try
+                    h=histogram(Data(TSD_DATA.(Session_type{sess}).respi_freq_BM.tsd{mouse,Side_ind(side)}),'BinLimits',[1 8],'NumBins',91); % 91=nansum(and(1<Spectro{3},Spectro{3}<8))
+                    HistData.(Side{side}).(Session_type{sess}).(Mouse_names{mouse}) = h.Values;
+                end
+%                 TimeSpentFreezing.(Session_type{sess}).(Mouse_names{mouse}) = nansum((Stop(Epoch1)-Start())/(Stop()-Start()));
+            end
+        end
+end
+
+% for sess=1:length(Session_type) % generate all data required for analyses
+%         
+%         if sess==1
+%             FolderList=FearSess;
+%         elseif sess==2
+%             FolderList=CondSess;
+%         elseif sess==3
+%             FolderList=ExtSess;
+%         elseif sess==4
+%             FolderList=Cond_PreSess;
+%         elseif sess==5
+%             FolderList=Cond_PostSess;
+%         end
+%         
+%         for mouse = 1:length(Mouse_names)
+%             
+%             for side=1:length(Side)
+%                 Spectro_to_use=OBSpec_TSD.(Session_type{sess}).ob_low.tsd{mouse,Side_ind(side)};
+%                 try
+%                     Spectrum_Frequency=ConvertSpectrum_in_Frequencies_BM(Spectro{3} , Range(Spectro_to_use) , Data(Spectro_to_use));
+%                     DataSpectrum_Frequency = Data(Spectrum_Frequency);
+%                     DataSpectrum_Frequency(or(DataSpectrum_Frequency<1,DataSpectrum_Frequency>8))=NaN;
+%                     h=histogram(DataSpectrum_Frequency,'BinLimits',[1 8],'NumBins',91); % 91=nansum(and(1<Spectro{3},Spectro{3}<8))
+%                     HistData.(Side{side}).(Session_type{sess}).(Mouse_names{mouse}) = h.Values;
+%                 end
+% %                 TimeSpentFreezing.(Session_type{sess}).(Mouse_names{mouse}) = nansum((Stop(Epoch1)-Start())/(Stop()-Start()));
+%             end
+%         end
+% end
+
+for group=1:length(Drug_Group)
+    
+   Drugs_Groups_UMaze_BM
+    
+    for sess=1:length(Session_type) % generate all data required for analyses
+        for mouse=1:length(Mouse)
+            Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+            for side=1:length(Side)
+                try
+                    if isnan(runmean(HistData.(Side{side}).(Session_type{sess}).(Mouse_names{mouse})/nansum(HistData.(Side{side}).(Session_type{sess}).(Mouse_names{mouse})),3))
+                        HistData.(Side{side}).(Drug_Group{group}).(Session_type{sess})(mouse,:) = NaN(1,91);
+                    else
+                        HistData.(Side{side}).(Drug_Group{group}).(Session_type{sess})(mouse,:) = runmean(HistData.(Side{side}).(Session_type{sess}).(Mouse_names{mouse})/nansum(HistData.(Side{side}).(Session_type{sess}).(Mouse_names{mouse})),3);
+                    end
+                catch
+                    HistData.(Side{side}).(Drug_Group{group}).(Session_type{sess})(mouse,:) = NaN(1,91);
+                end
+            end
+        end
+    end
+end
+
+% if you wnat pie chart run :
+Create_Behav_Drugs_BM
+
+%% Plot shock safe side freezing
+for group=1:4
+    n=1;
+    for sess=[4 5 3]
+        
+        subplot(3,4,4*(n-1)+group)
+        
+        Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'r',1); hold on;
+        Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'b',1); hold on;
+        makepretty; grid on
+        a=ylim; ylim([0 a(2)]);
+        if and(n==1,group==1); u=text(-2,0.02,'CondPre','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(n==2,group==1); u=text(-2,0.02,'CondPost','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(n==3,group==1); u=text(-2,0.02,'Ext','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if n==1; title(Drug_Group{group}); end
+        if n==3; xlabel('Frequency (Hz)'); end
+        if and(n==1,group==1); f=get(gca,'Children'); legend([f(8),f(4)],'Shock','Safe'); end
+        
+        n=n+1;
+    end
+end
+a=suptitle('Breathing frequency during freezing, spent time analysis'); a.FontSize=20;
+
+
+for group=1:4
+    n=1;
+    for sess=[4 5 3]
+        
+        axes('Position',[.24+(group-1)*.208 .85-(n-1)*.29 .05 .05]); box on
+        a= pie([nanmean(FreezingProp.All.(Drug_Group{group}).(Session_type{sess})) 1-nanmean(FreezingProp.All.(Drug_Group{group}).(Session_type{sess}))]); set(a(1), 'FaceColor', [0 0 0]); set(a(3), 'FaceColor', [1 1 1]);
+        axes('Position',[.24+(group-1)*.208 .77-(n-1)*.29 .05 .05]); box on
+        a= pie([nanmean(FreezingProp.Shock.(Drug_Group{group}).(Session_type{sess})) 1-nanmean(FreezingProp.Shock.(Drug_Group{group}).(Session_type{sess}))]); set(a(1), 'FaceColor', [1 0.5 0.5]); set(a(3), 'FaceColor', [0.5 0.5 1]);
+        
+        n=n+1;
+    end
+end
+
+    
+figure
+for group=5:8
+    n=1;
+    for sess=[4 5 3] % generate all data required for analyses
+        
+        subplot(3,4,4*(n-1)+group-4)
+        
+        Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'r',1); hold on;
+        Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'b',1); hold on;
+        makepretty; grid on
+        a=ylim; ylim([0 a(2)]);
+        if and(n==1,group==5); u=text(-2,0.02,'CondPre','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(n==2,group==5); u=text(-2,0.02,'CondPost','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(n==3,group==5); u=text(-2,0.02,'Ext','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if n==1; title(Drug_Group{group}); end
+        if n==3; xlabel('Frequency (Hz)'); end
+        if and(n==1,group==1); f=get(gca,'Children'); legend([f(8),f(4)],'Shock','Safe'); end
+        
+        n=n+1;
+    end
+end
+a=suptitle('Breathing frequency during freezing, spent time analysis'); a.FontSize=20;
+
+for group=5:8
+    n=1;
+    for sess=[4 5 3]
+        
+        axes('Position',[.24+(group-5)*.208 .85-(n-1)*.29 .05 .05]); box on
+        a= pie([nanmean(FreezingProp.All.(Drug_Group{group}).(Session_type{sess})) 1-nanmean(FreezingProp.All.(Drug_Group{group}).(Session_type{sess}))]); set(a(1), 'FaceColor', [0 0 0]); set(a(3), 'FaceColor', [1 1 1]);
+        axes('Position',[.24+(group-5)*.208 .77-(n-1)*.29 .05 .05]); box on
+        a= pie([nanmean(FreezingProp.Shock.(Drug_Group{group}).(Session_type{sess})) 1-nanmean(FreezingProp.Shock.(Drug_Group{group}).(Session_type{sess}))]); set(a(1), 'FaceColor', [1 0.5 0.5]); set(a(3), 'FaceColor', [0.5 0.5 1]);
+        
+        n=n+1;
+    end
+end
+
+
+figure; n=1;
+for sess=[4 5 3]
+    for side=2:3
+        subplot(3,2,2*(n-1)+side-1)
+       Conf_Inter=nanstd(HistData.(Side{side}).SalineSB.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineSB.(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineSB.(Session_type{sess})),Conf_Inter,'b',1); hold on;
+        Conf_Inter=nanstd(HistData.(Side{side}).SalineBM_Short.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineBM_Short.(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineBM_Short.(Session_type{sess})),Conf_Inter,'m',1); hold on;
+        Conf_Inter=nanstd(HistData.(Side{side}).SalineBM_Long.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineBM_Long.(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineBM_Long.(Session_type{sess})),Conf_Inter,'k',1); hold on;
+       makepretty; grid on
+        if sess==3; xlabel('Frequency (Hz)'); end
+        if side==2; ylabel(Session_type{sess}); end
+        a=ylim; ylim([0 a(2)]); xlim([0 8])
+        if and(n==1,side==2); f=get(gca,'Children'); legend([f(9),f(5),f(1)],'SB','BM short','BM long'); title('Shock'); end
+        if and(n==1,side==3); title('Safe'); end
+        
+    end
+    n=n+1;
+end
+
+a=suptitle('Saline groups comparison'); a.FontSize=20;
+
+
+figure; n=1;
+for sess=[4 5 3]
+    for side=2:3
+        subplot(3,2,2*(n-1)+side-1)
+        Conf_Inter=nanstd(HistData.(Side{side}).SalineBM_Short.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineBM_Short.(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineBM_Short.(Session_type{sess})),Conf_Inter,'k',1); hold on;
+        Conf_Inter=nanstd(HistData.(Side{side}).Diazepam_Short.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).Diazepam_Short.(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).Diazepam_Short.(Session_type{sess})),Conf_Inter,'m',1); hold on;
+        makepretty; grid on
+        if sess==3; xlabel('Frequency (Hz)'); end
+        if side==2; ylabel(Session_type{sess}); end
+        a=ylim; ylim([0 a(2)]); xlim([0 8])
+        if and(n==1,side==2); f=get(gca,'Children'); legend([f(5),f(1)],'Saline BM short','Diazepam short'); title('Shock'); end
+        if and(n==1,side==3); title('Safe'); end
+        
+    end
+    n=n+1;
+end
+
+a=suptitle('Short groups comparison'); a.FontSize=20;
+
+figure; n=1;
+for sess=[4 5 3]
+    for side=2:3
+        subplot(3,2,2*(n-1)+side-1)
+        Conf_Inter=nanstd(HistData.(Side{side}).SalineBM_Long.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineBM_Long.(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineBM_Long.(Session_type{sess})),Conf_Inter,'k',1); hold on;
+        Conf_Inter=nanstd(HistData.(Side{side}).Diazepam_Long.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).Diazepam_Long.(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).Diazepam_Long.(Session_type{sess})),Conf_Inter,'m',1); hold on;
+         makepretty; grid on
+        if sess==3; xlabel('Frequency (Hz)'); end
+        if side==2; ylabel(Session_type{sess}); end
+        a=ylim; ylim([0 a(2)]); xlim([0 8])
+        if and(n==1,side==2); f=get(gca,'Children');  legend([f(5),f(1)],'Saline BM short','Diazepam short'); title('Shock'); end
+        if and(n==1,side==3); title('Safe'); end
+        
+    end
+    n=n+1;
+end
+
+a=suptitle('Long groups comparison'); a.FontSize=20;
+
+
+%% All freezing
+figure
+for group=1:4
+    n=1;
+    for sess=[4 5 3] % generate all data required for analyses
+        
+        subplot(3,4,4*(n-1)+group)
+        
+        Conf_Inter=nanstd(HistData.All.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.All.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.All.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+        makepretty; grid on
+        a=ylim; ylim([0 a(2)]);
+        if and(n==1,group==1); u=text(-2,0.02,'Fear','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(n==2,group==1); u=text(-2,0.02,'Cond','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(n==3,group==1); u=text(-2,0.02,'Ext','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if n==1; title(Drug_Group{group}); end
+        if n==3; xlabel('Frequency (Hz)'); end
+    
+    n=n+1;
+    end
+end
+
+for group=1:4
+    n=1;
+    for sess=[4 5 3]
+        
+        axes('Position',[.24+(group-1)*.208 .85-(n-1)*.29 .05 .05]); box on
+        a= pie([nansum(nansum(HistData.All.(Drug_Group{group}).(Session_type{sess})(:,40:end)))/nansum(nansum(HistData.All.(Drug_Group{group}).(Session_type{sess}))) 1-nansum(nansum(HistData.All.(Drug_Group{group}).(Session_type{sess})(:,40:end)))/nansum(nansum(HistData.All.(Drug_Group{group}).(Session_type{sess})))]); set(a(1), 'FaceColor', [0 0 0]); set(a(3), 'FaceColor', [1 1 1]);
+        
+        n=n+1;
+    end
+end
+
+a=suptitle('Breathing frequency during freezing, spent time analysis'); a.FontSize=20;
+
+
+figure
+for group=5:8
+    n=1;
+    for sess=[4 5 3]
+        
+        subplot(3,4,4*(n-1)+group-4)
+        
+        Conf_Inter=nanstd(HistData.All.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.All.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.All.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+         makepretty; grid on
+        a=ylim; ylim([0 a(2)]);
+        if and(sess==1,group==5); u=text(-2,0.02,'Fear','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(sess==2,group==5); u=text(-2,0.02,'Cond','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(sess==3,group==5); u=text(-2,0.02,'Ext','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if sess==1; title(Drug_Group{group}); end
+        if sess==3; xlabel('Frequency (Hz)'); end
+    
+    n=n+1;
+    end
+end
+
+for group=5:8
+    for sess=1:3
+        
+        axes('Position',[.24+(group-5)*.208 .85-(sess-1)*.29 .05 .05]); box on
+        a= pie([nansum(nansum(HistData.All.(Drug_Group{group}).(Session_type{sess})(:,40:end)))/nansum(nansum(HistData.All.(Drug_Group{group}).(Session_type{sess}))) 1-nansum(nansum(HistData.All.(Drug_Group{group}).(Session_type{sess})(:,40:end)))/nansum(nansum(HistData.All.(Drug_Group{group}).(Session_type{sess})))]); set(a(1), 'FaceColor', [0 0 0]); set(a(3), 'FaceColor', [1 1 1]);
+ 
+    end
+end
+
+a=suptitle('Breathing frequency during freezing, spent time analysis'); a.FontSize=20;
+
+figure
+n=1;
+for sess=1:3
+    for group=[1 5 6]
+        
+        subplot(3,3,n)
+        
+        Conf_Inter=nanstd(HistData.All.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.All.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.All.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+        makepretty; grid on
+        a=ylim; ylim([0 a(2)]); xlim([0 8])
+        if and(sess==1,group==1); u=text(-2,0.02,'Fear','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(sess==2,group==1); u=text(-2,0.02,'Cond','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(sess==3,group==1); u=text(-2,0.02,'Ext','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if sess==1; title(Drug_Group{group}); end
+        if sess==3; xlabel('Frequency (Hz)'); end
+        n=n+1;
+    end
+end
+
+figure; side=1;
+for sess=1:3
+    subplot(1,3,sess)
+    Conf_Inter=nanstd(HistData.(Side{side}).SalineSB.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineSB.(Session_type{sess}),1));
+    shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineSB.(Session_type{sess})),Conf_Inter,'b',1); hold on;
+    Conf_Inter=nanstd(HistData.(Side{side}).SalineBM_Short.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineBM_Short.(Session_type{sess}),1));
+    shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineBM_Short.(Session_type{sess})),Conf_Inter,'m',1); hold on;
+    Conf_Inter=nanstd(HistData.(Side{side}).SalineBM_Long.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineBM_Long.(Session_type{sess}),1));
+    shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineBM_Long.(Session_type{sess})),Conf_Inter,'k',1); hold on;
+    makepretty; grid on
+    xlabel('Frequency (Hz)');
+    if side==1; title(Session_type{sess}); end
+    a=ylim; ylim([0 a(2)]); xlim([0 8])
+    if and(sess==1,side==1); f=get(gca,'Children'); legend([f(9),f(5),f(1)],'SB','BM short','BM long');  end
+end
+
+
+%% CondPre Post
+
+figure
+for group=1:4
+    for sess=4:5 % generate all data required for analyses
+        
+        subplot(2,4,4*(sess-4)+group)
+        try
+        Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'r',1); hold on;
+        Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'b',1); hold on;
+        makepretty; grid on
+        a=ylim; ylim([0 a(2)]);
+        if and(sess==4,group==1); u=text(-2,0.02,'Cond Pre','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(sess==5,group==1); u=text(-2,0.02,'Cond Post','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if sess==4; title(Drug_Group{group}); end
+        if sess==5; xlabel('Frequency (Hz)'); end
+        end
+    end
+end
+
+figure
+for group=5:8
+    for sess=4:5 % generate all data required for analyses
+        
+        subplot(2,4,4*(sess-4)+group-4)
+        
+        Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'r',1); hold on;
+        Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'b',1); hold on;
+        makepretty; grid on
+        a=ylim; ylim([0 a(2)]);
+        if and(sess==4,group==5); u=text(-2,0.02,'Cond Pre','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(sess==5,group==5); u=text(-2,0.02,'Cond Post','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if sess==4; title(Drug_Group{group}); end
+        if sess==5; xlabel('Frequency (Hz)'); end
+    end
+end
+
+
+figure
+n=1;
+for sess=4:5
+    for group=[1 5 6]
+        
+        subplot(2,3,n)
+        
+        Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'r',1); hold on;
+        Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'b',1); hold on;
+        makepretty; grid on
+        a=ylim; ylim([0 a(2)]); xlim([0 8])
+        if and(sess==4,group==1); u=text(-2,0.02,'Cond Pre','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if and(sess==5,group==1); u=text(-2,0.02,'Cond Post','FontSize',20,'FontWeight','bold'); set(u,'Rotation',90); end
+        if sess==4; title(Drug_Group{group}); end
+        if sess==5; xlabel('Frequency (Hz)'); end
+        n=n+1;
+    end
+end
+
+
+figure
+for side=2:3
+    for sess=4:5
+        subplot(2,2,2*(side-2)+sess-3)
+        Conf_Inter=nanstd(HistData.(Side{side}).SalineSB.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineSB.(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineSB.(Session_type{sess})),Conf_Inter,'b',1); hold on;
+        Conf_Inter=nanstd(HistData.(Side{side}).SalineBM_Short.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineBM_Short.(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineBM_Short.(Session_type{sess})),Conf_Inter,'m',1); hold on;
+        Conf_Inter=nanstd(HistData.(Side{side}).SalineBM_Long.(Session_type{sess}))/sqrt(size(HistData.(Side{side}).SalineBM_Long.(Session_type{sess}),1));
+        shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.(Side{side}).SalineBM_Long.(Session_type{sess})),Conf_Inter,'k',1); hold on;
+        makepretty; grid on
+        if side==3; xlabel('Frequency (Hz)'); end
+        if side==2; title(Session_type{sess}); end
+        a=ylim; ylim([0 a(2)]); xlim([0 8])
+        if and(sess==4,side==2); f=get(gca,'Children'); legend([f(9),f(5),f(1)],'SB','BM short','BM long'); ylabel('Shock'); end
+        if and(sess==4,side==3); ylabel('Safe'); end
+    end
+end
+
+
+%% DZP
+figure
+subplot(321)
+group=5; sess=1;
+Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'r',1); hold on;
+group=6;
+Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+makepretty; grid on
+ylabel('Fear'); title('Shock')
+f=get(gca,'Children'); legend([f(5),f(1)],'Saline BM','DZP BM');
+
+subplot(322)
+group=5;
+Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'b',1); hold on;
+group=6;
+Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+makepretty; grid on
+title('Safe')
+f=get(gca,'Children'); legend([f(5),f(1)],'Saline BM','DZP BM');
+
+group=5; sess=2;
+subplot(323)
+Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'r',1); hold on;
+group=6;
+Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+makepretty; grid on
+ylabel('Cond'); 
+
+subplot(324)
+group=5;
+Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'b',1); hold on;
+group=6;
+Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+makepretty; grid on
+
+group=5; sess=3;
+subplot(325)
+Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'r',1); hold on;
+group=6;
+Conf_Inter=nanstd(HistData.Shock.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Shock.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Shock.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+makepretty; grid on
+xlabel('Frequency (Hz)'); ylabel('Ext');
+ylim([0 0.05])
+
+subplot(326)
+group=5;
+Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'b',1); hold on;
+group=6;
+Conf_Inter=nanstd(HistData.Safe.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.Safe.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.Safe.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+makepretty; grid on
+xlabel('Frequency (Hz)'); 
+
+a=suptitle('Breathing frequency during freezing, spent time analysis'); a.FontSize=20;
+
+
+figure
+subplot(131)
+group=5; sess=1;
+Conf_Inter=nanstd(HistData.All.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.All.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.All.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'m',1); hold on;
+group=6;
+Conf_Inter=nanstd(HistData.All.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.All.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.All.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+title('Fear'); xlabel('Frequency (Hz)');makepretty; grid on
+f=get(gca,'Children'); legend([f(5),f(1)],'Saline BM','DZP BM');
+
+subplot(132)
+group=5; sess=2;
+Conf_Inter=nanstd(HistData.All.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.All.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.All.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'m',1); hold on;
+group=6;
+Conf_Inter=nanstd(HistData.All.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.All.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.All.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+title('Cond'); xlabel('Frequency (Hz)');makepretty; grid on
+
+subplot(133)
+group=5; sess=3;
+Conf_Inter=nanstd(HistData.All.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.All.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.All.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'m',1); hold on;
+group=6;
+Conf_Inter=nanstd(HistData.All.(Drug_Group{group}).(Session_type{sess}))/sqrt(size(HistData.All.(Drug_Group{group}).(Session_type{sess}),1));
+shadedErrorBar(Spectro{3}(13:103),nanmean(HistData.All.(Drug_Group{group}).(Session_type{sess})),Conf_Inter,'k',1); hold on;
+title('Ext'); xlabel('Frequency (Hz)');makepretty; grid on
+
+a=suptitle('Breathing frequency during freezing, spent time analysis, all freezing'); a.FontSize=20;
+
+
+

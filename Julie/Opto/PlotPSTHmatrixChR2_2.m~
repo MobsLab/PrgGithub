@@ -1,0 +1,241 @@
+function PlotPSTHmatrixChR2_2(t0,t1,t2,t3,t4,t5,t6,t7,C0,P0,E0,C1,P1,E1,C2,P2,E2,C3,P3,E3,C4,E4,P4,C5,E5,P5,C6,E6,P6,C7,E7,P7,MouseListC,StepName,zsc,sav,CSoption, tsdType)
+
+%24.11.2016
+% similar to PlotPSTHmatrixChR2_2 but takes into acccound E,P, C 4-> 7
+% called by PSTH_behav_accelero2.m
+
+% code � finir � mettre en sous fonction dans
+% %FigBILANObsFreezManipBulbectomie
+
+if zsc
+    % CS- no laser
+    C0=zscore(C0);% EXT24
+    P0=zscore(P0);%  EXT48
+    E0=zscore(E0);%  EXT72
+    % CS- with laser
+    C1=zscore(C1);
+    P1=zscore(P1);
+    E1=zscore(E1);
+    % CS+ no laser
+    C2=zscore(C2);
+    P2=zscore(P2); 
+    E2=zscore(E2);
+    % CS+ with laser
+    C3=zscore(C3);
+    P3=zscore(P3);
+    E3=zscore(E3);
+
+    C4=zscore(C4);
+    P4=zscore(P4);
+    E4=zscore(E4);
+    
+    C5=zscore(C5);
+    P5=zscore(P5);
+    E5=zscore(E5);
+    
+    C6=zscore(C6);
+    P6=zscore(P6);
+    E6=zscore(E6);
+    % because of the end of recording the last time points are nan (10 out of 150)
+    C7_zc=[];
+    P7_zc=[];
+    E7_zc=[];
+    for i=1:size(C7,2)   
+        if sum(~isnan(C7(:,i)))~=0
+            C7_zc(:,i)=[zscore(C7(~isnan(C7(:,i)),i)) ; nan(size(C7(isnan(C7(:,i)))))];
+        end
+        if sum(~isnan(P7(:,i)))~=0
+            P7_zc(:,i)=[zscore(P7(~isnan(P7(:,i)),i)); nan(size(P7(isnan(P7(:,i)))))];
+        end
+        if sum(~isnan(E7(:,i)))~=0
+            E7_zc(:,i)=[zscore(E7(~isnan(E7(:,i)),i)); nan(size(E7(isnan(E7(:,i)))))];
+        end
+    end
+    C7=C7_zc;
+    P7=P7_zc;
+    E7=E7_zc;
+end
+
+figure('color',[1 1 1]),
+set(gcf, 'Position',[ 8  91  1819 887]);
+n=8;
+p=3;
+a=1;
+% define ylabels
+if strcmp(CSoption, '4firstCS not averaged')
+    Ylegend={'CS- no laser';'CS- with laser';'CS+ no laser';'CS+ with laser'
+    
+elseif strcmp(CSoption, 'AllCS avg2by2')
+    
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    CS- no laser
+% CS- no laser
+SP{a}=subplot(n,p,a);imagesc(t0/1E3,[1:size(C2,2)],C0'),ylabel('CS- no laser'), title(StepName{1}), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+if zsc
+    text(-0.2, 1.2,'PSTH zscores', 'FontSize', 20, 'units', 'normalized')
+else
+    text(-0.2, 1.2,'PSTH', 'FontSize', 20, 'units', 'normalized')
+end
+
+SP{a}=subplot(n,p,a);imagesc(t0/1E3,[1:size(C2,2)],P0'), title(StepName{2}), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t0/1E3,[1:size(C2,2)],E0'), title(StepName{3}), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+% CS- with laser
+SP{a}=subplot(n,p,a);imagesc(t1/1E3,[1:size(C2,2)],C1'),ylabel('CS- with laser'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t1/1E3,[1:size(C2,2)],P1'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t1/1E3,[1:size(C2,2)],E1'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    CS+  1 to 4
+% CS+ no laser
+SP{a}=subplot(n,p,a);imagesc(t2/1E3,[1:size(C2,2)],C2'),ylabel('CS+ no laser'),
+hold on, line([0 0],[0.5 size(C2,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t2/1E3,[1:size(P2,2)],P2'),
+hold on, line([0 0],[0.5 size(P2,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 size(P2,2)+0.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t2/1E3,[1:size(E2,2)],E2'),
+hold on, line([0 0],[0.5 size(E2,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 size(E2,2)+0.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+
+% CS+ with laser
+SP{a}=subplot(n,p,a);imagesc(t3/1E3,[1:size(C2,2)],C3'),ylabel('CS+ with laser'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t3/1E3,[1:size(C2,2)],P3'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t3/1E3,[1:size(C2,2)],E3'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    CS+  5 to 8
+
+% CS+ no laser
+SP{a}=subplot(n,p,a);imagesc(t4/1E3,[1:size(C4,2)],C4'),ylabel('CS+ no laser'),
+hold on, line([0 0],[0.5 size(C4,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t4/1E3,[1:size(P4,2)],P4'),
+hold on, line([0 0],[0.5 size(P4,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 size(P4,2)+0.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t4/1E3,[1:size(E4,2)],E4'),
+hold on, line([0 0],[0.5 size(E4,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 size(E4,2)+0.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+
+% CS+ with laser
+SP{a}=subplot(n,p,a);imagesc(t5/1E3,[1:size(C2,2)],C5'),ylabel('CS+ with laser'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t5/1E3,[1:size(C2,2)],P5'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t5/1E3,[1:size(C2,2)],E5'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    CS+  9 to 11
+
+% CS+ no laser
+SP{a}=subplot(n,p,a);imagesc(t6/1E3,[1:size(C6,2)],C6'),ylabel('CS+ no laser'),
+hold on, line([0 0],[0.5 size(C6,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t6/1E3,[1:size(P6,2)],P6'),
+hold on, line([0 0],[0.5 size(P6,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 size(P6,2)+0.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t6/1E3,[1:size(E6,2)],E6'),
+hold on, line([0 0],[0.5 size(E6,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 size(E6,2)+0.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+
+% CS+ with laser
+SP{a}=subplot(n,p,a);imagesc(t7/1E3,[1:size(C7,2)],C7'),ylabel('CS+ with laser'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t7/1E3,[1:size(C7,2)],P7'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+SP{a}=subplot(n,p,a);imagesc(t7/1E3,[1:size(C7,2)],E7'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+a_final=a-1;
+
+
+for aa=1:a_final
+    subplot(SP{aa}), 
+    if strcmp(tsdType, 'Movtsd')
+        if zsc==0
+            caxis([0 25]); colorbar;
+        elseif zsc==1
+            caxis([-2 5]); colorbar;
+        end
+    elseif strcmp(tsdType, 'MovAcctsd')
+        if zsc==0
+            caxis([0 25]); colorbar;
+        elseif zsc==1
+            caxis([-2 5]); colorbar;
+        end
+    end
+end
+
+subplot(SP{1})
+text(-0.3,1.5,CSoption,'units','normalized')
+
+set(gcf,'PaperPosition',[ 0  0 27 18])
+if zsc
+    saveas(gcf,'AcceleroChR2_PSTHmatrix_zcores.fig')
+    saveas(gcf,'AcceleroChR2_PSTHmatrix_zscores.png')
+else
+    saveas(gcf,'AcceleroChR2_PSTHmatrix.fig')
+    saveas(gcf,'AcceleroChR2_PSTHmatrix.png')
+end

@@ -1,0 +1,189 @@
+ function [MatNumber,Zones,ZonesName,indexClosed,indexExt,PosWork]=AnalysePlusMaze(PosMat,mask,ref,plo)
+
+%% INPUTS
+
+freq=30; % Hz, default 30Hz
+threshold_InOut=0.5; % remove serial entry
+closedArms={'Up','Down'};
+res=pwd; 
+
+%% INITIALISATION
+if ~exist('plo','var')
+    plo=0;
+end
+scrsz = get(0,'ScreenSize');
+% ------------------------------------------------
+% ---------------- ARMS CARACTERIS ---------------
+
+% NameRow={'entry','exit'}; 
+% NameColumn={'left','right','up','down'};
+ZonesName={'Center','LeftExt','LeftInt','UpExt','UpInt','RightInt','RightExt','DownInt','DownExt'};
+
+indexClosed=zeros(1,length(ZonesName));
+indexExt=zeros(1,length(ZonesName));
+for zn=1:length(ZonesName)
+    for cl=1:length(closedArms)
+        if ~isempty(strfind(ZonesName{zn},closedArms{cl}))
+            indexClosed(zn)=1;
+        end
+    end
+    if ~isempty(strfind(ZonesName{zn},'Ext'))
+        indexExt(zn)=2;
+    elseif ~isempty(strfind(ZonesName{zn},'Int'))
+        indexExt(zn)=1;
+    end
+end
+
+% ------------------------------------------------
+% ---------------- RESAMPLE POSMAT ---------------
+
+PosWork=PosMat(~isnan(PosMat(:,2)),:);
+TimeInt=min(PosWork(:,1)):1/freq:max(PosWork(:,1));
+
+Xint=interp1(PosWork(:,1),PosWork(:,2),TimeInt);
+Yint=interp1(PosWork(:,1),PosWork(:,3),TimeInt);
+
+PosWork=[TimeInt',Xint',Yint'];
+
+
+%% DEFINE PLUS MAZE ZONES 
+ok=0;
+while ok==0
+    [x1,y1,Zone1,xedge,yedge]=roipoly(ref);close
+    figure('Color',[1 1 1],'Position',scrsz/2),
+    subplot(1,2,1), imagesc(ref.*mask), colormap bone
+    hold on, plot(xedge,yedge,'g')
+    title(['Closed Arms = ',[closedArms{:}]])
+    
+    minX=min(find(sum(mask,1)>0));
+    maxX=max(find(sum(mask,1)>0));
+    minY=min(find(sum(mask,2)>0));
+    maxY=max(find(sum(mask,2)>0));
+    plot([minX,minX,maxX,maxX,minX],[minY,maxY,maxY,minY,minY],'c')
+    
+    xedge=sort(xedge(1:4));
+    yedge=sort(yedge(1:4));
+    xleft=(xedge(1)+xedge(2))/2;
+    xright=(xedge(3)+xedge(4))/2;
+    yup=(yedge(1)+yedge(2))/2;
+    ydown=(yedge(3)+yedge(4))/2;
+    ZoneXY{1}=[xleft,xright;yup ydown];
+    % zones
+    % {'Center','leftExt','leftInt','UpExt','UpInt','RightExt',RightInt','DownExt','DownInt'};
+    
+    % ----------- LEFT ---------------
+    xarmLeft=[minX,minX+(xleft-minX)/2,xleft];
+    yarmLeft=[ydown+3,yup-3];
+    % ext
+    ZoneXY{2}=[xarmLeft([1,2]);yarmLeft([1 2])];
+    Zone2 = roipoly(x1,y1, ref,xarmLeft([1,2,2,1,1]) ,yarmLeft([1 1 2 2 1]))*2;
+    % int
+    ZoneXY{3}=[xarmLeft([2,3]);yarmLeft([1 2])];
+    Zone3 = roipoly(x1,y1, ref, xarmLeft([2,3,3,2,2]) ,yarmLeft([1 1 2 2 1]))*3;
+    
+    
+     % ----------- UP ---------------
+    yarmUP=[minY,minY+(yup-minY)/2,yup];
+    xarmUP=[xleft-3,xright+3];
+    % ext
+    ZoneXY{4}=[xarmUP([1,2]);yarmUP([1 2])];
+    Zone4 = roipoly(x1,y1, ref, xarmUP([1 1 2 2 1]),yarmUP([1 2 2 1 1]))*4;
+    % int
+    ZoneXY{5}=[xarmUP([1,2]);yarmUP([2 3])];
+    Zone5 = roipoly(x1,y1, ref, xarmUP([1 1 2 2 1]),yarmUP([2 3 3 2 2]))*5;
+    
+     % ----------- RIGHT ---------------
+    xarmRight=[xright,xright+(maxX-xright)/2,maxX];
+    yarmRight=[ydown+3,yup-3];
+    % ext
+    ZoneXY{6}=[xarmRight([1,2]);yarmRight([1 2])];
+    Zone6 = roipoly(x1,y1, ref, xarmRight([1 2 2 1 1]),yarmRight([1 1 2 2 1]))*6;
+    % int
+    ZoneXY{7}=[xarmRight([2,3]);yarmRight([1 2])];
+    Zone7 = roipoly(x1,y1, ref, xarmRight([2 3 3 2 2]),yarmRight([1 1 2 2 1]))*7;
+    
+    % ----------- DOWN ---------------
+    yarmDOWN=[ydown,ydown+(maxY-ydown)/2,maxY];
+    xarmDOWN=[xleft-3,xright+3];
+    % ext
+    ZoneXY{8}=[xarmDOWN([1,2]);yarmDOWN([1 2])];
+    Zone8 = roipoly(x1,y1, ref, xarmDOWN([1 2 2 1 1]),yarmDOWN([1 1 2 2 1]))*8;
+    % int
+    ZoneXY{9}=[xarmDOWN([1,2]);yarmDOWN([2 3])];
+    Zone9 = roipoly(x1,y1, ref, xarmDOWN([1 2 2 1 1]),yarmDOWN([2 2 3 3 2]))*9;
+    
+    Zones=Zone1+Zone2+Zone3+Zone4+Zone5+Zone6+Zone7+Zone8+Zone9;
+    subplot(1,2,2), imagesc(Zones)
+    caxis([0 9]); colorbar;
+    for zn=1:9
+        hold on, text(mean(ZoneXY{zn}(1,:)),mean(ZoneXY{zn}(2,:)),num2str(zn))
+    end
+    
+    choice=questdlg('Zones ok ?','ok?','Yes','No','Yes');
+    switch choice
+        case 'Yes'
+            ok=1;
+    end
+    %close
+end
+
+save tempPlusMaze ZoneXY Zones freq closedArms ZonesName indexClosed indexExt PosWork
+
+%%
+% sequences
+PosWork(:,4:6)=NaN(size(PosWork,1),3);
+for zn=1:length(ZonesName)
+    xlimits=sort(ZoneXY{zn}(1,:));
+    ylimits=sort(ZoneXY{zn}(2,:));
+    indexInsideZone = ( abs(PosWork(:,2)-mean(xlimits))<diff(xlimits)/2 &  abs(PosWork(:,3)-mean(ylimits))<diff(ylimits)/2 );
+    PosWork(indexInsideZone, 4:6) = [zn, indexClosed(zn), indexExt(zn)];
+end
+
+
+%% times of entry and exit
+% right arm
+out=PosWork(:,2)<x_right;
+in=PosWork(:,2)>x_right;
+t_entry_right=PosWork(out(1:end-1) & in(2:end),1);
+t_exit_right=PosWork(in(1:end-1) & out(2:end),1);
+
+% left arm
+out=PosWork(:,2)>x_left;
+in=PosWork(:,2)<x_left;
+t_entry_left=PosWork(out(1:end-1) & in(2:end),1);
+t_exit_left=PosWork(in(1:end-1) & out(2:end),1);
+% up arm
+out=PosWork(:,3)>y_up;
+in=PosWork(:,3)<y_up;
+t_entry_up=PosWork(out(1:end-1) & in(2:end),1);
+t_exit_up=PosWork(in(1:end-1) & out(2:end),1);
+
+% down arm
+out=PosWork(:,3)<y_down;
+in=PosWork(:,3)>y_down;
+t_entry_down=PosWork(out(1:end-1) & in(2:end),1);
+t_exit_down=PosWork(in(1:end-1) & out(2:end),1);
+
+
+MatNumber=zeros(length(NameRow),length(NameColumn));
+MatNumberth=MatNumber;
+for i=1:length(NameRow)
+    for j=1:length(NameColumn)
+        eval(['temp=t_',NameRow{i},'_',NameColumn{j},';']);
+        MatNumber(i,j)=length(temp);
+        Dtemp=diff(temp);
+        temp=temp(Dtemp>threshold_InOut);
+        MatNumberth(i,j)=length(temp);
+    end
+end
+
+%% display
+if plo
+    figure('Color',[1 1 1])
+    imagesc(mask); colormap gray
+    hold on, plot(PosWork(:,2),PosWork(:,3),'b')
+    text(0,0,num2str(),'Color','g')
+end
+
+
+

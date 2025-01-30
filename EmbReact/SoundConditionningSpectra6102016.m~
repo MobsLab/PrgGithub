@@ -1,0 +1,385 @@
+clear all,
+MouseToAvoid=[431]; % mice with noisy data to exclude
+FilesCond=PathForExperimentsEmbReact('SoundCond');
+FilesCond=RemoveElementsFromDir(FilesCond,'nmouse',MouseToAvoid);
+FilesTest=PathForExperimentsEmbReact('SoundTest');
+FilesTest=RemoveElementsFromDir(FilesTest,'nmouse',MouseToAvoid);
+
+% Get average spectra
+clear SaveSpec
+Struc={'B','H','PFCx'};
+StrucName={'Bulb','dHPC','PFCx'};
+WndwSz=2*1e4; % size of little window to extract frequency data
+LimFreq=20;
+SaveFigName='/media/DataMOBsRAID/ProjectEmbReact/Figures/Oct2016/20161006/';
+
+for ss=1:length(Struc)
+    clear SaveSpecCond SaveSpecTest SaveSpec
+    % During Conditionning
+    for mm=1:size(FilesCond.path,2)
+        mm
+        MouseName{mm}=num2str(FilesCond.ExpeInfo{mm}.nmouse);
+        AvailStruc=FilesCond.ExpeInfo{mm}.RecordElecs.structure;AvailStruc=[AvailStruc{:}];
+        if  not(isempty(findstr(AvailStruc,StrucName{ss})))
+            count1=1;
+            % Go to folder and load everything
+            cd( FilesCond.path{mm}{1})
+            clear StimEpoch SleepyEpoch TotalNoiseEpoch
+            load('behavResources.mat')
+            load('StateEpochSB.mat','TotalNoiseEpoch')
+            
+            %RemovEpoch=or(or(StimEpoch,SleepyEpoch),TotalNoiseEpoch);
+                        %RemovEpoch=or(or(StimEpoch,SleepyEpoch),TotalNoiseEpoch);
+
+            load([Struc{ss},'_Low_Spectrum.mat'])
+            Sptsd=tsd(Spectro{2}*1e4,Spectro{1});
+            
+            LitEp=FreezeEpoch-RemovEpoch;
+            % Average Spectra
+            if not(isempty(Start(LitEp)))
+                if sum(Stop(LitEp)-Start(LitEp))>2*1e4
+                    SaveSpec{mm,1}(1,:)=nanmean((Data(Restrict(Sptsd,LitEp))));
+                else
+                    SaveSpec{mm,1}(1,:)=nan(1,length(Spectro{3}));
+                end
+            else
+                SaveSpec{mm,1}(1,:)=nan(1,length(Spectro{3}));
+                
+            end
+            
+            %Individual Spectra
+            if not(isempty(Start(LitEp)))
+                if sum(Stop(LitEp)-Start(LitEp))>2*1e4
+                    for s=1:length(Start(LitEp))
+                        dur=(Stop(subset(LitEp,s))-Start(subset(LitEp,s)));
+                        Str=Start(subset(LitEp,s));
+                        if  dur<3.5*1e4 & dur>1.5*1e4
+                            SaveSpecCond{mm,1}(count1,:)=nanmean(Data(Restrict(Sptsd,subset(LitEp,s))));
+                            count1=count1+1;
+                        else
+                            numbins=round(dur/WndwSz);
+                            epdur=dur/numbins;
+                            for nn=1:numbins
+                                SaveSpecCond{mm,1}(count1,:)=nanmean(Data(Restrict(Sptsd,intervalSet(Str+epdur*(nn-1),Str+epdur*(nn)))));
+                                count1=count1+1;
+                            end
+                            
+                        end
+                    end
+                end
+            end
+            
+            
+        else
+            SaveSpec{mm,1}=[];
+            for c=1:size(FilesTest.path{mm},2)
+                SaveSpecCond{mm,1}=[];
+            end
+        end
+    end
+    
+    % During test
+    for mm=1:size(FilesTest.path,2)
+        mm
+        MouseName{mm}=num2str(FilesTest.ExpeInfo{mm}.nmouse);
+        AvailStruc=FilesTest.ExpeInfo{mm}.RecordElecs.structure;AvailStruc=[AvailStruc{:}];
+        if  not(isempty(findstr(AvailStruc,StrucName{ss})))
+            count1=1;
+            % Go to folder and load everything
+            cd( FilesTest.path{mm}{1})
+            clear StimEpoch SleepyEpoch TotalNoiseEpoch
+            load('behavResources.mat')
+            load('StateEpochSB.mat','TotalNoiseEpoch')
+            RemovEpoch=or(or(StimEpoch,SleepyEpoch),TotalNoiseEpoch);
+            load([Struc{ss},'_Low_Spectrum.mat'])
+            Sptsd=tsd(Spectro{2}*1e4,Spectro{1});
+            
+            LitEp=FreezeEpoch-RemovEpoch;
+            % Average Spectra
+            if not(isempty(Start(LitEp)))
+                if sum(Stop(LitEp)-Start(LitEp))>2*1e4
+                    SaveSpec{mm,2}(1,:)=nanmean((Data(Restrict(Sptsd,LitEp))));
+                else
+                    SaveSpec{mm,2}(1,:)=nan(1,length(Spectro{3}));
+                end
+            else
+                SaveSpec{mm,2}(1,:)=nan(1,length(Spectro{3}));
+                
+            end
+            
+            %Individual Spectra
+            if not(isempty(Start(LitEp)))
+                if sum(Stop(LitEp)-Start(LitEp))>2*1e4
+                    for s=1:length(Start(LitEp))
+                        dur=(Stop(subset(LitEp,s))-Start(subset(LitEp,s)));
+                        Str=Start(subset(LitEp,s));
+                        if  dur<3.5*1e4 & dur>1.5*1e4
+                            SaveSpecTest{mm,1}(count1,:)=nanmean(Data(Restrict(Sptsd,subset(LitEp,s))));
+                            count1=count1+1;
+                        else
+                            numbins=round(dur/WndwSz);
+                            epdur=dur/numbins;
+                            for nn=1:numbins
+                                SaveSpecTest{mm,1}(count1,:)=nanmean(Data(Restrict(Sptsd,intervalSet(Str+epdur*(nn-1),Str+epdur*(nn)))));
+                                count1=count1+1;
+                            end
+                            
+                        end
+                    end
+                end
+            end
+            
+            
+        else
+            SaveSpec{mm,2}=[];
+            for c=1:size(FilesTest.path{mm},2)
+                SaveSpecTest{mm,1}=[];
+            end
+        end
+    end
+    
+    fig=figure;fig.Name=[Struc{ss},' Av spec Sep Animals onf SoundCond'];
+    for mm=1:size(FilesTest.path,2)
+        subplot(ceil(size(FilesTest.path,2)/2),2,mm)
+        plot(Spectro{3},Spectro{3}.*(nanmean(SaveSpec{mm,1},1)),'r')
+        hold on
+        plot(Spectro{3},Spectro{3}.*(nanmean(SaveSpec{mm,2},1)),'b')
+        title(MouseName{mm})
+        xlim([1 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([5 5],ylim,'color','k','linewidth',2,'linestyle',':')
+    end
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.png'])
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.fig'])
+    close(fig)
+    
+    fig=figure;fig.Name=[Struc{ss},'Av spec Sep Animals SoundCond'];
+    for mm=1:size(FilesTest.path,2)
+        subplot(ceil(size(FilesTest.path,2)/2),2,mm)
+        plot(Spectro{3},(nanmean(SaveSpec{mm,1},1)),'r')
+        hold on
+        plot(Spectro{3},(nanmean(SaveSpec{mm,2},1)),'b')
+        title(MouseName{mm})
+        xlim([1 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([5 5],ylim,'color','k','linewidth',2,'linestyle',':')
+    end
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.png'])
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.fig'])
+    close(fig)
+    
+    fig=figure;fig.Name=[Struc{ss},'Av spec onf SoundCond'];
+    MeanSpecTest=[];    MeanSpecCond=[];
+    for mm=1:size(FilesTest.path,2)
+        if not(isempty(SaveSpec{mm,1}))
+            % normalize by total power for between mice
+            % averaging
+            MeanSpecCond=[MeanSpecCond;Spectro{3}.*(nanmean(SaveSpec{mm,1},1)./nanmean(nanmean(SaveSpec{mm,1}(LimFreq:end),1)))];
+        end
+        if not(isempty(SaveSpec{mm,2}))
+            MeanSpecTest=[MeanSpecTest;Spectro{3}.*(nanmean(SaveSpec{mm,2},1)./nanmean(nanmean(SaveSpec{mm,2}(LimFreq:end),1)))];
+        end
+    end
+    hold on
+    g=shadedErrorBar(Spectro{3},nanmean(MeanSpecTest),[stdError(MeanSpecTest);stdError(MeanSpecTest)],'b')
+    g=shadedErrorBar(Spectro{3},nanmean(MeanSpecCond),[stdError(MeanSpecCond);stdError(MeanSpecCond)],'r')
+    xlim([1 15]),line([3 3],ylim,'color','k'),line([5 5],ylim,'color','k')
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.png'])
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.fig'])
+    close(fig)
+    
+    fig=figure;fig.Name=[Struc{ss},'Av spec SoundCond'];
+    MeanSpecTest=[];    MeanSpecCond=[];
+    for mm=1:size(FilesTest.path,2)
+        if not(isempty(SaveSpec{mm,1}))
+            MeanSpecCond=[MeanSpecCond;nanmean(SaveSpec{mm,1},1)./nanmean(nanmean(SaveSpec{mm,1}(LimFreq:end)))];
+        end
+        if not(isempty(SaveSpec{mm,2}))
+            MeanSpecTest=[MeanSpecTest;nanmean(SaveSpec{mm,2},1)./nanmean(nanmean(SaveSpec{mm,2}(LimFreq:end)))];
+        end
+    end
+    hold on
+    g=shadedErrorBar(Spectro{3},nanmean(MeanSpecTest),[stdError(MeanSpecTest);stdError(MeanSpecTest)],'b')
+    g=shadedErrorBar(Spectro{3},nanmean(MeanSpecCond),[stdError(MeanSpecCond);stdError(MeanSpecCond)],'r')
+    xlim([1 15]),line([3 3],ylim,'color','k'),line([5 5],ylim,'color','k')
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.png'])
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.fig'])
+    close(fig)
+    
+    % Look at distributions of peak frequencies
+    fig=figure;fig.Name=[Struc{ss},'Freq Dist SoundCond'];
+    f=Spectro{3};
+    fTest=[];fCond=[];
+    for mm=1:size(FilesTest.path,2)
+        mm
+        for c=1:size(FilesTest.path{mm},2)
+            if not(isempty(SaveSpecCond{mm,c}))
+                for k=1:size(SaveSpecCond{mm,c},1)
+                    [val,ind]=max(SaveSpecCond{mm,c}(k,LimFreq:end)); ind=ind+LimFreq;
+                    fCond=[fCond,f(ind)];
+                end
+            end
+        end
+        for c=1:size(FilesTest.path{mm},2)
+            try
+                if not(isempty(SaveSpecTest{mm,c}))
+                    for k=1:size(SaveSpecTest{mm,c},1)
+                        [val,ind]=max(SaveSpecTest{mm,c}(k,LimFreq:end)); ind=ind+LimFreq;
+                        fTest=[fTest,f(ind)];
+                    end
+                end
+            end
+        end
+        
+    end
+    nhist({fTest,fCond},'samebins')
+    xlim([1 15]),line([3 3],ylim,'color','k'),line([5 5],ylim,'color','k')
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.png'])
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.fig'])
+    close(fig)
+    
+    
+    fig=figure;fig.Name=[Struc{ss},'Indiv Freq Distrib SoundCond'];
+    clear fTest fCond
+    f=Spectro{3};
+    for mm=1:size(FilesTest.path,2)
+        fTest{mm}=[];fCond{mm}=[];
+        subplot(ceil(size(FilesTest.path,2)/2),2,mm)
+        
+        for c=1:size(FilesTest.path{mm},2)
+            if not(isempty(SaveSpecCond{mm,c}))
+                for k=1:size(SaveSpecCond{mm,c},1)
+                    [val,ind]=max(SaveSpecCond{mm,c}(k,LimFreq:end)); ind=ind+LimFreq;
+                    fCond{mm}=[fCond{mm},f(ind)];
+                end
+            end
+        end
+        for c=1:size(FilesTest.path{mm},2)
+            try
+                if not(isempty(SaveSpecTest{mm,c}))
+                    for k=1:size(SaveSpecTest{mm,c},1)
+                        [val,ind]=max(SaveSpecTest{mm,c}(k,LimFreq:end)); ind=ind+LimFreq;
+                        fTest{mm}=[fTest{mm},f(ind)];
+                    end
+                end
+            end
+        end
+        nhist({fTest{mm},fCond{mm}},'samebins')
+        title(MouseName{mm})
+        xlim([1 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([5 5],ylim,'color','k','linewidth',2,'linestyle',':')
+    end
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.png'])
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.fig'])
+    close(fig)
+    
+    fig=figure;fig.Name=[Struc{ss},'Freq Dist Av Of Mice SoundCond'];
+    clear YCond YTest
+    BinLims=[0.25:0.25:20]
+    % exclude ouse with v little freezign and lots of baseline noise
+    for mm=1:size(FilesTest.path,2)
+        if not(isempty(fTest{mm}))
+            [YTest(mm,:),X]=hist(fTest{mm},BinLims);YTest(mm,:)=YTest(mm,:)./sum(YTest(mm,:));
+        else
+            YTest(mm,:)=nan(1,length(BinLims));
+        end
+        if not(isempty(fCond{mm}))
+            [YCond(mm,:),X]=hist(fCond{mm},BinLims);YCond(mm,:)=YCond(mm,:)./sum(YCond(mm,:));
+        else
+            YCond(mm,:)=nan(1,length(BinLims));
+        end
+    end
+    stairs(BinLims,smooth(nanmean(YCond),5),'r','linewidth',3);
+    hold on
+    stairs(BinLims,smooth(nanmean(YTest),5),'b','linewidth',3);
+    xlim([1 15]),line([3 3],ylim,'color','k'),line([5 5],ylim,'color','k')
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.png'])
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.fig'])
+    close(fig)
+    
+    
+    % Look at distributions of peak frequencies - after multiplying by f
+    fig=figure;fig.Name=[Struc{ss},'Freq Dist onf SoundCond'];
+    f=Spectro{3};
+    fTest=[];fCond=[];
+    for mm=1:size(FilesTest.path,2)
+        mm
+        for c=1:size(FilesTest.path{mm},2)
+            if not(isempty(SaveSpecCond{mm,c}))
+                for k=1:size(SaveSpecCond{mm,c},1)
+                    [val,ind]=max(Spectro{3}(LimFreq:end).*SaveSpecCond{mm,c}(k,LimFreq:end)); ind=ind+LimFreq;
+                    fCond=[fCond,f(min(ind,length(f)))];
+                end
+            end
+        end
+        for c=1:size(FilesTest.path{mm},2)
+            try
+                if not(isempty(SaveSpecTest{mm,c}))
+                    for k=1:size(SaveSpecTest{mm,c},1)
+                        [val,ind]=max(Spectro{3}(LimFreq:end).*SaveSpecTest{mm,c}(k,LimFreq:end)); ind=ind+LimFreq;
+                        fTest=[fTest,f(min(ind,length(f)))];
+                    end
+                end
+            end
+        end
+        
+    end
+    nhist({fTest,fCond},'samebins')
+    xlim([1 15]),line([3 3],ylim,'color','k'),line([5 5],ylim,'color','k')
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.png'])
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.fig'])
+    close(fig)
+    
+    
+    fig=figure;fig.Name=[Struc{ss},'Indiv Freq Distrib onf SoundCond'];
+    clear fTest fCond
+    f=Spectro{3};
+    for mm=1:size(FilesTest.path,2)
+        fTest{mm}=[];fCond{mm}=[];
+        subplot(ceil(size(FilesTest.path,2)/2),2,mm)
+        
+        for c=1:size(FilesTest.path{mm},2)
+            if not(isempty(SaveSpecCond{mm,c}))
+                for k=1:size(SaveSpecCond{mm,c},1)
+                    [val,ind]=max(Spectro{3}(LimFreq:end).*SaveSpecCond{mm,c}(k,LimFreq:end)); ind=ind+LimFreq;
+                    fCond{mm}=[fCond{mm},f(min(ind,length(f)))];
+                end
+            end
+        end
+        for c=1:size(FilesTest.path{mm},2)
+            try
+                if not(isempty(SaveSpecTest{mm,c}))
+                    for k=1:size(SaveSpecTest{mm,c},1)
+                        [val,ind]=max(Spectro{3}(LimFreq:end).*SaveSpecTest{mm,c}(k,LimFreq:end)); ind=ind+LimFreq;
+                        fTest{mm}=[fTest{mm},f(min(ind,length(f)))];
+                    end
+                end
+            end
+        end
+        nhist({fTest{mm},fCond{mm}},'samebins')
+        title(MouseName{mm})
+        xlim([1 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([5 5],ylim,'color','k','linewidth',2,'linestyle',':')
+    end
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.png'])
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.fig'])
+    close(fig)
+    
+    fig=figure;fig.Name=[Struc{ss},'Freq Dist Av Of Mice onf SoundCond'];
+    clear YCond YTest
+    BinLims=[0.25:0.25:20]
+    % exclude ouse with v little freezign and lots of baseline noise
+    for mm=1:size(FilesTest.path,2)
+        if not(isempty(fTest{mm}))
+            [YTest(mm,:),X]=hist(fTest{mm},BinLims);YTest(mm,:)=YTest(mm,:)./sum(YTest(mm,:));
+        else
+            YTest(mm,:)=nan(1,length(BinLims));
+        end
+        if not(isempty(fCond{mm}))
+            [YCond(mm,:),X]=hist(fCond{mm},BinLims);YCond(mm,:)=YCond(mm,:)./sum(YCond(mm,:));
+        else
+            YCond(mm,:)=nan(1,length(BinLims));
+        end
+    end
+    stairs(BinLims,smooth(nanmean(YCond),3),'r','linewidth',3);
+    hold on
+    stairs(BinLims,smooth(nanmean(YTest),3),'b','linewidth',3);
+    xlim([1 15]),line([3 3],ylim,'color','k','linewidth',2,'linestyle',':'),line([5 5],ylim,'color','k','linewidth',2,'linestyle',':')
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.png'])
+    saveas(fig.Number,[SaveFigName,strrep(fig.Name,' ','_'),'.fig'])
+    close(fig)
+end

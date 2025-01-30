@@ -1,0 +1,211 @@
+%%MeanCurvesMUAGangulyWavesPlot
+% 05.11.2019 KJ
+%
+% Infos
+%
+% see
+%    MeanCurvesMUAGangulyWaves MeanCurvesMUAFakeDeltaDeepPlot
+
+
+% load
+clear
+load(fullfile(FolderDeltaDataKJ,'MeanCurvesMUAGangulyWaves.mat'))
+
+animals = unique(muawaves_res.name);
+
+
+met_y.diff  = []; met_y.so = []; met_y.delta = [];
+met_deep.diff  = []; met_deep.so = []; met_deep.delta = [];
+met_sup.diff  = []; met_sup.so = []; met_sup.delta = [];
+
+recall.diff = []; precision.diff = [];
+recall.so = []; precision.so = [];
+recall.delta = []; precision.delta = [];
+
+
+for m=1:length(animals)
+    
+    mouse_y.diff  = []; mouse_y.so = []; mouse_y.delta = [];
+    mouse_deep.diff  = []; mouse_deep.so = []; mouse_deep.delta = [];
+    mouse_sup.diff  = []; mouse_sup.so = []; mouse_sup.delta = [];
+    
+    recall_mouse.diff = []; precision_mouse.diff = [];    
+    recall_mouse.so = []; precision_mouse.so = [];
+    recall_mouse.delta = []; precision_mouse.delta = [];
+    
+    for p=1:length(muawaves_res.path)
+        if strcmpi(muawaves_res.name{p},animals{m})
+            
+            %MUA
+            y_diff  = CenterFiringRateCurve(muawaves_res.met_mua.diff{p}(:,1),muawaves_res.met_mua.diff{p}(:,2), 1);
+            y_so = CenterFiringRateCurve(muawaves_res.met_mua.so{p}(:,1),muawaves_res.met_mua.so{p}(:,2), 1);
+            y_delta = CenterFiringRateCurve(muawaves_res.met_mua.delta{p}(:,1),muawaves_res.met_mua.delta{p}(:,2), 1);
+            
+            mouse_y.diff  = [mouse_y.diff y_diff];
+            mouse_y.so = [mouse_y.so y_so];
+            mouse_y.delta = [mouse_y.delta y_delta];
+            
+            mouse_x.diff  = muawaves_res.met_mua.diff{p}(:,1);
+            mouse_x.so = muawaves_res.met_mua.so{p}(:,1);
+            mouse_x.delta = muawaves_res.met_mua.delta{p}(:,1);
+            
+            
+            %LFP
+            mouse_deep.diff  = [mouse_deep.diff muawaves_res.met_deep.diff{p}(:,2)];
+            mouse_deep.so    = [mouse_deep.so muawaves_res.met_deep.so{p}(:,2)];
+            mouse_deep.delta = [mouse_deep.delta muawaves_res.met_deep.delta{p}(:,2)];
+            
+            mouse_sup.diff  = [mouse_sup.diff muawaves_res.met_sup.diff{p}(:,2)];
+            mouse_sup.so    = [mouse_sup.so muawaves_res.met_sup.so{p}(:,2)];
+            mouse_sup.delta = [mouse_sup.delta muawaves_res.met_sup.delta{p}(:,2)];
+            
+            
+            %recall precision
+            recall_mouse.diff = [recall_mouse.diff muawaves_res.diff.nb_down{p}/muawaves_res.nb_down{p}];
+            recall_mouse.so = [recall_mouse.so muawaves_res.so.nb_down{p}/muawaves_res.nb_down{p}];
+            recall_mouse.delta = [recall_mouse.delta muawaves_res.delta.nb_down{p}/muawaves_res.nb_down{p}];
+            
+            precision_mouse.diff = [precision_mouse.diff muawaves_res.diff.nb_down{p}/muawaves_res.diff.nb{p}];
+            precision_mouse.so = [precision_mouse.so muawaves_res.so.nb_down{p}/muawaves_res.so.nb{p}];
+            precision_mouse.delta = [precision_mouse.delta muawaves_res.delta.nb_down{p}/muawaves_res.delta.nb{p}];
+            
+        end
+    end
+    
+    %average per mouse
+    met_y.diff  = [met_y.diff mean(mouse_y.diff,2)];
+    met_y.so = [met_y.so mean(mouse_y.so,2)];
+    met_y.delta = [met_y.delta mean(mouse_y.delta,2)];
+    
+    met_x.diff  = mouse_x.diff;
+    met_x.so = mouse_x.so;
+    met_x.delta = mouse_x.delta;
+    
+    
+    %LFP
+    met_deep.diff = [met_deep.diff mean(mouse_deep.diff,2)];
+    met_deep.so = [met_deep.so mean(mouse_deep.so,2)];
+    met_deep.delta = [met_deep.delta mean(mouse_deep.delta,2)];
+    
+    met_sup.diff = [met_sup.diff mean(mouse_sup.diff,2)];
+    met_sup.so = [met_sup.so mean(mouse_sup.so,2)];
+    met_sup.delta = [met_sup.delta mean(mouse_sup.delta,2)];
+    
+    %recall precision
+    recall.diff(m,1) = 1-mean(recall_mouse.diff);
+    recall.so(m,1) = 1-mean(recall_mouse.so);
+    recall.delta(m,1) = 1-mean(recall_mouse.delta);
+    
+    precision.diff(m,1) = 1-mean(precision_mouse.diff);
+    precision.so(m,1) = 1-mean(precision_mouse.so);
+    precision.delta(m,1) = 1-mean(precision_mouse.delta);
+    
+end
+   
+%mean MUA
+mua_mean.diff.y  = mean(met_y.diff, 2);
+mua_mean.so.y = mean(met_y.so, 2);
+mua_mean.delta.y = mean(met_y.delta, 2);
+%std MUA
+mua_mean.diff.std  = std(met_y.diff,0,2) / sqrt(size(met_y.diff,2));
+mua_mean.so.std = std(met_y.so,0,2) / sqrt(size(met_y.so,2));
+mua_mean.delta.std = std(met_y.delta,0,2) / sqrt(size(met_y.delta,2));
+
+%x
+mua_mean.diff.x  = met_x.diff;
+mua_mean.so.x = met_x.so;
+mua_mean.delta.x = met_x.delta;
+
+
+%mean Deep
+deep_mean.diff.y  = mean(met_deep.diff, 2);
+deep_mean.so.y = mean(met_deep.so, 2);
+deep_mean.delta.y = mean(met_deep.delta, 2);
+%std Deep
+deep_mean.diff.std  = std(met_deep.diff,0,2) / sqrt(size(met_deep.diff,2));
+deep_mean.so.std = std(met_deep.so,0,2) / sqrt(size(met_deep.so,2));
+deep_mean.delta.std = std(met_deep.delta,0,2) / sqrt(size(met_deep.delta,2));
+
+
+%mean Sup
+sup_mean.diff.y  = mean(met_sup.diff, 2);
+sup_mean.so.y = mean(met_sup.so, 2);
+sup_mean.delta.y = mean(met_sup.delta, 2);
+%std Sup
+sup_mean.diff.std  = std(met_sup.diff,0,2) / sqrt(size(met_sup.diff,2));
+sup_mean.so.std = std(met_sup.so,0,2) / sqrt(size(met_sup.so,2));
+sup_mean.delta.std = std(met_sup.delta,0,2) / sqrt(size(met_sup.delta,2));
+
+
+%% Plot
+fontsize = 22;
+color_diff = 'k';
+color_so = [0.7 0.7 0.7];
+color_delta = [1 0.3 0.7];
+
+figure, hold on
+
+
+% mean mua
+subplot(1,3,[1 2]), hold on
+
+errorbar(mua_mean.diff.x, mua_mean.diff.y, mua_mean.diff.std, 'color', color_diff,'CapSize',1)
+errorbar(mua_mean.so.x, mua_mean.so.y, mua_mean.so.std, 'color', color_so,'CapSize',1)
+errorbar(mua_mean.delta.x, mua_mean.delta.y, mua_mean.delta.std, 'color', color_delta,'CapSize',1)
+%mean curves
+h(1) = plot(mua_mean.diff.x, mua_mean.diff.y, 'color', color_diff, 'linewidth',2);
+h(2) = plot(mua_mean.so.x, mua_mean.so.y, 'color', color_so, 'linewidth',2);
+h(3) = plot(mua_mean.delta.x, mua_mean.delta.y, 'color', color_delta, 'linewidth',2);
+%properties
+set(gca,'YLim', [0 1.8],'XLim',[-600 600],'Fontsize',fontsize);
+
+line([0 0], ylim,'Linewidth',1,'color',[0.5 0.5 0.5]), hold on
+legend(h,'Diff','SO','delta');
+xlabel('time from detection (ms)'),
+ylabel('Normalized MUA'), 
+
+
+% percentage of false positive
+subplot(1,3,3), hold on
+PlotErrorBarN_KJ([precision.diff precision.so precision.delta]*100, 'newfig',0, 'barcolors',{color_diff, color_so, color_delta}, 'paired',1, 'optiontest','ranksum', 'showPoints',1,'ShowSigstar','sig');
+set(gca,'ylim',[0 100],'xtick',1:3,'XtickLabel',{'Diff','SO','delta'},'Fontsize',fontsize),
+xtickangle(30),
+ylabel('% of fake detection'),
+title('False positive')
+
+
+
+%% PLOT LFP
+
+figure, hold on
+
+% mean LFP
+subplot(1,3,1), hold on
+errorbar(mua_mean.diff.x, mua_mean.diff.y, mua_mean.diff.std, 'color', color_diff,'CapSize',1)
+errorbar(mua_mean.diff.x, mua_mean.diff.y, mua_mean.diff.std, 'color', color_diff,'CapSize',1)
+h(1) = plot(mua_mean.diff.x, mua_mean.diff.y, 'color', color_diff, 'linewidth',2);
+h(2) = plot(mua_mean.diff.x, mua_mean.diff.y, 'color', color_diff, 'linewidth',2);
+
+
+errorbar(mua_mean.so.x, mua_mean.so.y, mua_mean.so.std, 'color', color_so,'CapSize',1)
+errorbar(mua_mean.delta.x, mua_mean.delta.y, mua_mean.delta.std, 'color', color_delta,'CapSize',1)
+%mean curves
+h(1) = plot(mua_mean.diff.x, mua_mean.diff.y, 'color', color_diff, 'linewidth',2);
+h(2) = plot(mua_mean.so.x, mua_mean.so.y, 'color', color_so, 'linewidth',2);
+h(3) = plot(mua_mean.delta.x, mua_mean.delta.y, 'color', color_delta, 'linewidth',2);
+%properties
+set(gca,'YLim', [0 1.8],'XLim',[-600 600],'Fontsize',fontsize);
+
+line([0 0], ylim,'Linewidth',1,'color',[0.5 0.5 0.5]), hold on
+legend(h,'Diff','SO','delta');
+xlabel('time from detection (ms)'),
+ylabel('Normalized MUA'), 
+
+
+
+
+
+
+
+
+

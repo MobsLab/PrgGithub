@@ -1,0 +1,179 @@
+function TortPlotSlope(Vlt,tDopaON,tDopaOFF
+%%TortPlotSlope
+
+    
+    
+    
+%% show membrane potentials raster
+
+for i=1:Ne
+plotcoul{i}='k';
+end
+for i=Ne+1:Ne+Nfs
+plotcoul{i}='r';
+end
+for i=Ne+Nfs+1:Ne+Nfs+No
+plotcoul{i}='b';
+end
+
+
+    
+figure('Color',[1 1 1])
+
+colorBox=[205 225 255]/255; %[197 246 255]/255;
+colorBox=[235 235 235]/255; %[197 246 255]/255;
+boxbottom = -100;
+boxhight = 12*(N+1) - boxbottom+10;    
+rectangle('Position', [tDopaON boxbottom tDopaOFF-tDopaON boxhight], 'LineStyle', 'none', 'FaceColor', colorBox);
+
+for i=1:N
+hold on, plot([0.1:0.1:t],Vlt(i,:)+i*10,plotcoul{i})
+end
+line([tDopaON tDopaOFF],[12*(N+1) 12*(N+1)],'Color','k','linewidth',4)
+
+ 
+
+    
+    
+    
+
+%% show action potentials for each cell type
+
+spkwidth=200;
+spkwidth=spkwidth*10;
+
+figure('Color',[1 1 1])
+for i=1:Ne
+    temp=firings(find(firings(:,2)==i),1)*10;
+%         temp=firings(find(firings(:,2)==i),1);
+    for j=1:length(temp)
+        if temp(j)<tDopaON*10
+            subplot(3,3,1), title('Before Dopa ON'), ylabel('Pyramidal cells')
+            try
+            hold on, plot(Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth]),'k')
+            xlim([0 2*spkwidth])
+            try
+            spkformKb=[spkformKb;Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];
+            catch
+            spkformKb=[Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];                
+            end
+            end
+        else
+            subplot(3,3,4), title('After Dopa ON')
+            try
+            hold on, plot(Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth]),'k')
+            xlim([0 2*spkwidth])
+            try
+            spkformKa=[spkformKa;Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];
+            catch
+            spkformKa=[Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];                
+            end
+            
+            end
+        end
+    end
+end
+clear temp
+
+% figure('Color',[1 1 1])
+for i=Ne+1:Ne+Nfs
+    temp=firings(find(firings(:,2)==i),1)*10;
+%         temp=firings(find(firings(:,2)==i),1);
+    for j=1:length(temp)
+        if temp(j)<tDopaON*10
+            subplot(3,3,2), ylabel('Fast-spiking interneurons')
+            try
+            hold on, plot(Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth]),'r')
+            xlim([0 2*spkwidth])
+            
+            try
+            spkformRb=[spkformRb;Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];
+            catch
+            spkformRb=[Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];                
+            end
+            
+            end
+        else
+            subplot(3,3,5)  
+            try
+            hold on, plot(Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth]),'r')
+            xlim([0 2*spkwidth])
+            try
+            spkformRa=[spkformRa;Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];
+            catch
+            spkformRa=[Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];                
+            end
+            
+            end
+        end
+    end
+end
+clear temp
+
+% figure('Color',[1 1 1])
+for i=Ne+Nfs+1:Ne+Nfs+No
+    temp=firings(find(firings(:,2)==i),1)*10;
+%         temp=firings(find(firings(:,2)==i),1);
+    for j=1:length(temp)
+        if temp(j)<tDopaON*10
+            subplot(3,3,3), ylabel('OLM cells')
+            try
+            hold on, plot(Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth]),'b')
+            xlim([0 2*spkwidth])
+            try
+            spkformBb=[spkformBb;Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];
+            catch
+            spkformBb=[Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];                
+            end
+            
+            end
+        else
+            subplot(3,3,6)  
+            try
+            hold on, plot(Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth]),'b')
+            xlim([0 2*spkwidth])
+            try
+            spkformBa=[spkformBa;Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];
+            catch
+            spkformBa=[Vlt(i,[temp(j)-spkwidth:temp(j)+spkwidth])];                
+            end
+
+            
+            end
+        end
+    end
+end
+clear temp
+
+% figure('Color',[1 1 1]), 
+subplot(3,3,9), 
+try
+    plot(mean(spkformBb),'c','linewidth',2)
+end
+try
+hold on, plot(mean(spkformBa),'b','linewidth',2)
+end
+ylim([-80 -40])
+xlim([0 2*spkwidth])
+
+subplot(3,3,8), 
+try
+    plot(mean(spkformRb),'c','linewidth',2)
+end
+try
+    hold on, plot(mean(spkformRa),'r','linewidth',2)
+end
+ylim([-80 -35])
+xlim([0 2*spkwidth])
+
+subplot(3,3,7), 
+try
+    plot(mean(spkformKb),'c','linewidth',2)
+end
+try
+hold on, plot(mean(spkformKa),'k','linewidth',2)
+end
+ylim([-60 -40])
+xlim([0 2*spkwidth])
+
+

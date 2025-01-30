@@ -1,0 +1,13 @@
+function slopeDifference = slopeDifference(pairCovObj)
+
+nbExp = size(pairCovObj);
+slopeDifference = zeros(nbExp,1);
+
+for i=1:nbExp
+
+	sMS1 = pairCovObj{i}.pMS1(1);
+	sMS2 = pairCovObj{i}.pMS2(1);
+	slopeDifference(i) = (sMS2 - sMS1);%/(sMS2 + sMS1);
+
+end
+

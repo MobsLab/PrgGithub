@@ -1,0 +1,112 @@
+% CoherencyAstroFieldLR
+% function [Res,S,f,Serr]=AstrosAnalysisLR
+                                       %Res=[VmMoy,STD,Error,Skew]
+                                       
+try                                       
+load Data
+end
+
+
+% voie=2;
+
+
+try
+    chF;
+catch
+    
+chF=50;    %freqce voulue finale en Hz, pas trop loin de la freqce qu'on veut analyser
+% chF=1
+end
+
+resamp=10000/chF;
+
+
+Y=resample(data(:,2),1,resamp);
+%resample d'un facteur 1/resamp, doit rester un facteurs de 10, ou des
+%entiers
+F=resample(data(:,3),1,resamp);
+
+
+Y=smooth(Y,5);                      %pour enlever le 50Hz,pour virer le bruit
+F=smooth(F,5);
+
+Y=Y(20:end-20);                     % pour éviter les effets de bords
+F=F(20:end-20);
+tps=[0:length(Y)-1]/chF;
+% dataRes=[[0:length(Y)-1]'/chF, Y,F];   %matrice resamplée à 50Hz, temps rééchantillonné
+
+%--------------------------------------------------------------------------
+% Pour ajuster la baseline: moyenne locale sur une fenêtre de 200sec,
+% décalage de 10sec à chaque itération
+
+Y=locdetrend(Y,chF,[200,10]);                                   
+F=locdetrend(F,chF,[200,10]);  
+
+% Fs           (sampling frequency) - optional. Default 1
+% movingwin    (length of moving window, and stepsize) [window winstep] -
+% optional. Ici 200 et 10
+
+
+% dataBas=[[0:length(Y)-1]'/chF, Y,F]; 
+
+%--------------------------------------------------------------------------
+% Params:
+
+try
+    chF;
+catch 
+    chF=1;
+end
+
+m=200; %movingwin
+
+% lF=5/data(end,1);
+% limitF=min(lF,0.005);
+limitF=0;
+
+
+% Fup=min(1,chF/2);
+Fup=0.1;
+
+Fpass=[limitF Fup];
+% Fpass=[0 0.5];
+params.fpass = Fpass;
+
+params.Fs=chF;
+% params.pad=0;
+params.trialave = 0;
+params.err = [2 0.01];
+
+
+%--------------------------------------------------------------------------
+
+[C,phi,S12,S1,S2,f,confC,phierr,Cerr] = coherencyc(Y,F,params);
+% [C, lag] = xcorr(Y,F,'coeff');
+
+
+
+plot(f,C),'k','linewidth',2)
+
+save Coherency C phi S12 S1 S2 f confC phierr Cerr
+% saveFigure(1,'Crosscorrelogram',pwd);
+
+% Output:
+%         C (magnitude of coherency - frequencies x trials if trialave=0; dimension frequencies if trialave=1)
+%         phi (phase of coherency - frequencies x trials if trialave=0; dimension frequencies if trialave=1)
+%         S12 (cross spectrum -  frequencies x trials if trialave=0; dimension frequencies if trialave=1)
+%         S1 (spectrum 1 - frequencies x trials if trialave=0; dimension frequencies if trialave=1)
+%         S2 (spectrum 2 - frequencies x trials if trialave=0; dimension frequencies if trialave=1)
+%         f (frequencies)
+%         confC (confidence level for C at 1-p %) - only for err(1)>=1
+%         phierr (error bars for phi) - only for err(1)>=1
+%         Cerr  (Jackknife error bars for C - use only for Jackknife - err(1)=2)
+
+%--------------------------------------------------------------------------
+
+set(1,'paperPositionMode','auto')
+
+eval(['print -f',num2str(1),' -dpng ','CrossCorr2','.png'])
+% eval(['print -f',num2str(1),' -dpng ','CrossCorr','.png'])
+
+eval(['print -f',num2str(1),' -painters',' -depsc2 ','CrossCorr2','.eps'])
+% eval(['print -f',num2str(1),' -painters',' -depsc2 ','CrossCorr','.eps'])

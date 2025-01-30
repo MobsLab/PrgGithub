@@ -1,0 +1,206 @@
+%%TortCrossCorrAnalysis
+
+    Nec=Ne/Nmod;
+    Nfsc=Nfs/Nmod;
+    Noc=No/Nmod;
+    
+S={};
+for i=1:N
+S{i}=ts(firings(find(firings(:,2)==i),1)*10);
+end
+S=tsdArray(S);
+
+
+pyr=[1:Ne];
+fs=[Ne+1:Ne+Nfs];
+olm=[Ne+1+Nfs:Ne+Nfs+No];
+
+
+
+for i=1:Nmod
+pyrMod{i}=(i-1)*Nec+1:i*Nec;
+fsMod{i}=Ne+(i-1)*Nfsc+1:Ne+i*Nfsc;
+olmMod{i}=Ne+Nfs+(i-1)*Noc+1:Ne+Nfs+i*Noc;
+end
+
+Before=intervalSet(tON*10+1000,tDopaON*10);
+After=intervalSet(tDopaON*10+1000,tOFF*10);
+
+
+Spb=PoolNeurons(Restrict(S,Before),pyr);
+Sfb=PoolNeurons(Restrict(S,Before),fs);
+Sob=PoolNeurons(Restrict(S,Before),olm);
+
+Spa=PoolNeurons(Restrict(S,After),pyr);
+Sfa=PoolNeurons(Restrict(S,After),fs);
+Soa=PoolNeurons(Restrict(S,After),olm);
+
+
+Binsize=10;
+NbBins=250;
+
+[Cpb,Bpb]=CrossCorr(Range(Spb),Range(Spb),Binsize,NbBins);
+[Cob,Bob]=CrossCorr(Range(Sob),Range(Sob),Binsize,NbBins);
+[Cfb,Bfb]=CrossCorr(Range(Sfb),Range(Sfb),Binsize,NbBins);
+% Cpb(Bpb==0)=0;
+% Cob(Bob==0)=0;
+% Cfb(Bfb==0)=0;
+
+[Cpa,Bpa]=CrossCorr(Range(Spa),Range(Spa),Binsize,NbBins);
+[Coa,Boa]=CrossCorr(Range(Soa),Range(Soa),Binsize,NbBins);
+[Cfa,Bfa]=CrossCorr(Range(Sfa),Range(Sfa),Binsize,NbBins);
+% Cpa(Bpa==0)=0;
+% Coa(Boa==0)=0;
+% Cfa(Bfa==0)=0;
+
+
+% figure('Color',[1 1 1])
+% 
+% subplot(2,2,1), hold on
+% plot(Bpb,Cpb,'k','LineWidth',2)
+% plot(Bfb,Cfb,'r','LineWidth',2)
+% plot(Bob,Cob,'b','LineWidth',2)
+% title('Before dopamine')
+% 
+% subplot(2,2,3), hold on
+% plot(Bpa,Cpa,'k','LineWidth',2)
+% plot(Bfa,Cfa,'r','LineWidth',2)
+% plot(Boa,Coa,'b','LineWidth',2)
+% title('After dopamine')
+% 
+% subplot(2,2,[2,4]), hold on
+% plot(Bpb,Cpb,'Color',[0.7 0.7 0.7],'LineWidth',2)
+% plot(Bfb,Cfb,'Color',[1 0.7 0.7],'LineWidth',2)
+% plot(Bob,Cob,'Color',[0.7 0.7 1],'LineWidth',2)
+% plot(Bpa,Cpa,'k','LineWidth',2)
+% plot(Bfa,Cfa,'r','LineWidth',2)
+% plot(Boa,Coa,'b','LineWidth',2)
+
+
+    M=max(max([Cpa, Coa Cfa, Cpb, Cob Cfb]));
+
+
+
+for i=1:Nmod
+
+    Spbm{i}=PoolNeurons(Restrict(S,Before),pyrMod{i});
+    Sfbm{i}=PoolNeurons(Restrict(S,Before),fsMod{i});
+    Sobm{i}=PoolNeurons(Restrict(S,Before),olmMod{i});
+
+    Spam{i}=PoolNeurons(Restrict(S,After),pyrMod{i});
+    Sfam{i}=PoolNeurons(Restrict(S,After),fsMod{i});
+    Soam{i}=PoolNeurons(Restrict(S,After),olmMod{i});
+
+
+end
+
+
+listcase=[1 2 3 4 5 7 8 9 10 13 14 15 19 20 25];
+
+a=1;
+figure('Color',[1 1 1]) 
+
+Binsize=10;
+NbBins=250;
+
+CrossA=zeros(251,1);
+CrossB=zeros(251,1);
+AutoA=zeros(251,1);
+AutoB=zeros(251,1);
+
+for i=1:Nmod
+    for j=i:Nmod
+        
+    [Cpb,Bpb]=CrossCorr(Range(Spbm{i}),Range(Spbm{j}),Binsize,NbBins);
+    [Cob,Bob]=CrossCorr(Range(Sobm{i}),Range(Sobm{j}),Binsize,NbBins);
+    [Cfb,Bfb]=CrossCorr(Range(Sfbm{i}),Range(Sfbm{j}),Binsize,NbBins);
+
+
+    [Cpa,Bpa]=CrossCorr(Range(Spam{i}),Range(Spam{j}),Binsize,NbBins);
+    [Coa,Boa]=CrossCorr(Range(Soam{i}),Range(Soam{j}),Binsize,NbBins);
+    [Cfa,Bfa]=CrossCorr(Range(Sfam{i}),Range(Sfam{j}),Binsize,NbBins);
+    
+
+    
+    if i==j
+        Cpb(Bpb==0)=0;
+        Cob(Bob==0)=0;
+        Cfb(Bfb==0)=0;
+        Cpa(Bpa==0)=0;
+        Coa(Boa==0)=0;
+        Cfa(Bfa==0)=0;
+
+
+        CrossB=CrossB+Cpb;
+        CrossA=CrossA+Cpa;
+    
+    else
+
+        AutoB=AutoB+Cpb;
+        AutoA=AutoA+Cpa;
+
+    end
+        
+    subplot(Nmod,Nmod,listcase(a)), hold on
+
+        plot(Bpb,Cpb,'k')
+        plot(Bpa,Cpa,'r')
+        %   
+%     plot(Bpb,Cpb,'Color',[0.7 0.7 0.7])
+%     plot(Bfb,Cfb,'Color',[1 0.7 0.7])
+%     plot(Bob,Cob,'Color',[0.7 0.7 1])
+%     plot(Bpa,Cpa,'k')
+%     plot(Bfa,Cfa,'r')
+%     plot(Boa,Coa,'b')
+    xlim([-Binsize*NbBins/2 Binsize*NbBins/2])
+%     ylim([0 M/3])
+    
+    a=a+1;
+    
+    end
+end
+
+
+
+%% Plot Network
+
+
+    
+for i=1:Ne
+celltype{i}='P';
+end
+for i=Ne+1:Ne+Nfs
+celltype{i}='F';
+end
+for i=Ne+Nfs+1:Ne+Nfs+No
+celltype{i}='O';
+end
+
+subplot(Nmod,Nmod,[16,17,21,22])
+imagesc(wON),axis xy%, colorbar
+set(gca,'ytick',[1:length(celltype)])
+set(gca,'yticklabel',celltype)
+set(gca,'xtick',[1:length(celltype)])
+set(gca,'xticklabel',celltype)
+title('Analysis Pyramidal neurons')
+
+    
+figure('Color',[1 1 1])
+
+subplot(2,1,1), hold on
+plot(Bpb,CrossB/max(CrossB),'k','LineWidth',2)
+plot(Bfb,CrossA/max(CrossA),'r','LineWidth',2)
+title('AutoCorrelogram, Pyramidal neurons (red: after, black: before)')
+    xlim([-Binsize*NbBins/2 Binsize*NbBins/2])
+    ylim([0 1.3])
+    
+subplot(2,1,2), hold on
+plot(Bpa,AutoB/max(AutoB),'k','LineWidth',2)
+plot(Bfa,AutoA/max(AutoA),'r','LineWidth',2)
+title('CrossCorrelogram, Pyramidal neurons (red: after, black: before)')
+    xlim([-Binsize*NbBins/2 Binsize*NbBins/2])
+    ylim([0 1.3])
+
+    
+    
+    

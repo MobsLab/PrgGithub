@@ -1,0 +1,70 @@
+Dir=PathForExperimentsML('PLETHYSMO');
+
+scrsz = get(0,'ScreenSize');
+Strains=unique(Dir.group);
+MiceNames=unique(Dir.name);
+NameEpochs={'SWSEpoch' 'REMEpoch' 'MovEpoch'};
+namechannel='PFCx_deep';
+[params,movingwin]=SpectrumParametersML('low');
+for man=1:length(Dir.path)
+        disp(['* * ',Dir.name{man},' * *'])
+        clear channel LFP
+        load([Dir.path{man},'/ChannelsToAnalyse/',namechannel,'.mat'])
+        if exist('channel','var') && ~isempty(channel)
+            try
+                load([Dir.path{man},'/SpectrumDataL/Spectrum',num2str(channel)])
+            catch
+                load([Dir.path{man},'/LFPData/LFP',num2str(channel)])
+                [Sp,t,f]=mtspecgramc(Data(LFP),movingwin,params);
+                save([Dir.path{man},'/SpectrumDataL/Spectrum',num2str(channel)],'-v7.3','Sp','t','f','movingwin','params')
+            end
+            clear  RespiTSD epoch SWSEpoch REMEpoch MovEpoch
+            load([Dir.path{man},'/StateEpoch.mat'],'SWSEpoch','REMEpoch','MovEpoch')
+            Spi=Sp;ti=t;freqfi=f;
+            %----------------------------------------------------------------------
+            %--------------------- mean spectrum for states -----------------------
+            MatrixTemp_info(man,1:2)=[find(strcmp(Dir.group{man},Strains)),find(strcmp(Dir.name{man},MiceNames))];
+            for nn=1:length(NameEpochs)
+                eval(['epoch=',NameEpochs{nn},';']);
+                [tEpoch, SpEpoch]=SpectroEpochML(Spi,ti,freqfi,epoch);
+                try
+                    MatrixTemp{nn}(man,:)=mean(SpEpoch,1);
+                catch
+                    MatrixTemp{nn}=mean(SpEpoch,1);
+                end
+            end
+        else
+            disp(['no channel ',namechannel])
+        end
+        %----------------------------------------------------------------------
+end
+
+figure('color',[1 1 1],'Position',[2 scrsz(4)/2 scrsz(3)/4 scrsz(4)/2]), numF=gcf;
+colori={'b','r','k'};
+
+for nn=1:length(NameEpochs)
+    Temp=nan(length(MiceNames),size(MatrixTemp{nn},2));
+    for mm=1:length(MiceNames)
+        Temp(mm,:)=nanmean(MatrixTemp{nn}(MatrixTemp_info(:,2)==mm,:),1);
+        Temp_info(mm)=unique(MatrixTemp_info(MatrixTemp_info(:,2)==mm,1));
+    end
+    
+    subplot(1,length(NameEpochs),nn),hold on, 
+    
+    legend_M=[];
+    for gg=1:length(Strains)
+        
+        temp=Temp(Temp_info==gg,:);
+        plot(freqfi,nanmean(temp,1),'Linewidth',2,'Color',colori{gg})
+        
+        legend_M=[legend_M,{[Strains{gg},' (n=',num2str(size(temp,1)),')']}];
+        if size(temp,1)>1
+            plot(freqfi,nanmean(temp,1)+stdError(temp),'Color',colori{gg});
+            plot(freqfi,nanmean(temp,1)-stdError(temp),'Color',colori{gg});
+            legend_M=[legend_M,'+Std','-Std'];
+        end
+    end
+    legend(legend_M)
+    title([namechannel,' ',NameEpochs{nn}])
+    xlim([0 15])
+end

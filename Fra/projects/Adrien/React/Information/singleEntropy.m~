@@ -1,0 +1,7 @@
+function singleEntropy = singleEntropy(X)
+
+p1 = length(find(X == 1))/length(X);
+
+singleEntropy = -p1*log2(p1) - (1-p1)*log2(1-p1);
+
+

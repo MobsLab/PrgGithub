@@ -1,0 +1,161 @@
+function PlotErrorBarN(A,varargin)
+%PlotErrorBarN(A,newfig,paired,optiontest,ColumnTest)
+
+% function PlotErrorBarN(A,newfig,paired,optiontest,ColumnTest)
+% inputs:
+% - A can be a matrice, line corresponds to dots & columns to bars
+%    or a cell Array 
+% - newfig (optional) = 1 to display in a new figure, 0 to add on existing 
+%                        one (default 1)
+% - paired (optional) = 1 if each line are paired data from a unique mouse, 
+%                        0 if from independent groups (default 1)
+% - optiontest (optional) = 'ttest' , 'ranksum' (default ranksum) 
+% - ColumnTest (optional) = (default 1), change if column to which all
+% groups must be compared are not the first one
+
+%% CHECK INPUTS
+
+% default values
+% newfig=1;
+% paired=1;
+% optiontest='ranksum';
+% ColumnTest=1;
+newfig=1;
+paired=1;
+optiontest='ttest';
+ColumnTest=1;
+for i = 1:2:length(varargin),
+
+      switch(lower(varargin{i})),
+
+        case 'newfig',
+        newfig= varargin{i+1};
+
+        case 'newfig',
+        paired= varargin{i+1};
+
+        case 'optiontest',
+        optiontest= varargin{i+1};
+
+        case 'columntest',
+        ColumnTest= varargin{i+1};
+          
+      end
+end
+% 
+% 
+% if ~exist('newfig','var')
+%     newfig=1;
+% end
+% if ~exist('paired','var')
+%     paired=1;
+% end
+% if ~exist('optiontest','var')
+%     optiontest='ranksum';
+% end
+% if ~exist('ColumnTest','var')
+%     ColumnTest=1;
+% end
+
+if ~iscell(A)
+    tempA=A; A={};
+    for i=1:size(tempA,2)
+        A{i}=tempA(:,i);
+    end
+end
+
+%% GET DATA FROM A
+
+N=length(A);
+R=[];
+E=[];
+
+for i=1:N
+    [Ri,Si,Ei]=MeanDifNan(A{i});
+    R=[R,Ri];
+    E=[E,Ei];
+end
+
+
+%% DISPLAY
+
+if newfig
+    figure('color',[1 1 1]),
+end
+figure(gcf), errorbar(R,E,'+','Color','k')
+hold on, bar(R,'k')
+xlim([0 N+1])
+
+for i=1:N
+    temp=A{i}(~isnan(A{i}));
+    plot(i*ones(length(temp),1),temp,'ko','markerfacecolor','w')
+end
+
+if paired
+    for i=1:N-1
+        temp=A{i};
+        tempi=A{i+1};
+        try line([i*ones(length(temp),1) (i+1)*ones(length(tempi),1)]',[temp tempi]','color',[0.6 0.6 0.6]); end
+    end
+end
+
+%% STATISTICAL TESTS
+
+fac=1;
+thSig=0.05;
+tplot=1;
+
+if strcmp(optiontest,'ranksum')
+    for i=[1:ColumnTest-1,ColumnTest+1:N]
+        if sum(~isnan(A{ColumnTest}))>2 && sum(~isnan(A{i}))>2
+            [p,h]=ranksum(A{ColumnTest},A{i});
+            if p<tplot
+                text(i,max(R)+max(E)*(1+1/fac),sprintf('%.2f',(p)),'Color','r') % Julie 22.01.2015
+            end
+            if h==1 && p<thSig && p>0.01
+                text(i,max(R)+max(E)*(1+1/fac),'*','Color','r')
+            elseif h==1 && p<0.01
+                text(i,max(R)+max(E)*(1+1/fac),'**','Color','r')
+            end
+        end
+    end
+    
+    
+elseif strcmp(optiontest,'ttest')
+    % normality
+    for i=1:N
+        [hi,pi,di]=swtest(A{i},0.05);
+        hnorm(i)=hi;
+    end
+    % normal distributions with same variance
+    for i=1:N
+        for j=i:N
+            [hi,pi,di]=vartest2(A{i},A{j});
+            hvar(i,j)=hi;
+        end
+    end
+    
+    for i=[1:ColumnTest-1,ColumnTest+1:N]
+        
+        if hnorm(i)+hnorm(ColumnTest)==0 && hvar(min(i,ColumnTest),max(i,ColumnTest))==0
+            % parametric tests ANOVA?
+            [h,p]=ttest2(A{ColumnTest},A{i});
+            if p<tplot
+                text(i,max(R)+max(E)*(1+1/fac),sprintf('%.2f',(p)),'Color','r') % Julie 22.01.2015
+                end
+            if p<thSig && p>0.01
+                text(i,max(R)+max(E)*(1+1/fac),'*','Color','r')
+            elseif p<0.01
+                text(i,max(R)+max(E)*(1+1/fac),'**','Color','r')
+            end
+        else
+            text(i,max(R)+max(E)*(1+1/fac),'NaN')
+        end
+    end
+    
+end
+
+
+
+
+

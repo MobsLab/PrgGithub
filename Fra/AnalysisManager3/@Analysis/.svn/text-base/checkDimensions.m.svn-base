@@ -1,0 +1,36 @@
+function checkDimensions(A, sz, ds, resourceName)
+% checkDimensions(A, size, dataset, resourceName)
+  
+  
+  res = A.resources{resourceName};
+  
+  dim = res.dimensions;
+  
+
+  for i = 1:length(dim)
+    d = dim{i};
+    if isempty(d)
+      exp_sz(i) = sz(i);
+    elseif isa(d, 'numeric')
+      exp_sz(i) = d;
+    elseif isa(d, 'char')
+      dq = getDim(A, ds, d);
+      exp_sz(i) = dq(1);
+      
+    end
+  end
+  
+  
+  if length(sz) ~= length(exp_sz)
+    error(['dimensions length mismatch for resource ' resourceName]);
+  end
+  
+  if any(sz ~=exp_sz)
+    error(['dimensions mismatch for resource ', resourceName, ...
+	   ' in dataset ' ds]);
+  end
+  
+  
+      
+  
+  

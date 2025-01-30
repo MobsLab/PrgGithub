@@ -1,0 +1,63 @@
+%  function A = scatterPlaceFields(A)
+
+
+
+A = getResource(A, 'PosXS',dset);
+XS = XS{1};
+A = getResource(A, 'PosYS',dset);
+YS = YS{1};
+XS = Restrict(XS, mazeEpoch);
+YS = Restrict(YS, mazeEpoch);
+
+ [success, message, messageid] = mkdir([parent_dir(A) filesep 'results'], 'PF');
+ resdir = [parent_dir(A) filesep 'results'];
+ [p,ds,e] = fileparts(current_dir(A));
+
+ 
+ figure(1)
+clf
+plot(Data(XS), Data(YS));
+% occH = ndhist([Data(XS), Data(YS)], [40 40], [min(Data(XS)), min(Data(YS))], ...
+%                            [max(Data(XS)) max(Data(YS))]);
+[occH, x1, x2] = hist2d(Data(XS), Data(YS), 40, 40);
+sz = length(occH(:));
+sOcc = sort(occH(:));
+th = sOcc(end-(ceil(sz/100)));
+
+
+figure(2), clf 
+imagesc(occH)
+colormap(gray);
+caxis([0 th]);
+
+
+
+
+for i = 1:length(S)
+    pX = Restrict(XS, S{i});
+    pY = Restrict(YS, S{i});    
+    
+    figure(1), clf
+    plot(Data(XS), Data(YS), 'Color', [0.7 0.7 0.7]);
+    hold on 
+    plot(Data(pX), Data(pY), 'r.');
+    saveas(gcf, [resdir filesep ds '_' cellnames{i} 'SC'], 'png');
+    figure(2), clf
+    pfH = hist2d(Data(pX), Data(pY), x1, x2);
+    dbclear warning
+    warning off
+    pf = 30 * pfH./occH;
+    warning on
+    sg = sort(pf(~isnan(pf(:))));
+    th = sg(end-10);
+    fh = imagesc(pf');
+    colormap(jet)
+    axis xy
+    caxis([0 th]);
+    colorbar
+keyboard
+%      saveas(fh, [resdir filesep ds '_' cellnames{i} 'PF'], 'png');
+    
+    
+
+end

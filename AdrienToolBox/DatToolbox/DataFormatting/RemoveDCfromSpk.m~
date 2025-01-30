@@ -1,0 +1,29 @@
+function [returnVar,msg] = RemoveDCfromDat(fname,nbChan,chanIx)
+
+% USAGE:
+%     RemoveDCfromDat(fbasename,shankIx,chanIx)
+%     This function removes DC from dat files by computing the average of
+%     the first 1e6 samples (or less if file is smaller)
+% INPUTS:
+%     fname: dat file name
+%     nbChan: total number of channels in dat file
+%     chanIx: vectors of channel indices
+% 
+% Adrien Peyrache 2011
+
+try
+    chanIx = chanIx(:)';
+
+    %data = memmapfile(fname,'format','int16','Writable',true);
+    data = LoadBinary(fname);
+    for ii=1:8
+        m = mean(squeeze(spk(ii,:,:)));
+        spk(ii,
+    end
+    returnVar = 1;
+    msg = '';
+    
+catch
+    returnVar = 0;
+    msg = lasterr; 
+end

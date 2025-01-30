@@ -1,0 +1,60 @@
+
+
+Var_rearranged = var(v);
+
+find(Var_Names=='immobiliy_pre')
+
+figure
+PlotCorrelations_BM(saline(16,:) , saline(38,:))
+
+figure
+A = saline(4,:); B = saline(38,:);
+A(and(A>80 , B>14000))=NaN;
+PlotCorrelations_BM(log10(A) , log10(B))
+
+figure
+PlotCorrelations_BM(A , log10(B))
+
+
+
+figure
+PlotCorrelations_BM(saline(38,:) , log10(saline(1,:)))
+PlotCorrelations_BM(saline(38,:) , saline(1,:))
+PlotCorrelations_BM(log10(saline(38,:)) , log10(saline(1,:)))
+
+
+figure
+A=saline(1,:); A(A<1)=NaN;
+PlotCorrelations_BM(saline(38,:) , A , 'method','spearman')
+
+
+
+Data_to_use=abs(saline');
+Data_to_use=sqrt(sqrt(Data_to_use));
+Data_to_use = zscore_nan_BM(Data_to_use);
+
+figure
+PlotCorrelations_BM(saline(38,:) , saline(3,:))
+
+figure
+PlotCorrelations_BM(Data_to_use1 , Data_to_use2)
+
+figure
+PlotCorrelations_BM(Data_to_use(:,38,:)' , Data_to_use(:,3)')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

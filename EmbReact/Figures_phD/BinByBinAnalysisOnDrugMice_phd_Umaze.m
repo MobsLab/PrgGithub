@@ -1,0 +1,385 @@
+clear all
+MouseGroup = {'Sal','Mdz','Flx','FlxChr'};
+Mice.Sal = [688,739,777,779,849,893];
+Mice.Flx = [740,750,778,775,794];
+Mice.Mdz = [829,851,856,857,858,859];
+Mice.FlxChr = [876];
+
+cd /media/DataMOBsRAIDN/ProjectEmbReact/Mouse688/20180209/ProjectEmbReact_M688_20180209_UMazeCondBlockedShock_PreDrug/Cond1
+load('B_Low_Spectrum.mat')
+fLow = Spectro{3};
+load('H_VHigh_Spectrum.mat')
+fHigh = Spectro{3};
+
+
+sesstype = 1;
+WndwSz = 3*1e4;
+
+load(['/media/nas4/ProjetEmbReact/DrugEffectFigures/DataFLXMDZ',num2str(sesstype),'_B_Corr.mat'])
+load(['/media/nas4/ProjetEmbReact/DrugEffectFigures/DataFLXMDZ',num2str(sesstype),'_Rip_Corr.mat'])
+load(['/media/nas4/ProjetEmbReact/DrugEffectFigures/DataFLXMDZ',num2str(sesstype),'_Fz_Corr.mat'])
+load(['/media/nas4/ProjetEmbReact/DrugEffectFigures/DataFLXMDZ',num2str(sesstype),'_Zn_Corr.mat'])
+load(['/media/nas4/ProjetEmbReact/DrugEffectFigures/DataFLXMDZ',num2str(sesstype),'_HR_Corr.mat'])
+load(['/media/nas4/ProjetEmbReact/DrugEffectFigures/DataFLXMDZ',num2str(sesstype),'_P_Corr.mat'])
+load(['/media/nas4/ProjetEmbReact/DrugEffectFigures/DataFLXMDZ',num2str(sesstype),'_BInstP_Corr.mat'])
+load(['/media/nas4/ProjetEmbReact/DrugEffectFigures/DataFLXMDZ',num2str(sesstype),'_BInstW_Corr.mat'])
+load(['/media/nas4/ProjetEmbReact/DrugEffectFigures/DataFLXMDZ',num2str(sesstype),'_H_Corr.mat'])
+
+
+%%
+clear MouseByMouse
+for gr = 1:length(MouseGroup)
+    for m = 1:length(B.(MouseGroup{gr}))
+        
+        MouseByMouse.OBFreq.(MouseGroup{gr}){m} = [];
+        MouseByMouse.RippleDensity.(MouseGroup{gr}){m} = [];
+        MouseByMouse.HR.(MouseGroup{gr}){m} = [];
+        MouseByMouse.HRVar.(MouseGroup{gr}){m}= [];
+        MouseByMouse.HPCPow.(MouseGroup{gr}){m} = [];
+        MouseByMouse.WhichZone.(MouseGroup{gr}){m} = [];
+        
+        % Get HR var
+        HRVar = tsd(Range(HR.(MouseGroup{gr}){m}),movstd(Data(HR.(MouseGroup{gr}){m}),5));
+        
+        % Get hps theta
+        Sp = Data(H.(MouseGroup{gr}){m});
+        PowerThetaTemp = nanmean(Sp(:,find(fLow<5.5,1,'last'):find(fLow<7.5,1,'last'))')';
+        ThetaPowerSlow = PowerThetaTemp;
+        
+        PowerThetaTemp = nanmean(Sp(:,find(fLow<10,1,'last'):find(fLow<15,1,'last'))')';
+        ThetaPowerFast = PowerThetaTemp;
+        PowerThetaSlow = tsd(Range(H.(MouseGroup{gr}){m}),ThetaPowerSlow./ThetaPowerFast);
+        
+        CleanFreezeEpoch = Fz.(MouseGroup{gr}){m};
+        gr
+        m
+        % Get periods one by one
+        if not(isempty(Start(CleanFreezeEpoch)))
+            if sum(Stop(CleanFreezeEpoch)-Start(CleanFreezeEpoch))>WndwSz
+                
+                for s=1:length(Start(CleanFreezeEpoch))
+                    dur=(Stop(subset(CleanFreezeEpoch,s))-Start(subset(CleanFreezeEpoch,s)));
+                    Str=Start(subset(CleanFreezeEpoch,s));
+                    
+                    if  dur<(WndwSz*2-0.5*1e4) & dur>(WndwSz-0.5*1e4)
+                        LitEpoch = subset(CleanFreezeEpoch,s);
+                        
+                        MouseByMouse.OBFreq.(MouseGroup{gr}){m} = [MouseByMouse.OBFreq.(MouseGroup{gr}){m},(nanmedian(Data(Restrict(BInstP.(MouseGroup{gr}){m},LitEpoch)))+nanmedian(Data(Restrict(BInstW.(MouseGroup{gr}){m},LitEpoch))))/2];
+                        
+                        if not(isempty(Range(Rip.(MouseGroup{gr}){m})))
+                            MouseByMouse.RippleDensity.(MouseGroup{gr}){m} = [MouseByMouse.RippleDensity.(MouseGroup{gr}){m},length(Range(Restrict(Rip.(MouseGroup{gr}){m},LitEpoch)))./sum(Stop(LitEpoch,'s')-Start(LitEpoch,'s'))];
+                        else
+                            MouseByMouse.RippleDensity.(MouseGroup{gr}){m} = [MouseByMouse.RippleDensity.(MouseGroup{gr}){m},NaN];
+                        end
+                        
+                        MouseByMouse.HPCPow.(MouseGroup{gr}){m} = [MouseByMouse.HPCPow.(MouseGroup{gr}){m},(nanmedian(Data(Restrict(PowerThetaSlow,LitEpoch))))];
+                        
+                        if not(isempty(Range(HR.(MouseGroup{gr}){m})))
+                            MouseByMouse.HR.(MouseGroup{gr}){m} = [MouseByMouse.HR.(MouseGroup{gr}){m},nanmean(Data(Restrict(HR.(MouseGroup{gr}){m},LitEpoch)))];
+                            MouseByMouse.HRVar.(MouseGroup{gr}){m}= [MouseByMouse.HRVar.(MouseGroup{gr}){m},nanstd(Data(Restrict(HRVar,LitEpoch)))];
+                        else
+                            MouseByMouse.HR.(MouseGroup{gr}){m} = [MouseByMouse.HR.(MouseGroup{gr}){m},NaN];
+                            MouseByMouse.HRVar.(MouseGroup{gr}){m}= [MouseByMouse.HRVar.(MouseGroup{gr}){m},NaN];
+                        end
+                        
+                        for k = 1:5
+                            durzone(k) = length(Range(Restrict(PowerThetaSlow,and(LitEpoch,Zn.(MouseGroup{gr}){m}{k}))));
+                        end
+                        [~,ind] = max(durzone);
+                        MouseByMouse.WhichZone.(MouseGroup{gr}){m} = [MouseByMouse.WhichZone.(MouseGroup{gr}){m},ind];
+                        
+                        
+                    else
+                        numbins=round(dur/WndwSz);
+                        epdur=dur/numbins;
+                        for nn=1:numbins
+                            LitEpoch = intervalSet(Str+epdur*(nn-1),Str+epdur*(nn));
+                            
+                            MouseByMouse.OBFreq.(MouseGroup{gr}){m} = [MouseByMouse.OBFreq.(MouseGroup{gr}){m},(nanmedian(Data(Restrict(BInstP.(MouseGroup{gr}){m},LitEpoch)))+nanmedian(Data(Restrict(BInstW.(MouseGroup{gr}){m},LitEpoch))))/2];
+                            
+                            if not(isempty(Range(Rip.(MouseGroup{gr}){m})))
+                                MouseByMouse.RippleDensity.(MouseGroup{gr}){m} = [MouseByMouse.RippleDensity.(MouseGroup{gr}){m},length(Range(Restrict(Rip.(MouseGroup{gr}){m},LitEpoch)))./sum(Stop(LitEpoch,'s')-Start(LitEpoch,'s'))];
+                            else
+                                MouseByMouse.RippleDensity.(MouseGroup{gr}){m} = [MouseByMouse.RippleDensity.(MouseGroup{gr}){m},NaN];
+                            end
+                            
+                            MouseByMouse.HPCPow.(MouseGroup{gr}){m} = [MouseByMouse.HPCPow.(MouseGroup{gr}){m},(nanmedian(Data(Restrict(PowerThetaSlow,LitEpoch))))];
+                            
+                            if not(isempty(Range(HR.(MouseGroup{gr}){m})))
+                                MouseByMouse.HR.(MouseGroup{gr}){m} = [MouseByMouse.HR.(MouseGroup{gr}){m},nanmean(Data(Restrict(HR.(MouseGroup{gr}){m},LitEpoch)))];
+                                MouseByMouse.HRVar.(MouseGroup{gr}){m}= [MouseByMouse.HRVar.(MouseGroup{gr}){m},nanstd(Data(Restrict(HRVar,LitEpoch)))];
+                            else
+                                MouseByMouse.HR.(MouseGroup{gr}){m} = [MouseByMouse.HR.(MouseGroup{gr}){m},NaN];
+                                MouseByMouse.HRVar.(MouseGroup{gr}){m}= [MouseByMouse.HRVar.(MouseGroup{gr}){m},NaN];
+                            end
+                            for k = 1:5
+                                durzone(k) = length(Range(Restrict(PowerThetaSlow,and(LitEpoch,Zn.(MouseGroup{gr}){m}{k}))));
+                            end
+                            [~,ind] = max(durzone);
+                            MouseByMouse.WhichZone.(MouseGroup{gr}){m} = [MouseByMouse.WhichZone.(MouseGroup{gr}){m},ind];
+                            
+                            
+                        end
+                        
+                    end
+                end
+            end
+            
+            
+            
+        end
+    end
+end
+    
+MouseByMouse.HR.Sal{end} = MouseByMouse.HR.Sal{end}*NaN;
+MouseByMouse.HRVar.Sal{end} = MouseByMouse.HRVar.Sal{end}*NaN;
+
+for gr = 1:length(MouseGroup)
+    AllData.(MouseGroup{gr}) = [];
+    Position.(MouseGroup{gr}) = [];
+    
+    for m = 1:length(B.(MouseGroup{gr}))
+        
+        AllData.(MouseGroup{gr}) = [AllData.(MouseGroup{gr});[MouseByMouse.OBFreq.(MouseGroup{gr}){m}',log(MouseByMouse.HPCPow.(MouseGroup{gr}){m})',MouseByMouse.HR.(MouseGroup{gr}){m}',...
+            MouseByMouse.HRVar.(MouseGroup{gr}){m}',MouseByMouse.RippleDensity.(MouseGroup{gr}){m}']];
+        MouseByMouse.WhichZone.(MouseGroup{gr}){m}(MouseByMouse.WhichZone.(MouseGroup{gr}){m}==1) = 10;
+        MouseByMouse.WhichZone.(MouseGroup{gr}){m}(MouseByMouse.WhichZone.(MouseGroup{gr}){m}==4) = 20;
+        MouseByMouse.WhichZone.(MouseGroup{gr}){m}(MouseByMouse.WhichZone.(MouseGroup{gr}){m}==3) = 30;
+        MouseByMouse.WhichZone.(MouseGroup{gr}){m}(MouseByMouse.WhichZone.(MouseGroup{gr}){m}==5) = 40;
+        MouseByMouse.WhichZone.(MouseGroup{gr}){m}(MouseByMouse.WhichZone.(MouseGroup{gr}){m}==2) = 50;
+
+        Position.(MouseGroup{gr}) = [Position.(MouseGroup{gr}),MouseByMouse.WhichZone.(MouseGroup{gr}){m}];
+        
+    end
+end
+
+clf
+Variables = {'OBFreq','HPCPow','HR','HRVar','RippleDens'};
+Lims = [10,90];
+for gr = 1:length(MouseGroup)
+    figure
+    for k = 1:5
+        for k2 = 1:5
+            
+            subplot(5,5,k+(k2-1)*5)
+            scatter(AllData.(MouseGroup{gr})(:,k),AllData.(MouseGroup{gr})(:,k2),5,Position.(MouseGroup{gr}),'filled')
+            hold on
+            colormap(fliplr(redblue))
+            clim([10 50])
+            xlabel(Variables{k})
+            ylabel(Variables{k2})
+            try
+                
+                xdata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})<30,k);
+                ydata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})<30,k2);
+                ToDel = find(isnan(xdata) |  isnan(ydata));
+                xdata(ToDel) = [];
+                ydata(ToDel) = [];
+                ToDel = find(xdata<prctile(xdata,Lims(1)) |xdata>prctile(xdata,Lims(2))|  ydata<prctile(ydata,Lims(1)) |ydata>prctile(ydata,Lims(2)));
+                xdata(ToDel) = [];
+                ydata(ToDel) = [];
+                K=convhull(xdata,ydata);
+                
+                Cont1=xdata(K);
+                Cont2=ydata(K);
+                
+                plot(Cont1,Cont2,'m','linewidth',3)
+                
+                xdata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})>30,k);
+                ydata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})>30,k2);
+                ToDel = find(isnan(xdata) |  isnan(ydata));
+                xdata(ToDel) = [];
+                ydata(ToDel) = [];
+                ToDel = find(xdata<prctile(xdata,Lims(1)) |xdata>prctile(xdata,Lims(2))|  ydata<prctile(ydata,Lims(1)) |ydata>prctile(ydata,Lims(2)));
+                xdata(ToDel) = [];
+                ydata(ToDel) = [];
+                K=convhull(xdata,ydata);
+                
+                Cont1=xdata(K);
+                Cont2=ydata(K);
+                
+                plot(Cont1,Cont2,'c','linewidth',3)
+            end
+            
+        end
+    end
+end
+
+
+for gr = 1:length(MouseGroup)
+subplot(4,4,gr)
+scatter(AllData.(MouseGroup{gr})(:,1),AllData.(MouseGroup{gr})(:,2),5,Position.(MouseGroup{gr}),'filled')
+colormap(fliplr(redblue))
+clim([10 50])
+xlim([0 8])
+ylim([-1 3.5])
+end
+
+
+
+for gr = 1:length(MouseGroup)
+subplot(4,4,gr+4)
+scatter(AllData.(MouseGroup{gr})(:,1),AllData.(MouseGroup{gr})(:,3),5,Position.(MouseGroup{gr}),'filled')
+colormap(fliplr(redblue))
+clim([10 50])
+xlim([0 8])
+ylim([6 14])
+end
+
+
+
+for gr = 1:length(MouseGroup)
+subplot(4,4,gr+8)
+scatter(AllData.(MouseGroup{gr})(:,1),AllData.(MouseGroup{gr})(:,4),5,Position.(MouseGroup{gr}),'filled')
+colormap(fliplr(redblue))
+clim([10 50])
+xlim([0 8])
+% ylim([6 14])
+end
+
+
+for gr = 1:length(MouseGroup)
+subplot(4,4,gr+12)
+scatter(AllData.(MouseGroup{gr})(:,1),AllData.(MouseGroup{gr})(:,5),5,Position.(MouseGroup{gr}),'filled')
+colormap(fliplr(redblue))
+clim([10 50])
+xlim([0 8])
+% ylim([6 14])
+end
+
+figure
+
+Variables = {'OBFreq','HPCPow','HR','HRVar','RippleDens'};
+Lims = [25,75];
+for gr = [1,2]
+    for k = 1:5
+        for k2 = 1:5
+            
+            subplot(5,5,k+(k2-1)*5)
+            hold on
+%             scatter(AllData.(MouseGroup{gr})(:,k),AllData.(MouseGroup{gr})(:,k2),5,Position.(MouseGroup{gr}),'filled')
+            hold on
+            colormap(fliplr(redblue))
+            clim([10 50])
+            xlabel(Variables{k})
+            ylabel(Variables{k2})
+            try
+                
+                xdata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})<30,k);
+                ydata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})<30,k2);
+                ToDel = find(isnan(xdata) |  isnan(ydata));
+                xdata(ToDel) = [];
+                ydata(ToDel) = [];
+                ToDel = find(xdata<prctile(xdata,Lims(1)) |xdata>prctile(xdata,Lims(2))|  ydata<prctile(ydata,Lims(1)) |ydata>prctile(ydata,Lims(2)));
+                xdata(ToDel) = [];
+                ydata(ToDel) = [];
+                K=convhull(xdata,ydata);
+%                 figure(22)
+                subplot(5,5,k+(k2-1)*5)
+                hold on
+
+                Cont1=xdata(K);
+                Cont2=ydata(K);
+                if gr==1
+                plot(Cont1,Cont2,'r','linewidth',3)
+                else
+                    plot(Cont1,Cont2,'m','linewidth',3)
+
+                end
+                xdata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})>30,k);
+                ydata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})>30,k2);
+                ToDel = find(isnan(xdata) |  isnan(ydata));
+                xdata(ToDel) = [];
+                ydata(ToDel) = [];
+                ToDel = find(xdata<prctile(xdata,Lims(1)) |xdata>prctile(xdata,Lims(2))|  ydata<prctile(ydata,Lims(1)) |ydata>prctile(ydata,Lims(2)));
+                xdata(ToDel) = [];
+                ydata(ToDel) = [];
+                K=convhull(xdata,ydata);
+%                                 figure(23)
+                subplot(5,5,k+(k2-1)*5)
+                hold on
+                Cont1=xdata(K);
+                Cont2=ydata(K);
+                if gr==1
+                                    plot(Cont1,Cont2,'b','linewidth',3)
+
+                else
+                plot(Cont1,Cont2,'c','linewidth',3)
+                end
+            end
+            
+        end
+    end
+end
+
+
+
+
+
+Variables = {'OBFreq','HPCPow','HR','HRVar','RippleDens'};
+Lims = [20,80];
+for gr = [1,2]
+    figure
+    for k = 1:5
+        for k2 = 1:5
+            
+            subplot(5,5,k+(k2-1)*5)
+%             hold on
+%             scatter(AllData.(MouseGroup{gr})(:,k),AllData.(MouseGroup{gr})(:,k2),5,Position.(MouseGroup{gr}),'filled')
+%             hold on
+%             colormap(fliplr(redblue))
+%             clim([10 50])
+            try
+                
+                xdata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})>30,k);
+                ydata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})>30,k2);
+                [no,xo1,xo2] = hist2d(xdata,ydata,20,20);
+                imagesc(xo1,xo2,no)
+                            xlabel(Variables{k})
+            ylabel(Variables{k2})
+
+%                 ToDel = find(isnan(xdata) |  isnan(ydata));
+%                 xdata(ToDel) = [];
+%                 ydata(ToDel) = [];
+%                 ToDel = find(xdata<prctile(xdata,Lims(1)) |xdata>prctile(xdata,Lims(2))|  ydata<prctile(ydata,Lims(1)) |ydata>prctile(ydata,Lims(2)));
+%                 xdata(ToDel) = [];
+%                 ydata(ToDel) = [];
+%                 K=convhull(xdata,ydata);
+% %                 figure(22)
+%                 subplot(5,5,k+(k2-1)*5)
+%                 hold on
+% 
+%                 Cont1=xdata(K);
+%                 Cont2=ydata(K);
+%                 if gr==1
+%                 plot(Cont1,Cont2,'r','linewidth',3)
+%                 else
+%                     plot(Cont1,Cont2,'m','linewidth',3)
+% 
+%                 end
+%                 xdata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})>30,k);
+%                 ydata = AllData.(MouseGroup{gr})(Position.(MouseGroup{gr})>30,k2);
+%                 ToDel = find(isnan(xdata) |  isnan(ydata));
+%                 xdata(ToDel) = [];
+%                 ydata(ToDel) = [];
+%                 ToDel = find(xdata<prctile(xdata,Lims(1)) |xdata>prctile(xdata,Lims(2))|  ydata<prctile(ydata,Lims(1)) |ydata>prctile(ydata,Lims(2)));
+%                 xdata(ToDel) = [];
+%                 ydata(ToDel) = [];
+%                 K=convhull(xdata,ydata);
+% %                                 figure(23)
+%                 subplot(5,5,k+(k2-1)*5)
+%                 hold on
+%                 Cont1=xdata(K);
+%                 Cont2=ydata(K);
+%                 if gr==1
+%                                     plot(Cont1,Cont2,'b','linewidth',3)
+% 
+%                 else
+%                 plot(Cont1,Cont2,'c','linewidth',3)
+%                 end
+            end
+            
+        end
+    end
+end
+

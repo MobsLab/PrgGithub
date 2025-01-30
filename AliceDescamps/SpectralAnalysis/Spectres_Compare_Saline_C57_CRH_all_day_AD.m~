@@ -1,0 +1,191 @@
+%% Input Dir exci DREADD
+% DirSaline = PathForExperiments_DREADD_MC('exciDREADD_CRH_VLPO_SalineInjection_1pm');
+% DirCNO = PathForExperiments_DREADD_MC('exciDREADD_CRH_VLPO_CNOInjection_1pm');
+
+%%1
+% Dir_sal_mCherry_C57 = PathForExperiments_DREADD_MC('mCherry_retroCre_PFC_VLPO_SalineInjection_10am');
+% Dir_sal_noDREADD_C57 = PathForExperiments_DREADD_MC('noDREADD_SalineInjection_10am');
+% Dir_C57 = MergePathForExperiment(Dir_sal_mCherry_C57,Dir_sal_noDREADD_C57);
+
+%%1
+Dir_sal_mCherry_C57 = PathForExperiments_DREADD_MC('mCherry_retroCre_PFC_VLPO_SalineInjection_10am');
+Dir_sal_noDREADD_C57 = PathForExperiments_DREADD_MC('noDREADD_SalineInjection_10am');
+Dir_C57 = MergePathForExperiment(Dir_sal_mCherry_C57,Dir_sal_noDREADD_C57);
+Dir_C57 = RestrictPathForExperiment(Dir_C57,'nMice',[1387 1389 1414 1423 1424 1425 1434 1439 1449]);
+
+%%2
+Dir_sal_mCherry_CRH = PathForExperiments_DREADD_AD('mCherry_CRH_VLPO_SalineInjection_10am');
+Dir_sal_DREADDinhib_CRH = PathForExperiments_DREADD_AD('inhibDREADD_CRH_VLPO_SalineInjection_10am');
+Dir_CRH = MergePathForExperiment(Dir_sal_mCherry_CRH,Dir_sal_DREADDinhib_CRH);
+Dir_CRH = RestrictPathForExperiment(Dir_CRH,'nMice',[1568 1580 1634 1638]);
+
+%%
+% load('B_High_Spectrum.mat'); %%see why it always crashes : too heavy ?
+% load('PFCx_deep_Low_Spectrum.mat');
+% load('Bulb_deep_Low_Spectrum.mat');
+% load('H_Low_Spectrum.mat');
+spectro = 'B_High_Spectrum.mat';
+
+%% parameters
+en_epoch_preInj = 3*1E8;%%1.4
+st_epoch_postInj = 1.65*1E8;
+
+%% get the data
+% saline condition
+for i=1:length(Dir_C57.path)
+    cd(Dir_C57.path{i}{1});
+    a{i} = load('SleepScoring_Accelero.mat', 'Wake', 'REMEpoch', 'SWSEpoch','Info');
+    %period of time
+    durtotal_sal_C57{i} = max([max(End(a{i}.Wake)),max(End(a{i}.SWSEpoch))]);
+    %all day
+    epoch_sal_C57{i} = intervalSet(0, durtotal_sal_C57{i});
+       
+    if exist(spectro)==2
+        load(spectro);
+        spectre_sal = tsd(Spectro{2}*1E4,Spectro{1});
+        freq_sal = Spectro{3};
+        sp_sal_C57{i}  = spectre_sal;
+        freq_sal_C57{i}  = freq_sal;
+    else
+    end
+    clear Wake REMEpoch SWSEpoch Spectro
+end
+
+%% CNO condition
+for j=1:length(Dir_CRH.path)
+    cd(Dir_CRH.path{j}{1});
+    c{j} = load('SleepScoring_Accelero.mat', 'Wake', 'REMEpoch', 'SWSEpoch','Info');
+    %period of time
+    durtotal_sal_CRH{j} = max([max(End(c{j}.Wake)),max(End(c{j}.SWSEpoch))]);
+    %all day
+    epoch_sal_CRH{j} = intervalSet(0, durtotal_sal_CRH{j});
+
+    if exist(spectro)==2
+        load(spectro);
+        spectre_CRH = tsd(Spectro{2}*1E4,Spectro{1});
+        frequence_sal_CRH = Spectro{3};
+        temps_sal_CRH = Spectro{2};
+        sp_sal_CRH{j} = spectre_CRH;
+        freq_sal_CRH{j} = frequence_sal_CRH;
+        tps_sal_CRH{j} = temps_sal_CRH;
+    else
+    end
+    clear Wake REMEpoch SWSEpoch Spectro
+end
+%%
+% calculate mean spectrum for each mouse
+for i=1:length(sp_sal_C57)
+    if isempty(sp_sal_C57{i})==0        
+    Spectre_C57_Wake_BeforeInj_mean(i,:)= nanmean(10*(Data(Restrict(sp_sal_C57{i},and(epoch_sal_C57{i},a{i}.Wake)))),1);
+    Spectre_C57_SWS_BeforeInj_mean(i,:)= nanmean(10*(Data(Restrict(sp_sal_C57{i},and(epoch_sal_C57{i},a{i}.SWSEpoch)))),1);
+    Spectre_C57_REM_BeforeInj_mean(i,:)= nanmean(10*(Data(Restrict(sp_sal_C57{i},and(epoch_sal_C57{i},a{i}.REMEpoch)))),1);
+    else
+    end
+end
+
+% sem saline
+Spectre_C57_Wake_BeforeInj_SEM = nanstd(Spectre_C57_Wake_BeforeInj_mean)/sqrt(size(Spectre_C57_Wake_BeforeInj_mean,1));
+Spectre_C57_SWS_BeforeInj_SEM = nanstd(Spectre_C57_SWS_BeforeInj_mean)/sqrt(size(Spectre_C57_SWS_BeforeInj_mean,1));
+Spectre_C57_REM_BeforeInj_SEM = nanstd(Spectre_C57_REM_BeforeInj_mean)/sqrt(size(Spectre_C57_REM_BeforeInj_mean,1));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%normalisation on mean spectrum
+for i=1:length(sp_sal_C57)
+    if isempty(sp_sal_C57{i})==0        
+        Spectre_C57_Wake_BeforeInj_mean_norm(i,:)= Spectre_C57_Wake_BeforeInj_mean(i,:)./nanmean(Spectre_C57_Wake_BeforeInj_mean(i,:)); Spectre_C57_Wake_BeforeInj_mean(Spectre_C57_Wake_BeforeInj_mean==0)=NaN;
+        Spectre_C57_SWS_BeforeInj_mean_norm(i,:)= Spectre_C57_SWS_BeforeInj_mean(i,:)./nanmean(Spectre_C57_SWS_BeforeInj_mean(i,:)); Spectre_C57_SWS_BeforeInj_mean(Spectre_C57_SWS_BeforeInj_mean==0)=NaN;
+        Spectre_C57_REM_BeforeInj_mean_norm(i,:)= Spectre_C57_REM_BeforeInj_mean(i,:)./nanmean(Spectre_C57_REM_BeforeInj_mean(i,:)); Spectre_C57_REM_BeforeInj_mean(Spectre_C57_REM_BeforeInj_mean==0)=NaN;
+        
+    else
+
+    end
+end
+
+%normalisation on max
+for i=1:length(sp_sal_C57)
+    if isempty(sp_sal_C57{i})==0        
+        Spectre_C57_Wake_BeforeInj_max_norm(i,:)= Spectre_C57_Wake_BeforeInj_mean(i,:)./max(Spectre_C57_Wake_BeforeInj_mean(i,:)); Spectre_C57_Wake_BeforeInj_mean(Spectre_C57_Wake_BeforeInj_mean==0)=NaN;
+        Spectre_C57_SWS_BeforeInj_max_norm(i,:)= Spectre_C57_SWS_BeforeInj_mean(i,:)./max(Spectre_C57_SWS_BeforeInj_mean(i,:)); Spectre_C57_SWS_BeforeInj_mean(Spectre_C57_SWS_BeforeInj_mean==0)=NaN;
+        Spectre_C57_REM_BeforeInj_max_norm(i,:)= Spectre_C57_REM_BeforeInj_mean(i,:)./max(Spectre_C57_REM_BeforeInj_mean(i,:)); Spectre_C57_REM_BeforeInj_mean(Spectre_C57_REM_BeforeInj_mean==0)=NaN;
+    else
+    
+    end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% SEM_mean_norm saline
+Spectre_C57_Wake_BeforeInj_SEM_norm = nanstd(Spectre_C57_Wake_BeforeInj_mean_norm)/sqrt(size(Spectre_C57_Wake_BeforeInj_mean_norm,1));
+Spectre_C57_SWS_BeforeInj_SEM_norm = nanstd(Spectre_C57_SWS_BeforeInj_mean_norm)/sqrt(size(Spectre_C57_SWS_BeforeInj_mean_norm,1));
+Spectre_C57_REM_BeforeInj_SEM_norm = nanstd(Spectre_C57_REM_BeforeInj_mean_norm)/sqrt(size(Spectre_C57_REM_BeforeInj_mean_norm,1));
+% SEM_max_norm saline
+Spectre_C57_Wake_BeforeInj_SEM_max_norm = nanstd(Spectre_C57_Wake_BeforeInj_max_norm)/sqrt(size(Spectre_C57_Wake_BeforeInj_max_norm,1));
+Spectre_C57_SWS_BeforeInj_SEM_max_norm = nanstd(Spectre_C57_SWS_BeforeInj_max_norm)/sqrt(size(Spectre_C57_SWS_BeforeInj_max_norm,1));
+Spectre_C57_REM_BeforeInj_SEM_max_norm = nanstd(Spectre_C57_REM_BeforeInj_max_norm)/sqrt(size(Spectre_C57_REM_BeforeInj_max_norm,1));
+
+
+
+%%
+% mean CNO
+for j=1:length(sp_sal_CRH)
+    
+    if isempty(sp_sal_CRH{j})==0        
+        Spectre_CRH_Wake_BeforeInj_mean(j,:)= nanmean(10*(Data(Restrict(sp_sal_CRH{j},and(epoch_sal_CRH{j},c{j}.Wake)))),1); Spectre_CRH_Wake_BeforeInj_mean(Spectre_CRH_Wake_BeforeInj_mean==0)=NaN;
+        Spectre_CRH_SWS_BeforeInj_mean(j,:)= nanmean(10*(Data(Restrict(sp_sal_CRH{j},and(epoch_sal_CRH{j},c{j}.SWSEpoch)))),1); Spectre_CRH_SWS_BeforeInj_mean(Spectre_CRH_SWS_BeforeInj_mean==0)=NaN;
+        Spectre_CRH_REM_BeforeInj_mean(j,:)= nanmean(10*(Data(Restrict(sp_sal_CRH{j},and(epoch_sal_CRH{j},c{j}.REMEpoch)))),1); Spectre_CRH_REM_BeforeInj_mean(Spectre_CRH_REM_BeforeInj_mean==0)=NaN;
+    else
+    
+    end
+end
+
+
+
+% sem CNO
+Spectre_CRH_Wake_BeforeInj_SEM = nanstd(Spectre_CRH_Wake_BeforeInj_mean)/sqrt(size(Spectre_CRH_Wake_BeforeInj_mean,1));
+Spectre_CRH_SWS_BeforeInj_SEM = nanstd(Spectre_CRH_SWS_BeforeInj_mean)/sqrt(size(Spectre_CRH_SWS_BeforeInj_mean,1));
+Spectre_CRH_REM_BeforeInj_SEM = nanstd(Spectre_CRH_REM_BeforeInj_mean)/sqrt(size(Spectre_CRH_REM_BeforeInj_mean,1));
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%normalisation on mean spectrum
+for j=1:length(sp_sal_CRH)
+    try
+    if isempty(sp_sal_CRH{j})==0        
+        Spectre_CRH_Wake_BeforeInj_mean_norm(j,:)= Spectre_CRH_Wake_BeforeInj_mean(j,:)./nanmean(Spectre_CRH_Wake_BeforeInj_mean(j,:)); Spectre_CRH_Wake_BeforeInj_mean(Spectre_CRH_Wake_BeforeInj_mean==0)=NaN;
+        Spectre_CRH_SWS_BeforeInj_mean_norm(j,:)= Spectre_CRH_SWS_BeforeInj_mean(j,:)./nanmean(Spectre_CRH_SWS_BeforeInj_mean(j,:)); Spectre_CRH_SWS_BeforeInj_mean(Spectre_CRH_SWS_BeforeInj_mean==0)=NaN;
+        Spectre_CRH_REM_BeforeInj_mean_norm(j,:)= Spectre_CRH_REM_BeforeInj_mean(j,:)./nanmean(Spectre_CRH_REM_BeforeInj_mean(j,:)); Spectre_CRH_REM_BeforeInj_mean(Spectre_CRH_REM_BeforeInj_mean==0)=NaN;
+    else
+    end
+    end
+end
+
+% SEM_norm CNO
+Spectre_CRH_Wake_BeforeInj_SEM_norm = nanstd(Spectre_CRH_Wake_BeforeInj_mean_norm)/sqrt(size(Spectre_CRH_Wake_BeforeInj_mean_norm,1));
+Spectre_CRH_SWS_BeforeInj_SEM_norm = nanstd(Spectre_CRH_SWS_BeforeInj_mean_norm)/sqrt(size(Spectre_CRH_SWS_BeforeInj_mean_norm,1));
+Spectre_CRH_REM_BeforeInj_SEM_norm = nanstd(Spectre_CRH_REM_BeforeInj_mean_norm)/sqrt(size(Spectre_CRH_REM_BeforeInj_mean_norm,1));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%normalisation on max spectrum
+for j=1:length(sp_sal_CRH)
+    try
+    if isempty(sp_sal_CRH{j})==0        
+        Spectre_CRH_Wake_BeforeInj_max_norm(j,:)= Spectre_CRH_Wake_BeforeInj_mean(j,:)./max(Spectre_CRH_Wake_BeforeInj_mean(j,:)); Spectre_CRH_Wake_BeforeInj_mean(Spectre_CRH_Wake_BeforeInj_mean==0)=NaN;
+        Spectre_CRH_SWS_BeforeInj_max_norm(j,:)= Spectre_CRH_SWS_BeforeInj_mean(j,:)./max(Spectre_CRH_SWS_BeforeInj_mean(j,:)); Spectre_CRH_SWS_BeforeInj_mean(Spectre_CRH_SWS_BeforeInj_mean==0)=NaN;
+        Spectre_CRH_REM_BeforeInj_max_norm(j,:)= Spectre_CRH_REM_BeforeInj_mean(j,:)./max(Spectre_CRH_REM_BeforeInj_mean(j,:)); Spectre_CRH_REM_BeforeInj_mean(Spectre_CRH_REM_BeforeInj_mean==0)=NaN;
+    else
+    end
+    end
+end
+
+% SEM_max_norm CNO
+Spectre_CRH_Wake_BeforeInj_SEM_max_norm = nanstd(Spectre_CRH_Wake_BeforeInj_max_norm)/sqrt(size(Spectre_CRH_Wake_BeforeInj_max_norm,1));
+Spectre_CRH_SWS_BeforeInj_SEM_max_norm = nanstd(Spectre_CRH_SWS_BeforeInj_max_norm)/sqrt(size(Spectre_CRH_SWS_BeforeInj_max_norm,1));
+Spectre_CRH_REM_BeforeInj_SEM_max_norm = nanstd(Spectre_CRH_REM_BeforeInj_max_norm)/sqrt(size(Spectre_CRH_REM_BeforeInj_max_norm,1));
+%% figures
+% to get figures (adapt to C57/CRH)
+% every possible comparison : Figure_Spectres_Saline_CNO_exci_CRH_VLPO_AD.m
+% with normalisation on mean run : Figure_Spectres_normalized_mean_Saline_CNO_exci_CRH_VLPO_AD.m
+% with normalisation on max run : Figure_Spectres_normalized_max_Saline_CNO_exci_CRH_VLPO_AD.m
+

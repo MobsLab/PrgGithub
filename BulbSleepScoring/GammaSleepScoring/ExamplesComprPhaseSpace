@@ -1,0 +1,175 @@
+close all, clear all
+load('/media/DataMOBSSlSc/SleepScoringMice/M61/20130415/StateEpochSB.mat')
+figure
+if exist('Epoch')
+    smooth_Theta=Restrict(smooth_Theta,Epoch);
+    smooth_ghi=Restrict(smooth_ghi,Epoch);
+end
+
+t=Range(smooth_Theta);
+ti=t(5:1000:end);
+ghi_new=(Restrict(smooth_ghi,ts(ti)));
+theta_new=(Restrict(smooth_Theta,ts(ti)));
+subplot(3,3,[2,3,5,6])
+try
+    remtheta=(Restrict(theta_new,And(PlotEp,REMEpoch)));
+catch
+    remtheta=(Restrict(theta_new,REMEpoch));
+end
+ghi_new_r=Restrict(ghi_new,ts(Range(remtheta)));
+plot(log(Data(ghi_new_r)),log(Data(remtheta)),'.','color',[1 0.2 0.2],'MarkerSize',1);
+hold on
+try
+    sleeptheta=(Restrict(theta_new,And(PlotEp,SWSEpoch)));
+catch
+    sleeptheta=(Restrict(theta_new,SWSEpoch));
+end
+ghi_new_s=Restrict(ghi_new,ts(Range(sleeptheta)));
+plot(log(Data(ghi_new_s)),log(Data(sleeptheta)),'.','color',[0.4 0.5 1],'MarkerSize',1);
+waketheta=(Restrict(theta_new,Wake));
+ghi_new_w=Restrict(ghi_new,ts(Range(waketheta)));
+plot(log(Data(ghi_new_w)),log(Data(waketheta)),'.','color',[0.6 0.6 0.6],'MarkerSize',1);
+legend('REM','SWS','Wake')
+l=findobj(gcf,'tag','legend');
+a=get(l,'children');
+try
+    set(a(1),'markersize',20); % This line changes the legend marker size
+    set(a(4),'markersize',20); % This line changes the legend marker size
+    set(a(7),'markersize',20); % This line changes the legend marker size
+catch
+    set(a(5),'markersize',20); % This line changes the legend marker size
+    set(a(8),'markersize',20); % This line changes the legend marker size
+    set(a(11),'markersize',20); % This line changes the legend marker size
+end
+axphase=gca;
+ys=get(axphase,'Ylim');
+xs=get(axphase,'Xlim');
+box on
+set(gca,'XTick',[],'YTick',[])
+subplot(3,3,[1,4])
+[theText, rawN, x] =nhist(log(Data(Restrict(smooth_Theta,sleepper))),'maxx',max(log(Data(Restrict(smooth_Theta,sleepper)))),'noerror','xlabel','Theta power','ylabel',[]); axis xy
+view(90,-90)
+line([log(theta_thresh) log(theta_thresh)],[0 max(rawN)],'linewidth',4,'color','r')
+set(gca,'YTick',[],'Xlim',ys)
+
+subplot(3,3,[8,9])
+[theText, rawN, x] =nhist(log(Data(smooth_ghi)),'maxx',max(log(Data(smooth_ghi))),'noerror','xlabel','Gamma power','ylabel',[]);
+line([log(gamma_thresh) log(gamma_thresh)],[0 max(rawN)],'linewidth',4,'color','r')
+set(gca,'YTick',[],'Xlim',xs)
+
+load('/media/DataMOBSSlSc/SleepScoringMice/M61/20130416/StateEpochSB.mat')
+figure
+if exist('Epoch')
+    smooth_Theta=Restrict(smooth_Theta,Epoch);
+    smooth_ghi=Restrict(smooth_ghi,Epoch);
+end
+
+t=Range(smooth_Theta);
+ti=t(5:2000:end);
+ghi_new=(Restrict(smooth_ghi,ts(ti)));
+theta_new=(Restrict(smooth_Theta,ts(ti)));
+subplot(3,3,[2,3,5,6])
+try
+    remtheta=(Restrict(theta_new,And(PlotEp,REMEpoch)));
+catch
+    remtheta=(Restrict(theta_new,REMEpoch));
+end
+ghi_new_r=Restrict(ghi_new,ts(Range(remtheta)));
+plot(log(Data(ghi_new_r)),log(Data(remtheta)),'.','color',[1 0.2 0.2],'MarkerSize',1);
+hold on
+try
+    sleeptheta=(Restrict(theta_new,And(PlotEp,SWSEpoch)));
+catch
+    sleeptheta=(Restrict(theta_new,SWSEpoch));
+end
+ghi_new_s=Restrict(ghi_new,ts(Range(sleeptheta)));
+plot(log(Data(ghi_new_s)),log(Data(sleeptheta)),'.','color',[0.4 0.5 1],'MarkerSize',1);
+waketheta=(Restrict(theta_new,Wake));
+ghi_new_w=Restrict(ghi_new,ts(Range(waketheta)));
+plot(log(Data(ghi_new_w)),log(Data(waketheta)),'.','color',[0.6 0.6 0.6],'MarkerSize',1);
+legend('REM','SWS','Wake')
+l=findobj(gcf,'tag','legend');
+a=get(l,'children');
+try
+    set(a(1),'markersize',20); % This line changes the legend marker size
+    set(a(4),'markersize',20); % This line changes the legend marker size
+    set(a(7),'markersize',20); % This line changes the legend marker size
+catch
+    set(a(5),'markersize',20); % This line changes the legend marker size
+    set(a(8),'markersize',20); % This line changes the legend marker size
+    set(a(11),'markersize',20); % This line changes the legend marker size
+end
+axphase=gca;
+ys=get(axphase,'Ylim');
+xs=get(axphase,'Xlim');
+box on
+set(gca,'XTick',[],'YTick',[])
+subplot(3,3,[1,4])
+[theText, rawN, x] =nhist(log(Data(Restrict(smooth_Theta,sleepper))),'maxx',max(log(Data(Restrict(smooth_Theta,sleepper)))),'noerror','xlabel','Theta power','ylabel',[]); axis xy
+view(90,-90)
+line([log(theta_thresh) log(theta_thresh)],[0 max(rawN)],'linewidth',4,'color','r')
+set(gca,'YTick',[],'Xlim',ys)
+
+subplot(3,3,[8,9])
+[theText, rawN, x] =nhist(log(Data(smooth_ghi)),'maxx',max(log(Data(smooth_ghi))),'noerror','xlabel','Gamma power','ylabel',[]);
+line([log(gamma_thresh) log(gamma_thresh)],[0 max(rawN)],'linewidth',4,'color','r')
+set(gca,'YTick',[],'Xlim',xs)
+
+load('/media/DataMOBSSlSc/SleepScoringMice/M83/20130730/StateEpochSB.mat')
+
+figure
+if exist('Epoch')
+    smooth_Theta=Restrict(smooth_Theta,Epoch);
+    smooth_ghi=Restrict(smooth_ghi,Epoch);
+end
+
+t=Range(smooth_Theta);
+ti=t(5:500:end);
+ghi_new=(Restrict(smooth_ghi,ts(ti)));
+theta_new=(Restrict(smooth_Theta,ts(ti)));
+subplot(3,3,[2,3,5,6])
+try
+    remtheta=(Restrict(theta_new,And(PlotEp,REMEpoch)));
+catch
+    remtheta=(Restrict(theta_new,REMEpoch));
+end
+ghi_new_r=Restrict(ghi_new,ts(Range(remtheta)));
+plot(log(Data(ghi_new_r)),log(Data(remtheta)),'.','color',[1 0.2 0.2],'MarkerSize',1);
+hold on
+try
+    sleeptheta=(Restrict(theta_new,And(PlotEp,SWSEpoch)));
+catch
+    sleeptheta=(Restrict(theta_new,SWSEpoch));
+end
+ghi_new_s=Restrict(ghi_new,ts(Range(sleeptheta)));
+plot(log(Data(ghi_new_s)),log(Data(sleeptheta)),'.','color',[0.4 0.5 1],'MarkerSize',1);
+waketheta=(Restrict(theta_new,Wake));
+ghi_new_w=Restrict(ghi_new,ts(Range(waketheta)));
+plot(log(Data(ghi_new_w)),log(Data(waketheta)),'.','color',[0.6 0.6 0.6],'MarkerSize',1);
+legend('REM','SWS','Wake')
+l=findobj(gcf,'tag','legend');
+a=get(l,'children');
+try
+    set(a(1),'markersize',20); % This line changes the legend marker size
+    set(a(4),'markersize',20); % This line changes the legend marker size
+    set(a(7),'markersize',20); % This line changes the legend marker size
+catch
+    set(a(5),'markersize',20); % This line changes the legend marker size
+    set(a(8),'markersize',20); % This line changes the legend marker size
+    set(a(11),'markersize',20); % This line changes the legend marker size
+end
+axphase=gca;
+ys=get(axphase,'Ylim');
+xs=get(axphase,'Xlim');
+box on
+set(gca,'XTick',[],'YTick',[])
+subplot(3,3,[1,4])
+[theText, rawN, x] =nhist(log(Data(Restrict(smooth_Theta,sleepper))),'maxx',max(log(Data(Restrict(smooth_Theta,sleepper)))),'noerror','xlabel','Theta power','ylabel',[]); axis xy
+view(90,-90)
+line([log(theta_thresh) log(theta_thresh)],[0 max(rawN)],'linewidth',4,'color','r')
+set(gca,'YTick',[],'Xlim',ys)
+
+subplot(3,3,[8,9])
+[theText, rawN, x] =nhist(log(Data(smooth_ghi)),'maxx',max(log(Data(smooth_ghi))),'noerror','xlabel','Gamma power','ylabel',[]);
+line([log(gamma_thresh) log(gamma_thresh)],[0 max(rawN)],'linewidth',4,'color','r')
+set(gca,'YTick',[],'Xlim',xs)

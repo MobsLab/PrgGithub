@@ -1,0 +1,193 @@
+
+clear all, close all
+m=1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M60/20130415/';
+m=2;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M82/20130730/';
+m=3;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M83/20130729/';
+m=4;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M123/LPSD1/';
+m=5;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M51/09112012/';
+m=6;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M61/20130415/';
+m=7;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M147/';
+m=8;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M148/20140828/';
+m=9;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M243/01042015/';
+m=10;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M244/09042015/';
+m=11;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M251/21052015/';
+m=12;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M252/21052015/';
+m=13;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M177178/M177178-Sleep-22102014/M178/';
+
+%% To execute
+MatX=[-0.7:3.2/99:2.5];
+MatY=[-1.5:3.5/99:2];
+for mm=1:m
+    mm
+    cd(filename2{mm})
+    %     load('MapsTransitionProba.mat')
+    load('StateEpochSB.mat','SWSEpoch','Wake')%     %Find transition zone
+    %     temp=nanmean(Val{4}');
+    %     [C,I]=min(temp(20:80));
+    %     I=I+19;
+    %     Lim2=find(temp(I:end)>0.9,1,'first')+I;
+    %     Lim1=find(temp(1:I)>0.9,1,'last');
+    %     %     plot(temp)
+    %     %     hold on
+    %     %     plot(Lim1,temp(Lim1),'*r')
+    %     %     plot(Lim2,temp(Lim2),'*r')
+    %     % pause
+    %     % hold off
+    %     X1=exp(MatX(Lim1)+nanmean(log(Data(Restrict(smooth_ghi,SWSEpoch)))));
+    %     X2=exp(MatX(Lim2)+nanmean(log(Data(Restrict(smooth_ghi,SWSEpoch)))));
+    %     TransitionEpoch1=thresholdIntervals(smooth_ghi,X1,'Direction','Above');
+    %     TransitionEpoch2=thresholdIntervals(smooth_ghi,X2,'Direction','Below');
+    %     TransitionEpoch=And(TransitionEpoch1,TransitionEpoch2);
+    %
+    %     save('TransLims.mat','X1','X2','TransitionEpoch')
+    load(' TransLims.mat')
+    
+    if exist('PF_Low_Spectrum.mat')
+        load('PF_Low_Spectrum.mat')
+        SptsdPF=tsd(t*1e4,Sp);
+    else
+        clear SptsdPF
+    end
+    if exist('Pa_Low_Spectrum.mat')
+        load('Pa_Low_Spectrum.mat')
+        SptsdPa=tsd(t*1e4,Sp);
+    else
+        clear SptsdPa
+    end
+    if exist('H_Low_Spectrum.mat')
+        load('H_Low_Spectrum.mat')
+        SptsdH=tsd(t*1e4,Sp);
+    else
+        clear SptsdH
+    end
+    
+    WakeBeg=Restrict(ts(Start(TransitionEpoch)),Wake);
+    [a,bWkBe]=intersect(Range(ts(Start(TransitionEpoch))),Range(WakeBeg));
+    WakeEnd=Restrict(ts(Stop(TransitionEpoch)),Wake);
+    [a,bWkEn]=intersect(Range(ts(Stop(TransitionEpoch))),Range(WakeEnd));
+    SleepBeg=Restrict(ts(Start(TransitionEpoch)),SWSEpoch);
+    [a,bSlBe]=intersect(Range(ts(Start(TransitionEpoch))),Range(SleepBeg));
+    SleepEnd=Restrict(ts(Stop(TransitionEpoch)),SWSEpoch);
+    [a,bSlEn]=intersect(Range(ts(Stop(TransitionEpoch))),Range(SleepEnd));
+    %Sleep to Sleep
+    temp=(subset(TransitionEpoch,(intersect(bSlBe,bSlEn))));temp=mergeCloseIntervals(temp,1e4);
+    [Y{mm,1},X{mm,1}]=hist((Stop(temp)-Start(temp))/1e4,50);
+    Dur{mm,1}=sum((Stop(temp)-Start(temp))/1e4);
+    temp=mergeCloseIntervals(temp,5e4);
+    SpecPer=intervalSet(Start(temp)-5e4,Start(temp));
+    if exist('SptsdH')
+        SpH{mm,1}=mean(Data(Restrict(SptsdH,SpecPer)));
+    end
+    if exist('SptsdPa')
+        SpPa{mm,1}=mean(Data(Restrict(SptsdPa,SpecPer)));
+    end
+    if exist('SptsdPF')
+        SpPF{mm,1}=mean(Data(Restrict(SptsdPF,SpecPer)));
+    end
+    
+    %     Wake to Wake
+    temp=(subset(TransitionEpoch,(intersect(bWkBe,bWkEn))));temp=mergeCloseIntervals(temp,1e4);
+    [Y{mm,2},X{mm,2}]=hist((Stop(temp)-Start(temp))/1e4,50);
+    Dur{mm,2}=sum((Stop(temp)-Start(temp))/1e4);
+    temp=mergeCloseIntervals(temp,5e4);
+    SpecPer=intervalSet(Start(temp)-5e4,Start(temp));
+    if exist('SptsdH')
+        SpH{mm,2}=mean(Data(Restrict(SptsdH,SpecPer)));
+    end
+    if exist('SptsdPa')
+        SpPa{mm,2}=mean(Data(Restrict(SptsdPa,SpecPer)));
+    end
+    if exist('SptsdPF')
+        SpPF{mm,2}=mean(Data(Restrict(SptsdPF,SpecPer)));
+    end
+    
+    %Wk to Sleep
+    temp=(subset(TransitionEpoch,(intersect(bWkBe,bSlEn))));temp=mergeCloseIntervals(temp,1e4);
+    [Y{mm,3},X{mm,3}]=hist((Stop(temp)-Start(temp))/1e4,50);
+    Dur{mm,3}=sum((Stop(temp)-Start(temp))/1e4);
+    temp=mergeCloseIntervals(temp,5e4);
+    SpecPer=intervalSet(Start(temp)-5e4,Start(temp));
+    if exist('SptsdH')
+        SpH{mm,3}=mean(Data(Restrict(SptsdH,SpecPer)));
+    end
+    if exist('SptsdPa')
+        SpPa{mm,3}=mean(Data(Restrict(SptsdPa,SpecPer)));
+    end
+    if exist('SptsdPF')
+        SpPF{mm,3}=mean(Data(Restrict(SptsdPF,SpecPer)));
+    end
+    
+    %Sleep to Wk
+    temp=(subset(TransitionEpoch,(intersect(bSlBe,bWkEn))));temp=mergeCloseIntervals(temp,1e4);
+    [Y{mm,4},X{mm,4}]=hist((Stop(temp)-Start(temp))/1e4,50);
+    Dur{mm,4}=sum((Stop(temp)-Start(temp))/1e4);
+    temp=mergeCloseIntervals(temp,5e4);
+    SpecPer=intervalSet(Start(temp)-5e4,Start(temp));
+    if exist('SptsdH')
+        SpH{mm,4}=mean(Data(Restrict(SptsdH,SpecPer)));
+    end
+    if exist('SptsdPa')
+        SpPa{mm,4}=mean(Data(Restrict(SptsdPa,SpecPer)));
+    end
+    if exist('SptsdPF')
+        SpPF{mm,4}=mean(Data(Restrict(SptsdPF,SpecPer)));
+    end
+    
+    % Sleep
+    if exist('SptsdH')
+        SpH{mm,5}=mean(Data(Restrict(SptsdH,SWSEpoch)));
+    end
+    if exist('SptsdPa')
+        SpPa{mm,5}=mean(Data(Restrict(SptsdPa,SWSEpoch)));
+    end
+    if exist('SptsdPF')
+        SpPF{mm,5}=mean(Data(Restrict(SptsdPF,SWSEpoch)));
+    end
+    
+    % Wake
+    if exist('SptsdH')
+        SpH{mm,6}=mean(Data(Restrict(SptsdH,Wake)));
+    end
+    if exist('SptsdPa')
+        SpPa{mm,6}=mean(Data(Restrict(SptsdPa,Wake)));
+    end
+    if exist('SptsdPF')
+        SpPF{mm,6}=mean(Data(Restrict(SptsdPF,Wake)));
+    end
+end
+
+figure
+clear a
+for mm=1:m
+    %     plot(X{mm,1},Y{mm,1}/sum(Y{mm,1}))
+    % hold on
+    % plot(X{mm,2},Y{mm,2}/sum(Y{mm,2}),'r')
+    % plot(X{mm,3},Y{mm,3}/sum(Y{mm,3}),'g')
+    % plot(X{mm,4},Y{mm,4}/sum(Y{mm,4}),'k')
+    a(mm,1)=sum(X{mm,1}.*Y{mm,1}/sum(Y{mm,1}));
+    a(mm,2)=sum(X{mm,2}.*Y{mm,2}/sum(Y{mm,2}));
+    a(mm,3)=sum(X{mm,3}.*Y{mm,3}/sum(Y{mm,3}));
+    a(mm,4)=sum(X{mm,4}.*Y{mm,4}/sum(Y{mm,4}));
+    b(mm,:)=sum(reshape([Y{mm,:}],50,4))./sum(sum(reshape([Y{mm,:}],50,4)));
+    c(mm,:)=(reshape([Dur{mm,:}],1,4))./sum(sum(reshape([Dur{mm,:}],1,4)));
+end
+
+for k=1:6
+SpH{:,k}
+
+end
+
+

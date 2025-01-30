@@ -1,0 +1,111 @@
+function PlotPSTHmatrixChR2(t0,t1,t2,t3,C0,P0,E0,C1,P1,E1,C2,P2,E2,C3,P3,E3,MouseListC,StepName,zsc,sav)
+% 22.11.2016
+% called by PSTH_behav_accelero
+
+% code � finir � mettre en sous fonction dans
+% %FigBILANObsFreezManipBulbectomie
+
+if zsc
+    % CS- no laser
+    C0=zscore(C0);% EXT24
+    P0=zscore(P0);%  EXT48
+    E0=zscore(E0);%  EXT72
+    % CS- with laser
+    C1=zscore(C1);
+    P1=zscore(P1);
+    E1=zscore(E1);
+    % CS+ no laser
+    C2=zscore(C2);
+    P2=zscore(P2); 
+    E2=zscore(E2);
+    % CS+ with laser
+    C3=zscore(C3);
+    P3=zscore(P3);
+    E3=zscore(E3);
+end
+
+figure('color',[1 1 1]),
+set(gcf, 'Position',[ 8  91  1819 887]);
+n=4;
+p=3;
+a=1;
+% CS- no laser
+subplot(n,p,a),imagesc(t0/1E3,[1:size(C2,2)],C0'),ylabel('CS- no laser'), title(StepName{1}), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+if zsc
+    text(-0.2, 1.2,'PSTH zscores', 'FontSize', 20, 'units', 'normalized')
+else
+    text(-0.2, 1.2,'PSTH', 'FontSize', 20, 'units', 'normalized')
+end
+
+subplot(n,p,a),imagesc(t0/1E3,[1:size(C2,2)],P0'), title(StepName{2}), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+subplot(n,p,a),imagesc(t0/1E3,[1:size(C2,2)],E0'), title(StepName{3}), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+% CS- with laser
+subplot(n,p,a),imagesc(t1/1E3,[1:size(C2,2)],C1'),ylabel('CS- with laser'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+subplot(n,p,a),imagesc(t1/1E3,[1:size(C2,2)],P1'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+subplot(n,p,a),imagesc(t1/1E3,[1:size(C2,2)],E1'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+% CS+ no laser
+subplot(n,p,a),imagesc(t2/1E3,[1:size(C2,2)],C2'),ylabel('CS+ no laser'),
+hold on, line([0 0],[0.5 size(C2,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+subplot(n,p,a),imagesc(t2/1E3,[1:size(P2,2)],P2'),
+hold on, line([0 0],[0.5 size(P2,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 size(P2,2)+0.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+subplot(n,p,a),imagesc(t2/1E3,[1:size(E2,2)],E2'),
+hold on, line([0 0],[0.5 size(E2,2)+0.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 size(E2,2)+0.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+
+% CS+ with laser
+subplot(n,p,a),imagesc(t3/1E3,[1:size(C2,2)],C3'),ylabel('CS+ with laser'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+subplot(n,p,a),imagesc(t3/1E3,[1:size(C2,2)],P3'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+subplot(n,p,a),imagesc(t3/1E3,[1:size(C2,2)],E3'), 
+hold on, line([0 0],[0.5 15.5],'color',[0.7 0.7 0.7]),line([30 30],[0.5 15.5],'color',[0.7 0.7 0.7])
+set(gca, 'YTick',[1:length(MouseListC)],'YTickLabel', MouseListC)
+a=a+1;
+
+
+
+set(gcf,'PaperPosition',[ 0  0 27 18])
+if zsc
+    saveas(gcf,'FigBilanChR2Freezing_PSTH_zcores.fig')
+    saveas(gcf,'FigBilanChR2Freezing_PSTH_zscores.png')
+else
+    saveas(gcf,'FigBilanChR2Freezing_PSTH.fig')
+    saveas(gcf,'FigBilanChR2Freezing_PSTH.png')
+end

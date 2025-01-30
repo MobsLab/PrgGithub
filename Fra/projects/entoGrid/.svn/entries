@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="11"
+   name=""
+   committed-date="2006-06-05T15:43:32.457573Z"
+   url="file:///home/battagli/svn/matlab/trunk/projects/entoGrid"
+   last-author="battagli"
+   kind="dir"
+   uuid="1dbe6431-9a14-0410-b9e7-efee63371b5f"
+   prop-time="2006-06-06T06:42:16.000000Z"
+   revision="17"/>
+<entry
+   committed-rev="1"
+   name="pathIntegratorNet2.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="3ebd419674e63532f79a40bf8959ed0e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="entoFilt.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="07db1de7e34cc288ac0fe5b73b078174"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="pathIntegratorNet3.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="3606f4654c9620245bb5f9d37c8c1750"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="pathIntegratorNet4.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="905614554113f7395109b2e90fb737f6"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="gridCompLearn.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ed5ce8b0d6eda273667a852fddc49231"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="pathIntegratorNet5.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e197d42b3566ec5c801b63813162df48"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="auto1.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="97999033adafdc8183ed91695fbd475a"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeGridWaves.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="d97bec68783e6fe556fdfaaa855add7e"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="pathIntegratorNet.m.master"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ed63222dfe7af33928c089e002915022"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeTuringVideo.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="b912279b03ddab6b4c364ca2fe9109fe"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="histV.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="b4bc33d26814d5a4d8492cc33268fe8c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeGridWaveVideo.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a93a0b7c8e7040591a51dd6d1dc769c4"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="randomForaging.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="4a70efb40169387abf7f9d6afa72de62"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeRombicVideo.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="b8eca9eecd3d8bf86e012237cebe4794"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="plotColors.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="82e17aabcea93b502ac62354a0e82b33"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="pathIntegratorNetC.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="651c3346eda036cb1d45d641b6502cc9"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="gridCompLearn2.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="072281912280256cf72b74052ab15312"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="pathIntegratorNetImpl.c"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="01df08960a9f681232161d1f992392aa"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="torus.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="3f2b5f3b790d637623eedd6900424b8b"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="plan.txt"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="68b329da9893e34099c7d8ad5cb9c940"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="pathIntegratorTheta.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="41c457006f0b9294b53a7bae0db0d596"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="analyzeSpeed.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="04cd489e67b89d5ebf4ae5269b0a3ee5"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="test"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="4870096f5428aaebd1d326b7268df23c"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="gridRecurrenLean.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="565497034f0ce0ba68dedf1c7f32ef08"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="histogramPP.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="31ff2b7ceaca28ee09ce43adaaad89b6"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="makeHexFormVideo.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="e12084fb2c20d1e5fae3badc1b505a84"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="randomWalk.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="59787b9a3d478b2caf5c97abfa071381"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="spaceAutoCorr.c"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="6764f54b642880c8d34f67edf48a22f4"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="pathIntegratorNet.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="adc39c2d7c4addbba72dde3420c382ca"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="test.c"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="5658cf20256f5e41ea74629bb9e75945"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="plotgrid1.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="ec8e383d5c612ad08fdf8a992be53010"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="auto1..m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="468b670a39be0ead121b3b95cb472e01"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="gridCompLearn201.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="584f14b460b44e8157e97a3d5b0692c7"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="videoImage.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="310956806e0cbd251ebde8c5a2340052"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:01.000000Z"/>
+<entry
+   committed-rev="1"
+   name="gridCompLearn202.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="633f8e44cc03725ae88737ff04d3da73"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="gridCompLearn203.m"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="36d87e23360a190cfae9f2efcd4b6ec6"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+<entry
+   committed-rev="1"
+   name="mexTest.c"
+   text-time="2006-06-01T11:59:02.000000Z"
+   committed-date="2006-05-25T10:43:10.993826Z"
+   checksum="a81b023916728d21025cbb1297122c51"
+   last-author="battagli"
+   kind="file"
+   prop-time="2006-06-01T11:59:02.000000Z"/>
+</wc-entries>

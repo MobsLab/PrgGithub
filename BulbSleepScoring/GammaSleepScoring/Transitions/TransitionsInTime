@@ -1,0 +1,136 @@
+
+clear all, close all
+m=1;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M60/20130415/';
+m=2;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M82/20130730/';
+m=3;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M83/20130729/';
+m=4;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M123/LPSD1/';
+m=5;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M51/09112012/';
+m=6;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M61/20130415/';
+m=7;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M147/';
+m=8;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M148/20140828/';
+m=9;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M243/01042015/';
+m=10;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M244/09042015/';
+m=11;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M251/21052015/';
+m=12;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M252/21052015/';
+m=13;
+filename2{m}='/media/DataMOBSSlSc/SleepScoringMice/M177178/M177178-Sleep-22102014/M178/';
+
+
+
+%% To execute
+MatX=[-0.7:3.2/99:2.5];
+MatY=[-1.5:3.5/99:2];
+clear Tot
+    binsz=0.5;
+    totdur=100;
+
+for mm=1:m
+    mm
+    tic
+    
+    for i=1:4
+        Points{i}=[];
+    end
+    cd(filename2{mm})
+    %     load('MapsTransitionProba.mat')
+    load('StateEpochSB.mat','SWSEpoch','Wake')%     %Find transition zone
+    
+    try
+        load('TransLims.mat')
+    catch
+        load(' TransLims.mat')
+    end
+    
+    
+    WakeBeg=Restrict(ts(Start(TransitionEpoch)),Wake);
+    [a,bWkBe]=intersect(Range(ts(Start(TransitionEpoch))),Range(WakeBeg));
+    WakeEnd=Restrict(ts(Stop(TransitionEpoch)),Wake);
+    [a,bWkEn]=intersect(Range(ts(Stop(TransitionEpoch))),Range(WakeEnd));
+    SleepBeg=Restrict(ts(Start(TransitionEpoch)),SWSEpoch);
+    [a,bSlBe]=intersect(Range(ts(Start(TransitionEpoch))),Range(SleepBeg));
+    SleepEnd=Restrict(ts(Stop(TransitionEpoch)),SWSEpoch);
+    [a,bSlEn]=intersect(Range(ts(Stop(TransitionEpoch))),Range(SleepEnd));
+    
+    %Sleep to Sleep
+    temp=(subset(TransitionEpoch,(intersect(bSlBe,bSlEn))));temp=mergeCloseIntervals(temp,1e4);
+    [C,B]=CrossCorr(Start(temp)/1e4,Start(temp)/1e4,binsz,totdur/binsz);
+    subplot(4,2,1)
+    C(B==0)=0;
+    plot(B/binsz,C/sum(C)), hold on
+    Tot{1,mm}=C/sum(C);
+    
+    % Wake to Wake
+    temp=(subset(TransitionEpoch,(intersect(bWkBe,bWkEn))));temp=mergeCloseIntervals(temp,1e4);
+    [C,B]=CrossCorr(Start(temp)/1e4,Start(temp)/1e4,binsz,totdur/binsz);
+    subplot(4,2,2)    
+    C(B==0)=0;
+    plot(B/binsz,C/sum(C)), hold on
+    Tot{2,mm}=C/sum(C);
+    
+    %Wk to Sleep
+    temp=(subset(TransitionEpoch,(intersect(bWkBe,bSlEn))));temp=mergeCloseIntervals(temp,1e4);
+    [C,B]=CrossCorr(Start(temp)/1e4,Start(temp)/1e4,binsz,totdur/binsz);
+    subplot(4,2,3)
+    C(B==0)=0;
+    plot(B/binsz,C/sum(C)), hold on
+    Tot{3,mm}=C/sum(C);
+    
+    %Sleep to Wk
+    temp=(subset(TransitionEpoch,(intersect(bSlBe,bWkEn))));temp=mergeCloseIntervals(temp,1e4);
+    [C,B]=CrossCorr(Start(temp)/1e4,Start(temp)/1e4,binsz,totdur/binsz);
+    subplot(4,2,4)
+    C(B==0)=0;
+    plot(B/binsz,C/sum(C)), hold on
+    Tot{4,mm}=C/sum(C);
+    
+    %Sleep to Sleep wi Sleep to Wake
+    temp=(subset(TransitionEpoch,(intersect(bSlBe,bSlEn))));temp=mergeCloseIntervals(temp,1e4);
+    temp2=(subset(TransitionEpoch,(intersect(bSlBe,bWkEn))));temp2=mergeCloseIntervals(temp2,1e4);
+    [C,B]=CrossCorr(Start(temp)/1e4,Start(temp2)/1e4,binsz,totdur/binsz);
+    subplot(4,2,5)
+    C(B==0)=0;
+    plot(B/binsz,C/sum(C)), hold on
+    Tot{5,mm}=C/sum(C);
+    
+    %Wake to wake wi wake to sleep
+    temp=(subset(TransitionEpoch,(intersect(bWkBe,bWkEn))));temp=mergeCloseIntervals(temp,1e4);
+    temp2=(subset(TransitionEpoch,(intersect(bWkBe,bSlEn))));temp2=mergeCloseIntervals(temp2,1e4);
+    [C,B]=CrossCorr(Start(temp)/1e4,Start(temp2)/1e4,binsz,totdur/binsz);
+    subplot(4,2,6)
+    C(B==0)=0;
+    plot(B/binsz,C/sum(C)), hold on
+    Tot{6,mm}=C/sum(C);
+    
+    %wake to sleep wi sleep to wake
+    temp=(subset(TransitionEpoch,(intersect(bWkBe,bSlEn))));temp=mergeCloseIntervals(temp,1e4);
+    temp2=(subset(TransitionEpoch,(intersect(bSlBe,bWkEn))));temp2=mergeCloseIntervals(temp2,1e4);
+    [C,B]=CrossCorr(Start(temp)/1e4,Start(temp2)/1e4,binsz,totdur/binsz);
+    subplot(4,2,7)
+    C(B==0)=0;
+    plot(B/binsz,C/sum(C)), hold on
+    Tot{7,mm}=C/sum(C);
+    
+ 
+    
+end
+
+   figure,
+
+for k=1:7
+       subplot(4,2,k)
+plot(B/binsz,mean(reshape([Tot{k,:}],length(C),13)'))
+   
+ 
+end

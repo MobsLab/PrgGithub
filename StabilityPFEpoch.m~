@@ -1,0 +1,49 @@
+function [r,p,rc,pc]=StabilityPFEpoch(S,X,Y,Epoch1,Epoch2,cellnames,posArt)
+
+smo=2;
+load behavResources
+try
+    posArt;
+catch
+     posArt=0;
+end
+sizeMap=50;
+si=sizeMap;               
+
+ep=TrackingEpoch-SleepEpoch;
+ep=ep-RestEpoch;
+[X,Y,S,stim,limMaz,limM,limMaze]=RemoveFalsePosition(X,Y,S,stim,ep,posArt);
+
+if posArt>0
+dis=tsd(Range(X),sqrt((Data(X)-max(Data(X))/2).^2+(Data(Y)-max(Data(Y))/2).^2));
+EpochOk=thresholdIntervals(dis,limMaz(2)/2,'Direction','Below');
+
+X=Restrict(X,EpochOk);
+Y=Restrict(Y,EpochOk);
+S=Restrict(S,EpochOk);
+end
+ 
+
+
+
+for a=1:length(S)
+    try
+map1=PlaceField(Restrict(S{a},Epoch1),Restrict(X,Epoch1),Restrict(Y,Epoch1),'smoothing',smo);close
+map2=PlaceField(Restrict(S{a},Epoch2),Restrict(X,Epoch2),Restrict(Y,Epoch2),'smoothing',smo);close
+
+MAP1{a}=map1.rate;
+MAP2{a}=map2.rate;
+[r(a),p(a),rc(a),pc(a)]=PlaceFiledCorrealtionFor2(MAP1{i}(:),MAP2{i}(:));
+
+figure('color',[1 1 1])
+subplot(2,2,1), imagesc(MAP1{a}), axis xy, colorbar, title(cellnames{a}),
+subplot(2,2,2), imagesc(MAP2{a}), axis xy, colorbar, title(['r=',num2str(r(a)),', rc=',num2str(rc(a))]),
+subplot(2,2,3), imagesc(MAP1{a}), axis xy, ca1=caxis;
+subplot(2,2,4), imagesc(MAP2{a}), axis xy, ca2=caxis;
+subplot(2,2,3), caxis([0 max(ca1(2),ca2(2))]), colorbar
+subplot(2,2,4), caxis([0 max(ca1(2),ca2(2))]),colorbar
+    end
+end
+
+
+

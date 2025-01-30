@@ -1,0 +1,82 @@
+clear all,close all
+Del=10000;
+dt=50*1E-6;
+stdtimes=3;
+cd /media/DataMOBS33/DataLeo/quantifexvivomathlab/
+fichier=dir;
+Titles={'Lat','MaxTime','Tau','Duration','Amp','Der0.5'};
+
+for kk=3:length(dir)
+    
+    FinalVals=[];
+    [d,si,h]=abfload(fichier(kk).name);
+    TracesToDo=[];
+    str=find(squeeze(d(:,3,1))>1,1,'First');
+    
+    str=find(squeeze(d(:,3,1))>1,1,'First');
+    if isempty(h.tags)
+        TracesToDo=[1:size(d,3)];
+    else
+        %TracesToDo=find(h.sweepStartInPts*dt<h.tags(1).timeSinceRecStart);
+        %TracesToDo=TracesToDo(1:end-1)';
+        TracesToDo=[1:h.tags(1).episodeIndex-1];
+        for t=1:size(h.tags,2)
+            if strcmp(h.tags(t).comment(1:3),'-60')
+                if t<size(h.tags,2)
+                    TracesToDo=[TracesToDo,[h.tags(t).episodeIndex:h.tags(t+1).episodeIndex-1]];
+                else
+                    TracesToDo=[TracesToDo,[h.tags(t).episodeIndex:size(d,3)]];
+                end
+            end
+        end
+    end
+    
+    load(['/media/DataMOBS33/DataLeo/Results/' fichier(kk).name(1:end-4) 'Results.mat'])
+    temprep=runmean(squeeze(d(:,1,TracesToDo(FinalVals(1:end-1,end)==2))),10);
+    temprep=mean(temprep');
+    Dat(kk-2,:)=temprep(str-10000:str+10000);  % on prend 0.5s autour de la stim
+    
+    
+    
+end
+
+close all
+clear Dat2 Amp
+for kk=[1,2,3,5:15,17,18,20]
+    Dat2(kk,:)=runmean(Dat(kk,:),50);
+    Dat2(kk,:)=Dat2(kk,:)-mean(Dat2(kk,1:5000));
+    [mx(1),ind(1)]=max(Dat2(kk,1e4:1.4*1e4));
+    [mx(2),ind(2)]=min(Dat2(kk,1e4:1.4*1e4));
+    Amp(kk)=mx(find(abs(mx)==max(abs(mx))));
+    PeakT(kk)=ind(find(abs(mx)==max(abs(mx))))+1e4;
+    tempDat=Dat2(kk,PeakT(kk):PeakT(kk)+1000);
+    x=[0:1000];
+    
+    [cf_,goodness]=createExpFit(x,tempDat,[Amp(kk),0.1,0]);CF=coeffvalues(cf_);
+    CF=coeffvalues(cf_);
+    Tau(kk)=dt./CF(2);
+    figure
+    plot(x,tempDat)
+    hold on
+    plot(cf_,'g')
+    Dat2(kk,:)=runmean(Dat2(kk,:)./abs(Amp(kk)),1);
+end
+t=[0:dt:20000*dt]-10000*dt;
+figure
+plot(t,Dat2(Amp>0,:)','k')
+hold on
+plot(t,Dat2(Amp<0,:)','r')
+xlim([-0.1 0.3])
+figure
+imagesc(t,[1:17],[(Dat2(Amp>0,:));(Dat2(Amp<0,:))])
+xlim([-0.1 0.3])
+figure
+plot(t,mean(Dat2(Amp>0,:)),'k')
+hold on
+plot(t,-mean(Dat2(Amp<0,:)),'r')
+xlim([-0.1 0.3])
+figure
+PlotErrorBar2nostars(Tau(Amp>0),Tau(Amp<0))
+[h,p]=ttest2(Tau(Amp>0),Tau(Amp<0))
+sigstar({[1,2]},p)
+set(gca,'XTick',[1,2],'XTickLabel',{'Inhib','Excit'})

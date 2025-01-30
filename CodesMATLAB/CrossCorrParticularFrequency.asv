@@ -1,0 +1,307 @@
+%CrossCorrParticularFrequency
+
+plott
+% clear
+
+% try
+
+try
+    
+load DataCompLFP10
+load Coherency
+catch
+    
+   
+load DataMCLFP
+
+end
+
+try
+    plott;
+catch
+    
+plott=0;
+end
+
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+
+freqFl=[0.01 0.02];
+freqFm=[0.03 0.04];
+
+freqFh=[0.05 0.5];
+%freqFh=[0.02 0.1];
+
+freqFuh=[0.5 1];
+
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+
+for Fil=[96,128,512,1024,2048]
+    try
+        Yl=FilterLFP(tsd(tps*1E4,Y),freqFl,Fil);
+    end
+    try
+        Ym=FilterLFP(tsd(tps*1E4,Y),freqFm,Fil);
+    end
+    try
+        Yh=FilterLFP(tsd(tps*1E4,Y),freqFh,Fil);
+    end
+    try
+        Yuh=FilterLFP(tsd(tps*1E4,Y),freqFuh,Fil);
+    end
+end
+
+
+
+
+% figure('Color',[1 1 1])
+if plott==1
+        figure(1)
+        clf
+        subplot(2,3,[1,4])
+        plot(tps,Y/max(Y),'Color',[0.7 0.7 0.7])
+        hold on, plot(tps,Data(Yl)/max(Y),'k','linewidth',2)
+        hold on, plot(tps,Data(Ym)/max(Y),'b','linewidth',2)
+        hold on, plot(tps,Data(Yh)/max(Y),'r','linewidth',1)
+        hold on, plot(tps,Data(Yuh)/max(Y),'g','linewidth',1)
+        xlim([tps(1) tps(end)])
+end
+
+for Fil=[96,128,512,1024,2048]
+    try
+Fl=FilterLFP(tsd(tps*1E4,F),freqFl,Fil);
+    end
+    try
+Fm=FilterLFP(tsd(tps*1E4,F),freqFm,Fil);
+    end
+    try
+        
+Fh=FilterLFP(tsd(tps*1E4,F),freqFh,Fil);
+    end
+    try
+        
+Fuh=FilterLFP(tsd(tps*1E4,F),freqFuh,Fil);
+    end
+end
+
+
+
+FLow=Data(Fl);
+FMedium=Data(Fm);
+FHigh=Data(Fh);
+FUltraHigh=Data(Fuh);
+
+YLow=Data(Yl);
+YMedium=Data(Ym);
+YHigh=Data(Yh);
+YUltraHigh=Data(Yuh);
+
+if plott==1
+        % figure('Color',[1 1 1])
+        % subplot(2,3,4)
+        plot(tps,2+F/max(F),'Color',[0.7 0.7 0.7])
+        hold on, plot(tps,2+Data(Fl)/max(F),'k','linewidth',2)
+        hold on, plot(tps,2+Data(Fm)/max(F),'b','linewidth',2)
+        hold on, plot(tps,2+Data(Fh)/max(F),'r','linewidth',1)
+        hold on, plot(tps,2+Data(Fuh)/max(F),'g','linewidth',1)
+        title('LFP (Up),    Vm Astro (Down)')
+        xlim([tps(1) tps(end)])
+end
+
+% figure('Color',[1 1 1])
+
+[Cl,lag,p1,CPM,CPm] = StatsXcorr(Data(Fl),Data(Yl),chF,100);
+[Cm,lag,p2,CPM,CPm] = StatsXcorr(Data(Fm),Data(Ym),chF,100);
+[Ch,lag,p3,CPM,CPm] = StatsXcorr(Data(Fh),Data(Yh),chF,100);
+[Cuh,lag,p4,CPMn,CPmn] = StatsXcorr(Data(Fuh),Data(Yuh),chF,100);
+
+if plott==1
+        subplot(2,3,[2,5])
+        hold on, plot(lag/chF,Cl,'k'), plot(lag/chF,CPM,'Color',[0.6 0.6 0.6]), plot(lag/chF,CPm,'Color',[0.6 0.6 0.6])
+        hold on, plot(lag/chF,Cm,'b'), plot(lag/chF,CPM,'Color',[0.6 0.6 0.6]), plot(lag/chF,CPm,'Color',[0.6 0.6 0.6])
+        hold on, plot(lag/chF,Ch,'r'), plot(lag/chF,CPM,'Color',[0.6 0.6 0.6]), plot(lag/chF,CPm,'Color',[0.6 0.6 0.6])
+        hold on, plot(lag/chF,Cuh,'g'), plot(lag/chF,CPMn,'Color',[0.6 0.6 0.6]), plot(lag/chF,CPmn,'Color',[0.6 0.6 0.6]),xlim([-50 50])
+        yl=ylim;
+        line([0 0],[yl(1) yl(2)],'Color','k')
+
+
+
+
+
+        subplot(2,3,[3,6])
+
+        hold on
+        colorBox=[225 225 225]/255; %[197 246 255]/255;
+        YL=ylim;    
+        boxbottom = YL(1);
+        boxhight = YL(2);
+        rectangle('Position', [freqFl(1) boxbottom freqFl(2)-freqFl(1) boxhight-boxbottom], 'LineStyle', 'none', 'FaceColor', colorBox);
+
+        colorBox=[205 225 255]/255; %[197 246 255]/255;
+        YL=ylim;    
+        boxbottom = YL(1);
+        boxhight = YL(2);
+        rectangle('Position', [freqFm(1) boxbottom freqFm(2)-freqFm(1) boxhight-boxbottom], 'LineStyle', 'none', 'FaceColor', colorBox);
+
+        colorBox=[255 225 205]/255; %[197 246 255]/255;
+        YL=ylim;    
+        boxbottom = YL(1);
+        boxhight = YL(2);
+        rectangle('Position', [freqFh(1) boxbottom freqFh(2)-freqFh(1) boxhight-boxbottom], 'LineStyle', 'none', 'FaceColor', colorBox);
+
+        colorBox=[205 255 225]/255; %[197 246 255]/255;
+        YL=ylim;    
+        boxbottom = YL(1);
+        boxhight = YL(2);
+        rectangle('Position', [freqFuh(1) boxbottom freqFuh(2)-freqFuh(1) boxhight-boxbottom], 'LineStyle', 'none', 'FaceColor', colorBox);
+
+%         plot(f(f>0.005&f<freqFuh(2)),S1(f>0.005&f<freqFuh(2))/max(S1(f>0.005&f<freqFuh(2))),'b')
+%         plot(f(f>0.005&f<freqFuh(2)),S2(f>0.005&f<freqFuh(2))/max(S2(f>0.005&f<freqFuh(2))),'r')
+%         plot(f(f>0.005&f<freqFuh(2)),C(f>0.005&f<freqFuh(2)),'k','linewidth',2)
+%         title('Vm Astro (blue),  LFP (red),  Coherence (black)')
+%         xlim([0.005 freqFuh(2)])
+
+end
+
+lim=100;
+
+zfl=hilbert(Data(Fl));
+zfl=abs(zfl);
+zfl=zfl(lim:end-lim);
+zyl=hilbert(Data(Yl));
+zyl=abs(zyl);
+zyl=zyl(lim:end-lim);
+
+zfm=hilbert(Data(Fm));
+zfm=abs(zfm);
+zfm=zfm(lim:end-lim);
+zym=hilbert(Data(Ym));
+zym=abs(zym);
+zym=zym(lim:end-lim);
+
+zfh=hilbert(Data(Fh));
+zfh=abs(zfh);
+zfh=zfh(lim:end-lim);
+zyh=hilbert(Data(Yh));
+zyh=abs(zyh);
+zyh=zyh(lim:end-lim);
+
+zfuh=hilbert(Data(Fuh));
+zfuh=abs(zfuh);
+zfuh=zfuh(lim:end-lim);
+zyuh=hilbert(Data(Yuh));
+zyuh=abs(zyuh);
+zyuh=zyuh(lim:end-lim);
+
+[r,p]=corrcoef([zfl,zyl,zfm,zym,zfh,zyh,zfuh,zyuh]);
+R=r;
+R(p>0.05)=0;
+
+
+% figure('Color',[1 1 1])
+
+if plott==1
+    
+    
+        figure(2)
+        clf
+        subplot(2,2,[1,3]), hold on
+        plot(tps,Y/max(Y),'Color',[0.7 0.7 0.7])
+        plot(tps(lim:end-lim),zyl/max(Y),'k')
+        plot(tps(lim:end-lim),zym/max(Y),'b')
+        plot(tps(lim:end-lim),zyh/max(Y),'r')
+        plot(tps(lim:end-lim),zyuh/max(Y),'g')
+
+        % subplot(2,2,3), hold on
+        plot(tps,2+F/max(F),'Color',[0.7 0.7 0.7])
+        plot(tps(lim:end-lim),2+zfl/max(F),'k')
+        plot(tps(lim:end-lim),2+zfm/max(F),'b')
+        plot(tps(lim:end-lim),2+zfh/max(F),'r')
+        plot(tps(lim:end-lim),2+zfuh/max(F),'g')
+        xlim([tps(1) tps(end)])
+
+        subplot(2,2,[2,4])
+        % imagesc(r-diag(diag(r)))
+        imagesc(R-diag(diag(R)))
+        colorbar
+font=8;
+
+legend{1}='LFP low';
+legend{2}='Vm low';
+legend{3}='LFP med';
+legend{4}='Vm med';
+legend{5}='LFP hi';
+legend{6}='Vm hi';
+legend{7}='LFP u-hi';
+legend{8}='Vm u-hi';
+set(gca,'ytick',[1:length(legend)])
+set(gca,'yticklabel',legend)
+set(gca,'xtick',[1:length(legend)])
+set(gca,'xticklabel',legend)
+set(gca,'FontSize',font)
+
+
+        fichier=pwd;
+
+       % eval(['saveFigure(1,''CrossCorrFrequency1'',''',fichier,''')'])
+       % eval(['saveFigure(2,''CrossCorrFrequency2'',''',fichier,''')'])
+
+end
+
+
+lags=lag/chF;
+
+[BE,id]=min(Cl);
+DelaiL=lags(id);
+[BE,id]=min(Cm);
+DelaiM=lags(id);
+
+Ch2=Ch(find(lags>-10&lags<10));
+lags2=lags(find(lags>-10&lags<10));
+[BE,id]=min(Ch2);
+DelaiH=lags2(id);
+
+Cuh2=Cuh(find(lags>-2&lags<2));
+lags2=lags(find(lags>-2&lags<2));
+[BE,id]=min(Cuh2);
+DelaiUH=lags2(id);
+
+
+DelaisOne=[DelaiL, DelaiM, DelaiH, DelaiUH];
+
+if plott==1
+
+    figure(1)
+    subplot(2,3,[2,5])
+    title(['Delays ',num2str(DelaisOne(1)),'s  ',num2str(DelaisOne(2)),'s  ',num2str(DelaisOne(3)*1000),'ms  ',num2str(DelaisOne(4)*1000),'ms'])
+
+end
+
+
+[rlisa, plisa]=corrcoef(Data(Fh),Data(Yh));
+rLisa=rlisa(1,2);
+pLisa=plisa(1,2);
+
+
+save DataCrossCorrPartFreq rLisa pLisa lags Cl Cm Ch Cuh p1 p2 p3 p4 DelaisOne FLow FMedium FHigh FUltraHigh YLow YMedium YHigh YUltraHigh zfl zfm zfh zfuh zyl zym zyh zyuh r p R freqFl freqFm freqFh freqFuh% f S1 S2 C CPMn CPmn
+
+
+
+
+
+
+
+% save DataCrossCorrPartFreqNewFilter0.02_0.1 rLisa pLisa lags Cl Cm Ch Cuh DelaisOne FLow FMedium FHigh FUltraHigh YLow YMedium YHigh YUltraHigh zfl zfm zfh zfuh zyl zym zyh zyuh r p R freqFl freqFm freqFh freqFuh f S1 S2 C CPMn CPmn
+
+% catch
+%     
+% disp(' Pas de DataCompLFP10')
+% 
+% 
+% end 
+
+
+

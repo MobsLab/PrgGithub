@@ -1,0 +1,114 @@
+function AnalyzeOpenField(filename)
+
+%% INPUTS
+freq=30; % Hz, default 30Hz
+BlockDistance=60; % duration in sec of each time block for distance
+
+%% INITIALISATION
+if ~exist('filename','var')
+    filename=input('Enter Filename: ','s');
+end
+res=pwd;
+try 
+    lis=dir([res,'/',filename]);
+    mark='/';
+catch
+    lis=dir([res,'\',filename]);
+    mark='\';
+end
+
+try
+    load([filename,mark,'TrackingOFFline.mat'],'PosOFF','mask');
+catch
+    try
+    load([filename,mark,'InfoTracking.mat'],'PosOFF','mask');
+catch
+    load(filename,'PosOFF','mask');
+    end
+end
+
+%% Redo Position
+PosOFF=PosOFF(~isnan(PosOFF(:,2)),:);
+TimeInt=min(PosOFF(:,1)):1/freq:max(PosOFF(:,1));
+
+Xint=interp1(PosOFF(:,1),PosOFF(:,2),TimeInt);
+Yint=interp1(PosOFF(:,1),PosOFF(:,3),TimeInt);
+
+PosWork=[TimeInt',Xint',Yint'];
+ok='n';
+while ok~='y'
+    figure('Color',[ 1 1 1])
+    imagesc(mask); colormap gray
+    hold on, plot(PosOFF(:,2),PosOFF(:,3),'r')
+    hold on, plot(PosWork(:,2),PosWork(:,3))
+    title('Define environment edges')
+    
+    [x,y]=ginput(2);
+    hold on, line([x(1) x(1) x(2) x(2) x(1)], [y(1) y(2) y(2) y(1) y(1)], 'Color','k')
+    ok=input('Are you satisfied with new environment edges (y/n)? ','s');
+    close
+end
+temp=[PosWork(:,1),PosWork(:,2)-mean(x),PosWork(:,3)-mean(y)];
+PosWork=temp;
+x=x-mean(x); y=y-mean(y);
+
+
+%% Show central zone
+
+
+figure('Color',[ 1 1 1])
+subplot(2,2,1)
+plot(PosWork(:,2),PosWork(:,3))
+hold on, line([x(1) x(1) x(2) x(2) x(1)], [y(1) y(2) y(2) y(1) y(1)], 'Color','k')
+
+CentralPercVal=10:10:90;
+for i=1:length(CentralPercVal)
+    CentralPerc=CentralPercVal(i); % percentage, default 50%
+    
+    temp=realsqrt(CentralPerc*x(1)^2/100);
+    CentralX=[-temp;temp];
+    temp=realsqrt(CentralPerc*y(1)^2/100);
+    CentralY=[-temp;temp];
+    
+    % percentage of time in central zone,
+    PercTime(i)=sum(abs(PosWork(:,2))<CentralX(2) & abs(PosWork(:,3))<CentralY(2))/length(PosWork)*100;
+    
+    % plot 50% central zone
+    if CentralPerc==50
+        hold on, line([CentralX(1) CentralX(1) CentralX(2) CentralX(2) CentralX(1)], [CentralY(1) CentralY(2) CentralY(2) CentralY(1) CentralY(1)], 'Color','m')
+        title(filename)
+        legend({'Path','edges','50%central'}, 'Location','East')
+        disp(['% time spent in central zone (50% surface)= ',num2str(PercTime(i))])
+    end
+end
+
+subplot(2,2,2),bar(CentralPercVal,PercTime)
+xlabel('central zone (% surface)')
+ylabel('% time spent in central zone')
+
+
+
+
+%% distance parcourue
+
+d=realsqrt(diff(PosWork(:,2)).*diff(PosWork(:,2))+diff(PosWork(:,3)).*diff(PosWork(:,3)));
+index=1:BlockDistance*freq:length(d)-BlockDistance*freq;
+for i=1:length(index)
+	Distance(i)=sum(d(index(i):index(i)+BlockDistance*freq));
+    
+end
+subplot(2,2,3)
+bar(index/freq,Distance)
+title(['Run Distance per ',num2str(BlockDistance),'s block'])
+
+disp(['Total Runned distance ',num2str(sum(Distance))])
+
+
+%% save Analyse
+
+filenameTronc=filename(1:strfind(filename,'.mat')-1);
+if isempty(filenameTronc), filenameTronc=[filename,mark,filename];end
+
+filenameTronc=[filename,mark,'AnalyzeOpenField'];
+save([filenameTronc,'-A'],'PercTime','Distance','PosWork')
+

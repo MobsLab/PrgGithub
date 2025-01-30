@@ -1,0 +1,395 @@
+% function PowerSpectrumLR011010
+function [yf,f,spe,f2,S2,Serr2,Serr2a,Serr2b,S3,t3,f3,C,lag,lags]=PowerSpectrumLR011010(chF)
+
+try
+load Data
+end
+
+
+%---------------------------------------------------------------------
+%---------------------------------------------------------------------
+%---------------------------------------------------------------------
+
+
+voie=2;
+
+
+try
+    chF;
+catch 
+    chF=10;
+end
+
+
+
+%---------------------------------------------------------------------
+%---------------------------------------------------------------------
+% Ajustement de la baseline
+%---------------------------------------------------------------------
+        try
+            load DataAdjust10
+        
+        catch
+
+            V=data(:,2);
+            V=smooth(V,5);      %pour enlever le 50Hz,pour virer le bruit
+                       
+            resamp=10000/chF;
+            V=resample(V,1,resamp);
+                        %resample d'un facteur 1/resamp, doit rester un facteurs de 10, ou des
+                        %entiers
+
+            V=V(20:end-20);
+
+            tps=[0:length(V)-1]/chF;
+
+
+            figure('Color',[1 1 1]),
+            plot(V)
+
+            s=input('Do you want to adjust the data (y:n)? ','s');
+            if s=='y'
+            limInf=input('limite inf= ');
+            limSup=input('limite sup= ');
+            else
+            limInf=[];
+            limSup=[];                
+            end
+            
+            if length(limInf)==0;
+            limInf=1;
+            end
+
+            if length(limSup)==0;
+            limSup=length(V);
+            end
+
+            V=V(limInf:limSup);
+            tps=tps(limInf:limSup);
+            
+            close all
+            
+            figure('Color',[1 1 1]),
+            plot(V)
+            close all
+            
+try
+            V2=locdetrend(V,chF,[200,10]);
+            comment='ok';
+            valueLoc=200;
+            save DataAdjust10 V V2 tps chF comment limInf limSup valueLoc
+catch
+           try
+            V2=locdetrend(V,chF,[150,10]);
+            comment='problem';
+            valueLoc=150;
+            save DataAdjust10 V V2 tps chF comment limInf limSup  valueLoc
+catch
+            V2=locdetrend(V,chF,[50,10]);
+            comment='problem';
+            valueLoc=50;
+            save DataAdjust10 V V2 tps chF comment limInf limSup valueLoc
+           end
+end
+
+        end
+%---------------------------------------------------------------------
+%---------------------------------------------------------------------
+% Transformée de Fourier
+%---------------------------------------------------------------------
+            
+
+
+        Y=V2;
+        
+        
+%         tpsr=tps;
+        % figure,plot(tpsr,y-mean(y))
+
+        % Transformée de Fourier
+
+        L = length(Y);
+        NFFT = 2^nextpow2(L); % Next power of 2 from length of y
+        yf  = fft(Y,NFFT)/L;
+        f = chF*1/2*linspace(0,1,NFFT/2+1);
+
+        spe=abs(yf(1:NFFT/2+1));
+
+        % FIGURE 1:
+        % 1er graphe: transformée de Fourier sans multitapers (composante très
+        % lente omise?)
+        figure('Color',[1 1 1])
+        subplot(1,3,1), hold on
+        plot(f,spe)
+        plot(f,smooth(spe,5),'r','linewidth',2)
+
+        xlim([0.002 0.09])
+
+        save Spectre yf f spe
+
+%-------------------------------------------------------------------------
+% Power spectrum multi tapers
+%-------------------------------------------------------------------------
+% ----------------------------------------------------------------------
+        m=200; %movingwin
+
+        % lF=5/data(end,1);
+        % limitF=min(lF,0.005);
+        limitF=0;
+
+
+        % Fup=min(1,chF/2);
+        Fup=3;
+
+        Fpass=[limitF Fup];
+        % Fpass=[0 0.5];
+
+
+        params.Fs=chF;
+        
+        
+                %         params.pad=0;
+                % 
+                % %         params.tapers=[2 3];
+                %         params.tapers=[3 5];
+                % %         params.tapers=[7 13];
+                %         params.tapers=[10 19];
+                %          
+                %         params.fpass = Fpass;
+                %         params.trialave = 0;
+       
+        params.err = [2 0.01];
+
+% Paramèters fixés ci-dessus:
+%         chF=1;
+%         m=200; %movingwin
+%         limitF=0;
+%         Fup=0.1;
+%         Fpass=[limitF Fup];
+%         params.Fs=chF;       
+%         params.err = [2 0.01];
+
+
+        1E5/chF; %????
+
+        params.fpass = Fpass;
+
+%pb avec les enregistrements trop longs?
+
+if length(Y)>5E5
+    [S2,f2,Serr2]=mtspectrumc(Y(1:5E5),params);
+else
+    [S2,f2,Serr2]=mtspectrumc(Y,params);
+end
+
+
+                % figure('Color',[1 1 1])
+                % subplot(7,1,1), plot(tps,Y), title(['Frequency: ',num2str(params.Fs),'Hz. Limite Inf: ',num2str(limitF)]), xlim([tps(1) tps(end)])
+                % subplot(7,1,2), plot(f,S)
+                % subplot(7,1,3), plot(f,f'.*S)
+                % 
+                % subplot(7,1,4), 
+                % % Xerr=10*log10(Xerr);
+                % % plot(f2,SmoothDec(f2'.*S2,3),'r','linewidth',1), xlim([0 Fup]), ca=ylim;
+                % % hold on, plot((f2),SmoothDec(f2'.*(Serr2(1,:)'),3),'b:')
+                % % hold on, plot((f2),SmoothDec(f2'.*(Serr2(2,:)'),3),'c:')
+                % 
+                % plot(f2,10*log10(S2),'r','linewidth',1), xlim([0 Fup]), ca=ylim;
+                % hold on, plot(f2,10*log10(Serr2(1,:)),'b:')
+                % hold on, plot(f2,10*log10(Serr2(2,:)),'c:')
+                % 
+                % subplot(7,1,5), plot(f,10*log10(S))
+                % subplot(7,1,6), plot(10*log10(f),S)
+                % subplot(7,1,7), plot(10*log10(f),10*log10(S))
+
+
+                % % % % % 
+                % % % % % % figure('Color',[1 1 1])
+                % % % % % % hold on, plot((f2),f2'.*(S2),'r')
+                % % % % % % hold on, plot((f2),f2'.*(S2-Serr2(1,:)'),'b:')
+                % % % % % % hold on, plot((f2),f2'.*(S2+Serr2(1,:)'),'c:')
+
+%-----------------------------------------------------------------------
+% Lissage
+
+% S2=resample(S2,1,10);
+% f2=f2(1:10:end);
+
+smo=0.5;
+
+S2=SmoothDec(S2,smo);
+
+% Smooth - Smooth using a Gaussian kernel.
+%  
+%    USAGE
+%  
+%      smoothed = Smooth(data,smooth)
+%  
+%      data           data to smooth
+%      smooth         horizontal and vertical standard deviations [Sv Sh]
+%                     for Gaussian kernel, measured in number of samples
+%                     (0 = no smoothing)
+
+% Serr2a=resample(Serr2(1,:),1,10);
+Serr2a=Serr2(1,:);
+Serr2a=SmoothDec(Serr2a,smo);
+
+% Serr2b=resample(Serr2(2,:),1,10);
+Serr2b=Serr2(2,:);
+Serr2b=SmoothDec(Serr2b,smo);
+
+%-----------------------------------------------------------------------
+% 
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+
+% subplot(1,3,1),
+% plot(f2,SmoothDec(f2'.*S2,smo),'r','linewidth',1), xlim([0 Fup]), ca=ylim;
+% hold on, plot((f2),SmoothDec(f2'.*(Serr2(1,:)'),smo),'b:')
+% hold on, plot((f2),SmoothDec(f2'.*(Serr2(2,:)'),smo),'c:')
+
+% subplot(1,3,2),
+
+% FIGURE1, 2ème graphe:
+% PowerSpectrum multitapers, représentation 1
+subplot(1,3,2),
+plot(f2,10*log10(S2),'r','linewidth',2), xlim([0 Fup]), ca=ylim;
+hold on, plot(f2,10*log10(Serr2a),'b')
+hold on, plot(f2,10*log10(Serr2b),'c')
+% title(['Frequency: ',num2str(params.Fs),'Hz. Limite Inf: ',num2str(limitF)])
+
+% FIGURE1, 3ème graphe:
+% PowerSpectrum multitapers, représentation 2
+subplot(1,3,3)
+plot(10*log10(f2),10*log10(S2),'r','linewidth',2)
+hold on, plot(10*log10(f2),10*log10(Serr2a),'b')
+hold on, plot(10*log10(f2),10*log10(Serr2b),'c')
+xlim([10*log10(limitF) 10*log10(Fup)])
+
+save Spectre -append f2 S2 Serr2 Serr2a Serr2b
+saveFigure(1,'PowerSpectrum',pwd);
+
+close all
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+% SPECTROGRAM (freq au cours du temps)
+% ----------------------------------------------------------------------
+try
+
+        movingwin=[m,1];
+
+        % movingwin         (in the form [window winstep] i.e length of moving
+        % window and step size)
+        % params.tapers=[3 5] par défaut. Ici, c'est le cas.
+
+
+        % params.tapers=[2 3];
+
+
+        [S3,t3,f3]=mtspecgramc(Y,movingwin,params);  
+
+        % FIGURE 2: spectrogramme
+
+        figure('Color',[1 1 1])
+        subplot(3,1,1), plot(tps,Y,'k')
+        xlim([tps(1)+m tps(end)-m])
+
+        %-----------------------------------------------------------------------
+        % imagesc(t3,f3,log(S3)'), axis xy
+        F3=ones(size(S3,1),1)*f3; 
+
+        % S3p=F3'.*S3'; fac=40;
+        S3p=10*log10(S3'); fac=2;
+
+        % S3p=SmoothDec(S3p,[3,4]);
+
+        nb=2;
+        S3p=SmoothDec(S3p(1:nb:end,:),[3,4]);
+        f3=f3(1:nb:end);
+
+        %-----------------------------------------------------------------------
+
+
+        subplot(3,1,[2:3]),imagesc(t3,f3,S3p), axis xy
+
+        ca=caxis;
+        % caxis(ca/fac)
+        % caxis(ca)
+        xlim([tps(1)+m tps(end)-m])
+
+        save Spectrogram S3 t3 f3
+        saveFigure(1,'Spectrogram',pwd);
+        close all
+
+        
+catch
+    
+    S3=[];
+    t3=[];
+    f3=[];
+    
+end
+
+
+%-----------------------------------------------------------------------
+% Crosscorrelogramme
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+% [C,LAGS] = XCORR  returns a vector of lag indices (LAGS).
+% XCORR(A,'flag'), XCORR(A,B,'flag') or XCORR(A,B,MAXLAG,'flag') 
+%     normalizes the correlation according to 'flag':
+%         biased   - scales the raw cross-correlation by 1/M.
+%         unbiased - scales the raw correlation by 1/(M-abs(k)), where k 
+%                    is the index into the result.
+%         coeff    - normalizes the sequence so that the correlations at 
+%                    zero lag are identically 1.0.
+%         none     - no scaling (this is the default).
+try
+            [C, lag] = xcorr(Y,Y,'coeff');
+            lags=lag/chF;
+
+            figure('Color',[1 1 1])
+            plot(lags(lags>-100&lags<100),C(lags>-100&lags<100),'k','linewidth',2)
+
+            save Crosscorr C lag lags
+            saveFigure(1,'Crosscorrelogram',pwd);
+            close all
+catch
+                
+    
+    C=[];
+    lag=[];
+    lags=[];
+end
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+
+
+
+%  figure, hist(Y(10:end-10),100)
+% 
+% h=hist(Y,[-85:0.1:-50]);
+% 
+% 
+%         Fpass=[0.05 2.5];
+%         movingwin=[50,5];
+%         
+%         params.trialave = 0;
+%         params.err = [1 0.05];
+%         params.tapers=[10 19];
+%         params.pad=0;
+%         params.Fs=100;
+%         params.fpass=Fpass;
+%         
+%         [Spect,freq]=mtspectrumc(yy,params);
+
+
+
+
+% [C, B] = CrossCorr2(Y,Y, 2, 250); C(B==0)=0; 
+% figure, bar(B,C,1)
+
+

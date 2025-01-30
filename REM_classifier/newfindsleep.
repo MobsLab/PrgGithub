@@ -1,0 +1,120 @@
+%load Bulb Spectrum
+% load LFPH --> for theta
+% create sptsd
+%load StateEpoch
+
+%%% NEW FIND SLEEP
+clear all 
+close all
+load('SpectrumREM_bulb_high.mat')
+load('StateEpoch.mat')
+fB=f;
+try 
+sptsd=tsd(t*10000,Sp);
+catch
+sptsd=tsd(t*10000,Sp2);
+end
+
+TotalEpoch=intervalSet(t(1)*1e4,1e4*t(end));
+Epoch=TotalEpoch-GndNoiseEpoch-NoiseEpoch;
+
+Spectr=Restrict(sptsd,Epoch);
+startg=find(fB<50,1,'last');
+stopg=find(fB>70,1,'first');
+a=Data(Spectr);
+
+tot_ghi=tsd(Range(Restrict(Spectr,Epoch)),sum(a(:,startg:stopg)')');
+
+tot_ghi=Restrict(tot_ghi,Epoch);
+smooth_ghi=tsd(Range(tot_ghi),smooth(Data(tot_ghi),500));
+
+Peaks=[];
+Peaktd=[];
+Trough=[];
+Troughtd=[];
+for k=1:length(Start(Epoch))
+    data=(Data(Restrict(smooth_ghi,subset(Epoch,k))))';
+    td=Range(Restrict(smooth_ghi,subset(Epoch,k)))';
+    
+    de = diff(data);
+    de1 = [de 0];
+    de2 = [0 de];
+    
+    %finding peaks
+    PeaksIdx = find(de1 < 0 & de2 > 0);
+    TroughIdx=find(de1>0 & de2<0);
+    Peaks = [Peaks data(PeaksIdx)];
+    Peaktd=[Peaktd td(PeaksIdx)];
+    Trough=[Trough data(TroughIdx)];
+    Troughtd=[Troughtd td(TroughIdx)];
+
+end
+Peakstsd=tsd(Peaktd',Peaks');
+Troughstsd=tsd(Troughtd',Trough');
+
+
+
+peak_thresh=63000;
+Peaks_sleep_tsd=tsd(Peaktd(Peaks<peak_thresh)',Peaks(Peaks<peak_thresh)');
+Peaks_wake_tsd=tsd(Peaktd(Peaks>peak_thresh)',Peaks(Peaks>peak_thresh)');
+
+Peaktd(2,:)=Peaks>peak_thresh;
+actval=Peaktd(2,1);
+if actval==1
+    startwake=Peaktd(1,1);
+    lastwake=0;
+    wakenum=1;
+else startsleep=Peaktd(1,1);
+     lastsleep=0;
+ wakenum=0;
+end
+ sleepper=intervalSet(0,0);
+ wakeper=intervalSet(0,0);
+Epochbeg=Start(Epoch);
+Epochend=End(Epoch);
+%1 is awake
+minsleep=2*1e4;
+minwake=2*1e4;
+for k=2:length(Peaktd)
+ a=find(Epochend>Peaktd(1,k),1,'first');
+
+    if actval==1
+        if Peaktd(2,k)==1
+            lastwake=Peaktd(1,k);
+            wakenum=wakenum+1;
+            actval=1;
+        else
+            if abs(min(lastwake-startwake,lastwake-Epochbeg(a))) > minwake
+            wakeper=Or(wakeper,intervalSet(startwake,Peaktd(1,k)));
+            startsleep=Peaktd(1,k);
+            lastsleep=Peaktd(1,k);
+            actval=0;
+            else
+            sleepper=Or(sleepper,intervalSet(startwake,Peaktd(1,k)));
+            startsleep=startwake;
+            lastsleep=Peaktd(1,k);
+            actval=0;
+            end
+        end
+    else
+        if Peaktd(2,k)==0
+            lastsleep=Peaktd(1,k);
+                            actval=0;
+        else
+            
+            if abs(min(lastsleep-startsleep,lastsleep-Epochbeg(a))) > minsleep
+                sleepper=Or(sleepper,intervalSet(startsleep,lastsleep));
+                wakenum=1;
+                startwake=Peaktd(1,k);
+                               actval=1;
+
+            else
+               wakeper=Or(wakeper,intervalSet(startsleep,Peaktd(1,k)));
+               wakenum=wakenum+1;
+               startwake=startsleep;
+               lastwake=Peaktd(1,k);
+               actval=1;
+            end
+        end
+    end
+end

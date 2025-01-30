@@ -1,0 +1,117 @@
+% CorrFreezingActivity2exp
+
+% similar to CorrFreezingActivity but merge data from Dec2014 and Feb 2015 experiments
+
+% plot sham and bulb for both Dec end Feb
+% notation: 1:sham; 2:bulb ; A:Dec2014 ; B:Feb2015
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  FEB 15
+% % hyperactivity data
+% cd /media/DataMOBsRAID/ProjetAversion/ManipFeb15Bulbectomie/hyperactivity
+% load Hyperactivity_5.mat
+% StepNameHyp=StepName;
+% 
+% % freezing data
+% cd /media/DataMOBsRAID/ProjetAversion/ManipFeb15Bulbectomie/SoundOnly
+% load shamAllMiceBilan_1_envC.mat
+% bilanSham=bilan;
+% load bulbAllMiceBilan_1_envC.mat
+% bilanBulb=bilan;
+% StepNameFreeze=StepName;
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  DEC 14
+% 
+% % hyperactivity data
+% cd /media/DataMOBsRAID/ProjetAversion/ManipDec14Bulbectomie/hyperactivty
+% load Hyperactivity_5.mat
+% StepNameHyp=StepName;
+% 
+% 
+% cd /media/DataMOBsRAID/ProjetAversion/ManipDec14Bulbectomie/FreezingSoundOnly
+% load shamAllMiceBilan_1_envA.mat
+% bilanSham=bilan;
+% load bulbAllMiceBilan_1_envA.mat
+% bilanBulb=bilan;
+% StepNameFreeze=StepName;
+
+ParamList={'TotalDistanceTable','TotalTimeTable', 'StopNbTable','PercentTimePeriphTable','MeanDistFromTheCenterTable','NbEntriesCenterNormTable'};
+%ParamList={'TotalDistanceTable'};
+for k=1:length(ParamList)
+figure('Position', [2300 500 1200 700])
+    for j=2:4 % j : post, 6d, 3wk
+
+
+        % hyperactivity data
+        cd /media/DataMOBsRAID/ProjetAversion/ManipDec14Bulbectomie/hyperactivty
+        load Hyperactivity_5.mat
+        StepNameHyp=StepName;
+        stepH=StepNameHyp{j};
+        eval(['H1_A=',ParamList{k},'{1,1}(:, j);']);
+        eval(['H2_A=',ParamList{k},'{1,2}(:, j);']);
+
+        cd /media/DataMOBsRAID/ProjetAversion/ManipDec14Bulbectomie/FreezingSoundOnly
+        load shamAllMiceBilan_1_envA.mat
+        bilanSham_Dec=bilan;
+        load bulbAllMiceBilan_1_envA.mat
+        bilanBulb_Dec=bilan;
+        StepNameFreeze=StepName;
+
+
+        %%%%%%%%%%%%%%%%%%%
+
+        % hyperactivity data
+        cd /media/DataMOBsRAID/ProjetAversion/ManipFeb15Bulbectomie/hyperactivity
+        load Hyperactivity_5.mat
+        StepNameHyp=StepName;
+        stepH=StepNameHyp{j};
+        eval(['H1_B=',ParamList{k},'{1,1}(:, j);']);
+        eval(['H2_B=',ParamList{k},'{1,2}(:, j);']);
+
+        % freezing data
+        cd /media/DataMOBsRAID/ProjetAversion/ManipFeb15Bulbectomie/SoundOnly
+        load shamAllMiceBilan_1_envC.mat
+        bilanSham_Feb=bilan;
+        load bulbAllMiceBilan_1_envC.mat
+        bilanBulb_Feb=bilan;
+        StepNameFreeze=StepName;
+
+        
+
+      
+
+        for i=2:length(StepNameFreeze) % COND EXTenvC EXTenvB
+            stepF=StepNameFreeze{i};
+            
+            F1_A=mean(bilanSham_Dec{1,2}, 2); % mean on columns : one value for the coditioning session (alternative :derniere(s) colonne(s)
+            F2_A=mean(bilanBulb_Dec{1,i}, 2);
+            F1_B=mean(bilanSham_Feb{1,2}, 2); % mean on columns : one value for the coditioning session (alternative :derniere(s) colonne(s)
+            F2_B=mean(bilanBulb_Feb{1,i}, 2);
+            
+
+            subplot(3,3,3*(j-2)+i-1)
+            
+            scatter(F1_A,H1_A, 'MarkerFaceColor', 'k','MarkerEdgeColor', 'w'), hold on
+            scatter(F2_A,H2_A, 'MarkerFaceColor', 'r','MarkerEdgeColor', 'w')
+            scatter(F1_B,H1_B, 'MarkerFaceColor', [0 0 1],'MarkerEdgeColor', 'w'), hold on
+            scatter(F2_B,H2_B, 'MarkerFaceColor', [1 0.5 0],'MarkerEdgeColor', 'w')
+
+            %ylabel([ParamList{k}(1:(end-5)) ' ' stepH])
+            ylabel(stepH)
+            if j==2 &&i==2
+                XL=xlim;
+                YL=ylim;
+                text((XL(1)-(XL(2)-XL(1))*0.5), (YL(1)+(YL(2)-YL(1))*1.2), ParamList{k}(1:(end-5)))
+            end
+            H1=[H1_A;H1_B];
+            H2=[H2_A;H2_B];
+            F1=[F1_A;F1_B];
+            F2=[F2_A;F2_B];
+            [r1,p1]=corrcoef(H1,F1);
+            [r2,p2]=corrcoef(H2,F2);
+            [r,p]=corrcoef([H1;H2],[F1;F2]);
+            title([stepF ' sham p = ' sprintf('%.2f',(p1(1,2))) ' / bulb p = ' sprintf('%.2f',(p2(1,2))) '/ all p = ' sprintf('%.2f',(p(1,2)))]);
+        end
+    end
+end
+legend('sham', 'bulb')
+xlabel('Percent of freezing')

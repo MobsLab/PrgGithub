@@ -1,0 +1,14 @@
+function info = init_file;
+info = [];
+%specifies most of the structure of data
+info.rootDir = '/Volumes/Elements/ProjectMMN/Catherine/';
+info.subjectDir = 'Mouse99/';
+info.acquisitionDir = {'10092024' '12092013' '23092013'};
+info.maindir = '/media/KARIMBACKUP/DataMMN/Mouse55-63/20130923/MMN-Mouse-55-23092013/'
+
+load([info.rootDir info.subjectDir '/ChannelNames.mat']);
+info.channelNames = ChannelName;
+info.channelNumber = 1:numel(ChannelName);
+
+
+info.StateEpochDir = '/EpochInfo';

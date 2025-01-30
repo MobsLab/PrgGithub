@@ -1,0 +1,157 @@
+% FiltreSoikesMC (LR) from NewMCAnalysis (KB)
+
+function [dEeg2 dEeg LFP lfp LFPf LFPf2 tps data] = FiltreSpikesMC(nom)
+
+le=length(nom);
+nomL=nom(1:le-4);
+
+try 
+    eval(['load DataVM',nomL])
+catch
+    
+        data=abfloadKB(nom);
+        
+        raw=tsd(data(:,1),data(:,2));
+        ii=thresholdIntervals(raw,-10,'Direction','Above');
+        spikes=Start(ii);
+        spk=tsd(spikes,spikes);
+
+
+        clear raw
+        Vm=data(:,1:2);
+        h = waitbar(0,'Please wait...');
+
+        for i=1:length(spikes)
+            ix(i)=find(data(:,1)==spikes(i));
+
+                if ix(i)+100<length(data)&ix(i)-50>1
+                    Vm(ix(i)-50:ix(i)+100,:)=RemoveSpike(data(ix(i)-50:ix(i)+100,:));
+                else if ix(i)+100<length(data)&ix(i)-50<1
+                    Vm(1:ix(i)+100,:)=RemoveSpike(data(1:ix(i)+100,:));
+                    else if ix(i)+100>length(data)
+                    Vm(ix(i)-50:end,:)=RemoveSpike(data(ix(i)-50:end,:));
+
+                    end
+                    end
+
+                end
+
+            %     if ix(i)+250<length(data)
+            %         Vm(ix(i)-100:ix(i)+250,:)=RemoveSpike(data(ix(i)-100:ix(i)+250,:));
+            %     else
+            %         Vm(ix(i)-100:end,:)=RemoveSpike(data(ix(i)-100:end,:));
+            %     end
+
+
+            waitbar(i/length(spikes),h)
+
+        end
+
+            close(h)
+
+
+            % tps=data(1:10:end,1);
+            temp=[Vm(1,2)*ones(500000,1); Vm(:,2); Vm(end,2)*ones(500000,1)];
+            VM=resample(temp,1,100);
+            VM=VM(5001:end-5000);
+
+            %échelle de temps recalculée
+                        tps=data(1:100:end,1);
+
+
+            [b,a]=butterlow1(2/100);
+            dEeg = filtfilt(b,a,[VM(1)*ones(5000,1); VM; VM(end)*ones(5000,1)]);
+
+                        %pour virer la baseline
+                        %filtre passe bas (0,005Hz)
+                        if tps(end)>500
+                        [b,a]=butterlow1(0.05/100);
+                        else if tps(end)>100&tps(end)<500
+                                [b,a]=butterlow1(0.5/100);
+                            else
+                                [b,a]=butterlow1(1/100);
+                            end
+                        end
+
+                        dEeg2 = filtfilt(b,a,dEeg);
+                        %valeurs filtrées: dEeg
+
+                       
+
+        dEeg=dEeg(5001:end-5000);
+        dEeg2=dEeg2(5001:end-5000);
+
+            eval(['save DataVM',nomL,' VM Vm data tps spikes dEeg2 dEeg'])
+
+end
+
+% limite=5000;
+% tps=tps(limite:end-limite);
+% yy=dEeg(limite:end-limite)-dEeg2(limite:end-limite);
+
+% ________________________________________________________________
+
+% Pour le lFP
+% ----------------------------------------------------------------
+lfp=data(:,3);
+temp=[lfp(1)*ones(500000,1); lfp(:); lfp(end)*ones(500000,1)];
+LFP=resample(temp,1,100);
+LFP=LFP(5001:end-5000);
+
+   %échelle de temps recalculée
+%                         tps=data(1:100:end,1);
+
+ [b,a]=butterlow1(2/100);
+    LFPf = filtfilt(b,a,[LFP(1)*ones(5000,1); LFP; LFP(end)*ones(5000,1)]);
+
+                %pour virer la baseline
+                %filtre passe bas (0,005Hz)
+                if tps(end)>500
+                [b,a]=butterlow1(0.05/100);
+%                 ne semble pas être appliqué...d'où lignes 125 à 
+                else if tps(end)>100&tps(end)<500
+                        [b,a]=butterlow1(0.5/100);
+                    else
+                        [b,a]=butterlow1(1/100);
+%                         
+                    end
+                end
+
+                LFPf2 = filtfilt(b,a,LFPf);
+                %valeurs filtrées: dEeg
+
+                %échelle de temps recalculée
+                
+[b,a]=butterlow1(0.05/100);
+LFPf3=filtfilt(b,a,LFPf2);
+F=LFPf2-LFPf3;
+
+
+LFPf=LFPf(5001:end-5000);
+LFPf2=LFPf2(5001:end-5000);
+F=F(
+
+ eval(['save DataLFP',nomL,' LFP lfp LFPf LFPf2'])
+ 
+ 
+ % correlation à 0 lag, LFP comme ref
+ 
+% F=LFPf2;
+% Y=dEeg2;
+% [r, p] = corrcoef(F,Y);
+%                r=r(1,2);
+%                p=p(1,2);
+% eval(['save Corr',nomL,' r p'])
+ 
+end
+
+
+
+
+
+               
+% Crosscorrelogram
+               
+%  [C,lag] = xcorr(F,Y,'coeff');
+
+

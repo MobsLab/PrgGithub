@@ -1,0 +1,1180 @@
+function [numF,filename]=UMazeTracking(~,~)
+%% INPUTS
+
+clear global name_folder imageRef Ratio_IMAonREAL
+clear global enableTrack intermed
+global a
+global vid
+global chrono
+global name_folder
+global imageRef
+global Ratio_IMAonREAL
+global enableTrack
+global intermed
+global LastStim
+global Zone
+global DoorChangeMat
+global Count_Freez
+global th_immob
+global thimmobline
+global Act
+global PlotFreez
+global PosMat
+global n_AutoStop
+global num_exp
+global StartChrono
+global tDeb
+global guireg_fig
+global countDown
+global t_ON
+global t_OFF
+global namePhase
+global ZoneLabels
+global t1 t2
+t1=clock;
+t2=clock;
+
+% Tracking parameters
+global maxsrndsz SrdZone; maxsrndsz=80; SrdZone=20;
+global maxsrtsz strsz se; maxsrtsz=20; strsz=1; se = strel('disk',strsz);
+global maxyaxis ymax; maxyaxis=1;ymax=0.01;
+global BW_threshold2;
+global smaller_object_size2;
+global PixelsUsed
+global maxth_immob; maxth_immob=0.05;
+intermed=load('InfoTrackingTemp.mat');
+imageRef=intermed.ref;
+BW_threshold2=intermed.BW_threshold;
+smaller_object_size2=intermed.smaller_object_size;
+shape_ratio2=intermed.shape_ratio;
+frame_rate = 20;
+
+% Display parameters
+color_on = [ 0 0 0];
+color_off = [1 1 1];
+colori={'g','r','c'};
+scrsz = get(0,'ScreenSize');
+global UpdateImage; UpdateImage=2; % update every n frames the picture shown on screen
+global maxfrvis;maxfrvis=800;
+
+% Time/date parameters
+res=pwd;
+mark=filesep;
+t=clock;
+jour=num2str(t(3));if length(jour)==1, jour=cat(2,'0',jour);end
+mois=num2str(t(2));if length(mois)==1, mois=cat(2,'0',mois);end
+annee=num2str(t(1));
+TodayIs=[jour mois annee];
+
+
+%% Task parameters
+global nametypes; nametypes={'Hab','TestPre','Cond','CondWallShock','CondWallSafe','TestPost','Ext','BlockedWall',...
+    'EPM','SoundHab','SoundCnd','SoundTest',...
+    'Calibration','CalibrationEyeshock','SleepSession','BlockedWallShock'};
+mat1=ones(1,30);
+global SoundTimesHabTest; SoundTimesHabTest=[122,193,251,351,413,485,636,698,800,874,940,1022,1133,1195,1275,1340,Inf];
+global SoundTimesCond;  SoundTimesCond=[122,197,287,362,457,530,640,760,840,930,1010,1095,1185,1285,1365,1430,Inf];
+global CalibTimes;  CalibTimes=[50,70,90,110,150,155,157,159,Inf];
+global CalibTimesEyeshock;  CalibTimesEyeshock=[50,70,90,110,Inf];
+global SinglShockTime; SinglShockTime=[45,Inf];
+global CondWallShockTime; CondWallShockTime=[120,150,180,210,Inf];
+global delStim; delStim=15;%was 12 for PAG
+global delStimreturn; delStimreturn=5;%was 12 for PAG
+
+
+%% Initialization
+global ShTN; ShTN=1;
+nPhase=NaN;
+StartChrono=0;
+prefac0=0;
+num_exp=0;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% graphical interface n�1 with all the pushbuttons
+
+Fig_Odor=figure('units','normalized','position',[0.1 0.1 0.4 0.85],...
+    'numbertitle','off','name','UMazeProtocol','menubar','none','tag','figure Odor');
+set(Fig_Odor,'Color',color_on);
+
+maskbutton(1)= uicontrol(Fig_Odor,'style','pushbutton',...
+    'units','normalized','position',[0.01 0.89 0.2 0.05],...
+    'string','1- INPUTS EXPE','callback', @giv_inputs);
+set(maskbutton(1),'enable','on','FontWeight','bold')
+
+maskbutton(2)= uicontrol(Fig_Odor,'style','pushbutton',...
+    'units','normalized','position',[0.01 0.75 0.2 0.05],...
+    'string','2- Real Distance','callback', @Real_distance);
+set(maskbutton(2),'enable','off')
+
+maskbutton(3)= uicontrol(Fig_Odor,'style','pushbutton',...
+    'units','normalized','position',[0.01 0.70 0.2 0.05],'string','3 - GetBehavZones','callback',@DefineZones);
+set(maskbutton(3),'enable','off')
+
+maskbutton(5)= uicontrol(Fig_Odor,'style','pushbutton',...
+    'units','normalized','position',[0.01 0.65 0.2 0.05],...
+    'string','4- START EXPE','callback', @start_Expe);
+set(maskbutton(5),'enable','off')
+
+maskbutton(4)= uicontrol(Fig_Odor,'style','pushbutton',...
+    'units','normalized','position',[0.01 0.48 0.2 0.05],'string','5- START session');
+set(maskbutton(4),'enable','off','callback', @StartSession)
+
+maskbutton(6)= uicontrol(Fig_Odor,'style','pushbutton',...
+    'units','normalized','position',[0.025 0.31 0.15 0.03],...
+    'string','REstart Session','callback', @Restart_Phase);
+set(maskbutton(6),'enable','off')
+
+maskbutton(7)= uicontrol(Fig_Odor,'style','pushbutton',...
+    'units','normalized','position',[0.025 0.36 0.15 0.03],...
+    'string','Stop Emergency','callback', @stop_Phase);
+set(maskbutton(7),'enable','off')
+
+maskbutton(8)= uicontrol(Fig_Odor,'style','pushbutton',...
+    'units','normalized','position',[0.01 0.03 0.2 0.05],...
+    'string','CLOSE EXPE','callback', @quit);
+set(maskbutton(8),'enable','on','FontWeight','bold')
+
+maskbutton(9)= uicontrol(Fig_Odor,'style','pushbutton',...
+    'units','normalized','position',[0.55 0.03 0.2 0.05],...
+    'string','DoorChange','callback', @DoorChange);
+set(maskbutton(9),'enable','on','FontWeight','bold')
+
+
+inputDisplay(1)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.25 0.55 0.5 0.02],'string','Filename = TO DEFINE','FontSize',10);
+inputDisplay(6)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.01 0.59 0.16 0.02],'string','Session','FontSize',12);
+inputDisplay(7)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.01 0.56 0.16 0.02],'string','WAIT','FontSize',12);
+inputDisplay(8)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.01 0.95 0.2 0.02],'string','TASK = ?','FontSize',10);
+inputDisplay(9)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.01 0.81 0.16 0.06],'string','ListOfSession = ?','FontSize',10);
+inputDisplay(10)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.15 0.45 0.1 0.02],'string','Shock','FontSize',8);
+inputDisplay(11)=uicontrol(Fig_Odor,'style','text','units','normalized','position',[0.01 0.2 0.12 0.1],'string','Prompt','FontSize',8);
+
+for bi=[1,6:9], set(inputDisplay(bi),'BackgroundColor',color_on,'ForegroundColor','w','FontWeight','bold');end
+
+chronoshow=uicontrol('style','edit', 'units','normalized','position',[0.01 0.4 0.1 0.05],...
+    'string',num2str(floor(0)),'ForegroundColor','g','BackgroundColor','k','FontSize',14);
+chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0.1 0.05],...
+    'string',num2str(floor(0)),'ForegroundColor','k','BackgroundColor','k','FontSize',14);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CALLED FUNCTIONS
+
+% -----------------------------------------------------------------
+%% function to quit the programm
+    function quit(obj,event)
+        enableTrack=0;
+        try close(guireg_fig);end
+        delete(Fig_Odor)
+    end
+
+
+%% function to register when animal makes a quick turn around
+    function DoorChange(obj,event)
+       DoorChangeMat=[DoorChangeMat,PosMat(end,1)]; 
+    end 
+% -----------------------------------------------------------------
+%% Ask for all inputs and display
+    function giv_inputs(obj,event)
+        
+        strfcts=strjoin(nametypes,'|');
+        u2=uicontrol(Fig_Odor,'Style', 'popup','String', strfcts,'units','normalized',...
+            'Position', [0.01 0.84 0.2 0.05],'Callback', @setprotoc);
+        
+        
+        function setprotoc(obj,event)
+            fctname=get(obj,'value');
+            namePhase=nametypes(fctname);
+            savProtoc;
+        end
+        
+        function savProtoc(obj,event)
+            set(inputDisplay(9),'string',['Sessions:',{' '},namePhase]);
+
+        if strcmp('Hab',namePhase) 
+            lengthPhase=900;
+            set(inputDisplay(10),'string','No Shock');
+            set(chronostim,'ForegroundColor','k');
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        elseif strcmp('BlockedWall',namePhase)
+            lengthPhase=300;
+            set(inputDisplay(10),'string','No Shock');
+            set(chronostim,'ForegroundColor','k');
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        elseif strcmp('BlockedWallShock',namePhase)
+            lengthPhase=300;
+            set(inputDisplay(10),'string','NextShock');
+            set(chronostim,'ForegroundColor','r');
+            set(chronostim,'string',num2str(SinglShockTime(ShTN)));
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        elseif strcmp('TestPre',namePhase)
+            lengthPhase=180;
+            set(inputDisplay(10),'string','No Shock');
+            set(chronostim,'ForegroundColor','k');
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        elseif strcmp('Cond',namePhase)
+            lengthPhase=480;
+            set(chronostim,'ForegroundColor','r');
+            set(inputDisplay(10),'string','TimeInZone');
+            set(chronostim,'string',num2str(0));
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        elseif strcmp('CondWallShock',namePhase)
+            lengthPhase=480;
+            set(chronostim,'ForegroundColor','r');
+            set(inputDisplay(10),'string','NextShock');
+            set(chronostim,'string',num2str(CondWallShockTime(ShTN)));
+            set(inputDisplay(11),'string','Remove door at 300','ForegroundColor','k');
+        elseif strcmp('CondWallSafe',namePhase)
+            lengthPhase=480;
+            set(chronostim,'ForegroundColor','r');
+            set(inputDisplay(10),'string','TimeInZone');
+            set(chronostim,'string',num2str(0));
+            set(inputDisplay(11),'string','Remove door at 300','ForegroundColor','k');
+        elseif strcmp('TestPost',namePhase)
+            lengthPhase=180;
+            set(inputDisplay(10),'string','No Shock');
+            set(chronostim,'ForegroundColor','k');
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        elseif strcmp('Ext',namePhase)
+            lengthPhase=900;
+            set(inputDisplay(10),'string','No Shock');
+            set(chronostim,'ForegroundColor','k');
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        elseif strcmp('EPM',namePhase)
+            lengthPhase=1200;
+            set(inputDisplay(10),'string','No Shock');
+            set(chronostim,'ForegroundColor','k');
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        elseif strcmp('SoundCnd',namePhase)
+            lengthPhase=1600;
+            set(inputDisplay(10),'string','NextSound');
+            set(chronostim,'ForegroundColor','r');
+            set(chronostim,'string',num2str(SoundTimesCond(ShTN)));
+            set(inputDisplay(11),'string','Check Sound is CS+','ForegroundColor','r');
+        elseif strcmp('SoundHab',namePhase)
+            lengthPhase=780;
+            set(inputDisplay(10),'string','NextSound');
+            set(chronostim,'ForegroundColor','g');
+            set(chronostim,'string',num2str(SoundTimesHabTest(ShTN)));
+            set(inputDisplay(11),'string','Check Sound is CS-','ForegroundColor','g');
+        elseif strcmp('SoundTest',namePhase)
+            lengthPhase=1450;
+            set(inputDisplay(10),'string','NextSound');
+            set(chronostim,'ForegroundColor','g');
+            set(chronostim,'string',num2str(SoundTimesHabTest(ShTN)));
+            set(inputDisplay(11),'string','Check Sound is CS-','ForegroundColor','g');
+        elseif strcmp('Calibration',namePhase)
+            lengthPhase=180;
+            set(inputDisplay(10),'string','NextShock');
+            set(chronostim,'ForegroundColor','r');
+            set(chronostim,'string',num2str(CalibTimes(ShTN)));
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        elseif strcmp('CalibrationEyeshock',namePhase)
+            lengthPhase=130;
+            set(inputDisplay(10),'string','NextShock');
+            set(chronostim,'ForegroundColor','r');
+            set(chronostim,'string',num2str(CalibTimesEyeshock(ShTN)));
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        elseif strcmp('SleepSession',namePhase)
+            lengthPhase=12000;
+            set(inputDisplay(10),'string','No Shock');
+            set(chronostim,'ForegroundColor','k');
+            set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
+        end
+        
+        try
+            temp=load('default_answer.mat','default_answer'); default_answer=temp.default_answer;
+            default_answer{2}=num2str(lengthPhase);
+        end
+        if ~exist('default_answer','var') || (exist('default_answer','var') && length(default_answer)~=5)
+            default_answer={'100',num2str(lengthPhase),'0.3','2','5','1'};
+        end
+
+        answer = inputdlg({'NumberMouse','Session duration (s)','Thresh immobility (mm)','Drop intervals (s)','Smooth Factor'},'INFO',1,default_answer);
+        default_answer=answer; save default_answer default_answer
+        
+        nmouse=str2num(answer{1});
+        lengthPhase=str2num(answer{2});
+        nPhase=1;
+        startphase=1;
+        countDown=0;
+        
+        th_immob=str2num(answer{3});
+        thtps_immob=str2num(answer{4});
+        SmoothFact=str2num(answer{5});
+        
+        nameTASK='UMaze';
+        
+        set(inputDisplay(8),'string',['TASK = ',nameTASK]);
+        
+        if exist('Ratio_IMAonREAL','var') && ~isempty(Ratio_IMAonREAL)
+            set(maskbutton(5),'enable','on','FontWeight','bold')
+            set(maskbutton(2),'enable','on','FontWeight','normal','string','2- Real Distance (OK)')
+        else
+            set(maskbutton(2),'enable','on','FontWeight','bold')
+        end
+        
+        disp(' ');disp('-------------------- New Expe ---------------------');
+        save([res,mark,'TempFreezeON.mat'],'nmouse','nPhase','namePhase','lengthPhase','nameTASK','imageRef','startphase');
+        save([res,mark,'TempFreezeON.mat'],'-append','th_immob','thtps_immob','SmoothFact');
+        set(maskbutton(1),'FontWeight','normal','string','1- INPUTS EXPE (OK)');
+    
+        end
+        set(maskbutton(3),'enable','on')
+    end
+
+% -----------------------------------------------------------------
+%% Ask for all inputs and display
+    function Real_distance(obj,event)
+        
+        figure(Fig_Odor), subplot(5,1,1:2),
+        imagesc(imageRef); colormap gray; axis image
+        title('Click on two points to define a distance','Color','w')
+        for j=1:2
+            [x,y]=ginput(1);
+            hold on, plot(x,y,'+r')
+            x1(j)=x; y1(j)=y;
+        end
+        line(x1,y1,'Color','r','Linewidth',2)
+        
+        answer = inputdlg({'Enter real distance (cm):'},'Define Real distance',1,{'40'});
+        text(mean(x1)+10,mean(y1)+10,[answer{1},' cm'],'Color','r')
+        
+        d_xy=sqrt((diff(x1)^2+diff(y1)^2));
+        Ratio_IMAonREAL=d_xy/str2num(answer{1});
+        
+        title(' do 2-')
+        hold on, line([10 20]*Ratio_IMAonREAL,[10 10],'Color','k','Linewidth',3)
+        text(15*Ratio_IMAonREAL,15,'10 cm','Color','k')
+        
+        set(maskbutton(5),'enable','on','FontWeight','bold')
+        set(maskbutton(2),'enable','on','FontWeight','normal','string','2- Real Distance (OK)')
+        Ratio_IMAonREAL=Ratio_IMAonREAL;
+        save([res,mark,'TempFreezeON.mat'],'-append','Ratio_IMAonREAL');
+    end
+
+% -----------------------------------------------------------------
+%% Interface of analysis
+    function start_Expe(obj,event)
+        t1=clock;
+        t2=clock;
+        enableTrack=1;
+        templaod=load([res,mark,'TempFreezeON.mat']);
+        tempstartphase=templaod.startphase;
+        num_exp=0;
+        num_phase=tempstartphase-1;
+        StartChrono=0;
+        prefix=['FEAR-Mouse-' num2str(templaod.nmouse) '-' TodayIs '-'];
+        
+        set(maskbutton(5),'enable','on','FontWeight','normal','string','3- START EXPE (OK)')
+        
+        for nn=tempstartphase:templaod.nPhase
+            if enableTrack
+                num_phase=num_phase+1;
+                startphase=num_phase;
+                
+                n_AutoStop=templaod.lengthPhase;
+                set(inputDisplay(6),'string',['Session ',num2str(nn),' :'])
+                set(inputDisplay(7),'string','WAIT for start');
+                
+                % create folder to save tracking and analysis
+                % ----------------------
+                prefac=num2str(num_phase);
+                if length(prefac)==1, prefac=cat(2,'0',prefac);end
+                
+                try
+                    name_folder = [prefix prefac '-' templaod.namePhase{nn}];
+                catch
+                    name_folder = [prefix prefac '-' templaod.namePhase{nn}];
+                end
+                
+                trynumber=1;
+                name_foldertemp=[name_folder,'0'];
+                while exist(name_foldertemp,'file')
+                    name_foldertemp=[name_folder,num2str(trynumber,'%02g')];
+                    trynumber=trynumber+1;
+                end
+                name_folder=name_foldertemp;
+                
+                mkdir(name_folder);
+                disp(name_folder)
+                
+                set(inputDisplay(1),'string',name_folder);
+                save([res,mark,'TempFreezeON.mat'],'-append','imageRef','Ratio_IMAonREAL','name_folder','n_AutoStop','startphase')
+                
+                pause(0.1)
+                StartChrono=0;
+                
+                if size(a.Status,2)==6
+                    try fopen(a); end
+                end
+                set(maskbutton(4),'enable','on','FontWeight','bold')
+                Track_Freeze;
+            end
+        end
+        try        
+            set(maskbutton(5),'enable','off','FontWeight','normal','string','3- START EXPE')
+            set(maskbutton(1),'enable','on','FontWeight','bold','string','1- INPUTS EXPE')
+            set(maskbutton(4),'enable','on'),end
+        if enableTrack
+            set(inputDisplay(6),'string','END of the')
+            set(inputDisplay(7),'string','experiment')
+        end
+    end
+
+
+
+% -----------------------------------------------------------------
+%% track mouse
+    function Track_Freeze(obj,event)
+        commnum=1;
+        chrono=0;
+        Count_Freez=0; set(chronoshow,'string',num2str(0));
+        num_exp=num_exp+1;
+        disp('   Begining tracking...')
+        guireg_fig=OnlineGuiReglage;
+        % -------------------
+        % reload everything
+        tempLoad=load([res,mark,'TempFreezeON.mat']);
+        imageRef=tempLoad.imageRef;
+        Ratio_IMAonREAL=tempLoad.Ratio_IMAonREAL;
+        th_immob=tempLoad.th_immob;
+        thtps_immob=tempLoad.thtps_immob;
+        n_AutoStop=tempLoad.n_AutoStop;
+        name_folder=tempLoad.name_folder;
+        
+        % -------------------
+        % display zone
+        
+        figure(Fig_Odor), subplot(5,1,1:2),
+        htrack = imagesc(imageRef);axis image;
+        line([10 20]*Ratio_IMAonREAL,[10 10],'Color','k','Linewidth',3)
+        text(15*Ratio_IMAonREAL,15,'10 cm','Color','k')
+        title('ACQUISITION ON')
+        g=plot(0,0,'m+');
+        
+        figure(Fig_Odor), subplot(5,1,3:4),
+        htrack2 = imagesc(zeros(size((imageRef))));axis image;colormap hot; caxis([0 1])
+        xlabel('tracking online','Color','w')
+        
+        im_diff=0;
+        figure(Fig_Odor), subplot(5,1,5)
+        hold off, PlotFreez=plot(0,0,'-b');
+        hold on, thimmobline=line([1,2000],[1 1]*th_immob,'Color','r');
+        xlim([0,maxfrvis]); 
+        % display chrono
+        time_image = 1/frame_rate;
+        
+        
+        % -----------------------------------------------------------------
+        % ---------------------- INITIATE TRACKING ------------------------
+        n=1;
+        num_fr=1; num_fr_f=1;
+        diffshow=zeros(size((imageRef)));
+        prefac0=char; for ii=1:4-length(num2str(num_exp)), prefac0=cat(2,prefac0,'0'); end
+        Fname=['F' TodayIs '-' prefac0 num2str(num_exp)];
+        mkdir([name_folder mark Fname]);
+        disp(['   ',Fname]);
+        DoorChangeMat=[];
+        
+        PosMat=[];
+        clear Movtsd
+        %tDeb = clock; timeDeb = tDeb(4)*60*60+tDeb(5)*60+tDeb(6);
+        clear image_temp
+        
+        CLpluTTL=[];
+        while enableTrack
+            %Active la camera et envoie l'image dans le workspace
+            pause(time_image-etime(t2,t1));
+            IM=getsnapshot(vid);
+            % ---------------------------------------------------------
+            % update chrono
+            t1 = clock;
+            
+            if StartChrono
+                chrono=etime(t1,tDeb);
+                set(chronoshow,'string',[num2str(floor(chrono)),'/',num2str(n_AutoStop)]);
+            end
+            % used to get imge here but things speed up a lot if you do it
+            % after the pause
+            %trigger(vid);
+            %IM=getdata(vid,1,'uint8');
+            
+            % ---------------------------------------------------------
+            % --------------------- TREAT IMAGE -----------------------            
+            % Substract reference image
+            subimage = (imageRef-IM);
+            % Add the mask
+            subimage = uint8(double(subimage).*double(intermed.mask));
+            % Convert the resulting grayscale image into a binary image.
+            diff_im = im2bw(subimage,BW_threshold2);
+            % erode to get rid of fine objects
+            diff_im=imerode(diff_im,se);
+            % Remove all the objects smaller than smaller_object_size
+            diff_im = bwareaopen(diff_im,smaller_object_size2);
+            diff_im=imdilate(diff_im,se);
+
+            % ---------------------------------------------------------
+            % --------------------- FIND MOUSE ------------------------
+            % We get a set of properties for each labeled region.
+            bw = logical(diff_im);
+            stats = regionprops( bw, 'Centroid','MajorAxisLength','MinorAxisLength');
+            centroids = cat(1, stats.Centroid);
+            
+            % ---------------------------------------------------------
+            % --------------------- FREEZING -----------------------
+            if n>3 & size(centroids) == [1 2]
+                FzZone=roipoly([1:320],[1:240],IM,[centroids(1)-SrdZone centroids(1)-SrdZone centroids(1)+SrdZone centroids(1)+SrdZone],...
+                    [centroids(2)-SrdZone centroids(2)+SrdZone centroids(2)+SrdZone centroids(2)-SrdZone]);
+                PixelsUsed=sum(sum(double(FzZone).*double(intermed.mask)+double(FzZone_temp).*double(intermed.mask)));
+                immob_IM = double(diff_im).*double(FzZone) - double(image_temp).*double(FzZone_temp);
+                diffshow=ones(size(immob_IM,1),size(immob_IM,2));
+                diffshow(FzZone==1)=0.4;
+                diffshow(FzZone_temp==1)=0.4;
+                diffshow(bw==1)=0;
+                image_temp=diff_im;
+                FzZone_temp=FzZone;
+            else
+                diffshow=diff_im;
+                immob_IM=nan(size(IM,1),size(IM,2));
+                image_temp=diff_im;
+                FzZone_temp=intermed.mask;
+                PixelsUsed=SrdZone*SrdZone;
+            end
+            
+            % display video, mouse position and save in posmat
+            % Every 3 images
+            if StartChrono
+                
+                % Update displays every UpdateImage frames
+                %if  mod(n,UpdateImage)==0
+                    
+                    set(htrack2,'Cdata',diffshow);
+                    set(htrack,'Cdata',IM);
+                    try
+                        dattemp=im_diff;
+                        dattemp(isnan(im_diff(:,2)),2)=0;
+                        set(PlotFreez,'YData',im_diff(max(1,num_fr-maxfrvis):end,2),'XData',[1:length(dattemp(max(1,num_fr-maxfrvis):end,2))]')
+                    end
+                    figure(Fig_Odor), subplot(5,1,5)
+                    set(gca,'Ylim',[0 max(ymax,1e-5)]);
+                    
+               % end
+
+                if size(centroids) == [1 2]
+                    set(g,'Xdata',centroids(1),'YData',centroids(2))
+                    PosMat(num_fr,1)=chrono;
+                    PosMat(num_fr,2)=centroids(1)/Ratio_IMAonREAL;
+                    PosMat(num_fr,3)=centroids(2)/Ratio_IMAonREAL;
+                    PosMat(num_fr,4)=0;
+                    im_diff(num_fr,1)=chrono;
+                    im_diff(num_fr,2)=(sum(sum(((immob_IM).*(immob_IM)))))./PixelsUsed;
+                else
+                    set(g,'Xdata',0,'YData',0)
+                    PosMat(num_fr,:)=[chrono;NaN;NaN;NaN];
+                    im_diff(num_fr,1:2)=[chrono;NaN];
+                end
+                num_fr=num_fr+1;
+                
+                
+                
+                %% UMaze protocols
+                if strcmp('Cond',namePhase) &  size(centroids) == [1 2]
+                    where= Zone{1}(max(floor(centroids(2)),1),max(floor(centroids(1)),1));
+                    if where==1
+                        set(chronostim,'string',num2str(floor(etime(clock,LastStim))));
+                        if etime(clock,LastStim)>1.5*delStim 
+                            LastStim=clock;
+                            LastStim(end)=LastStim(end)-(delStim-delStimreturn); % was 5
+                        end
+                        if etime(clock,LastStim)>delStim +2*rand
+                            LastStim=clock;
+                            fwrite(a,9);
+                            PosMat(end,4)=1;
+                            disp('stim')
+                        end
+                    end
+                end
+                
+                
+                if (strcmp('BlockedWallShock',namePhase))
+                    if etime(clock,tDeb)>SinglShockTime(ShTN)
+                    fwrite(a,9);
+                    PosMat(end,4)=1;
+                    SinglShockTime(ShTN)
+                    disp('shock')
+                    ShTN=ShTN+1;
+                    set(chronostim,'string',num2str(SinglShockTime(ShTN)));
+                    end
+                end
+
+                if (strcmp('CondWallSafe',namePhase))
+                    if etime(clock,tDeb)>280
+                        set(inputDisplay(11),'string','Remove door at 300','ForegroundColor','r','FontSize',15);
+                    end
+                    if etime(clock,tDeb)>300  &  size(centroids) == [1 2]
+                        where= Zone{1}(max(floor(centroids(2)),1),max(floor(centroids(1)),1));
+                        if where==1
+                            set(chronostim,'string',num2str(floor(etime(clock,LastStim))));
+                            if etime(clock,LastStim)>1.5*delStim %was 2
+                                LastStim=clock;
+                                LastStim(end)=LastStim(end)-(delStim-delStimreturn); % was 5
+                            end
+                            if etime(clock,LastStim)>delStim +2*rand
+                                LastStim=clock;
+                                fwrite(a,9);
+                                PosMat(end,4)=1;
+                                disp('stim')
+                            end
+                        end
+                    end
+                end
+                
+                if (strcmp('CondWallShock',namePhase))
+                    if etime(clock,tDeb)>280
+                        set(inputDisplay(11),'string','Remove door at 300','ForegroundColor','r','FontSize',15);
+                    end
+                    if etime(clock,tDeb)>CondWallShockTime(ShTN)
+                        fwrite(a,9);
+                        PosMat(end,4)=1;
+                        CondWallShockTime(ShTN)
+                        disp('shock')
+                        ShTN=ShTN+1;
+                        set(chronostim,'string',num2str(CondWallShockTime(ShTN)));
+                    end
+                    
+                    if etime(clock,tDeb)>300  &  size(centroids) == [1 2]
+                        set(inputDisplay(10),'string','TimeInZone');
+                        where= Zone{1}(max(floor(centroids(2)),1),max(floor(centroids(1)),1));
+                        if where==1
+                            set(chronostim,'string',num2str(floor(etime(clock,LastStim))));
+                            if etime(clock,LastStim)>1.5*delStim %was 2
+                                LastStim=clock;
+                                LastStim(end)=LastStim(end)-(delStim-delStimreturn); % was 5
+                            end
+                            if etime(clock,LastStim)>delStim +2*rand
+                                LastStim=clock;
+                                fwrite(a,9);
+                                PosMat(end,4)=1;
+                                disp('stim')
+                            end
+                        end
+                    end
+                end
+                
+                
+                %% Sound Protocols
+                if strcmp('SoundCnd',namePhase) 
+                    if etime(clock,tDeb)>SoundTimesCond(ShTN)
+                    if rem(ShTN,2)==0
+                        fwrite(a,7);
+                        PosMat(end,4)=2;
+                        disp('CS-')
+                        set(chronostim,'ForegroundColor','r');
+                        set(inputDisplay(11),'string','Change Sound to CS+','ForegroundColor','r');
+                    else
+                        fwrite(a,5);
+                        PosMat(end,4)=1;
+                        disp('CS+ shock')
+                        set(chronostim,'ForegroundColor','g');
+                        set(inputDisplay(11),'string','Change Sound to CS-','ForegroundColor','g');
+                    end
+                    ShTN=ShTN+1;
+                    set(chronostim,'string',num2str(SoundTimesCond(ShTN)));
+                    end
+                end
+                
+                if (strcmp('SoundHab',namePhase)|strcmp('SoundTest',namePhase))
+                    if etime(clock,tDeb)>SoundTimesHabTest(ShTN)
+                    fwrite(a,7);
+                    PosMat(end,4)=2;
+                    disp('CS-/CS+')
+                    if ShTN<=4
+                        disp('CS-')
+                    else
+                        disp('CS+')
+                    end
+                    if ShTN==4
+                        set(chronostim,'ForegroundColor','r'); 
+                            set(inputDisplay(11),'string','Change Sound to CS+','ForegroundColor','r');
+                    end
+                    ShTN=ShTN+1;
+                    set(chronostim,'string',num2str(SoundTimesHabTest(ShTN)));
+                    end
+                end
+                
+                %% Calibration Protocols
+                if (strcmp('Calibration',namePhase))
+                    if etime(clock,tDeb)>CalibTimes(ShTN)
+                    fwrite(a,9);
+                    PosMat(end,4)=1;
+                    CalibTimes(ShTN)
+                    disp('shock')
+                    ShTN=ShTN+1;
+                    set(chronostim,'string',num2str(CalibTimes(ShTN)));
+                    end
+                end
+                
+                if (strcmp('CalibrationEyeshock',namePhase))
+                    if etime(clock,tDeb)>CalibTimesEyeshock(ShTN)
+                    fwrite(a,9);
+                    PosMat(end,4)=1;
+                    CalibTimesEyeshock(ShTN)
+                    disp('shock')
+                    ShTN=ShTN+1;
+                    set(chronostim,'string',num2str(CalibTimesEyeshock(ShTN)));
+                    end
+                end
+                
+                
+                
+
+               % ---------------------------------------------------------
+                % --------------------- SAVE fwrite(FRAMES) -----------------------
+                datas.image =  uint8(double(IM));
+                datas.time = t1;
+                                
+                prefac1=char; for ii=1:6-length(num2str(n)), prefac1=cat(2,prefac1,'0');end
+                save([ name_folder mark Fname mark 'frame' prefac1 sprintf('%0.5g',n)],'datas');
+                n = n+1;
+                
+                
+            end
+            
+            t2 = clock;
+            if StartChrono && etime(t2,tDeb)> n_AutoStop+0.5
+                enableTrack=0;
+                if Count_Freez
+                    Count_Freez=0;
+                    t_OFF=clock;
+                    TimeFreez=TimeFreez+etime(t_OFF,t_ON);
+                end
+            end
+%            pause(time_image-etime(t2,t1));
+        end
+        
+        % if no stopemergency, ready to start next phase
+        try
+            if etime(t2,tDeb)> n_AutoStop+0.5, enableTrack=1;end
+        end
+        fwrite(a,3);
+        
+        % Correct for intan trigger time to realign with ephys
+        im_diff(:,1)=im_diff(:,1)+1;
+        PosMat(:,1)=PosMat(:,1)+1;
+
+        mask=intermed.mask;
+        ref=imageRef;
+        pixratio=1./Ratio_IMAonREAL;
+        save([name_folder,mark,'behavResources.mat'],'PosMat','im_diff','frame_rate','th_immob','imageRef',...
+            'shape_ratio2','BW_threshold2','mask','smaller_object_size2','ref','pixratio','delStim','delStimreturn');
+        % calculate freezing
+        im_diff=im_diff(1:find(im_diff(:,1)>chrono-1,1,'last'),:);
+        im_diff(im_diff(:,2)>20,2)=NaN;
+        PosMatInt=PosMat;
+        x=PosMatInt(:,2);
+        nanx = isnan(x);
+        t    = 1:numel(x);
+        x(nanx) = interp1(t(~nanx), x(~nanx), t(nanx));
+        PosMatInt(:,2)=x;
+        x=PosMatInt(:,3);
+        nanx = isnan(x);
+        t    = 1:numel(x);
+        x(nanx) = interp1(t(~nanx), x(~nanx), t(nanx));
+        PosMatInt(:,3)=x;
+        im_diffint=im_diff;
+        x=im_diffint(:,2);
+        nanx = isnan(x);
+        t    = 1:numel(x);
+        x(nanx) = interp1(t(~nanx), x(~nanx), t(nanx));
+        x(isnan(x))=nanmean(x);
+        im_diffint(:,2)=x;
+        
+        PosMatInit=PosMat;
+        PosMat=PosMatInt;
+        im_diffInit=im_diff;
+        im_diff=im_diffint;
+
+        Movtsd=tsd(PosMatInt(1:end-1,1)*1e4,sqrt(diff(PosMatInt(:,2)).^2+diff(PosMatInt(:,1)).^2));
+        Xtsd=tsd(PosMatInt(:,1)*1e4,(PosMatInt(:,3)));
+        Ytsd=tsd(PosMatInt(:,1)*1e4,(PosMatInt(:,2)));
+        Imdifftsd=tsd(im_diffint(:,1)*1e4,SmoothDec(im_diffint(:,2)',1));
+
+        try FreezeEpoch=thresholdIntervals(Imdifftsd,th_immob,'Direction','Below');
+            FreezeEpoch=mergeCloseIntervals(FreezeEpoch,0.3*1E4);
+            FreezeEpoch=dropShortIntervals(FreezeEpoch,thtps_immob*1E4);
+            Freeze=sum(End(FreezeEpoch)-Start(FreezeEpoch));
+        catch
+            Freeze=NaN;
+            Freeze2=NaN;
+        end
+        
+        Xtemp=Data(Xtsd); Ytemp=Data(Ytsd); T1=Range(Ytsd);
+        if not(isempty('Zone'))
+            for t=1:length(Zone)
+                try
+                    ZoneIndices{t}=find(diag(Zone{t}(floor(Data(Xtsd)*Ratio_IMAonREAL),floor(Data(Ytsd)*Ratio_IMAonREAL))));
+                    Xtemp2=Xtemp*0;
+                    Xtemp2(ZoneIndices{t})=1;
+                    ZoneEpoch{t}=thresholdIntervals(tsd(T1,Xtemp2),0.5,'Direction','Above');
+                    Occup(t)=size(ZoneIndices{t},1)./size(Data(Xtsd),1);
+                    FreezeTime(t)=length(Data(Restrict(Xtsd,and(FreezeEpoch,ZoneEpoch{t}))))./length(Data((Restrict(Xtsd,ZoneEpoch{t}))));
+                catch
+                    ZoneIndices{t}=[];
+                    ZoneEpoch{t}=intervalSet(0,0);
+                    Occup(t)=0;
+                    FreezeTime(t)=0;
+                end
+            end
+        else
+            for t=1:2
+                ZoneIndices{t}=[];
+                ZoneEpoch{t}=intervalSet(0,0);
+                Occup(t)=0;
+                FreezeTime(t)=0;
+            end
+        end
+        
+        ShTN=1;
+        % save and copy file in save_folder
+        msg_box=msgbox('Saving behavioral Information','save','modal');
+
+        save([name_folder,mark,'behavResources.mat'],'PosMat','PosMatInit','im_diff','im_diffInit','frame_rate','FreezeEpoch','Movtsd','th_immob','thtps_immob','imageRef',...
+            'shape_ratio2','BW_threshold2','mask','smaller_object_size2','Zone','ZoneEpoch','ZoneIndices','Ratio_IMAonREAL','FreezeTime','Occup','DoorChangeMat','Xtsd',...
+            'Ytsd','Imdifftsd','delStim','delStimreturn','-append');
+        pause(0.5)
+        try set(PlotFreez,'YData',0,'XData',0);end
+        
+        %% generate figure
+        figbilan=figure;
+        % raw data : movement over time
+        subplot(2,3,1:3)
+        plot(Range(Movtsd,'s'),Data(Movtsd)./prctile(Data(Movtsd),98),'k'), hold on
+        plot(Range(Imdifftsd,'s'),Data(Imdifftsd)./prctile(Data(Imdifftsd),98),'b')
+        for k=1:length(Start(FreezeEpoch))
+            plot(Range(Restrict(Imdifftsd,subset(FreezeEpoch,k)),'s'),Data(Restrict(Imdifftsd,subset(FreezeEpoch,k)))*0+max(ylim)*0.8,'c','linewidth',2)
+        end
+        plot(PosMat(PosMat(:,4)==1,1),PosMat(PosMat(:,4)==1,1)*0+max(ylim)*0.9,'k*')
+        if exist('ZoneEpoch')
+        for k=1:length(Start(ZoneEpoch{1}))
+            plot(Range(Restrict(Imdifftsd,subset(ZoneEpoch{1},k)),'s'),Data(Restrict(Imdifftsd,subset(ZoneEpoch{1},k)))*0+max(ylim)*0.95,'r','linewidth',2)
+        end
+        for k=1:length(Start(ZoneEpoch{2}))
+            plot(Range(Restrict(Imdifftsd,subset(ZoneEpoch{2},k)),'s'),Data(Restrict(Imdifftsd,subset(ZoneEpoch{2},k)))*0+max(ylim)*0.95,'g','linewidth',2)
+        end
+        end
+        title('Raw Data')
+        
+        subplot(2,2,3)
+        bar(Occup(1:2))
+        hold on
+        try,set(gca,'Xtick',[1,2],'XtickLabel',{ZoneLabels{1:2}}),end
+        colormap copper
+        ylabel('% time spent')
+        xlim([0.5 2.5])
+        box off
+
+        subplot(2,2,4)
+        bar(FreezeTime(1:2))
+        hold on
+        try,set(gca,'Xtick',[1,2],'XtickLabel',{ZoneLabels{1:2}}),end
+        colormap copper
+        ylabel('% time spent freezing')
+        xlim([0.5 2.5])
+        box off
+        
+        saveas(figbilan,[name_folder,mark,'FigBilan.fig'])
+        saveas(figbilan,[name_folder,mark,'FigBilan.png'])
+        close(figbilan)
+        %%
+        
+        % display
+        try
+            close(guireg_fig)
+            set(Fig_Odor,'Color',color_on);
+            for bi=[1,3,6:9], set(inputDisplay(bi),'BackgroundColor',color_on);end
+            for bit=1:2
+                set(maskbutton(bit),'enable','on','FontWeight','bold')
+            end
+            delete(msg_box)
+            set(maskbutton(3),'enable','off','FontWeight','normal')
+            set(maskbutton(7),'enable','off','FontWeight','normal')
+            set(maskbutton(4),'enable','on','FontWeight','bold')
+        end
+        
+        
+        
+        % -----------------------------------------------------------------
+        % Manual Count freezing
+       
+        
+    end
+
+% -----------------------------------------------------------------
+%% StartSession
+    function StartSession(obj,event)
+        %pause (1) % en secondes
+        
+        if a.BytesAvailable>0
+            fread(a,a.BytesAvailable);
+        end
+        set(maskbutton(7),'enable','on','FontWeight','bold')
+        set(maskbutton(3),'enable','on','FontWeight','bold')
+        set(maskbutton(4),'enable','off','FontWeight','normal')
+        %enableTrack=1;
+        fwrite(a,1);
+        set(inputDisplay(7),'string','RECORDING');
+        StartChrono=1;
+        tDeb = clock;
+        LastStim=clock;
+    end
+
+%% Define behavioural zones
+    function DefineZones(obj,event)
+        global Zones
+        figtemp=figure();
+        imagesc(imageRef),colormap gray,hold on
+        if strcmp(namePhase,'EPM')
+            disp('OpenArms');[x1,y1,Open,x2,y2]=roipoly; plot(x2,y2)
+            disp('ClosedArms');[x1,y1,Closed,x2,y2]=roipoly(); plot(x2,y2)
+            Centre=zeros(size(imageRef));Centre(Open==1 & Closed==1)=1;
+            Open(Centre==1)=0;Closed(Centre==1)=0;
+            Zone{1}=uint8(Open);Zone{2}=uint8(Closed);Zone{3}=uint8(Centre);
+            ZoneLabels={'OpenArms','ClosedArms','Centre'};
+            set(maskbutton(3),'string','3 - GetBehavZones (OK)')
+        elseif strcmp(namePhase,'SoundCnd') | strcmp(namePhase,'SoundHab') | strcmp(namePhase,'SoundTest') | strcmp(namePhase,'Calibration')  | strcmp(namePhase,'SleepSession') | strcmp(namePhase,'CalibrationEyeshock')
+            stats = regionprops(intermed.mask, 'Area');
+            tempmask=intermed.mask;
+            AimArea=stats.Area/2;
+            ActArea=stats.Area;
+            while AimArea<ActArea
+                tempmask=imerode(tempmask,strel('disk',1));
+                stats = regionprops(tempmask, 'Area');
+                ActArea=stats.Area;
+            end
+            Zone{1}=uint8(tempmask); % Inside area
+            Zone{2}=uint8(intermed.mask-tempmask);% Outside area
+            ZoneLabels={'Inside','Outside'};
+            set(maskbutton(3),'string','3 - GetBehavZones (OK)')
+        else
+            disp('Shock');[x1,y1,Shock,x2,y2]=roipoly; Zone{1}=uint8(Shock);plot(x2,y2)
+            disp('NoShock');[x1,y1,NoShock,x2,y2]=roipoly(); Zone{2}=uint8(NoShock);plot(x2,y2)
+            disp('Centre');[x1,y1,Centre,x2,y2]=roipoly(); Zone{3}=uint8(Centre);plot(x2,y2)
+            disp('CentreShock');[x1,y1,CentreShock,x2,y2]=roipoly(); Zone{4}=uint8(CentreShock);plot(x2,y2)
+            disp('CentreNoShock');[x1,y1,CentreNoShock,x2,y2]=roipoly();    Zone{5}=uint8(CentreNoShock);plot(x2,y2)
+            stats = regionprops(intermed.mask, 'Area');
+            tempmask=intermed.mask;
+            AimArea=stats.Area/2;
+            ActArea=stats.Area;
+            while AimArea<ActArea
+                tempmask=imerode(tempmask,strel('disk',1));
+                stats = regionprops(tempmask, 'Area');
+                ActArea=stats.Area;
+            end
+            Zone{6}=uint8(tempmask); % Inside area
+            Zone{7}=uint8(intermed.mask-tempmask);% Outside area
+            ZoneLabels={'Shock','NoShock','Centre','CentreShock','CentreNoShock','Inside','Outside'};
+            set(maskbutton(3),'string','3 - GetBehavZones (OK)')
+        end
+        close(figtemp)
+    end
+
+% -----------------------------------------------------------------
+%% stop tracking
+    function stop_Phase(obj,event)
+        figure(Fig_Odor), subplot(5,1,1:2), title('ACQUISITION STOPPED')
+        enableTrack=0;
+        set(maskbutton(4),'enable','on','FontWeight','normal')
+        set(maskbutton(6),'enable','on','FontWeight','bold')
+        set(maskbutton(7),'enable','off','FontWeight','normal')
+        set(maskbutton(3),'enable','off','FontWeight','normal')
+        try fwrite(a,3);disp('Intan OFF');end
+    end
+
+% -----------------------------------------------------------------
+%% stop tracking
+    function Restart_Phase(obj,event)
+        set(maskbutton(4),'enable','on','FontWeight','bold')
+        set(maskbutton(7),'enable','on','FontWeight','bold')
+        set(maskbutton(6),'enable','off','FontWeight','normal')
+        templaod=load([res,mark,'TempFreezeON.mat']);
+        enableTrack=1;
+        start_Expe;
+    end
+
+
+
+% -----------------------------------------------------------------
+%% OnlineGuiReglage
+    function guireg_fig=OnlineGuiReglage(obj,event);
+        
+        
+        % function guireg_fig=OnlineGuiReglage(obj,event);
+        % let online control of paramteres for image treatments
+        
+        if ~exist('typical_size','var'), typical_size=300;end
+        typical_rapport=10;
+        
+        % create figure
+        guireg_fig=figure('units','normalized',...
+            'position',[0.1 0.1 0.4 0.6],...
+            'numbertitle','off',...
+            'name','Online Mouse Tracking : Setting Parameters',...
+            'menubar','none',...
+            'tag','figure reglage');
+        set(guireg_fig,'Color',color_on);
+        
+        % create names of sliders
+        text1=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.10 0.85 0.10 0.05],...
+            'string','seuil couleur');
+        
+        text2=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.25 0.85 0.10 0.05],...
+            'string','seuil objets');
+        
+        text3=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.40 0.85 0.10 0.05],...
+            'string','obj sz');
+        
+        text4=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.55 0.85 0.10 0.05],...
+            'string','Fz Srnd Sz');
+        
+        text5=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.70 0.85 0.10 0.05],...
+            'string','freezing threshold');
+        
+        text5=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.85 0.85 0.10 0.05],...
+            'string','Yaxis');
+        
+        % create sliders
+        slider_seuil = uicontrol(guireg_fig,'style','slider',...
+            'units','normalized',...
+            'position',[0.10 0.1 0.08 0.7],...
+            'callback', @seuil);
+        set(slider_seuil,'Value',BW_threshold2);
+        
+        slider_small=uicontrol(guireg_fig,'style','slider',...
+            'units','normalized',...
+            'position',[0.25 0.1 0.08 0.7],...
+            'callback', @elimination);
+        set(slider_small,'Value',smaller_object_size2/typical_size);
+        
+        slider_strel = uicontrol(guireg_fig,'style','slider',...
+            'units','normalized',...
+            'position',[0.40 0.1 0.08 0.7],...
+            'callback', @setstrelsize);
+        set(slider_strel,'Value',strsz/maxsrtsz);
+        
+        slider_srndsz = uicontrol(guireg_fig,'style','slider',...
+            'units','normalized',...
+            'position',[0.55 0.1 0.08 0.7],...
+            'callback', @setsrndsz);
+        set(slider_srndsz,'Value',SrdZone/maxsrndsz);       
+        
+        slider_freeze = uicontrol(guireg_fig,'style','slider',...
+            'units','normalized',...
+            'position',[0.70 0.1 0.08 0.7],...
+            'callback', @freeze_thresh);
+        set(slider_freeze,'Value',th_immob/10);
+        
+        slider_yaxis = uicontrol(guireg_fig,'style','slider',...
+            'units','normalized',...
+            'position',[0.85 0.1 0.08 0.7],...
+            'callback', @fixyaxis);
+        set(slider_yaxis,'Value',ymax/maxyaxis);
+
+        % create labels with actual values
+        text6=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.1 0.05 0.08 0.03],...
+            'string',num2str(BW_threshold2)); 
+        
+        text7=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.25 0.05 0.08 0.03],...
+            'string',num2str(smaller_object_size2));
+
+        text8=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.40 0.05 0.08 0.03],...
+            'string',num2str(strsz));
+
+        text9=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.55 0.05 0.08 0.03],...
+            'string',num2str(SrdZone));
+        
+        text10=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.70 0.05 0.08 0.03],...
+            'string',num2str(th_immob));
+        
+        text11=uicontrol(guireg_fig,'style','text', ...
+            'units','normalized',...
+            'position',[0.85 0.05 0.08 0.03],...
+            'string',num2str(ymax));
+        
+        %get threshold value
+        function seuil(obj,event)
+            BW_threshold2 = get(slider_seuil, 'value');
+            set(text6,'string',num2str(BW_threshold2))
+        end
+        
+        %get min object size
+        function elimination(obj,event)
+            smaller_object_size2 = round(get(slider_small,'value')*typical_size);
+            set(text7,'string',num2str(smaller_object_size2))
+        end
+        
+          %get object size for erosion
+        function setstrelsize(~,~)
+            strsz = round(get(slider_strel,'value')*maxsrtsz);
+            se = strel('disk',strsz);
+            set(text8,'string',num2str(strsz));
+            pause(0.01)
+        end
+        
+        
+        %get soround zone size
+        function setsrndsz(~,~)
+            SrdZone = round(get(slider_srndsz,'value')*maxsrndsz);
+            set(text9,'string',num2str(SrdZone));
+        end 
+    
+        %get freezing threshold
+        function freeze_thresh(obj,event)
+            th_immob = (get(slider_freeze,'value')*maxth_immob);
+            set(text10,'string',num2str(th_immob))
+            set(thimmobline,'Ydata',[1,1]*th_immob)
+        end
+        
+        %get ylims
+        function fixyaxis(~,~)
+            ymax = (get(slider_yaxis,'value')*maxyaxis);
+            set(text11,'string',num2str(ymax));
+        end
+        
+        function enterManual(obj,event)
+            defAns={num2str(BW_threshold2) num2str(smaller_object_size2) num2str(shape_ratio2)};
+            prompt = {'BW_threshold','smaller_object_size','shape_ratio'};
+            dlg_title = 'Change parameters for offline tracking:';
+            answer = inputdlg(prompt,dlg_title,1,defAns);
+            BW_threshold2=str2num(answer{1});
+            smaller_object_size2=str2num(answer{2});
+            shape_ratio2=str2num(answer{3});
+            
+            set(slider_seuil,'Value',BW_threshold2);
+            set(slider_small,'Value',smaller_object_size2/typical_size);
+            set(slider_rapport,'Value',shape_ratio2/typical_rapport);
+        end
+    end
+
+end

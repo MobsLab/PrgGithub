@@ -1,0 +1,1105 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>RunFuctions_ML</title><meta name="generator" content="MATLAB 7.10"><meta name="date" content="2014-07-02"><meta name="m-file" content="RunFuctions_ML"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">look at Delta waves, average respi</a></li><li><a href="#3">effet de la stim sur theta</a></li><li><a href="#4">------------------------------------------------------------------------</a></li><li><a href="#5">------------------------------------------------------------------------</a></li><li><a href="#6">run Compute_RatioSleepML</a></li><li><a href="#7">run ParcoursSleepStages</a></li><li><a href="#8">Run Generate delta, Spindles and ripples</a></li><li><a href="#9">Run PETHSpindlesRipplesML</a></li><li><a href="#10">Run CoordineRipplesSpindles</a></li><li><a href="#11">------------------------------------------------------------------------</a></li><li><a href="#12">Run LFPspectrum_StrainsML_new</a></li><li><a href="#13">ComputeSpectrogram_newML</a></li><li><a href="#14">------------------------------------------------------------------------</a></li><li><a href="#15">run CodeBulbRespiML</a></li><li><a href="#16">run Run_ZAPRespi2_ML</a></li><li><a href="#17">run ParcoursCohPlethy</a></li><li><a href="#18">run RespiModulatesGamma_ML</a></li><li><a href="#19">run RespiModulatesEvents_ML</a></li><li><a href="#20">------------------------------------------------------------------------</a></li><li><a href="#21">Run OptoStim_trigLFP_ML</a></li><li><a href="#22">Run HCStim_trigLFP_ML</a></li></ul></div><pre class="codeinput"><span class="comment">%RunFuctions_ML</span>
+res=pwd;
+</pre><h2>look at Delta waves, average respi<a name="2"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+    Dir=PathForExperimentsML(<span class="string">'PLETHYSMO'</span>);
+    <span class="keyword">for</span> man=1:length(Dir.path)
+        cd(Dir.path{man})
+        disp(Dir.path{man}(max(strfind(Dir.path{man},<span class="string">'Mouse'</span>)):end))
+        RespirationByDeltaML;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>effet de la stim sur theta<a name="3"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+    clear <span class="string">stim</span> <span class="string">LFP</span> <span class="string">lfp</span>
+    SetCurrentSession
+    stim=GetEvents(<span class="string">'51'</span>)*1E4;
+    <span class="keyword">if</span> issorted(stim)
+        stim=tsd(stim,stim);
+    <span class="keyword">end</span>
+    load(<span class="string">'LFPData.mat'</span>)
+    lfp=LFP{1};
+
+    figure, [fh, rasterAx, histAx, matVal1] = ImagePETH(lfp, stim, -5000, +5000,<span class="string">'BinSize'</span>,1);
+    rg=Range(matVal1,<span class="string">'s'</span>);
+    dt=Data(matVal1);
+
+    <span class="comment">%figure('Color',[1 1 1]),</span>
+    plot(rg*1E3,mean(dt,2),<span class="string">'Linewidth'</span>,2,<span class="string">'Color'</span>,<span class="string">'b'</span>)
+    hold <span class="string">on</span>, plot(rg*1E3,mean(dt,2)+stdError(dt')',<span class="string">'k'</span>)
+    hold <span class="string">on</span>, plot(rg*1E3,mean(dt,2)-stdError(dt')',<span class="string">'k'</span>)
+
+    hold <span class="string">on</span>, line([0 0],[min(mean(dt,2)),max(mean(dt,2))],<span class="string">'Color'</span>,<span class="string">'r'</span>,<span class="string">'Linewidth'</span>,2); a=0;
+    <span class="keyword">for</span> i=1:14
+        a=a+72/10;
+        hold <span class="string">on</span>, line([a a],[min(mean(dt,2)),max(mean(dt,2))],<span class="string">'Color'</span>,<span class="string">'r'</span>);
+    <span class="keyword">end</span>
+    xlabel(<span class="string">'Time around MFB stimulation (ms)'</span>)
+    title(res(max(strfind(res,<span class="string">'Mouse'</span>)):end))
+<span class="keyword">end</span>
+</pre><h2>------------------------------------------------------------------------<a name="4"></a></h2><p>------------------------------------------------------------------------- ------------------------      Processing     ---------------------------- ------------------------------------------------------------------------- -------------------------------------------------------------------------</p><pre class="codeinput"><span class="keyword">if</span> 0
+    <span class="comment">% follow those steps:</span>
+    <span class="comment">% 1- ComputeTrackingAndImmobility.m</span>
+    a=0;
+    a=a+1; PathTosave{a}=<span class="string">'/media/DataMOBsRAID5/ProjetSommeil/ManipeManual/Mouse107/20140113/ICSS-Mouse-107-13012014-wideband'</span>;
+    a=a+1; PathTosave{a}=<span class="string">'/media/DataMOBsRAID5/ProjetSommeil/ManipeManual/Mouse109/20140113/ICSS-Mouse-109-13012014-wideband'</span>;
+    a=a+1; PathTosave{a}=<span class="string">'/media/DataMOBsRAID5/ProjetSommeil/ManipeManual/Mouse109/20140113/ICSS-Mouse-109-13012014-wideband/Ref_Tracking1to8'</span>;
+    <span class="keyword">for</span> i=1:length(PathTosave)
+
+        cd(PathTosave{i})
+        <span class="keyword">try</span>
+            ComputeTrackingAndImmobility;
+        <span class="keyword">catch</span>
+            disp(<span class="string">'Problem with ComputeTrackingAndImmobility'</span>);
+        <span class="keyword">end</span>
+        close <span class="string">all</span>
+
+        <span class="keyword">if</span> 0
+            n=input(<span class="string">'Enter number of files.avi (loop): '</span>);
+            <span class="keyword">for</span> i=1:n
+                filename_tosave=input(<span class="string">'filetosave: '</span>,<span class="string">'s'</span>);
+                load([filename_tosave,<span class="string">'.mat'</span>]);
+                Pos(:,4)=ones(size(Pos,1),1);
+                Pos(isnan(Pos(:,2)),4)=zeros(sum(isnan(Pos(:,2))),1);
+                save(filename_tosave,<span class="string">'-append'</span>,<span class="string">'Pos'</span>)
+                file = fopen([filename_tosave,<span class="string">'.pos'</span>],<span class="string">'w'</span>);
+                <span class="keyword">for</span> i = 1:length(Pos),
+                    fprintf(file,<span class="string">'%f\t'</span>,Pos(i,2));
+                    fprintf(file,<span class="string">'%f\t'</span>,Pos(i,3));
+                    fprintf(file,<span class="string">'%f\n'</span>,Pos(i,4));
+                <span class="keyword">end</span>
+                fclose(file);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+
+    <span class="keyword">end</span>
+
+
+
+    <span class="comment">% 2- makeDataBulbe.m or (CodeBulbRespi for plethysmo)</span>
+    <span class="comment">% 3- Add path in PathForExperimentsML.m</span>
+<span class="keyword">end</span>
+</pre><h2>------------------------------------------------------------------------<a name="5"></a></h2><p>------------------------------------------------------------------------- -----------------------      SleepScoring     --------------------------- ------------------------------------------------------------------------- -------------------------------------------------------------------------</p><h2>run Compute_RatioSleepML<a name="6"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+    Compute_RatioSleepML(<span class="string">'None'</span>,1,1)
+    Compute_RatioSleepML(<span class="string">'None'</span>,0,1)
+<span class="keyword">end</span>
+</pre><h2>run ParcoursSleepStages<a name="7"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+    ParcoursSleepStages;
+<span class="keyword">end</span>
+</pre><h2>Run Generate delta, Spindles and ripples<a name="8"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+
+    NameDir={<span class="string">'BASAL'</span> <span class="string">'PLETHYSMO'</span> <span class="string">'CANAB'</span> <span class="string">'DPCPX'</span>};
+
+    <span class="keyword">for</span> i=1:length(NameDir)
+        Dir=PathForExperimentsML(NameDir{i});
+
+        <span class="keyword">for</span> man=1:length(Dir.path)
+            disp(<span class="string">'  '</span>)
+            cd(Dir.path{man})
+            GenerateDeltaSpindlesRipplesML(Dir.path{man})
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><h2>Run PETHSpindlesRipplesML<a name="9"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+    namedFoldersave=<span class="string">'/media/DataMOBsRAID5/ProjetAstro/AnalyseSpindlesRipplesML'</span>;
+
+    NameDir={<span class="string">'BASAL'</span> <span class="string">'PLETHYSMO'</span> <span class="string">'CANAB'</span> <span class="string">'DPCPX'</span>};
+    <span class="keyword">for</span> i=1:length(NameDir)
+        Dir=PathForExperimentsML(NameDir{i});
+
+        <span class="keyword">for</span> man=1:length(Dir.path)
+            <span class="keyword">if</span> strcmp(NameDir{i},<span class="string">'PLETHYSMO'</span>)
+                nameMouseDay=[<span class="string">'Plethysmo'</span>,Dir.path{man}(max(strfind(Dir.path{man},<span class="string">'Mouse'</span>)):end)]; nameMouseDay(strfind(nameMouseDay,<span class="string">'/'</span>))=<span class="string">'-'</span>;
+            <span class="keyword">else</span>
+                nameMouseDay=Dir.path{man}(max(strfind(Dir.path{man},<span class="string">'BULB'</span>))+5:end);
+            <span class="keyword">end</span>
+
+            <span class="keyword">try</span>
+                PETHSpindlesRipplesML(Dir.path{man});
+                numF=gcf; saveFigure(numF,[<span class="string">'SpindlesRipples_'</span>,nameMouseDay],namedFoldersave);close
+            <span class="keyword">catch</span>
+                disp(<span class="string">' -&gt; problem'</span>)
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><h2>Run CoordineRipplesSpindles<a name="10"></a></h2><pre class="codeinput"><span class="keyword">if</span> 1
+    namedFoldersave=<span class="string">'/media/DataMOBsRAID5/ProjetAstro/AnalyseSpindlesRipplesML'</span>;
+    NameDir={<span class="string">'BASAL'</span> <span class="string">'PLETHYSMO'</span> <span class="string">'CANAB'</span> <span class="string">'DPCPX'</span>};
+    <span class="comment">%NameDir={'CANAB'};</span>
+    ScriptCoordineRipplesSpindles(namedFoldersave,NameDir);
+
+<span class="keyword">end</span>
+</pre><pre class="codeoutput"> 
+/media/DataMOBs/ProjetDPCPX/Mouse047/20121108/BULB-Mouse-47-08112012
+ PROBLEM !!!! /media/DataMOBs/ProjetDPCPX/Mouse047/20121108/BULB-Mouse-47-08112012
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse047/20121112/BULB-Mouse-47-12112012
+ PROBLEM !!!! /media/DataMOBs/ProjetDPCPX/Mouse047/20121112/BULB-Mouse-47-12112012
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse052/20121114/BULB-Mouse-52-14112012
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse052/20121114/BULB-Mouse-52-14112012
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse052/20121116/BULB-Mouse-52-16112012
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse052/20121116/BULB-Mouse-52-16112012
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse052/20121221/BULB-Mouse-52-21122012
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse052/20121221/BULB-Mouse-52-21122012
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse054/20130308/BULB-Mouse-54-08032013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse054/20130308/BULB-Mouse-54-08032013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBs/ProjetLPS/Mouse054/20130319/BULB-Mouse-54-19032013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBs/ProjetLPS/Mouse054/20130319/BULB-Mouse-54-19032013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBs/ProjetLPS/Mouse054/20130320/BULB-Mouse-54-20032013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBs/ProjetLPS/Mouse054/20130320/BULB-Mouse-54-20032013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse065/20130513/BULB-Mouse-65-13052013
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse065/20130513/BULB-Mouse-65-13052013
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse065/20130515/BULB-Mouse-65-15052013
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse065/20130515/BULB-Mouse-65-15052013
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse066/20130513/BULB-Mouse-66-13052013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse066/20130513/BULB-Mouse-66-13052013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse066/20130515/BULB-Mouse-66-15052013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse066/20130515/BULB-Mouse-66-15052013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse051/20130313/BULB-Mouse-51-13032013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse051/20130313/BULB-Mouse-51-13032013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse051/20121227/BULB-Mouse-51-27122012
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse051/20121227/BULB-Mouse-51-27122012
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; PFCxDeep added in MATT
+  -&gt; Problem PaCxSup
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse060/20130422/BULB-Mouse-60-22042013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse060/20130422/BULB-Mouse-60-22042013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse060/20130415/BULB-Mouse-60-15042013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse060/20130415/BULB-Mouse-60-15042013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse060/20130430/BULB-Mouse-60-30042013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse060/20130430/BULB-Mouse-60-30042013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse061/20130422/BULB-Mouse-61-22042013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse061/20130422/BULB-Mouse-61-22042013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse061/20130415/BULB-Mouse-61-15042013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse061/20130415/BULB-Mouse-61-15042013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse061/20130430/BULB-Mouse-61-30042013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse061/20130430/BULB-Mouse-61-30042013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse082/20130729/BULB-Mouse-82-29072013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse082/20130729/BULB-Mouse-82-29072013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse083/20130723/BULB-Mouse-83-23072013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse083/20130723/BULB-Mouse-83-23072013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse083/20130729/BULB-Mouse-83-29072013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse083/20130729/BULB-Mouse-83-29072013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse051
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse051
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; Problem PFCxDeep
+  -&gt; Problem PaCxSup
+  -&gt; Problem PaCxDeep
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse060/20130503
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse060/20130503
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; Problem PFCxDeep
+  -&gt; Problem PaCxSup
+  -&gt; Problem PaCxDeep
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse061/20130503
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse061/20130503
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; Problem PFCxDeep
+  -&gt; Problem PaCxSup
+  -&gt; Problem PaCxDeep
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse082/20130724
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse082/20130724
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; Problem PFCxDeep
+  -&gt; Problem PaCxSup
+  -&gt; Problem PaCxDeep
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse082/20130827
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse082/20130827
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; Problem PFCxDeep
+  -&gt; Problem PaCxSup
+  -&gt; Problem PaCxDeep
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse083/20130724
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse083/20130724
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; Problem PFCxDeep
+  -&gt; Problem PaCxSup
+  -&gt; Problem PaCxDeep
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse083/20130827
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse083/20130827
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; Problem PFCxDeep
+  -&gt; Problem PaCxSup
+  -&gt; Problem PaCxDeep
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse054/BO
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse054/BO
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse054/Cx
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse054/Cx
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; Problem PFCxDeep
+  -&gt; Problem PaCxSup
+  -&gt; Problem PaCxDeep
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse065/20130514
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse065/20130514
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse066/20130514
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse066/20130514
+ 
+/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse066/20130528
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse066/20130528
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse051/20130110/BULB-Mouse-51-10012013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse051/20130110/BULB-Mouse-51-10012013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse047/20130111/BULB-Mouse-47-11012013
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse047/20130111/BULB-Mouse-47-11012013
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse052/20130122/BULB-Mouse-52-22012013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse052/20130122/BULB-Mouse-52-22012013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; Problem PFCxSup
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse054/20130314/BULB-Mouse-54-14032013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse054/20130314/BULB-Mouse-54-14032013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse060/20130430/BULB-Mouse-60-30042013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse060/20130430/BULB-Mouse-60-30042013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse061/20130430/BULB-Mouse-61-30042013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse061/20130430/BULB-Mouse-61-30042013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse065/BULB-Mouse-65-05062013
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse065/BULB-Mouse-65-05062013
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse066/BULB-Mouse-66-05062013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse066/BULB-Mouse-66-05062013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse082/20130802/BULB-Mouse-82-02082013
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse082/20130802/BULB-Mouse-82-02082013
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse083/20130802/BULB-Mouse-83-02082013
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/ProjetCannabinoids/Mouse083/20130802/BULB-Mouse-83-02082013
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse051/20130313/BULB-Mouse-51-13032013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBs/ProjetDPCPX/Mouse051/20130313/BULB-Mouse-51-13032013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse054/20130308/BULB-Mouse-54-08032013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse054/20130308/BULB-Mouse-54-08032013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse060/20130422/BULB-Mouse-60-22042013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse060/20130422/BULB-Mouse-60-22042013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse061/20130422/BULB-Mouse-61-22042013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse061/20130422/BULB-Mouse-61-22042013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse065/20130515/BULB-Mouse-65-15052013
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse065/20130515/BULB-Mouse-65-15052013
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse066/20130515/BULB-Mouse-66-15052013
+    /AnalyCoordineRipplesSpindles.mat already exists.. reloading
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse066/20130515/BULB-Mouse-66-15052013
+    /AnalyCoordineGammaSpindles.mat already exists.. reloading
+  -&gt; PFCxSup added in MATT
+  -&gt; PFCxDeep added in MATT
+  -&gt; PaCxSup added in MATT
+  -&gt; PaCxDeep added in MATT
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse082/20130730/BULB-Mouse-82-30072013
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse082/20130730/BULB-Mouse-82-30072013
+ 
+/media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse083/20130730/BULB-Mouse-83-30072013
+ PROBLEM !!!! /media/DataMOBsRAID5/ProjetAstro/ProjetDPCPX/Mouse083/20130730/BULB-Mouse-83-30072013
+</pre><img vspace="5" hspace="5" src="RunFuctions_ML_01.png" alt=""> <img vspace="5" hspace="5" src="RunFuctions_ML_02.png" alt=""> <img vspace="5" hspace="5" src="RunFuctions_ML_03.png" alt=""> <h2>------------------------------------------------------------------------<a name="11"></a></h2><p>------------------------------------------------------------------------- ------------------------      Spectrum      ----------------------------- ------------------------------------------------------------------------- -------------------------------------------------------------------------</p><h2>Run LFPspectrum_StrainsML_new<a name="12"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+    NameDir={<span class="string">'CANAB'</span>};<span class="comment">%'PLETHYSMO' 'BASAL'</span>
+    NameInjectionEpoch={<span class="string">'VEHEpoch'</span>,<span class="string">'CPEpoch'</span>};
+    NameStructures={<span class="string">'PaCx'</span> <span class="string">'Bulb'</span> <span class="string">'PFCx'</span>};<span class="comment">% 'dHPC'</span>
+
+    option={<span class="string">'deep'</span> <span class="string">'sup'</span>};
+    <span class="comment">%option={'deep' };</span>
+    clean=0;<span class="comment">%clean=[0 1];</span>
+    <span class="keyword">for</span> d=1:length(NameDir)
+        <span class="keyword">for</span> o=1:length(option)
+            <span class="keyword">for</span> i=1:length(NameStructures)
+                <span class="keyword">for</span> nn=1:length(NameInjectionEpoch)
+                    <span class="keyword">for</span> c=1:length(clean)
+                        disp(<span class="string">' '</span>)
+                        disp([<span class="string">' * * * '</span>,NameDir{d},<span class="string">' '</span>,NameStructures{i},<span class="string">'_'</span>,option{o},<span class="string">' * * * '</span>])
+                        <span class="keyword">if</span> strcmp(NameDir{d},<span class="string">'PLETHYSMO'</span>)
+                            LFPspectrum_StrainsML_new(NameDir{d},NameStructures{i},<span class="string">'MovEpoch'</span>,clean(c),option{o},[2 3.5]);
+                            LFPspectrum_StrainsML_new(NameDir{d},NameStructures{i},<span class="string">'MovEpoch'</span>,clean(c),option{o},[5 10]);
+                        <span class="keyword">else</span>
+                            LFPspectrum_StrainsML_new(NameDir{d},NameStructures{i},<span class="string">'MovEpoch'</span>,clean(c),option{o},[],NameInjectionEpoch{nn});
+                        <span class="keyword">end</span>
+                        LFPspectrum_StrainsML_new(NameDir{d},NameStructures{i},<span class="string">'SWSEpoch'</span>,clean(c),option{o},[],NameInjectionEpoch{nn});
+                        LFPspectrum_StrainsML_new(NameDir{d},NameStructures{i},<span class="string">'REMEpoch'</span>,clean(c),option{o},[],NameInjectionEpoch{nn});
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+                close <span class="string">all</span>
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><h2>ComputeSpectrogram_newML<a name="13"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+    a=0;
+   a=a+1; direct{a}=<span class="string">'/media/DataMOBsRAID5/ProjetOPTO/DATAopto/Mouse079/MNT/Day2/OPTO-Mouse-79-16072013'</span>;
+   a=a+1; direct{a}=<span class="string">'/media/DataMOBsRAID5/ProjetOPTO/DATAopto/Mouse079/MNT/Day3/OPTO-Mouse-79-17072013'</span>;
+   a=a+1; direct{a}=<span class="string">'/media/DataMOBsRAID5/ProjetOPTO/DATAopto/Mouse079/MNT/Day4/OPTO-Mouse-79-18072013'</span>;
+   a=a+1; direct{a}=<span class="string">'/media/DataMOBsRAID5/ProjetOPTO/DATAopto/Mouse079/MNT/Day5/OPTO-Mouse-79-19072013'</span>;
+   [params,movingwin,suffix]=SpectrumParametersML(<span class="string">'low'</span>);
+   <span class="keyword">for</span> a=1:length(direct)
+       cd(direct{a})
+       S={};cellnames={}; save <span class="string">SpikeData</span> <span class="string">S</span> <span class="string">cellnames</span>
+       clear <span class="string">InfoLFP</span> <span class="string">setCu</span>
+       load(<span class="string">'/media/DataMOBsRAID5/ProjetOPTO/DATAopto/Mouse079/MNT/Day1/OPTO-Mouse-79-15072013/LFPData/InfoLFP.mat'</span>)
+       mkdir(<span class="string">'LFPData'</span>)
+       save <span class="string">LFPData/InfoLFP</span> <span class="string">InfoLFP</span>
+       <span class="keyword">try</span>
+           makeDataBulbe;
+       <span class="keyword">catch</span>
+           disp(<span class="string">'Problem with makeDataBulbe'</span>)
+       <span class="keyword">end</span>
+       ComputeSpectrogram_newML(movingwin,params,InfoLFP,<span class="string">'VTA'</span>,<span class="string">'All'</span>,suffix);
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>------------------------------------------------------------------------<a name="14"></a></h2><p>------------------------------------------------------------------------- -----------------------      RESPIRATION      --------------------------- ------------------------------------------------------------------------- -------------------------------------------------------------------------</p><h2>run CodeBulbRespiML<a name="15"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+    ComputeTrackingAndImmobility
+    CodeBulbRespiML
+
+    PlethysmoSignalML
+    Plot_RespiLFP_ML
+    PlotBilanRespiML
+    plotRespiLFPML
+    RespiLFP_MLOneMore
+    LFP_by_RespiFreqML
+    LFP_by_RespiFreqML_bis
+<span class="keyword">end</span>
+</pre><h2>run Run_ZAPRespi2_ML<a name="16"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+    NameStates={<span class="string">'SWS'</span> <span class="string">'REM'</span> <span class="string">'Wake'</span> };
+    NameTypeFreq={<span class="string">'HighGamma'</span> <span class="string">'LowGamma'</span> <span class="string">'Delta'</span>};
+    <span class="keyword">for</span> i=1:length(NameTypeFreq)
+        <span class="keyword">for</span> j=1:length(NameStates)
+            Run_ZAPRespi2_ML(NameStates{j},NameTypeFreq{i});
+            close <span class="string">all</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>run ParcoursCohPlethy<a name="17"></a></h2><pre class="codeinput"> <span class="keyword">if</span> 0
+     nameStruct={<span class="string">'Bulb'</span> <span class="string">'PFCx'</span> <span class="string">'PaCx'</span> <span class="string">'dHPC'</span> <span class="string">'Respi'</span>};
+     nameprof={<span class="string">'deep'</span>, <span class="string">'sup'</span>};
+     nameDir={<span class="string">'PLETHYSMO'</span> <span class="string">'BASAL'</span>};
+     <span class="keyword">for</span> dd=1:length(nameDir)
+         <span class="keyword">for</span> pp=1:length(nameprof)
+             <span class="keyword">for</span> s1=2:length(nameStruct)
+                 <span class="keyword">for</span> s2=1:length(nameStruct)
+                     <span class="keyword">if</span> s1~=s2
+                         disp([nameStruct{s1},<span class="string">' - '</span>,nameStruct{s2}])
+                         ParcoursCohPlethy_ML(nameDir{dd},nameStruct{s1},nameStruct{s2},1,nameprof{pp});
+                         close <span class="string">all</span>
+                     <span class="keyword">end</span>
+                 <span class="keyword">end</span>
+             <span class="keyword">end</span>
+         <span class="keyword">end</span>
+     <span class="keyword">end</span>
+ <span class="keyword">end</span>
+</pre><h2>run RespiModulatesGamma_ML<a name="18"></a></h2><pre class="codeinput"> <span class="keyword">if</span> 0
+     nameStruct={<span class="string">'Bulb'</span> <span class="string">'PFCx'</span> <span class="string">'PaCx'</span> <span class="string">'dHPC'</span>};
+     nameprof={<span class="string">'deep'</span>, <span class="string">'sup'</span>};
+     <span class="comment">%nameEpochs={'MovEpoch' 'REMEpoch' 'SWSEpoch' 'S12' 'S34'};</span>
+     nameEpochs={<span class="string">'MovEpoch'</span> <span class="string">'WakeEpoch'</span>};
+     <span class="keyword">for</span> p=1:length(nameprof)
+         <span class="keyword">for</span> s=1:length(nameStruct)
+             <span class="keyword">for</span> nn=1:length(nameEpochs)
+                 disp(<span class="string">' '</span>)
+                 disp([nameStruct{s},<span class="string">'_'</span>,nameprof{p},<span class="string">'  -'</span>,nameEpochs{nn}])
+                 RespiModulatesGamma_ML([nameStruct{s},<span class="string">'_'</span>,nameprof{p}],nameEpochs{nn},8,1);
+             <span class="keyword">end</span>
+         <span class="keyword">end</span>
+     <span class="keyword">end</span>
+
+ <span class="keyword">end</span>
+</pre><h2>run RespiModulatesEvents_ML<a name="19"></a></h2><pre class="codeinput"> <span class="keyword">if</span> 0
+
+     nameStruct={<span class="string">'PFCx'</span> <span class="string">'PaCx'</span>};
+     nameprof={<span class="string">'Deep'</span>, <span class="string">'Sup'</span>};
+     NameEvent={<span class="string">'Spindles'</span> <span class="string">'DeltaWaves'</span>};
+
+     <span class="keyword">for</span> p=1:length(nameprof)
+         <span class="keyword">for</span> s=1:length(nameStruct)
+             <span class="keyword">for</span> e=1:length(NameEvent)
+                 disp([<span class="string">' * * '</span>,NameEvent{e},<span class="string">' '</span>,nameStruct{s},nameprof{p},<span class="string">' * * '</span>])
+                 RespiModulatesEvents_ML([nameStruct{s},nameprof{p}],NameEvent{e},[2.5 3],1,0);
+                 <span class="comment">%RespiModulatesEvents_ML([nameStruct{s},nameprof{p}],NameEvent{e},[2.5 3],0,1);</span>
+             <span class="keyword">end</span>
+         <span class="keyword">end</span>
+     <span class="keyword">end</span>
+ <span class="keyword">end</span>
+</pre><h2>------------------------------------------------------------------------<a name="20"></a></h2><p>------------------------------------------------------------------------- -----------------------      STIMULATION      --------------------------- ------------------------------------------------------------------------- -------------------------------------------------------------------------</p><h2>Run OptoStim_trigLFP_ML<a name="21"></a></h2><pre class="codeinput"><span class="keyword">if</span> 0
+    OptoStim_trigLFP_ML
+<span class="keyword">end</span>
+</pre><h2>Run HCStim_trigLFP_ML<a name="22"></a></h2><p>+ plot Ripples VS-VTA-dHPC</p><pre class="codeinput"><span class="keyword">if</span> 0
+    HCStim_trigLFP_ML
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.10<br></p></div><!--
+##### SOURCE BEGIN #####
+%RunFuctions_ML
+res=pwd;
+
+%% look at Delta waves, average respi
+
+if 0
+    Dir=PathForExperimentsML('PLETHYSMO');
+    for man=1:length(Dir.path)
+        cd(Dir.path{man})
+        disp(Dir.path{man}(max(strfind(Dir.path{man},'Mouse')):end))
+        RespirationByDeltaML;
+    end
+end
+
+%% effet de la stim sur theta
+if 0
+    clear stim LFP lfp
+    SetCurrentSession
+    stim=GetEvents('51')*1E4;
+    if issorted(stim)
+        stim=tsd(stim,stim);
+    end
+    load('LFPData.mat')
+    lfp=LFP{1};
+    
+    figure, [fh, rasterAx, histAx, matVal1] = ImagePETH(lfp, stim, -5000, +5000,'BinSize',1);
+    rg=Range(matVal1,'s');
+    dt=Data(matVal1);
+    
+    %figure('Color',[1 1 1]),
+    plot(rg*1E3,mean(dt,2),'Linewidth',2,'Color','b')
+    hold on, plot(rg*1E3,mean(dt,2)+stdError(dt')','k')
+    hold on, plot(rg*1E3,mean(dt,2)-stdError(dt')','k')
+    
+    hold on, line([0 0],[min(mean(dt,2)),max(mean(dt,2))],'Color','r','Linewidth',2); a=0;
+    for i=1:14
+        a=a+72/10;
+        hold on, line([a a],[min(mean(dt,2)),max(mean(dt,2))],'Color','r');
+    end
+    xlabel('Time around MFB stimulation (ms)')
+    title(res(max(strfind(res,'Mouse')):end))
+end
+
+%% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH      Processing     REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+if 0
+    % follow those steps:
+    % 1- ComputeTrackingAndImmobility.m
+    a=0;
+    a=a+1; PathTosave{a}='/media/DataMOBsRAID5/ProjetSommeil/ManipeManual/Mouse107/20140113/ICSS-Mouse-107-13012014-wideband';
+    a=a+1; PathTosave{a}='/media/DataMOBsRAID5/ProjetSommeil/ManipeManual/Mouse109/20140113/ICSS-Mouse-109-13012014-wideband';
+    a=a+1; PathTosave{a}='/media/DataMOBsRAID5/ProjetSommeil/ManipeManual/Mouse109/20140113/ICSS-Mouse-109-13012014-wideband/Ref_Tracking1to8';
+    for i=1:length(PathTosave)
+        
+        cd(PathTosave{i})
+        try 
+            ComputeTrackingAndImmobility;
+        catch
+            disp('Problem with ComputeTrackingAndImmobility');
+        end
+        close all
+        
+        if 0
+            n=input('Enter number of files.avi (loop): ');
+            for i=1:n
+                filename_tosave=input('filetosave: ','s');
+                load([filename_tosave,'.mat']);
+                Pos(:,4)=ones(size(Pos,1),1);
+                Pos(isnan(Pos(:,2)),4)=zeros(sum(isnan(Pos(:,2))),1);
+                save(filename_tosave,'-append','Pos')
+                file = fopen([filename_tosave,'.pos'],'w');
+                for i = 1:length(Pos),
+                    fprintf(file,'%f\t',Pos(i,2));
+                    fprintf(file,'%f\t',Pos(i,3));
+                    fprintf(file,'%f\n',Pos(i,4));
+                end
+                fclose(file);
+            end
+        end
+        
+        
+    end
+                  
+    
+    
+    % 2- makeDataBulbe.m or (CodeBulbRespi for plethysmo)
+    % 3- Add path in PathForExperimentsML.m
+end
+
+
+ 
+%% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-      SleepScoring     REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+ 
+%% run Compute_RatioSleepML
+if 0
+    Compute_RatioSleepML('None',1,1)
+    Compute_RatioSleepML('None',0,1)
+end
+
+%% run ParcoursSleepStages
+
+if 0
+    ParcoursSleepStages;
+end
+
+%% Run Generate delta, Spindles and ripples 
+if 0
+    
+    NameDir={'BASAL' 'PLETHYSMO' 'CANAB' 'DPCPX'};
+
+    for i=1:length(NameDir)
+        Dir=PathForExperimentsML(NameDir{i});
+        
+        for man=1:length(Dir.path)
+            disp('  ')
+            cd(Dir.path{man})
+            GenerateDeltaSpindlesRipplesML(Dir.path{man})
+        end
+    end
+    
+end
+
+%% Run PETHSpindlesRipplesML
+if 0
+    namedFoldersave='/media/DataMOBsRAID5/ProjetAstro/AnalyseSpindlesRipplesML';
+    
+    NameDir={'BASAL' 'PLETHYSMO' 'CANAB' 'DPCPX'};
+    for i=1:length(NameDir)
+        Dir=PathForExperimentsML(NameDir{i});
+        
+        for man=1:length(Dir.path)
+            if strcmp(NameDir{i},'PLETHYSMO')
+                nameMouseDay=['Plethysmo',Dir.path{man}(max(strfind(Dir.path{man},'Mouse')):end)]; nameMouseDay(strfind(nameMouseDay,'/'))='-';
+            else
+                nameMouseDay=Dir.path{man}(max(strfind(Dir.path{man},'BULB'))+5:end);
+            end
+            
+            try
+                PETHSpindlesRipplesML(Dir.path{man});
+                numF=gcf; saveFigure(numF,['SpindlesRipples_',nameMouseDay],namedFoldersave);close
+            catch
+                disp(' -> problem')
+            end
+            
+        end
+    end
+    
+end
+
+
+%% Run CoordineRipplesSpindles
+if 1
+    namedFoldersave='/media/DataMOBsRAID5/ProjetAstro/AnalyseSpindlesRipplesML';
+    NameDir={'BASAL' 'PLETHYSMO' 'CANAB' 'DPCPX'};
+    %NameDir={'CANAB'};
+    ScriptCoordineRipplesSpindles(namedFoldersave,NameDir);
+    
+end
+%% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH      Spectrum      REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+
+%% Run LFPspectrum_StrainsML_new
+
+if 0
+    NameDir={'CANAB'};%'PLETHYSMO' 'BASAL'
+    NameInjectionEpoch={'VEHEpoch','CPEpoch'};
+    NameStructures={'PaCx' 'Bulb' 'PFCx'};% 'dHPC'
+    
+    option={'deep' 'sup'};
+    %option={'deep' };
+    clean=0;%clean=[0 1];
+    for d=1:length(NameDir)
+        for o=1:length(option)
+            for i=1:length(NameStructures)
+                for nn=1:length(NameInjectionEpoch)
+                    for c=1:length(clean)
+                        disp(' ')
+                        disp([' * * * ',NameDir{d},' ',NameStructures{i},'_',option{o},' * * * '])
+                        if strcmp(NameDir{d},'PLETHYSMO')
+                            LFPspectrum_StrainsML_new(NameDir{d},NameStructures{i},'MovEpoch',clean(c),option{o},[2 3.5]);
+                            LFPspectrum_StrainsML_new(NameDir{d},NameStructures{i},'MovEpoch',clean(c),option{o},[5 10]);
+                        else
+                            LFPspectrum_StrainsML_new(NameDir{d},NameStructures{i},'MovEpoch',clean(c),option{o},[],NameInjectionEpoch{nn});
+                        end
+                        LFPspectrum_StrainsML_new(NameDir{d},NameStructures{i},'SWSEpoch',clean(c),option{o},[],NameInjectionEpoch{nn});
+                        LFPspectrum_StrainsML_new(NameDir{d},NameStructures{i},'REMEpoch',clean(c),option{o},[],NameInjectionEpoch{nn});
+                    end
+                end
+                close all
+            end
+            
+        end
+    end
+    
+end
+
+
+%% ComputeSpectrogram_newML
+if 0
+    a=0;
+   a=a+1; direct{a}='/media/DataMOBsRAID5/ProjetOPTO/DATAopto/Mouse079/MNT/Day2/OPTO-Mouse-79-16072013';
+   a=a+1; direct{a}='/media/DataMOBsRAID5/ProjetOPTO/DATAopto/Mouse079/MNT/Day3/OPTO-Mouse-79-17072013';
+   a=a+1; direct{a}='/media/DataMOBsRAID5/ProjetOPTO/DATAopto/Mouse079/MNT/Day4/OPTO-Mouse-79-18072013';
+   a=a+1; direct{a}='/media/DataMOBsRAID5/ProjetOPTO/DATAopto/Mouse079/MNT/Day5/OPTO-Mouse-79-19072013';
+   [params,movingwin,suffix]=SpectrumParametersML('low');
+   for a=1:length(direct)
+       cd(direct{a})
+       S={};cellnames={}; save SpikeData S cellnames
+       clear InfoLFP setCu
+       load('/media/DataMOBsRAID5/ProjetOPTO/DATAopto/Mouse079/MNT/Day1/OPTO-Mouse-79-15072013/LFPData/InfoLFP.mat')
+       mkdir('LFPData')
+       save LFPData/InfoLFP InfoLFP
+       try 
+           makeDataBulbe;
+       catch
+           disp('Problem with makeDataBulbe')
+       end
+       ComputeSpectrogram_newML(movingwin,params,InfoLFP,'VTA','All',suffix);
+   end
+end
+
+
+
+%% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-      RESPIRATION      REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+
+%% run CodeBulbRespiML
+if 0
+    ComputeTrackingAndImmobility
+    CodeBulbRespiML
+    
+    PlethysmoSignalML
+    Plot_RespiLFP_ML
+    PlotBilanRespiML
+    plotRespiLFPML
+    RespiLFP_MLOneMore
+    LFP_by_RespiFreqML
+    LFP_by_RespiFreqML_bis
+end
+%% run Run_ZAPRespi2_ML
+
+if 0
+    NameStates={'SWS' 'REM' 'Wake' };
+    NameTypeFreq={'HighGamma' 'LowGamma' 'Delta'};
+    for i=1:length(NameTypeFreq)
+        for j=1:length(NameStates)
+            Run_ZAPRespi2_ML(NameStates{j},NameTypeFreq{i});
+            close all;
+        end
+    end
+end
+
+ %% run ParcoursCohPlethy
+ 
+ if 0
+     nameStruct={'Bulb' 'PFCx' 'PaCx' 'dHPC' 'Respi'};
+     nameprof={'deep', 'sup'}; 
+     nameDir={'PLETHYSMO' 'BASAL'};
+     for dd=1:length(nameDir)
+         for pp=1:length(nameprof)
+             for s1=2:length(nameStruct)
+                 for s2=1:length(nameStruct)
+                     if s1~=s2
+                         disp([nameStruct{s1},' - ',nameStruct{s2}])
+                         ParcoursCohPlethy_ML(nameDir{dd},nameStruct{s1},nameStruct{s2},1,nameprof{pp});
+                         close all
+                     end
+                 end
+             end
+         end
+     end
+ end
+    
+ 
+ %% run RespiModulatesGamma_ML
+ 
+ if 0
+     nameStruct={'Bulb' 'PFCx' 'PaCx' 'dHPC'};
+     nameprof={'deep', 'sup'};
+     %nameEpochs={'MovEpoch' 'REMEpoch' 'SWSEpoch' 'S12' 'S34'};
+     nameEpochs={'MovEpoch' 'WakeEpoch'};
+     for p=1:length(nameprof)
+         for s=1:length(nameStruct)
+             for nn=1:length(nameEpochs)
+                 disp(' ')
+                 disp([nameStruct{s},'_',nameprof{p},'  -',nameEpochs{nn}])
+                 RespiModulatesGamma_ML([nameStruct{s},'_',nameprof{p}],nameEpochs{nn},8,1);
+             end
+         end
+     end
+ 
+ end
+
+ 
+ %% run RespiModulatesEvents_ML
+ 
+ if 0
+     
+     nameStruct={'PFCx' 'PaCx'};
+     nameprof={'Deep', 'Sup'};
+     NameEvent={'Spindles' 'DeltaWaves'};
+     
+     for p=1:length(nameprof)
+         for s=1:length(nameStruct)
+             for e=1:length(NameEvent)
+                 disp([' * * ',NameEvent{e},' ',nameStruct{s},nameprof{p},' * * '])
+                 RespiModulatesEvents_ML([nameStruct{s},nameprof{p}],NameEvent{e},[2.5 3],1,0);
+                 %RespiModulatesEvents_ML([nameStruct{s},nameprof{p}],NameEvent{e},[2.5 3],0,1);
+             end
+         end
+     end
+ end
+ 
+ 
+%% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-      STIMULATION      REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+
+%% Run OptoStim_trigLFP_ML
+if 0
+    OptoStim_trigLFP_ML
+end
+
+%% Run HCStim_trigLFP_ML
+% + plot Ripples VS-VTA-dHPC
+if 0
+    HCStim_trigLFP_ML
+end
+
+
+##### SOURCE END #####
+--></body></html>

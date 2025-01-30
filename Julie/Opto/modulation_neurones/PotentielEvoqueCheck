@@ -1,0 +1,27 @@
+% PotentielEvoqueCheck
+% 
+% 20.05.2017
+% aims at checking that the modulation we observe during laser stimulation
+% is not due to evoked response of neurons to the light start or end
+
+sav=0;
+savindiv=0;
+cd /media/DataMOBsRAIDN/ProjetAversion/SleepStim
+resRslt=pwd;
+
+Dir.path={
+'/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse458/20161117';
+'/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse459/20161123';
+'/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse465/20170126';
+'/media/DataMOBsRAIDN/ProjetAversion/DATA-Fear/Mouse467/20170202';
+
+};
+
+load('/media/DataMOBsRAIDN/ProjetAversion/SleepStim/ModNeurons_dur.mat')
+
+mu_sau=mu;
+
+mu(pval<0.05)=nan;
+
+figure
+PlotErrorSpreadN_KJ

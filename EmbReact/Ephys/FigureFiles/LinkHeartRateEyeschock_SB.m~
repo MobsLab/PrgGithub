@@ -1,0 +1,97 @@
+[Group,Mice] = GetMiceDrugGroupsUMaze;
+Mice = [666,667,668,669,Mice.Sal];
+
+232, 
+
+for mm = 1:length(Mice)
+    FileNames=GetAllMouseTaskSessions(Mice(mm));
+    GoodSess = find(not(cellfun(@isempty,strfind(FileNames,'Cond'))));
+    FileNames = FileNames(GoodSess);
+    
+    EKG = ConcatenateDataFromFolders_SB(FileNames,'HeartRate');
+    Fz = ConcatenateDataFromFolders_SB(FileNames,'Epoch','epochname','freezeepoch');
+    Stim = ConcatenateDataFromFolders_SB(FileNames,'Epoch','epochname','stimepoch');
+    StimNum(mm) = length(Start(Stim));
+    
+    EKGInt = tsd([0:0.05:max(Range(EKG,'s'))]*1E4,interp1(Range(EKG),Data(EKG),[0:0.05:max(Range(EKG,'s'))]*1E4)');
+    
+    [M,T] = PlotRipRaw(EKGInt,Start(Stim,'s'),20000,0,0);
+    T(T==0)=NaN;
+    AllResp{mm} = T;
+    BefStim = intervalSet(Start(Stim)-3*1E4,Start(Stim));
+    AftStim = intervalSet(Start(Stim),Start(Stim)+3*1E4);
+    for k = 1:length(STart(
+    
+end
+
+TimeLims=[5,30];
+for tt=1:length(TimeLims)
+    TimeLim=TimeLims(tt);
+    disp(num2str(TimeLim))
+    RemDat=[];
+    RemFzTimeBef=[];    RemFzTimeAft=[];
+    RemDatPos=[];
+    
+    RemMouseNum=[];
+    tpsvect=[-TimeLim+0.1:0.1:TimeLim-0.1]*1e4;
+    for ss=1:length(SessNames)
+        Dir=PathForExperimentsEmbReact(SessNames{ss});
+        MouseToAvoid=[560,117,431]; % mice with noisy data to exclude
+        Dir=RemoveElementsFromDir(Dir,'nmouse',MouseToAvoid);
+        for d=1:length(Dir.path)
+            Dat=[];
+            FzTimeBef=[];FzTimeAft=[];
+            MouseNum=[];
+            
+            for dd=1:length(Dir.path{d})
+                cd(Dir.path{d}{dd})
+                load('ExpeInfo.mat')
+                if exist('HeartBeatInfo.mat')>0
+                    clear EKG TTLInfo
+                    load('HeartBeatInfo.mat')
+                    load('behavResources_SB.mat')
+                    TTLInfo.StimEpoch=mergeCloseIntervals(TTLInfo.StimEpoch,1*1e4);
+                    EpAll=intervalSet(Start(TTLInfo.StimEpoch)-TimeLim*1e4,Start(TTLInfo.StimEpoch)+TimeLim*1e4);
+                    EpBef=intervalSet(Start(TTLInfo.StimEpoch)-2*1e4,Start(TTLInfo.StimEpoch)-0.5*1e4);
+                    EpAft=intervalSet(Start(TTLInfo.StimEpoch)+2*1e4,Start(TTLInfo.StimEpoch)+5*1e4);
+                    for e=1:length(Start(TTLInfo.StimEpoch))
+                        try
+                            Times=Range(EKG.HBTimes);
+                            HeartRate = tsd(Times(1:end-1),1./(diff(Times/1e4)));
+                            dattemp=interp1(Range(Restrict(HeartRate,subset(EpAll,e)))-Start(subset(EpAll,e))-TimeLim*1E4,Data(Restrict(HeartRate,subset(EpAll,e))),tpsvect);
+                            Dat=[Dat;dattemp];
+                            tempEp=and(subset(EpBef,e),Behav.FreezeEpoch);
+                            durtempEp=sum(Stop(tempEp,'s')-Start(tempEp,'s'));
+                            FzTimeBef=[FzTimeBef,durtempEp];
+                            tempEp=and(subset(EpAft,e),Behav.FreezeEpoch);
+                            durtempEp=sum(Stop(tempEp,'s')-Start(tempEp,'s'));
+                            FzTimeAft=[FzTimeAft,durtempEp];
+                            MouseNum=[MouseNum,ExpeInfo.nmouse];
+                            
+                        end
+                    end
+                    
+                end
+            end
+            
+            if size(Dat,1)>5
+                %             figure
+                %             subplot(121)
+                %             [MatNew,ind]=SortMat(Dat,[5:70]);
+                %             imagesc(tpsvect,1:size(MatNew,1),MatNew)
+                %             caxis([5 15])
+                %             title(num2str(ExpeInfo.nmouse))
+                %             subplot(122)
+                %             imagesc(tpsvect,1:size(MatNew,1),nanzscore(MatNew',[5:70])')
+                %             caxis([-10 10])
+                if ss<3
+                    RemDat=[RemDat;Dat];
+                    RemFzTimeBef=[RemFzTimeBef,FzTimeBef];
+                    RemFzTimeAft=[RemFzTimeAft,FzTimeAft];
+                    %                     RemDatPos=[RemDatPos,DatPos];
+                    RemMouseNum=[RemMouseNum,MouseNum];
+                end
+            end
+        end
+    end
+    WinToE

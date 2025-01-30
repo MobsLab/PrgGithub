@@ -1,0 +1,158 @@
+%CodeRespi
+
+%% initialisation
+ploSpectrumRespi=1;
+NameEpochs={'SWSEpoch' 'REMEpoch' 'MovEpoch'};
+Dir=PathForExperimentsML('PLETHYSMO');
+Strains=unique(Dir.group);
+MiceNames=unique(Dir.name);
+SaveFig=0;
+
+
+scrsz = get(0,'ScreenSize');
+%% pour aller plus loin, essais
+
+
+[params,movingwin]=SpectrumParametersML('low');
+params.Fs=1000;
+
+MatrixTemp_info=nan(length(Dir.path),2);
+try
+    load('/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/CodeRespi.mat','MatrixTemp','MatrixTemp_info')
+    MatrixTemp;
+catch
+    for man=1:length(Dir.path)
+        disp(['* * ',Dir.name{man},' * *'])
+        
+        clear  RespiTSD epoch SWSEpoch REMEpoch MovEpoch
+        load([Dir.path{man},'/StateEpoch.mat'],'SWSEpoch','REMEpoch','MovEpoch')
+        load([Dir.path{man},'/LFPData.mat'],'RespiTSD')
+        
+        %----------------------------------------------------------------------
+        %--------------------- compute Respi spectro --------------------------
+        [Spi,ti,freqfi]=mtspecgramc(Data(RespiTSD),movingwin,params);
+        if ploSpectrumRespi
+            figure, imagesc(ti,freqfi,10*log10(Spi)');axis xy;
+            hold on, plot(Range(RespiTSD,'s'),10+Data(RespiTSD)/mean(abs(Data(RespiTSD))),'Color','k')
+        end
+        
+        %----------------------------------------------------------------------
+        %--------------------- mean spectrum for states -----------------------
+        MatrixTemp_info(man,1:2)=[find(strcmp(Dir.group{man},Strains)),find(strcmp(Dir.name{man},MiceNames))];
+        for nn=1:length(NameEpochs)
+            eval(['epoch=',NameEpochs{nn},';']);
+            [tEpoch, SpEpoch]=SpectroEpochML(Spi,ti,freqfi,epoch);
+            try
+                MatrixTemp{nn}(man,:)=mean(SpEpoch,1);
+            catch
+                MatrixTemp{nn}=mean(SpEpoch,1);
+            end
+        end
+        %----------------------------------------------------------------------
+    end
+    save('/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/CodeRespi','MatrixTemp','MatrixTemp_info')
+end
+
+
+%% strain effect
+figure('color',[1 1 1],'Position',[2 scrsz(4)/2 scrsz(3)/4 scrsz(4)/2]), numF=gcf;
+colori={'b','r','k'};
+
+for nn=1:length(NameEpochs)
+    Temp=nan(length(MiceNames),size(MatrixTemp{nn},2));
+    for mm=1:length(MiceNames)
+        Temp(mm,:)=nanmean(MatrixTemp{nn}(MatrixTemp_info(:,2)==mm,:),1);
+        Temp_info(mm)=unique(MatrixTemp_info(MatrixTemp_info(:,2)==mm,1));
+    end
+    
+    subplot(1,length(NameEpochs),nn),hold on, 
+    
+    legend_M=[];
+    for gg=1:length(Strains)
+        
+        temp=Temp(Temp_info==gg,:);
+        plot(freqfi,nanmean(temp,1),'Linewidth',2,'Color',colori{gg})
+        
+        legend_M=[legend_M,{[Strains{gg},' (n=',num2str(size(temp,1)),')']}];
+        if size(temp,1)>1
+            plot(freqfi,nanmean(temp,1)+stdError(temp),'Color',colori{gg});
+            plot(freqfi,nanmean(temp,1)-stdError(temp),'Color',colori{gg});
+            legend_M=[legend_M,'+Std','-Std'];
+        end
+    end
+    legend(legend_M)
+    title(['Respi ',NameEpochs{nn}])
+    xlim([0 15])
+end
+
+
+%% svae fig
+
+
+if SaveFig,
+    if ~exist(['/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/CodeRespi_',date],'dir')
+        mkdir('/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo',['CodeRespi_',date]);
+    end
+    disp(['...keyboard before saving figures in DataPlethysmo/CodeRespi_',date])
+    keyboard
+    saveFigure(numF,'RespiFreqSpec_brainstates',['/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/CodeRespi_',date]);
+end
+
+
+%%
+res=pwd;
+disp('Analyse Gamma')
+Namestruct='PFCx_deep';
+try
+    load('/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/AnalyGammaRespi/AnalyGammaRespi.mat')
+    Matrix_low;Matrix_Respi;Matrix_high;Matrix_info;Matrix_t;
+catch
+    for man=1:length(Dir.path)
+        disp(['* * ',Dir.name{man},' * *'])
+        Matrix_info(man,1:2)=[find(strcmp(Dir.group{man},Strains)),find(strcmp(Dir.name{man},MiceNames))];
+        
+        cd(Dir.path{man})
+        [MRespi, Mlow, Mhigh]=RespiGammaMarie(Namestruct);
+        if ~isnan(MRespi)
+            Matrix_t=MRespi(:,1)';
+            Matrix_Respi(man,:)=MRespi(:,2)';
+            Matrix_low(man,:)=Mlow(:,2)';
+            Matrix_high(man,:)=Mhigh(:,2)';
+        else
+            Matrix_info(man,1:2)=[nan,nan];
+        end
+        
+    end
+    save('/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/AnalyGammaRespi/AnalyGammaRespi','Matrix_low','Matrix_Respi','Matrix_high','Matrix_info','Matrix_t')
+end
+cd(res);
+for mm=1:length(MiceNames)
+    ind_mm=find(Matrix_info(:,2)==mm);
+    mmMatrix_Respi(mm,:)=mean(Matrix_Respi(ind_mm,:),1);
+    mmMatrix_low(mm,:)=mean(Matrix_low(ind_mm,:),1);
+    mmMatrix_high(mm,:)=mean(Matrix_high(ind_mm,:),1);
+    mmMatrix_info(mm,:)=unique(Matrix_info(ind_mm,1));
+end
+
+
+for gg=1:length(Strains)
+    figure, 
+    ind_gg=find(mmMatrix_info==gg);
+
+    subplot(2,1,1),hold on,
+    plot(Matrix_t,rescale(mean(mmMatrix_Respi(ind_gg,:)),-1,1),'k','Linewidth',2)
+    plot(Matrix_t,rescale(mean(mmMatrix_low(ind_gg,:)),-1,1),'color',colori{gg})
+    legend({'Respiration','Low gamma'})
+    
+    subplot(2,1,2),hold on,
+    plot(Matrix_t,rescale(mean(mmMatrix_Respi(ind_gg,:)),-1,1),'k','Linewidth',2)
+    plot(Matrix_t,rescale(mean(mmMatrix_high(ind_gg,:)),-1,1),'color',colori{gg})
+    legend({'Respiration','High gamma'})
+    
+    title([Strains{gg},' ',Namestruct])
+    
+end
+    
+    
+    
+    

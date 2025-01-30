@@ -1,0 +1,32 @@
+%GrangerMarie
+
+
+cd /media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse061/20130503
+
+load('LFPData/LFP4.mat')
+LFP=ResampleTSD(LFP,250);
+LFP1=LFP; % hpc
+load('LFPData/LFP12.mat')
+LFP=ResampleTSD(LFP,250);
+LFP2=LFP; %bulb
+load('/media/DataMOBsRAID5/ProjetAstro/DataPlethysmo/Mouse061/20130503/SleepStagesPaCxDeep.mat')
+params.tapers=[3 5];
+params.pad=1;
+params.fpass=[0 100];   
+params.err=[1 0.05];
+params.Fs=round(1/median(diff(Range(LFP,'s'))));
+
+movingwin=[3 0.1];
+
+
+Epoch=subset(REMEpoch,2);
+figure, plot(Range(Restrict(LFP1,Epoch),'s'),Data(Restrict(LFP1,Epoch)))
+hold on, plot(Range(Restrict(LFP2,Epoch),'s'),Data(Restrict(LFP2,Epoch)),'r')
+
+order=15;
+[granger2, granger_F, granger_pvalue, granger_num, granger_den, granger_num_dof, granger_den_dof, granger_dir, granger_inst]=etc_granger([Data(Restrict(LFP1,Epoch)),Data(Restrict(LFP2,Epoch))],order,'ts_name',{'Hpc','Bulb'});
+
+[Fx2yb,Fy2xb]= one_bi_ga([Data(Restrict(LFP1,Epoch)),Data(Restrict(LFP2,Epoch))],1,100,order,params.Fs,[0.001:0.01:params.Fs/2]);
+
+
+

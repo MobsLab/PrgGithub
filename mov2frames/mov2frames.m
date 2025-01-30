@@ -1,0 +1,67 @@
+function [frames,combinedImage]=mov2frames(framesFolder,list)
+
+%[frames,combinedImage]=mov2frames('/Users/karimbenchenane/Dropbox/Mac/Downloads/convert Video to JPG/mov2frames');
+
+% Define the folder where the frames are stored
+
+try
+    framesFolder;
+catch
+    framesFolder = '/Users/karimbenchenane/Dropbox/Mac/Downloads/convert Video to JPG/mov2frames';
+end
+
+try
+    list;
+catch
+    list=1:length(imageFiles);
+end
+
+% List all image files in the folder
+imageFiles = dir(fullfile(framesFolder, '*.jpg')); % Assuming jpg format, change if different
+
+% Number of frames to combine
+%numFrames = min(length(imageFiles), 10); % Combining first 10 frames, adjust as necessary
+numFrames=length(list);
+
+% Initialize a cell array to store the frames
+frames = cell(1, numFrames);
+
+% Read the frames into the cell array
+a=1;
+for k = list    
+    temp = imread(fullfile(framesFolder, imageFiles(k).name));
+    frames{a} = temp(28:320,114:560,:);
+    a=a+1;
+end
+
+% Assuming all frames are the same size, get the size of the first frame
+[height, width, numChannels] = size(frames{1});
+
+% Create an empty matrix to store the combined image
+combinedImage = zeros(height, width, numChannels, 'uint8');
+
+% Alpha blending factor for each frame
+alpha = 1 / numFrames;
+
+% Combine the frames using alpha blending
+for k = 1:numFrames
+    %combinedImage = combinedImage + uint8(alpha * double(frames{k}));
+    temp=double(frames{k});
+    temp(temp>200)=255;
+    temp= uint8(alpha * temp);
+    
+    %temp(temp==0)=1;
+    J = imsharpen(temp(:,:,1));
+    K = imsharpen(temp(:,:,2));
+    L = imsharpen(temp(:,:,3));
+    I(:,:,1)=J; I(:,:,2)=K;I(:,:,3)=L; 
+    I=temp;
+    combinedImage = combinedImage + I;
+end
+
+% Display the resulting image
+% imshow(combinedImage);
+% title('Combined Image Showing Movement');
+
+% Save the resulting image if desired
+imwrite(combinedImage, 'combined_movement_image.jpg');

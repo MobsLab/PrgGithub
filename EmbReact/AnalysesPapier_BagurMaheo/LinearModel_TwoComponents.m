@@ -1,0 +1,212 @@
+clear all
+cd /media/nas7/ProjetEmbReact/DataEmbReact/Data_for_SB/
+load('DATA_GLM_Physio_Behav_Eyelid_corr.mat')
+Labels{24} = 'Mystery Variable';
+
+VarToUse = [6,7,11];
+VarToPred = [14,15,20,24];
+BadGuys = sum(isnan(MAT([VarToUse,VarToPred],:)))>0;
+% MAT(:,BadGuys) = [];
+Input = nanzscore(MAT([VarToUse],:)')';
+
+clf
+for vv = 1:length(VarToPred)
+    
+    Pred = MAT(VarToPred(vv),:);
+    Model = fitlm(Input',Pred');
+    Coeff(vv,:) = Model.Coefficients.Estimate(2:end);
+    pval(vv,:) = Model.Coefficients.pValue(2:end);
+    subplot(length(VarToPred),1,vv)
+    bar(Coeff(vv,:))
+    for ii = 1 :length(VarToUse)
+        if pval(vv,ii)<0.001
+            text(ii,max(ylim),'***')
+        elseif pval(vv,ii)<0.01
+            text(ii,max(ylim),'**')
+        elseif pval(vv,ii)<0.05
+            text(ii,max(ylim),'*')
+        end
+    end
+    ylim([min(ylim) max(ylim)*1.2])
+    if vv==length(VarToPred)
+        set(gca,'XTick',1:length(VarToUse),'XTickLabel',Labels(VarToUse))
+    end
+    title(Labels(VarToPred(vv)))
+end
+
+%% Correlations
+figure
+for vv = 1:length(VarToPred)
+    for ii = 1 :length(VarToUse)
+        subplot(3,length(VarToPred),(ii-1)*length(VarToPred)+vv)
+        plot(MAT(VarToPred(vv),:),MAT(VarToUse(ii),:),'.')
+        [R,P] = corr(MAT(VarToPred(vv),:)',MAT(VarToUse(ii),:)','rows','complete','type','Spearman');
+        xlabel(Labels(VarToPred(vv)))
+        ylabel(Labels(VarToUse(ii)))
+        title([num2str(R) '  ' num2str(P) ])
+    end
+end
+
+figure
+%% Partial correlations
+
+% Shock freezing prediction controlling other
+for vv = 1:length(VarToPred)
+    [rho_shock(vv),p_shock(vv)] = partialcorr(MAT(1,:)',MAT(VarToPred(vv),:)',MAT([2,11],:)','rows','complete','type','Pearson');
+end
+
+% Plot this :
+for vv = 1:length(VarToPred)
+    Model = fitlm(MAT([2,11],:)',MAT(VarToPred(vv),:)');
+    res = MAT(VarToPred(vv),:)' - predict(Model,MAT([2,11],:)');
+    subplot(3,4,vv)
+    if p_shock(vv)<0.05
+        plot(MAT(1,:)',res,'r.')
+        title(num2str(p_shock(vv)))
+        
+    else
+        plot(MAT(1,:)',res,'k.')
+    end
+    [R,P] = corr(res,MAT(1,:)','rows','complete','type','Pearson')
+    makepretty
+    xlabel(['residual' Labels{VarToPred(vv)}])
+    ylabel(Labels(1))
+    xlim padded
+    ylim padded
+    
+end
+
+
+%% Safe freezing prediction controlling other
+for vv = 1:length(VarToPred)
+    [rho_safe(vv),p_safe(vv)] = partialcorr(MAT(2,:)',MAT(VarToPred(vv),:)',MAT([1,11],:)','rows','complete','type','Pearson');
+end
+
+% Plot this :
+for vv = 1:length(VarToPred)
+    Model = fitlm(MAT([1,11],:)',MAT(VarToPred(vv),:)');
+    res = MAT(VarToPred(vv),:)' - predict(Model,MAT([1,11],:)');
+    subplot(3,length(VarToPred),vv+length(VarToPred))
+    if p_safe(vv)<0.05
+        plot(MAT(2,:)',res,'r.')
+        title(num2str(p_safe(vv)))
+    else
+        plot(MAT(2,:)',res,'k.')
+    end
+    [R,P] = corr(res,MAT(2,:)','rows','complete','type','Pearson')
+    makepretty
+    xlabel(['residual' Labels{VarToPred(vv)}])
+    ylabel(Labels(2))
+    xlim padded
+    ylim padded
+    
+end
+
+
+%% Shock nmuber prediction controlling other
+for vv = 1:length(VarToPred)
+    [rho_sknum(vv),p_sknum(vv)] = partialcorr(MAT(11,:)',MAT(VarToPred(vv),:)',MAT([1,2],:)','rows','complete','type','Pearson');
+end
+
+
+% Plot this :
+for vv = 1:length(VarToPred)
+    Model = fitlm(MAT([2,1],:)',MAT(VarToPred(vv),:)');
+    res = MAT(VarToPred(vv),:)' - predict(Model,MAT([2,1],:)');
+    subplot(3,length(VarToPred),vv+length(VarToPred)*2)
+    if p_sknum(vv)<0.05
+        plot(MAT(11,:)',res,'r.')
+        title(num2str(p_sknum(vv)))
+    else
+        plot(MAT(11,:)',res,'k.')
+    end
+    [R,P] = corr(res,MAT(11,:)','rows','complete','type','Pearson')
+    makepretty
+    xlabel(['residual' Labels{VarToPred(vv)}])
+    ylabel(Labels(11))
+    xlim padded
+    ylim padded
+    
+end
+
+
+figure
+%% Partial correlations
+
+% Shock freezing prediction controlling other
+for vv = 1:length(VarToPred)
+    [rho_shock(vv),p_shock(vv)] = partialcorr(MAT(6,:)',MAT(VarToPred(vv),:)',MAT([7,11],:)','rows','complete','type','Pearson');
+end
+
+% Plot this :
+for vv = 1:length(VarToPred)
+    Model = fitlm(MAT([7,11],:)',MAT(VarToPred(vv),:)');
+    res = MAT(VarToPred(vv),:)' - predict(Model,MAT([7,11],:)');
+    subplot(3,length(VarToPred),vv)
+    if p_shock(vv)<0.05
+        plot(MAT(6,:)',res,'r.')
+        title(num2str(p_shock(vv)))
+    else
+        plot(MAT(6,:)',res,'k.')
+    end
+    [R,P] = corr(res,MAT(6,:)','rows','complete','type','Pearson')
+    makepretty
+    xlabel(['residual' Labels{VarToPred(vv)}])
+    ylabel(Labels(6))
+    xlim padded
+    ylim padded
+    
+end
+
+
+%% Safe freezing prediction controlling other
+for vv = 1:length(VarToPred)
+    [rho_safe(vv),p_safe(vv)] = partialcorr(MAT(7,:)',MAT(VarToPred(vv),:)',MAT([6,11],:)','rows','complete','type','Pearson');
+end
+
+% Plot this :
+for vv = 1:length(VarToPred)
+    Model = fitlm(MAT([6,11],:)',MAT(VarToPred(vv),:)');
+    res = MAT(VarToPred(vv),:)' - predict(Model,MAT([6,11],:)');
+    subplot(3,length(VarToPred),vv+length(VarToPred))
+    if p_safe(vv)<0.05
+        plot(MAT(7,:)',res,'r.')
+        title(num2str(p_safe(vv)))
+    else
+        plot(MAT(7,:)',res,'k.')
+    end
+    [R,P] = corr(res,MAT(7,:)','rows','complete','type','Pearson')
+    makepretty
+    xlabel(['residual' Labels{VarToPred(vv)}])
+    ylabel(Labels(7))
+    xlim padded
+    ylim padded
+    
+end
+
+
+%% Shock nmuber prediction controlling other
+for vv = 1:length(VarToPred)
+    [rho_sknum(vv),p_sknum(vv)] = partialcorr(MAT(11,:)',MAT(VarToPred(vv),:)',MAT([6,7],:)','rows','complete','type','Pearson');
+end
+
+
+% Plot this :
+for vv = 1:length(VarToPred)
+    Model = fitlm(MAT([6,7],:)',MAT(VarToPred(vv),:)');
+    res = MAT(VarToPred(vv),:)' - predict(Model,MAT([6,7],:)');
+    subplot(3,length(VarToPred),vv+length(VarToPred)*2)
+    if p_sknum(vv)<0.05
+        plot(MAT(11,:)',res,'r.')
+        title(num2str(p_sknum(vv)))
+    else
+        plot(MAT(11,:)',res,'k.')
+    end
+    [R,P] = corr(res,MAT(11,:)','rows','complete','type','Pearson')
+    makepretty
+    xlabel(['residual' Labels{VarToPred(vv)}])
+    ylabel(Labels(11))
+    xlim padded
+    ylim padded
+    
+end

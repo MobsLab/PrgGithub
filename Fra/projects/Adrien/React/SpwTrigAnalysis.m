@@ -1,0 +1,31 @@
+parent_dir = '/media/sdb1/Data';
+datasets = List2Cell([ parent_dir filesep 'datasets_rat20tmp.list' ] );
+
+A = getResource(A,'SpwTrigCorrMS1',datasets);
+A = getResource(A,'SpwTrigCorrMS2',datasets);
+A = getResource(A,'CorrectError',datasets);
+A = getResource(A,'TrialOutcome',datasets);
+
+%  meanDiff = zeros(lenght(datasets,1);
+
+for day=1:length(datasets);
+
+	corrMS1 = Data(spwTrigCorrMS1{day});
+	corrMS2 = Data(spwTrigCorrMS2{day});
+	meanDiff(day,:) =  mean(corrMS2) - mean(corrMS1);
+	ce = Data(correctError{day});
+	side = Data(trialOutcome{day});
+	nbCorrect(day) = length(find(ce == 1));
+	nbLeft(day) = length(find(ce == 1));
+
+end
+
+meanDiff(isnan(meanDiff)) = 0;
+
+
+
+figure(1),clf
+%  plot([1:size(meanDiff,2)],mean(meanDiff))
+%  plot([1:length(datasets)], meanDiff(:,26))
+
+scatter(nbLeft,meanDiff(:,26))

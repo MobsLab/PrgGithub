@@ -1,0 +1,104 @@
+function [MATinfo,nameAcq]=getActiID
+
+
+nameAcq={'BASAL','TEST0','TEST','COND','TESTFinal'};
+MATinfo=[];
+
+for numBatch=1:3
+    
+    clear DataExpe expe channelID GpW GpS Problems
+    clear ID_Basal ID_Test0 ID_Test ID_TestF ID_Cond
+    
+    if numBatch==1
+        DataExpe=1;
+        expe=[9:22,24:87,89:141]; %23 does not exists
+        channelID=[1:4,6:8,10:12]; % #5 and #9 not included
+        
+        ID_Basal=[29 31 32 34 40 43 60 70 81 91 101 111 121 131 141];% BASAL
+        
+        ID_Test0 = 38;%36 37  TEST 0
+        ID_Test = [59 69 80 90 100 110 120 130];% TEST
+        ID_TestF = 140;% TESTFINAL
+        
+        ID_Cond=[48 52 55 57,    61 63 65 67,    72 74 76 78,...
+            82 84 86 88,    92 94 96 98,    102 104 106 108,...
+            112 114 116 118,    122 124 126 128,   132 134 136 138]; % COND
+        
+        GpW=[1 2 5 6 10]; % wake conditioning
+        GpS=[3 4 7 8 11 12];% sleep conditioning
+        
+        Problems=[5 33; 11 95;... % do not take mouse#11 from recording 0095.
+            1 103; 2 107];
+        
+    elseif numBatch==2
+        DataExpe=2;
+        expe=0:1:110;
+        channelID=[1,2,4,5,7,8,11]; % ordered
+        
+        ID_Basal=[7 8 14 18 19 21 24 34 44,...
+            65 67 69 71 81 91 101 111 121 131 141 151,...
+            161 163, 165:178];% BASAL
+        ID_Test0 = [17 20 23];%66 68 70 TEST 0
+        ID_Test = [33 43 54 80 90 100 110 120 130 140 150];% TEST
+        ID_TestF = [160 162 164];% TESTFINAL
+        ID_Cond=[25 27 29 31, 35 37 39 41,45 47 50 52,...
+            72 74 76 78, 82 84 86 88, 92 94 96 98,...
+            102 104 106 108, 112 114 116 118, 122 124 126 128,...
+            132 134 136 138, 142 144 146 148, 152 154 156 158]; % COND
+        
+        GpW=[2 3 5 8 9 12]; % wake conditioning
+        GpS=[1 4 6 7 10 11];% sleep conditioning
+        
+        Problems=[6 17; 10 17; 12 17;3 27;...% removed from channelID
+            2 45;1 101; 4 172];% do not take mouse#1 after recording 0100.
+        
+        
+    elseif numBatch==3
+        
+        DataExpe=2;
+        expe=58:110;
+        channelID=[2 3 6 9 10 12]; % ordered
+        
+        ID_Basal=[65 67 69 71 81 91 101 111 121 131 141 151,...
+            161 163, 165:178];
+        
+        ID_Test0 = [66 68 70];% TEST 0
+        ID_Test = [80 90 100 110 120 130 140 150];% TEST
+        ID_TestF = [160 162 164];% TESTFINAL
+        
+        ID_Cond=[72 74 76 78, 82 84 86 88, 92 94 96 98,...
+            102 104 106 108, 112 114 116 118, 122 124 126 128,...
+            132 134 136 138, 142 144 146 148, 152 154 156 158]; % COND
+        
+        GpW=[2 3 5 8 9 12]; % wake conditioning
+        GpS=[1 4 6 7 10 11];% sleep conditioning
+        
+        Problems=[];
+    end
+    
+    % expe and num mice
+    temp1=ones(length(channelID),1)*expe; temp1=temp1(:);
+    temp2=channelID'*ones(1,length(expe));temp2=temp2(:);
+    temp3=[(numBatch-1)*12+channelID]'*ones(1,length(expe));temp3=temp3(:);
+    tempMAT=nan(length(expe)*length(channelID),6);
+    tempMAT(:,[1,2,4,6])=[DataExpe*ones(length(expe)*length(channelID),1),temp1,temp2,temp3];
+    
+    % type of recording
+    tempMAT(ismember(tempMAT(:,2),ID_Basal),3)=0;% Basal=0
+    tempMAT(ismember(tempMAT(:,2),ID_Test0),3)=1;% Test0=1
+    tempMAT(ismember(tempMAT(:,2),ID_Test),3)=2;% Test=2
+    tempMAT(ismember(tempMAT(:,2),ID_Cond),3)=3;% Cond=3
+    tempMAT(ismember(tempMAT(:,2),ID_TestF),3)=4;% TestFinal=4
+    
+    % groups of mice
+    tempMAT(ismember(tempMAT(:,4),GpW),5)=1;
+    tempMAT(ismember(tempMAT(:,4),GpS),5)=0;
+    
+    % erase days when mice absent
+    for p=1:size(Problems,1)
+        tempMAT(tempMAT(:,4)==Problems(p,1) & tempMAT(:,2)>Problems(p,2) ,:)=[];
+    end
+    
+    MATinfo=[MATinfo;tempMAT];
+end
+

@@ -1,0 +1,120 @@
+% % FindRespiOscillationInBulbLFP.m
+% % 04.09.2015
+% 
+% thD=0.5;
+% th=75;  % en ms
+% 
+% % temp1=load('LFPData/LFP38.mat');
+% % temp2=load('LFPData/LFP39.mat');
+% 
+% temp1=load('LFPData/LFP2.mat');
+% temp2=load('LFPData/LFP14.mat');
+% LFP1=temp1.LFP;
+% LFP2=temp2.LFP;
+% t=Range(LFP1);
+% LFPd=tsd(Range(LFP1), Data(LFP1)-Data(LFP2));
+% 
+% 
+% 
+% 
+% freqDelta=[1 5];% mettre+ large ? 
+% Epoch=intervalSet(770*1E4, 4584*1E4);
+% Filt_LFPd = FilterLFP(LFPd, freqDelta, 1024);
+% Filt_LFPd_r = Restrict(Filt_LFPd,Epoch);
+% %OK=max(-Data(Filt_LFPd_r),0);
+% OK=max(Data(Filt_LFPd_r),0);
+% 
+% if 0
+% figure, plot(Range(LFP1,'s'), Data(LFP1)),hold on,
+% plot(Range(LFP2,'s'), Data(LFP2)-10000,'r'),hold on,
+% plot(Range(LFPd,'s'), Data(LFPd)+10000,'k'),hold on,
+% plot(Range(Filt_LFPd,'s'), Data(Filt_LFPd)+10000,'g'),
+% plot(Range(Filt_LFPd_r,'s'), OK+10000,'Color','c'),
+% line([Start(DeltaEpoch1,'s') End(DeltaEpoch1,'s')],[12000 12000],'Color', 'r', 'LineWidth', 2)
+% end
+% 
+% 
+% DeltaEpoch1=thresholdIntervals(tsd(Range(Restrict(LFPd,Epoch)), OK),thD*std(OK(OK>0)),'Direction','Above');
+% OKtsd=tsd(Range(Restrict(LFPd,Epoch)),OK);
+% 
+% b=End(DeltaEpoch1)-Start(DeltaEpoch1);
+% 
+% DeltaEpoch=dropShortIntervals(DeltaEpoch1,th*10); % crucial element for noise detection (75ms) !!!!!!!!!!!!!!!!!!!!!!!!!!
+% tDelta=Start(DeltaEpoch)+(End(DeltaEpoch)-Start(DeltaEpoch))/2;
+
+
+load Diode
+load DiodeOnMouse
+load StateEpoch
+diode_ON_segt=And(diode_ON_segt,DiodeOnMouse);
+diode_ON_segt=dropShortIntervals(diode_ON_segt,30000);
+diode_ON_segt=intervalSet(Start(diode_ON_segt)+2*1E4,End(diode_ON_segt)-1*1E4);
+TotEpoch=intervalSet(t(1),t(end));
+WakeEpoch=TotEpoch-SWSEpoch-REMEpoch;
+
+State={'SWSEpoch','REMEpoch','WakeEpoch'};
+StimPer={'diode_ON_segt','diode_OFF_period'};
+intervalTable={};%
+for j=1:length(State)
+    for k=1:length(StimPer)
+        if eval(['~isempty(Start(And(' StimPer{k} ',' State{j} ')))'])
+            eval(['intervalTable{j,k}=And(And(DeltaEpoch,' State{j} '),' StimPer{k} ');']);
+        end
+    end
+end
+
+% Frequency of dipole events
+%h_fq=figure;
+dipole_fq=nan(length(State),length(StimPer));
+
+colorstate={'r','k'};
+for j=1:length(State)
+
+        subplot(1,3,j)
+        hold on
+        for k=1:length(StimPer)
+            if ~isempty(intervalTable{j,k})
+            s=Start(intervalTable{j,k},'s');
+            e=End(intervalTable{j,k},'s');
+            scatter(k, size(Start(intervalTable{j,k}),1)/(e(end)-s(1)), 'MarkerFaceColor',colorstate{k},'MarkerEdgeColor',colorstate{k})
+            dipole_fq(j,k)=size(Start(intervalTable{j,k}),1)/(e(end)-s(1));
+            end
+        end
+        plot(1:length(StimPer),dipole_fq(j,:),'Color',[0.7 0.7 0.7])
+        xlim([0 length(StimPer)+1])
+        ylim([0 4])
+        title(State{j})
+        if j==1
+        ylabel('dipole events frequency')
+        legend(StimPer)
+        end
+
+end
+
+h_max=figure;
+dipole_max=nan(length(State),length(StimPer));
+
+colorstate={'r','k'};
+for j=1:length(State)
+
+        subplot(1,3,j)
+        hold on
+        for k=1:length(StimPer)
+            if ~isempty(intervalTable{j,k})
+            s=Start(intervalTable{j,k},'s');
+            e=End(intervalTable{j,k},'s');
+            scatter(k, mean(End(intervalTable{j,k})-Start(intervalTable{j,k})), 'MarkerFaceColor',colorstate{k},'MarkerEdgeColor',colorstate{k})
+            dipole_max(j,k)=mean(End(intervalTable{j,k})-Start(intervalTable{j,k}));
+            end
+        end
+        plot(1:length(StimPer),dipole_max(j,:),'Color',[0.7 0.7 0.7])
+        xlim([0 length(StimPer)+1])
+        %ylim([0 4])
+        title(State{j})
+        if j==1
+        ylabel('dipole events amplitude')
+        legend(StimPer)
+        end
+
+end
+

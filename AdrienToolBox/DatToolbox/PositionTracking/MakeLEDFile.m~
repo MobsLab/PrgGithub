@@ -1,0 +1,14 @@
+function MakeLEDFile(fbasename,varargin)
+
+% USAGE:
+%     [returnVar,msg] = MakeLEDFile(filebasename,channel)
+% INPUTS:
+%     filebasename: file base name
+%     channel (optionnal): sync pulse channel. Default is last channel in the eeg file.
+% 
+% Adrien Peyrache 2011
+
+if ~isempty(varargin)    
+    channel = varargin{1};
+    if
+info = xml_load([fbasename '.xml']);

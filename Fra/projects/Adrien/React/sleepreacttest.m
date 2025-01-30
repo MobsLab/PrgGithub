@@ -1,0 +1,68 @@
+dsetNum = 35
+
+
+dset = datasets{dsetNum}
+
+R2 = Data(reactTimeCourseS2{dsetNum});
+times = Range(reactTimeCourseS2{dsetNum});
+nbBins2 = length(times);
+
+
+A = getResource(A,'Sleep2Epoch',dset);
+sleep2Epoch = sleep2Epoch{1};
+A = getResource(A,'PosXS',dset);
+XS = XS{1};
+A = getResource(A,'PosYS',dset)
+YS=YS{1};
+
+
+eegfname = [dset filesep dset(end-5:end) 'eeg5.mat'];
+if exist([eegfname '.gz'])
+    display(['unzipping file ' eegfname]);
+    eval(['!gunzip ' eegfname '.gz']);
+end
+load(eegfname)
+display(['zipping file ' eegfname]);
+eval(['!gzip ' eegfname]);
+
+eegS2 = Restrict(EEG5,sleep2Epoch);
+clear EEG5
+b = fir1(96,[0.005 0.01]);
+
+deegS2 = Data(eegS2);
+deegS2Filt = filtfilt(b,1,deegS2);
+eegS2std = std(deegS2Filt);
+eegS2Filt = tsd(Range(eegS2),deegS2Filt);
+%  
+[thSt2 thEnd2] = findTheta(eegS2Filt,0.5*eegS2std,0.5*eegS2std,'CloseThreshold',200000,'MinThetaDuration','100000');
+
+XS2 = Restrict(XS,sleep2Epoch);
+YS2 = Restrict(YS,sleep2Epoch);
+
+x = Data(XS2) - mean(Data(XS2));
+y = Data(YS2) - mean(Data(YS2));
+
+d = sqrt(x.*x + y.*y);
+
+
+rg = [1:10:nbBins2];
+	
+times = times(rg)/10000;
+
+thSt2 = Range(thSt2)/10000 - times(1);
+thEnd2 = Range(thEnd2)/10000 - times(1);
+if length(thEnd2)>length(thSt2); thEnd2(end)=[];end;
+
+Rsmooth = conv(R2,gausswin(1200))/sum(gausswin(1200));
+Rsmooth = Rsmooth(600:end-600);
+RsmF = Rsmooth(rg);
+maxY = max(RsmF)+0.005;
+minY = min(RsmF)-0.005;
+
+
+figure(1),clf
+
+hold on
+fill([thSt2';thSt2';thEnd2';thEnd2'],[minY maxY maxY minY]'*ones(1,length(thSt2)),'r')
+plot(times - times(1),RsmF,'LineWidth',3,'Color','k')
+plot(Range(XS2)/10000-times(1),maxY*d/max(d))
