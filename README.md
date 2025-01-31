@@ -9,7 +9,6 @@ You will find them here :
 - [./Processing](https://github.com/MobsLab/GetFunctions.git) - not updated compared to Dropbox yet : we need to figure the delta wave computation out.
 - [./Sam](https://github.com/MobsLab/SamMnemozyne.git) - can also be found in the [Mnremozyne repo](https://github.com/MobsLab/Mnemozyne.git), SamMnemozyne branch.
 - [./ERC_Codes](https://github.com/MobsLab/Mnemozyne.git)
-- Ella Navigation model ?
 
 # PrgGithub
 
