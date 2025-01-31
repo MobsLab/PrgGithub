@@ -6,6 +6,15 @@ all_params.std_conf = {};
 all_params.tps = {};
 all_params.error_good = {};
 all_params.error_bad = {};
+
+% Function to load and save CSV data
+function loadAndSaveCSV(filePath, varName)
+    csvData = csvread(filePath);
+    idx = csvData(2:end, 1);
+    data = csvData(2:end, 2);
+    save([varName '.mat'], ['idx' varName], varName)
+end
+
 for imouse = 1:length(Dir.path)
     cd(Dir.path{imouse}{1});
     load behavResources.mat
@@ -13,70 +22,28 @@ for imouse = 1:length(Dir.path)
     cd(Dir.results{imouse}{1});
     window_size = '200';
     try
-        csvLinearPred = csvread([ Dir.results{imouse}{1}  'results/' window_size '/linearPred.csv']);
-        idxLinearPred = csvLinearPred(2:end,1);
-        LinearPred=csvLinearPred(2:end,2);
-        save('linearPred.mat', 'idxLinearPred', 'LinearPred')
-        csvTimeStepsPred = csvread([Dir.results{imouse}{1}  'results/' window_size '/timeStepsPred.csv']);
-        idxTimeStepsPred = csvTimeStepsPred(2:end,1);
-        TimeStepsPred = csvTimeStepsPred(2:end,2);
-        save('timeStepsPred.mat', 'idxTimeStepsPred', 'TimeStepsPred')
+        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearPred.csv'], 'LinearPred');
+        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/timeStepsPred.csv'], 'TimeStepsPred');
+        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/lossPred.csv'], 'LossPred');
+        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearTrue.csv'], 'LinearTrue');
         
-        csvLossPred = csvread([ Dir.results{imouse}{1} 'results/' window_size '/lossPred.csv']);
-        idxLossPred = csvLossPred(2:end,1);
-        LossPred=csvLossPred(2:end,2);
-        save('lossPred.mat', 'idxLossPred', 'LossPred')
-        
-        
-        csvLinearTrue = csvread([ Dir.results{imouse}{1} 'results/' window_size '/linearTrue.csv']);
-        idxLinearTrue = csvLinearTrue(2:end,1);
-        LinearTrue=csvLinearTrue(2:end,2);
-        save('linearTrue.mat', 'idxLinearTrue', 'LinearTrue')
-        
-        %importing decoded position during sleep
+        % Importing decoded position during sleep
         try
-            csvLinearPredSleep = csvread([ Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/linearPred.csv']);
-            idxLinearPredSleep = csvLinearPredSleep(2:end,1);
-            LinearPredSleep=csvLinearPredSleep(2:end,2);
-            save('linearPredSleep.mat', 'idxLinearPredSleep', 'LinearPredSleep')
-            csvTimeStepsPredSleep = csvread([ Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/timeStepsPred.csv']);
-            idxTimeStepsPredSleep = csvTimeStepsPredSleep(2:end,1);
-            TimeStepsPredSleep = csvTimeStepsPredSleep(2:end,2);
-            save('timeStepsPredSleep.mat', 'idxTimeStepsPredSleep', 'TimeStepsPredSleep')
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/linearPred.csv'], 'LinearPredSleep');
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/timeStepsPred.csv'], 'TimeStepsPredSleep');
         catch
             disp("No sleep session found")
         end
     catch
         window_size = '252';
-        csvLinearPred = csvread([ Dir.results{imouse}{1}  'results/' window_size '/linearPred.csv']);
-        idxLinearPred = csvLinearPred(2:end,1);
-        LinearPred=csvLinearPred(2:end,2);
-        save('linearPred.mat', 'idxLinearPred', 'LinearPred')
-        csvTimeStepsPred = csvread([Dir.results{imouse}{1}  'results/' window_size '/timeStepsPred.csv']);
-        idxTimeStepsPred = csvTimeStepsPred(2:end,1);
-        TimeStepsPred = csvTimeStepsPred(2:end,2);
-        save('timeStepsPred.mat', 'idxTimeStepsPred', 'TimeStepsPred')
-        
-        csvLossPred = csvread([ Dir.results{imouse}{1} 'results/' window_size '/lossPred.csv']);
-        idxLossPred = csvLossPred(2:end,1);
-        LossPred=csvLossPred(2:end,2);
-        save('lossPred.mat', 'idxLossPred', 'LossPred')
-        
-        
-        csvLinearTrue = csvread([ Dir.results{imouse}{1} 'results/' window_size '/linearTrue.csv']);
-        idxLinearTrue = csvLinearTrue(2:end,1);
-        LinearTrue=csvLinearTrue(2:end,2);
-        save('linearTrue.mat', 'idxLinearTrue', 'LinearTrue')
+        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearPred.csv'], 'LinearPred');
+        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/timeStepsPred.csv'], 'TimeStepsPred');
+        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/lossPred.csv'], 'LossPred');
+        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearTrue.csv'], 'LinearTrue');
         
         try
-            csvLinearPredSleep = csvread([ Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/linearPred.csv']);
-            idxLinearPredSleep = csvLinearPredSleep(2:end,1);
-            LinearPredSleep=csvLinearPredSleep(2:end,2);
-            save('linearPredSleep.mat', 'idxLinearPredSleep', 'LinearPredSleep')
-            csvTimeStepsPredSleep = csvread([ Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/timeStepsPred.csv']);
-            idxTimeStepsPredSleep = csvTimeStepsPredSleep(2:end,1);
-            TimeStepsPredSleep = csvTimeStepsPredSleep(2:end,2);
-            save('timeStepsPredSleep.mat', 'idxTimeStepsPredSleep', 'TimeStepsPredSleep')
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/linearPred.csv'], 'LinearPredSleep');
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/timeStepsPred.csv'], 'TimeStepsPredSleep');
         catch
             disp("No sleep session found")
         end
