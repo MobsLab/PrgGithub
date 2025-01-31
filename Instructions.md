@@ -2,7 +2,9 @@ Hello MOBsters, welcome to this brand new Github repository! This is where you w
 
 # First steps
 
-I will assume you already have a GitHub account, and have access to the PrgGithub repo. I will also assume that your connection with the Github server runs smoothly via ssh. Inorder to do so, simply run in your terminal :
+I will assume you already have a GitHub account, and have access to the PrgGithub repo, otherwise you need to log into the MOBsLab git account and send yourself an invitation to join as a collaborator.
+
+I will also assume that your connection with the Github server runs smoothly via ssh. Inorder to do so, simply run in your terminal :
 
 ```bash
 ssh -T git@github.com
