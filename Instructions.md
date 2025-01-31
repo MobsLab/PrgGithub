@@ -57,6 +57,8 @@ This will make sure that Matlab looks for the functions and scripts in the `PrgG
 > Make sure to replace `path/to/PrgGithub` with the actual path to the `PrgGithub` folder on your computer.
 > Make also sure to close all the matlab windows before changing the `startup.m` file.
 
+**Warning**: once you restart Matlab for the first time, it should load the newly download PrgGithub folder to path. **BUT** all the scripts you see in the editor window (if you have any) are still the ones from the Dropbox ! You can verify this by running `edit whateverscript-is-open` and see that Matlab will open another tab with the correct script, the one that lies in the PrgGithub folder. This is the script you should run and modify from now on.
+
 # How to contribute
 
 **Note**: maybe this is not necessary yet, need to check in team meetings.
