@@ -22,7 +22,6 @@ MakeExampleFig1_UmazePaper.m
 
 
 %% Figure 2 - stress score correlates with recovery imombility
-
 % SDS / DZP / Ripples stress score
 LookAtAllStressScore_Rip_DZP_Sal_SDS_UMaze.m
 
@@ -30,7 +29,19 @@ LookAtAllStressScore_Rip_DZP_Sal_SDS_UMaze.m
 
 % Code for correlating stress score with freezing types missing
 
+%% Figure 3 - Hippocampal place cell
+% COde for example data
 
+% Code for ripple quantification
+
+% Code for shock / mid / safe cell activation
+
+% Code for reactivation analysis
+
+
+%% Figure supp
+% Mouvement vs other parameters
+ROC_curves_BodyParametersFreezingUMaze_SB
 
 %% SVM saline
 Finalfigures_DecodePositionWithPhysio_2sbinBy2sBin
@@ -53,7 +64,7 @@ RipplesReactivationUmazeWake_HPC
 
 
 %% Ripples correlation with breathing
-/home/ratatouille/Dropbox/Kteam/PrgMatlab/Baptiste/Fear/Ripples_Density_OB_Frequency_BM_SB.m
+ROC_curves_BodyParametersFreezingUMaze_SB.m
 
 
 %% SDS
