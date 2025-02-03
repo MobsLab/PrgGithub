@@ -1,6 +1,7 @@
 # Update 2025-01-30
 
-There were some already existing git repos in the PrgGithub folder. I updated them. I think we should delete them from this repo.
+There were some already existing git repos in the PrgGithub folder.
+I added them as git submodules in the PrgGithub folder. **If you want to use them you need to give yourself the rights.**
 You will find them here :
 
 - [./OnlinePlaceDecoding](https://github.com/MobsLab/OnlinePlaceDecoding.git)
