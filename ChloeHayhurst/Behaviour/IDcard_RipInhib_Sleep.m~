@@ -2,6 +2,7 @@ clear all
 close all
 
 load('/media/nas8-2/ProjetEmbReact/transfer/AllSessions.mat')
+load('AllSessions.mat');
 % GetEmbReactMiceFolderList_BM
 Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear','LastCondPre'};
 

@@ -9,11 +9,22 @@ SessNames={'Habituation24HPre_PreDrug' 'Habituation_PreDrug' 'HabituationBlocked
     'SleepPost_PreDrug' ' TestPost_PreDrug' 'ExtinctionBlockedShock_PreDrug' 'ExtinctionBlockedSafe_PreDrug' 'UMazeCondExplo_PostDrug' 'UMazeCondBlockedShock_PostDrug' 'UMazeCondBlockedSafe_PostDrug',...
     'SleepPost_PostDrug' 'TestPost_PostDrug'  'ExtinctionBlockedShock_PostDrug' 'ExtinctionBlockedSafe_PostDrug'};
 
-MouseToDo = 1685;
+MouseToDo = 1691;
 Mouse_names{1}=['M' num2str(MouseToDo)];
 
 
-%% Do the Sess.mat
+%% Do the Sess.mat and the AllSessions.mat
+
+% For mice older than 1685 : 
+% clearvars -except MouseToDo SessNames
+% cd('/media/nas6/ProjetEmbReact/transfer')
+% Mouse_names{1}=['M' num2str(MouseToDo)];
+% Sess.(Mouse_names{1}) = GetAllMouseTaskSessions_CH(MouseToDo);
+% Sess2.(Mouse_names{1}) = Sess.(Mouse_names{1});
+% load('Sess.mat', 'Sess')
+% Sess.(Mouse_names{1}) = Sess2.(Mouse_names{1});
+% save('Sess.mat', 'Sess')
+
 
 clearvars -except MouseToDo SessNames
 cd('/media/nas6/ProjetEmbReact/transfer')
@@ -23,6 +34,19 @@ Sess2.(Mouse_names{1}) = Sess.(Mouse_names{1});
 load('Sess.mat', 'Sess')
 Sess.(Mouse_names{1}) = Sess2.(Mouse_names{1});
 save('Sess.mat', 'Sess')
+
+if MouseToDo >= 1685
+    GetEmbReactMiceFolderList_CH
+else
+    GetEmbReactMiceFolderList_BM
+end
+
+cd('/media/nas8-2/ProjetEmbReact/transfer')
+save('AllSessions.mat','CondExploSess','CondPostSess','CondPreSess','CondSafeSess','CondSess','CondShockSess','LastCondPreSess',...
+    'ExtSafeSess','ExtSess', 'ExtShockSess','FearSess','FirstExtSess','ExtPreSess','ExtPostSess',...
+    'HabSess','HabSess24','HabSessPre',...
+    'SleepPostPostSess','SleepPostPreSess','SleepPostSess','SleepPreSess','SleepSess',...
+    'TestPostPostSess','TestPostPreSess','TestPostSess','TestPreSess','TestSess')
 
 
 %% Correct Tracking

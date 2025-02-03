@@ -1,11 +1,15 @@
 clear all
 close all
-GetEmbReactMiceFolderList_BM
+
+cd('/media/nas8-2/ProjetEmbReact/transfer')
+load('AllSessions.mat');
+
+% GetEmbReactMiceFolderList_BM
 % GetAllSalineSessions_BM
 % Group = [1 2];
 % Group = [3 4];
-% Group = 7;
-Group = [7 3];
+Group = 7;
+% Group = [7 3];
 
 Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','Saline'};
 Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear'};
@@ -84,7 +88,6 @@ for group = Group
             ShockUnblockedEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})= and(ShockZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),UnblockedEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             SafeUnblockedEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})= and(SafeZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),UnblockedEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             
-            
             FreezeShockEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , ShockZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             FreezeSafeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , SafeZoneEpoch_freezing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             
@@ -100,9 +103,7 @@ for group = Group
             FreezeMiddleEpoch_Behav.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch_Behav.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , MiddleZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             FreezeSafeCornerEpoch_Behav.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch_Behav.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , SafeCornerEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             FreezeShockCornerEpoch_Behav.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch_Behav.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , ShockCornerEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            
-            
-            
+                        
             ActiveShockEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , ShockZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             ActiveSafeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , SafeZoneEpoch_freezing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             ActiveSafe2Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , SafeZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
@@ -111,7 +112,6 @@ for group = Group
             Unblocked_ActiveShockZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(ActiveShockEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , UnblockedEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             Unblocked_ActiveSafeZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(ActiveSafeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , UnblockedEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             Unblocked_ActiveSafeZone2Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(ActiveSafe2Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , UnblockedEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            
             
             [ShockZoneEpoch_Corrected.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , SafeZoneEpoch_Corrected.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})] = Correct_ZoneEntries_Maze_BM(Unblocked_ActiveShockZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , Unblocked_ActiveSafeZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             [ShockZoneEpoch_Corrected.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , SafeZone2Epoch_Corrected.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})] = Correct_ZoneEntries_Maze_BM(Unblocked_ActiveShockZoneEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) , Unblocked_ActiveSafeZone2Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
