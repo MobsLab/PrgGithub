@@ -1,3 +1,18 @@
 [submodule "DimaGitCode"]
 	path = Dima/CleanCodeForGit
 	url = git@github.com:MobsLab/AnalysisNeuro.git
+[submodule "ERC_codes"]
+	path = ERC_Codes
+	url = git@github.com:MobsLab/Mnemozyne.git
+[submodule "Sam"]
+	path = SamGit
+	url = git@github.com:MobsLab/SamMnemozyne.git
+[submodule "OnlinePlaceDecoding"]
+	path = onlinePlaceDecoding
+	url = git@github.com:MobsLab/OnlinePlaceDecoding.git
+[submodule "PreProcessing"]
+	path = PreProcessing/nomenclatureCodes
+	url = git@github.com:MobsLab/PreProcessing.git
+[submodule "GetFunctions"]
+	path = processing
+	url = git@github.com:MobsLab/GetFunctions.git
