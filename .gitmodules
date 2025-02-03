@@ -16,3 +16,12 @@
 [submodule "GetFunctions"]
 	path = processing
 	url = git@github.com:MobsLab/GetFunctions.git
+[submodule "KilosortWrapper_Peyrache"]
+	path = KilosortWrapper_peyrache
+	url = git@github.com:PeyracheLab/KilosortWrapper.git
+[submodule "sortingQuality-master"]
+	path = sortingQuality-master
+	url = https://github.com/cortex-lab/sortingQuality.git
+[submodule "swa-matlab-develop"]
+	path = swa-matlab-develop
+	url = git@github.com:Mensen/swa-matlab.git
