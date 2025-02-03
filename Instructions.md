@@ -24,7 +24,7 @@ This repository is seen as a total replacement of our current Dropbox folder for
 In your terminal, navigate to the folder where you want to clone the repository. Then, run the following command :
 
 ```bash
-git clone git@github.com:MobsLab/PrgGithub.git
+git clone --recurse-submodules=yes --remote-submodules git@github.com:MobsLab/PrgGithub.git
 ```
 
 This will create a folder named `PrgGithub` in the folder you are currently in. This folder will contain all the codes that are in the repository.
