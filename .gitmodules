@@ -1,27 +1,27 @@
 [submodule "DimaGitCode"]
-	path = Dima/CleanCodeForGit
+	path = Dima/_CleanCodeForGit
 	url = git@github.com:MobsLab/AnalysisNeuro.git
 [submodule "ERC_codes"]
-	path = ERC_Codes
+	path = ERC_codes
 	url = git@github.com:MobsLab/Mnemozyne.git
 [submodule "Sam"]
-	path = SamGit
+	path = Sam
 	url = git@github.com:MobsLab/SamMnemozyne.git
 [submodule "OnlinePlaceDecoding"]
-	path = onlinePlaceDecoding
+	path = OnlinePlaceDecoding
 	url = git@github.com:MobsLab/OnlinePlaceDecoding.git
 [submodule "PreProcessing"]
-	path = PreProcessing/nomenclatureCodes
+	path = PreProcessing/NomenclatureCodes
 	url = git@github.com:MobsLab/PreProcessing.git
 [submodule "GetFunctions"]
-	path = processing
+	path = Processing
 	url = git@github.com:MobsLab/GetFunctions.git
 [submodule "KilosortWrapper_Peyrache"]
-	path = KilosortWrapper_peyrache
+	path = KilosortWrapper_Peyrache
 	url = git@github.com:PeyracheLab/KilosortWrapper.git
 [submodule "sortingQuality-master"]
 	path = sortingQuality-master
 	url = https://github.com/cortex-lab/sortingQuality.git
 [submodule "swa-matlab-develop"]
-	path = swa-matlab-develop
+	path = swa-matlab
 	url = git@github.com:Mensen/swa-matlab.git
