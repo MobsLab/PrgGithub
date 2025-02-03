@@ -14,10 +14,10 @@ import os
 os.chdir(r'/home/gruffalo/Documents/Python/projects/data_Sophie/')
 
 # Import necessary packages and modules
-from load_save_results import ( 
-    load_results
-    )
+from load_data import load_dataframes
 from preprocess_sort_data import (
+    denoise_mice_data,
+    create_sorted_column_replace_zeros,
     rebin_mice_data
     )
 from analyse_data import (
@@ -46,14 +46,30 @@ from plot_results_linear_model import (
 
 # %% Load data
 
-load_path = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/'
-figures_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/figures/linear_model'
+# Load data and needed modules
+all_mat_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/alldata'
+maze_mat_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/justmaze'
+figures_directory = r'/home/gruffalo/Documents/Python/projects/data_Sophie/figures'
 
-maze_denoised_data = load_results(load_path + 'maze_denoised_data.pkl')
-maze_spike_times_data = load_results(load_path + 'maze_spike_times_data.pkl')
+# Load variables and spike times for all mice during all recording sessions
+all_mice_data, all_spike_times_data = load_dataframes(all_mat_directory)
+
+# Load variables and spike times for all mice during the U-Maze session
+maze_mice_data, maze_spike_times_data = load_dataframes(maze_mat_directory)
+
+# %% Preprocess data
+
+# Denoise data
+all_denoised_data = denoise_mice_data(all_mice_data, ['BreathFreq', 'Heartrate', 'timebins', 'Accelero', 'LinPos'])
+maze_denoised_data = denoise_mice_data(maze_mice_data, ['BreathFreq', 'Heartrate', 'timebins', 'Accelero', 'Speed', 'LinPos'])
+
+# Scaling problems between sleep and UMaze
+create_sorted_column_replace_zeros(all_denoised_data, 'Mouse514', 'Accelero', replace=True)
+create_sorted_column_replace_zeros(maze_denoised_data, 'Mouse514', 'Accelero', replace=True)
 
 # Rebin data
 new_bin_size = 0.6
+all_rebinned_data = rebin_mice_data(all_denoised_data, ['BreathFreq', 'Heartrate', 'Accelero', 'LinPos'], new_bin_size)
 maze_rebinned_data = rebin_mice_data(maze_denoised_data, ['BreathFreq', 'Heartrate', 'Accelero', 'Speed', 'LinPos'], new_bin_size)
 
 

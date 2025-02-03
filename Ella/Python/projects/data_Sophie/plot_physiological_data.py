@@ -42,38 +42,6 @@ def plot_variable_time(mice_data, mouse_id, variable_name):
     plt.legend()
     plt.grid(True)
     plt.show()
-    
-
-def plot_variable_histogram(mice_data, mouse_id, variable_name, bins=30):
-    """
-    Plot the histogram of a specified variable for a given mouse.
-    
-    Parameters:
-    - mice_data (dict): Dictionary containing dataframes for each mouse.
-    - mouse_id (str): The ID of the mouse whose variable will be plotted.
-    - variable_name (str): The name of the column (variable) to plot.
-    - bins (int): Number of bins for the histogram. Default is 30.
-    
-    Returns:
-    - None: Displays the histogram.
-    """
-    # Access the dataframe of the specified mouse
-    mouse_df = mice_data[mouse_id]
-    
-    # Check if the variable exists in the dataframe
-    if variable_name not in mouse_df.columns:
-        print(f"Variable '{variable_name}' not found in the dataframe of mouse '{mouse_id}'.")
-        return
-    
-    # Plot the histogram of the variable
-    plt.figure(figsize=(8, 5))
-    plt.hist(mouse_df[variable_name].dropna(), bins=bins, color='royalblue', alpha=0.7, edgecolor='black')
-    plt.title(f"Histogram of {variable_name} for mouse {mouse_id}", fontsize=14)
-    plt.xlabel(variable_name, fontsize=12)
-    plt.ylabel("Frequency", fontsize=12)
-    plt.grid(alpha=0.4)
-    plt.tight_layout()
-    plt.show()
 
 
 def plot_variable_conditions(mice_data, mouse_id, variable, epoch_names):

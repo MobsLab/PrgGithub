@@ -11,8 +11,7 @@ import pandas as pd
 # For the linear regression using StatsModels
 def combine_dataframes_on_timebins(spike_count_df, physiological_df):
     """
-    Combine two dataframes based on the 'timebins' column and remove rows with NaN values.
-    Ensures efficient merging by indexing both DataFrames on 'timebins' and checking that both timebins are aligned.
+    Combine two dataframes based on the 'timebins' column.
 
     Parameters:
     - spike_count_df (pd.DataFrame): DataFrame containing spike count data indexed by 'timebins'.
@@ -21,60 +20,18 @@ def combine_dataframes_on_timebins(spike_count_df, physiological_df):
     Returns:
     - combined_df (pd.DataFrame): Combined DataFrame indexed by 'timebins' and containing columns from both DataFrames.
     """
-
-    # Ensure 'timebins' column exists in physiological_df
+    
+    # Ensure the 'timebins' column is in the physiological data
     if 'timebins' not in physiological_df.columns:
         raise ValueError("The physiological_df must have a 'timebins' column.")
+    
+    # Merge the two DataFrames on the 'timebins' column
+    combined_df = pd.merge(spike_count_df, physiological_df, on='timebins', how='inner')
 
-    # Ensure 'timebins' is indexed in spike_count_df
-    if spike_count_df.index.name != 'timebins':
-        raise ValueError("The spike_count_df must have 'timebins' as its index.")
-
-    # Drop rows with NaN values in 'timebins' from physiological_df
-    physiological_df = physiological_df.dropna(subset=['timebins']).copy()
-
-    # Set 'timebins' as the index in physiological_df
-    physiological_df.set_index('timebins', inplace=True)
-
-    # Ensure indices are of the same type
-    physiological_df.index = physiological_df.index.astype(float)
-    spike_count_df.index = spike_count_df.index.astype(float)
-
-    # Check that both DataFrames have the same timebins
-    common_timebins = spike_count_df.index.intersection(physiological_df.index)
-    if common_timebins.empty:
-        raise ValueError("No overlapping timebins found between the two DataFrames.")
-
-    # Perform an inner join on the indices
-    combined_df = spike_count_df.join(physiological_df, how='inner')
+    # Set 'timebins' as the index of the final DataFrame
+    combined_df.set_index('timebins', inplace=True)
 
     return combined_df
-
-# def combine_dataframes_on_timebins(spike_count_df, physiological_df):
-#     """
-#     Combine two dataframes based on the 'timebins' column and remove rows with NaN values.
-
-#     Parameters:
-#     - spike_count_df (pd.DataFrame): DataFrame containing spike count data indexed by 'timebins'.
-#     - physiological_df (pd.DataFrame): DataFrame containing physiological data, with a 'timebins' column.
-
-#     Returns:
-#     - combined_df (pd.DataFrame): Combined DataFrame indexed by 'timebins' and containing columns from both DataFrames.
-#     """
-#     # Ensure the 'timebins' column is in the physiological data
-#     if 'timebins' not in physiological_df.columns:
-#         raise ValueError("The physiological_df must have a 'timebins' column.")
-
-#     # Merge the two DataFrames on the 'timebins' column
-#     combined_df = pd.merge(spike_count_df, physiological_df, on='timebins', how='inner')
-
-#     # Remove rows with any NaN values
-#     combined_df.dropna(inplace=True)
-
-#     # Set 'timebins' as the index of the final DataFrame
-#     combined_df.set_index('timebins', inplace=True)
-
-#     return combined_df
 
 
 # To create new lagged predictors 

@@ -237,7 +237,8 @@ def interpolate_column(mice_data, mouse_id, column_name, replace=False):
         mouse_df[new_column_name] = mouse_df[column_name].interpolate(method='linear')
         print(f"Created new column '{new_column_name}' with interpolated values.")
         
-        
+
+
 def rebin_mice_data(mice_data, columns_to_rebin, new_bin_size):
     """
     Rebin the data of specified columns in the mice_data dictionary according to a new bin size.
@@ -251,8 +252,6 @@ def rebin_mice_data(mice_data, columns_to_rebin, new_bin_size):
     Returns:
     - rebinned_data (dict): Dictionary containing the rebinned dataframes for each mouse.
     """
-    import numpy as np
-    import pandas as pd
 
     rebinned_data = {}
 
@@ -260,34 +259,30 @@ def rebin_mice_data(mice_data, columns_to_rebin, new_bin_size):
     scaled_new_bin_size = new_bin_size * 10
     scaled_base = 0.2 * 10
 
-    # Check if the new bin size is a multiple of 0.2 by scaling to integers
-    if scaled_new_bin_size % scaled_base != 0:
-        raise ValueError(f"New bin size should be a multiple of 0.2. Received: {new_bin_size}")
-
     # Iterate over each mouse in the dictionary
     for mouse_id, mouse_df in mice_data.items():
-        mouse_df_copy = mouse_df.copy()  # Create a copy to avoid modifying the original data
-
         # Get the 'timebins' column
-        timebins = mouse_df_copy['timebins']
-
+        timebins = mouse_df['timebins']
+        
+        # Check if the new bin size is a multiple of 0.2 by scaling to integers
+        if scaled_new_bin_size % scaled_base != 0:
+            raise ValueError(f"New bin size should be a multiple of 0.2. Received: {new_bin_size}")
+        
         # Generate bin edges based on new_bin_size
         bin_edges = np.arange(timebins.min(), timebins.max() + new_bin_size, new_bin_size)
-
+        
         # Assign each timebin to a bin
-        mouse_df_copy['rebinned_timebins'] = pd.cut(
-            timebins, bins=bin_edges, include_lowest=True, right=False, labels=bin_edges[:-1]
-        )
-
+        mouse_df['rebinned_timebins'] = pd.cut(timebins, bins=bin_edges, include_lowest=True, right=False, labels=bin_edges[:-1])
+        
         # Group by the rebinned timebins and compute the mean for the specified columns
-        rebinned_df = mouse_df_copy.groupby('rebinned_timebins', observed=True)[columns_to_rebin].mean().reset_index()
-
+        rebinned_df = mouse_df.groupby('rebinned_timebins', observed=True)[columns_to_rebin].mean().reset_index()
+        
         # Rename the 'rebinned_timebins' column to 'timebins'
         rebinned_df = rebinned_df.rename(columns={'rebinned_timebins': 'timebins'})
 
         # Create a full range of rebinned timebins to ensure no bins are skipped
         full_time_range = pd.Series(bin_edges[:-1], name='timebins')
-
+        
         # Merge the rebinned DataFrame with the full time range, filling missing values with NaN
         rebinned_df = pd.DataFrame({'timebins': full_time_range}).merge(rebinned_df, on='timebins', how='left')
 
@@ -295,59 +290,6 @@ def rebin_mice_data(mice_data, columns_to_rebin, new_bin_size):
         rebinned_data[mouse_id] = rebinned_df
 
     return rebinned_data
-
-
-# def rebin_mice_data(mice_data, columns_to_rebin, new_bin_size):
-#     """
-#     Rebin the data of specified columns in the mice_data dictionary according to a new bin size.
-#     If no data is present for a given bin, a row with NaN values is created to ensure equal spacing.
-
-#     Parameters:
-#     - mice_data (dict): Dictionary containing data for each mouse.
-#     - columns_to_rebin (list): List of column names to be rebinned.
-#     - new_bin_size (float): The new bin size in seconds (preferably a multiple of 0.2).
-
-#     Returns:
-#     - rebinned_data (dict): Dictionary containing the rebinned dataframes for each mouse.
-#     """
-
-#     rebinned_data = {}
-
-#     # Multiply by 10 to avoid floating-point precision issues
-#     scaled_new_bin_size = new_bin_size * 10
-#     scaled_base = 0.2 * 10
-
-#     # Iterate over each mouse in the dictionary
-#     for mouse_id, mouse_df in mice_data.items():
-#         # Get the 'timebins' column
-#         timebins = mouse_df['timebins']
-        
-#         # Check if the new bin size is a multiple of 0.2 by scaling to integers
-#         if scaled_new_bin_size % scaled_base != 0:
-#             raise ValueError(f"New bin size should be a multiple of 0.2. Received: {new_bin_size}")
-        
-#         # Generate bin edges based on new_bin_size
-#         bin_edges = np.arange(timebins.min(), timebins.max() + new_bin_size, new_bin_size)
-        
-#         # Assign each timebin to a bin
-#         mouse_df['rebinned_timebins'] = pd.cut(timebins, bins=bin_edges, include_lowest=True, right=False, labels=bin_edges[:-1])
-        
-#         # Group by the rebinned timebins and compute the mean for the specified columns
-#         rebinned_df = mouse_df.groupby('rebinned_timebins', observed=True)[columns_to_rebin].mean().reset_index()
-        
-#         # Rename the 'rebinned_timebins' column to 'timebins'
-#         rebinned_df = rebinned_df.rename(columns={'rebinned_timebins': 'timebins'})
-
-#         # Create a full range of rebinned timebins to ensure no bins are skipped
-#         full_time_range = pd.Series(bin_edges[:-1], name='timebins')
-        
-#         # Merge the rebinned DataFrame with the full time range, filling missing values with NaN
-#         rebinned_df = pd.DataFrame({'timebins': full_time_range}).merge(rebinned_df, on='timebins', how='left')
-
-#         # Store the rebinned dataframe in the new dictionary
-#         rebinned_data[mouse_id] = rebinned_df
-
-#     return rebinned_data
 
 
 
