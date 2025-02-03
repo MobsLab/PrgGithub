@@ -41,8 +41,8 @@ if length(CondSess.(Mouse_names{mouse}))==15 % Long Protocol Sleep Rip
     ExtSess.(Mouse_names{mouse}) = ExtSess2.(Mouse_names{mouse});
     CondPreSess.(Mouse_names{mouse}) = CondSess2.(Mouse_names{mouse})(1:9);
     CondPostSess.(Mouse_names{mouse}) = CondSess2.(Mouse_names{mouse})(10:length(CondSess2.(Mouse_names{mouse})));
-%     ExtPreSess.(Mouse_names{mouse}) = ExtSess2.(Mouse_names{mouse})(1:6);
-%     ExtPostSess.(Mouse_names{mouse}) = ExtSess2.(Mouse_names{mouse})(7:length(ExtSess2.(Mouse_names{mouse})));
-%     FirstExtPreSess.(Mouse_names{mouse}) = ExtSess2.(Mouse_names{mouse})(1,4);
+    ExtPreSess.(Mouse_names{mouse}) = ExtSess2.(Mouse_names{mouse})(1:6);
+    ExtPostSess.(Mouse_names{mouse}) = ExtSess2.(Mouse_names{mouse})(7:length(ExtSess2.(Mouse_names{mouse})));
+    FirstExtPreSess.(Mouse_names{mouse}) = ExtSess2.(Mouse_names{mouse})(1,4);
     clear CondSess2 ExtSess2
 end

@@ -79,6 +79,20 @@ ylim([1 15])
 set(gca,'XTick',[],'YTick',[])
 xlim([200 300])
 
+figure
+load('ChannelsToAnalyse/Bulb_deep.mat')
+load(['LFPData/LFP',num2str(channel),'.mat'])
+LFPOB = LFP;
+LFPRespi = FilterLFP(LFP,[0.5 20],1024)
+load('ChannelsToAnalyse/EKG.mat')
+load(['LFPData/LFP',num2str(channel),'.mat'])
+LFPHR = LFP;
+
+plotEp = intervalSet(200*1e4,300*1e4);
+plot(Range(Restrict(LFPOB,plotEp),'s'),zscore(Data(Restrict(LFPOB,plotEp))))
+hold on
+plot(Range(Restrict(LFPOB,plotEp),'s'),zscore(Data(Restrict(LFPRespi,plotEp)))+5)
+plot(Range(Restrict(LFPOB,plotEp),'s'),zscore(Data(Restrict(LFPHR,plotEp)))+10)
 
 %% SAFE EXAMPLE
 ff=8
@@ -159,6 +173,13 @@ LFPRespi = FilterLFP(LFP,[0.5 20],1024)
 load('ChannelsToAnalyse/EKG.mat')
 load(['LFPData/LFP',num2str(channel),'.mat'])
 LFPHR = LFP;
+
+plotEp = intervalSet(195*1e4,295*1e4);
+plot(Range(Restrict(LFPOB,plotEp),'s'),zscore(Data(Restrict(LFPOB,plotEp))))
+hold on
+plot(Range(Restrict(LFPOB,plotEp),'s'),zscore(Data(Restrict(LFPRespi,plotEp)))+5)
+plot(Range(Restrict(LFPOB,plotEp),'s'),zscore(Data(Restrict(LFPHR,plotEp)))+10)
+
 
 
 
@@ -243,3 +264,21 @@ colormap parula
 ylim([1 15])
 set(gca,'XTick',[],'YTick',[])
 xlim([200 470])
+
+figure
+load('ChannelsToAnalyse/Bulb_deep.mat')
+load(['LFPData/LFP',num2str(channel),'.mat'])
+LFPOB = LFP;
+LFPRespi = FilterLFP(LFP,[0.5 20],1024)
+load('ChannelsToAnalyse/EKG.mat')
+load(['LFPData/LFP',num2str(channel),'.mat'])
+LFPHR = LFP;
+
+plotEp = intervalSet(200*1e4,470*1e4);
+plot(Range(Restrict(LFPOB,plotEp),'s'),zscore(Data(Restrict(LFPOB,plotEp))))
+hold on
+plot(Range(Restrict(LFPOB,plotEp),'s'),zscore(Data(Restrict(LFPRespi,plotEp)))+5)
+plot(Range(Restrict(LFPOB,plotEp),'s'),zscore(Data(Restrict(LFPHR,plotEp)))+10)
+
+
+

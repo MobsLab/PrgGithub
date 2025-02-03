@@ -27,6 +27,7 @@ RectangleCorners = [0,0;20,0;20,40;0,40];
 ExtRectangleCorners = [-2,-2;22,-2;22,42;-2,42];
 ExtendedCagePoly = polyshape(ExtRectangleCorners);
 LimInOut = 12;
+SpVal = [0:0.2:10];
 
 for group = 1:2
     if group ==1
@@ -40,9 +41,9 @@ for group = 1:2
         %%SLEEP
         %Load sleep scoring
         if exist('SleepScoring_Accelero.mat')
-            stages_ctrl{i} = load('SleepScoring_Accelero', 'REMEpoch', 'SWSEpoch', 'Wake');
+            stages = load('SleepScoring_Accelero', 'REMEpoch', 'SWSEpoch', 'Wake');
         elseif exist('SleepScoring_OBGamma.mat')
-            stages_ctrl{i} = load('SleepScoring_OBGamma', 'REMEpoch', 'SWSEpoch', 'Wake');
+            sstages = load('SleepScoring_OBGamma', 'REMEpoch', 'SWSEpoch', 'Wake');
         else
         end
         
@@ -50,14 +51,14 @@ for group = 1:2
         EPOI = intervalSet(time_start,time_end); % restrict to this epoch
         
         % States
-        Sleep = or(stages_ctrl{i}.SWSEpoch,stages_ctrl{i}.REMEpoch);
+        Sleep = or(stages.SWSEpoch,stages.REMEpoch);
         Sleep = and(Sleep,EPOI);
-        Wake = and(stages{i}.Wake,EPOI);
-        REM = and(stages_ctrl{i}.REMEpoch,EPOI);
+        Wake = and(stages.Wake,EPOI);
+        REM = and(stages.REMEpoch,EPOI);
         
         %% Sleep Proportion
         REMProp{group}(i) = sum(Stop(REM) - Start(REM))./sum(Stop(Sleep)-Start(Sleep));
-        SleepProp{group}(i) = sum(Stop(Sleep) - Start(Sleep))./(time_end/1E4 - time_start/1E4);
+        SleepProp{group}(i) = sum(Stop(Sleep) - Start(Sleep))./(time_end - time_start);
         
         % Heart rate
         if exist('HeartBeatInfo.mat')>0
@@ -65,7 +66,7 @@ for group = 1:2
             % Calculate HR variability
             rg = Range(EKG.HBRate);
             dt = movstd(Data(EKG.HBRate),5);
-            HRVar = tsd(rg,dt);
+            HRVariability = tsd(rg,dt);
             
             % get the speed
             load('behavResources.mat', 'Vtsd')
@@ -81,87 +82,61 @@ for group = 1:2
                 
                 
                 % Mean heart rate varaibility during this time
-                HRVar_CTRL_BySpeed(sp) = nanmean(Data(Restrict(HRVar,LitEpoch)) );
+                HRVar_CTRL_BySpeed(sp) = nanmean(Data(Restrict(HRVariability,LitEpoch)) );
             end
             HR{group}(i) = nanmean(MnHR_CTRL_BySpeed);
-            HRVar{group}(i) = nanmeanHRVar_CTRL_BySpeedMnHR_CTRL_BySpeed);
+            HRVar{group}(i) = nanmean(HRVar_CTRL_BySpeed);
             
         else
             HR{group}(i) = NaN;
             HRVar{group}(i) = NaN;
         end
-
+        
         %% Thigmotaxy
         if exist('AlignedCagePos.mat')
-        FirstSleep = min(Start(dropShortIntervals(Sleep,1*1e4)));
-        PreSleep = intervalSet(0,FirstSleep);
-        
-        load('behavResources.mat')
-        MovEpoch = thresholdIntervals(Vtsd,SpeedLim,'Direction','Above');
-        MovEpoch = dropShortIntervals(MovEpoch,0.1*1e4);
-        MovEpoch = mergeCloseIntervals(MovEpoch,3*1e4);
-        
-        load('AlignedCagePos.mat', 'AlignedYtsd','AlignedXtsd')
-        % Distance to wall during mouvement
-        X = Data(Restrict(AlignedYtsd,and(intervalSet(0,3600*1e4),MovEpoch)));
-        Y = Data(Restrict(AlignedXtsd,and(intervalSet(0,3600*1e4),MovEpoch)));
-        % Get rid of times when mouse is on top of the cage
-        TFin = isinterior(ExtendedCagePoly,X,Y);
-        X = X(TFin);
-        Y = Y(TFin);
-        
-        for ii = 1:length(X)
-            DistNear(ii) = DistancePointNearestSideRectangle([X(ii),Y(ii)],RectangleCorners);
-        end
-        [Y,X] = hist(DistNear,[0:0.2:10]);
-        AllHist = runmean(Y/sum(Y),3);
-
-        ThigmoScore{group}(i) = nanmean(AllH(1:LimInOut)')./nanmean(AllH(LimInOut+1:end)');
-
-    end
-end
-        
-        
-        
-    end
-
-
-
-%% GET DATA - SDS group (mCherry saline injection 10h with stress)
-for i=1:length(DirSocialDefeat.path)
-    cd(DirSocialDefeat.path{i}{1});
-    %%Load sleep scoring
-    if exist('SleepScoring_Accelero.mat')
-        stages_ctrl{i} = load('SleepScoring_Accelero', 'REMEpoch', 'SWSEpoch', 'Wake');
-    elseif exist('SleepScoring_OBGamma.mat')
-        stages_ctrl{i} = load('SleepScoring_OBGamma', 'REMEpoch', 'SWSEpoch', 'Wake');
-    else
-    end
-    
-    %%Define different periods of time for quantifications
-    EPOI = intervalSet(time_start,time_end); % restrict to this epoch
-    Sleep = or(stages_ctrl{i}.SWSEpoch,stages_ctrl{i}.REMEpoch);
-    Sleep = and(Sleep,EPOI);
-    
-    % REM prop
-    REMProp{2}(i) = sum(Stop(and(stages_ctrl{i}.REMEpoch,EPOI)) - Start(and(stages_ctrl{i}.REMEpoch,EPOI)))./sum(Stop(Sleep)-Start(Sleep));
-    
-    % Latency to state
-    StateStart = Start(Sleep)/1e4;
-    StateDur = DurationEpoch(Sleep)/1e4;
-    j=1;
-    for ii=20:20:200
-        val = StateStart(find(StateDur>ii,1));
-        if isempty(val)
-            LatencyToState{2}(i,j) = NaN;
+            FirstSleep = min(Start(dropShortIntervals(Sleep,1*1e4)));
+            PreSleep = intervalSet(0,FirstSleep);
+            
+            load('behavResources.mat')
+            MovEpoch = thresholdIntervals(Vtsd,SpeedLim,'Direction','Above');
+            MovEpoch = dropShortIntervals(MovEpoch,0.1*1e4);
+            MovEpoch = mergeCloseIntervals(MovEpoch,3*1e4);
+            
+            load('AlignedCagePos.mat', 'AlignedYtsd','AlignedXtsd')
+            % Distance to wall during mouvement
+            X = Data(Restrict(AlignedYtsd,and(intervalSet(0,3600*1e4),MovEpoch)));
+            Y = Data(Restrict(AlignedXtsd,and(intervalSet(0,3600*1e4),MovEpoch)));
+            % Get rid of times when mouse is on top of the cage
+            TFin = isinterior(ExtendedCagePoly,X,Y);
+            X = X(TFin);
+            Y = Y(TFin);
+            
+            for ii = 1:length(X)
+                DistNear(ii) = DistancePointNearestSideRectangle([X(ii),Y(ii)],RectangleCorners);
+            end
+            [Y,X] = hist(DistNear,[0:0.2:10]);
+            AllHist = runmean(Y/sum(Y),3);
+            
+            ThigmoScore{group}(i) = nanmean(AllHist(1:LimInOut)')./nanmean(AllHist(LimInOut+1:end)');
         else
-            LatencyToState{2}(i,j) = StateStart(find(StateDur>ii,1));
+            ThigmoScore{group}(i) = NaN;
         end
-        j=j+1;
     end
-    
-    % Fragmentation
-    SFI{2}(i) = length(StateStart)./(nanmean(StateDur));
-    Prop{2}(i) = nansum(StateDur)/(time_end/1E4 - time_start/1E4)
-    
 end
+
+figure
+subplot(151)
+[pval , stats_out]=MakeSpreadAndBoxPlot2_SB(ThigmoScore,{},[1,2],{'Ctrl','SDS'},'paired',0,'showpoints',1)
+ylabel('Thigmo')
+subplot(152)
+[pval , stats_out]=MakeSpreadAndBoxPlot2_SB(HR,{},[1,2],{'Ctrl','SDS'},'paired',0,'showpoints',1)
+ylabel('HR speed corr')
+subplot(153)
+[pval , stats_out]=MakeSpreadAndBoxPlot2_SB(HRVar,{},[1,2],{'Ctrl','SDS'},'paired',0,'showpoints',1)
+ylabel('HRvar speed corr')
+subplot(154)
+[pval , stats_out]=MakeSpreadAndBoxPlot2_SB(REMProp,{},[1,2],{'Ctrl','SDS'},'paired',0,'showpoints',1)
+ylabel('Prop REM')
+subplot(155)
+[pval , stats_out]=MakeSpreadAndBoxPlot2_SB(SleepProp,{},[1,2],{'Ctrl','SDS'},'paired',0,'showpoints',1)
+ylabel('Prop sleep')

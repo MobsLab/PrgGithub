@@ -24,7 +24,11 @@ end
 a=1;
 for ss=1:length(SessNames)
     disp(SessNames{ss})
+    if MouseNum >= 1685
+    Dir=PathForExperimentsEmbReact_CH(SessNames{ss});
+    else
     Dir=PathForExperimentsEmbReact(SessNames{ss});
+    end
     for d=1:length(Dir.path)
         for dd=1:length(Dir.path{d})
             if Dir.ExpeInfo{d}{dd}.nmouse==MouseNum

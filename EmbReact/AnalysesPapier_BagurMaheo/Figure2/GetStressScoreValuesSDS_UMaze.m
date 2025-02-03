@@ -1,20 +1,20 @@
-clear all
+function [AllDatCtrl,AllDatSDS] = GetStressScoreValuesSDS_UMaze
 
-%% input dir
+%% Outputs the elements of the stresssocre for SDS animals
+% AllDAT : prop wake, prop rem, HR, thigmo
+% Control
 Dir_ctrl=PathForExperiments_DREADD_MC('mCherry_retroCre_PFC_VLPO_SalineInjection_10am');
 Dir_ctrl=RestrictPathForExperiment(Dir_ctrl,'nMice',[1423 1424 1425 1426 1433 1434 1449 1450 1451 1414 1439 1440 1437]);
 
-% Basic protocl
-DirSocialDefeat_classic1 = PathForExperiments_SD_MC('SleepPostSD');
-DirSocialDefeat_classic2 = PathForExperiments_SD_MC('SleepPostSD_SalineInj');
-DirSocialDefeat_classic3 = PathForExperiments_SD_MC('SleepPostSD_oneSensoryExposure_SalineInjection');
+% SDS protocl
+DirSocialDefeat_classic1 = PathForExperiments_SD_MC('SleepPostSD_SalineInj');
+DirSocialDefeat_classic2 = PathForExperiments_SD_MC('SleepPostSD_oneSensoryExposure_SalineInjection');
 % BM mice - heart
-DirSocialDefeat_totSleepPost_BM_cno1 = PathForExperiments_SD_MC('SleepPostSD_noDREADD_BM_mice_CNOInjection');
-DirSocialDefeat_BM_saline1 = PathForExperiments_SD_MC('SleepPostSD_noDREADD_BM_mice_SalineInjection');
-DirSocialDefeat_BM = MergePathForExperiment(DirSocialDefeat_totSleepPost_BM_cno1,DirSocialDefeat_BM_saline1);
+DirSocialDefeat_BM1 = PathForExperiments_SD_MC('SleepPostSD_noDREADD_BM_mice_SalineInjection');
+DirSocialDefeat_BM2 = PathForExperiments_SD_MC('SleepPostSD_noDREADD_BM_mice_CNOInjection');
+DirSocialDefeat_BM = MergePathForExperiment(DirSocialDefeat_BM1,DirSocialDefeat_BM2);
 % Merge them
-DirSocialDefeat_classic1 = MergePathForExperiment(DirSocialDefeat_classic1,DirSocialDefeat_classic2);
-DirSocialDefeat_classic = MergePathForExperiment(DirSocialDefeat_classic1,DirSocialDefeat_classic3);
+DirSocialDefeat_classic = MergePathForExperiment(DirSocialDefeat_classic2,DirSocialDefeat_classic1);
 DirSocialDefeat = MergePathForExperiment(DirSocialDefeat_BM,DirSocialDefeat_classic);
 
 
@@ -67,25 +67,29 @@ for group = 1:2
             rg = Range(EKG.HBRate);
             dt = movstd(Data(EKG.HBRate),5);
             HRVariability = tsd(rg,dt);
+            LastWake = subset(Wake,length(Start(Wake)));
+%             FirstWake = subset(Wake,1);
             
-            % get the speed
-            load('behavResources.mat', 'Vtsd')
+            HR{group}(i) = nanmean(Data(Restrict(EKG.HBRate,intervalSet(0,5*1e4)))) - nanmean(Data(Restrict(EKG.HBRate,Wake)));
             
-            for sp = 1:length(SpVal)-1
-                
-                % Restrict to time with specific speed
-                LitEpoch = and(thresholdIntervals(Vtsd,SpVal(sp),'Direction','Above'),thresholdIntervals(Vtsd,SpVal(sp+1),'Direction','Below'));
-                LitEpoch = and(LitEpoch,Wake);
-                
-                % Mean heart rate during this time
-                MnHR_CTRL_BySpeed(sp) = nanmean(Data(Restrict(EKG.HBRate,LitEpoch)));
-                
-                
-                % Mean heart rate varaibility during this time
-                HRVar_CTRL_BySpeed(sp) = nanmean(Data(Restrict(HRVariability,LitEpoch)) );
-            end
-            HR{group}(i) = nanmean(MnHR_CTRL_BySpeed);
-            HRVar{group}(i) = nanmean(HRVar_CTRL_BySpeed);
+            %             % get the speed
+            %             load('behavResources.mat', 'Vtsd')
+            %
+            %             for sp = 1:length(SpVal)-1
+            %
+            %                 % Restrict to time with specific speed
+            %                 LitEpoch = and(thresholdIntervals(Vtsd,SpVal(sp),'Direction','Above'),thresholdIntervals(Vtsd,SpVal(sp+1),'Direction','Below'));
+            %                 LitEpoch = and(LitEpoch,Wake);
+            %
+            %                 % Mean heart rate during this time
+            %                 MnHR_CTRL_BySpeed(sp) = nanmean(Data(Restrict(EKG.HBRate,LitEpoch)));
+            %
+            %
+            %                 % Mean heart rate varaibility during this time
+            %                 HRVar_CTRL_BySpeed(sp) = nanmean(Data(Restrict(HRVariability,LitEpoch)) );
+            %             end
+            %             HR{group}(i) = nanmean(MnHR_CTRL_BySpeed);
+            %             HRVar{group}(i) = nanmean(HRVar_CTRL_BySpeed);
             
         else
             HR{group}(i) = NaN;
@@ -123,20 +127,11 @@ for group = 1:2
         end
     end
 end
+% Normalize by controls
+ThigmoScore{2} = ThigmoScore{2}./mean(ThigmoScore{1});
+ThigmoScore{1} = ThigmoScore{1}./mean(ThigmoScore{1});
 
-figure
-subplot(151)
-[pval , stats_out]=MakeSpreadAndBoxPlot2_SB(ThigmoScore,{},[1,2],{'Ctrl','SDS'},'paired',0,'showpoints',1)
-ylabel('Thigmo')
-subplot(152)
-[pval , stats_out]=MakeSpreadAndBoxPlot2_SB(HR,{},[1,2],{'Ctrl','SDS'},'paired',0,'showpoints',1)
-ylabel('HR speed corr')
-subplot(153)
-[pval , stats_out]=MakeSpreadAndBoxPlot2_SB(HRVar,{},[1,2],{'Ctrl','SDS'},'paired',0,'showpoints',1)
-ylabel('HRvar speed corr')
-subplot(154)
-[pval , stats_out]=MakeSpreadAndBoxPlot2_SB(REMProp,{},[1,2],{'Ctrl','SDS'},'paired',0,'showpoints',1)
-ylabel('Prop REM')
-subplot(155)
-[pval , stats_out]=MakeSpreadAndBoxPlot2_SB(SleepProp,{},[1,2],{'Ctrl','SDS'},'paired',0,'showpoints',1)
-ylabel('Prop sleep')
+group = 1;
+AllDatCtrl = [1-SleepProp{group};REMProp{group};HR{group};ThigmoScore{group}];
+group = 2;
+AllDatSDS = [1-SleepProp{group};REMProp{group};HR{group};ThigmoScore{group}];

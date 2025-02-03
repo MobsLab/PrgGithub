@@ -1,3 +1,4 @@
+
 % You should install in your path the following directories:
 %
 %   WaveLab
@@ -42,9 +43,7 @@ InstallMEX
 %  For Copying permissions see COPYING.m
 %  Comments? e-mail wavelab@stat.stanford.edu 
 
-addpath(genpath('/home/mobs/Dropbox/Kteam/PrgMatlab/'))
-rmpath(genpath('/home/mobsrick/Dropbox/Kteam/PrgMatlab/Fra/@intervalSet/old/'))
-rmpath(genpath('/home/mobsrick/Dropbox/Kteam/PrgMatlab/Fra/@tsd/old/'))
+addpath(genpath('/home/pinky/git_hub/mobs_codes/PrgGithub'))
 
 
 com.mathworks.desktop.mnemonics.MnemonicsManagers.get.disable

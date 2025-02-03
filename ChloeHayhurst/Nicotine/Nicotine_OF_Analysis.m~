@@ -140,19 +140,37 @@ for group = 4:5
         load('behavResources.mat')
         
         satisfied = 0;
-        rotate = 0;
         while satisfied ==0
             
+            X=Data(Xtsd);Y=Data(Ytsd);
+            XRotate = -Data(Ytsd);
+            YRotate = -Data(Xtsd);
             figure
-            plot(Data(Xtsd),Data(Ytsd))
-            [x(:,1),x(:,2)]=ginput(4);
-            [AlignedXtsd,AlignedYtsd] = affineTransform(Xtsd, Ytsd, x);
+            %             imagesc(double(ref)), colormap jet, hold on
+            plot(X,Y)
             
-            satisfied = input('Satisfied?');
+            title('give 3 corners : bottom left, bottom right and top left')
+            [x,y] = ginput(3);
+            
+            close all
+            
+            AlignedXtsd = tsd(Range(Xtsd),(XRotate-x(1))./(x(2)-x(1))*1.6);
+            AlignedYtsd = tsd(Range(Ytsd),(YRotate-y(1))./(y(3)-y(1)));
+            
+            AlignedXtsd = tsd(Range(Xtsd),(X-x(1))./(x(2)-x(1)));
+            AlignedYtsd = tsd(Range(Ytsd),(Y-y(1))./(y(3)-y(1)));
+            
+            figure, hold on
+            %             plot(Data(AlignedXtsd),Data(AlignedYtsd))
+            plot(Data(AlignedYtsd),Data(AlignedXtsd))
+            
+            vline(0)
+            vline(1)
+            hline(0)
+            hline(1.6)
+            
+            satisfied = input('Satisfied?')
         end
-        close all
-        save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd','-append');
-        
     end
 end
 
