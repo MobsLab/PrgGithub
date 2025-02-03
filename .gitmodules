@@ -1,0 +1,3 @@
+[submodule "DimaGitCode"]
+	path = Dima/CleanCodeForGit
+	url = git@github.com:MobsLab/AnalysisNeuro.git
