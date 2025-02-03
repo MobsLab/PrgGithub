@@ -15,6 +15,23 @@ https://docs.google.com/spreadsheets/d/1YjbDNbrAc8-lKRNrFsmwyXEinpN2BYV7GmjlievC
 % Note pad on paper
 https://docs.google.com/document/d/15JBBGA7BdG0gwBFOFU0SV3Uk78D262OxBIgkDLFSYh0/edit?usp=sharing
 
+
+%% Figure 1 - two types of freezing
+% Make example
+MakeExampleFig1_UmazePaper.m
+
+
+%% Figure 2 - stress score correlates with recovery imombility
+
+% SDS / DZP / Ripples stress score
+LookAtAllStressScore_Rip_DZP_Sal_SDS_UMaze.m
+
+% Code for "homeostasis" measure of freezing level missing
+
+% Code for correlating stress score with freezing types missing
+
+
+
 %% SVM saline
 Finalfigures_DecodePositionWithPhysio_2sbinBy2sBin
 Finalfigures_DecodePositionWithPhysio_MouseByMouse
@@ -38,8 +55,6 @@ RipplesReactivationUmazeWake_HPC
 %% Ripples correlation with breathing
 /home/ratatouille/Dropbox/Kteam/PrgMatlab/Baptiste/Fear/Ripples_Density_OB_Frequency_BM_SB.m
 
-%% Examples fig1
-/home/pinky/Dropbox/Kteam/PrgMatlab/EmbReact/AnalysesPapier_BagurMaheo/MakeExampleFig1.m
 
 %% SDS
 

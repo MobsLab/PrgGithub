@@ -120,21 +120,3 @@ figure
 MakeSpreadAndBoxPlot3_SB(Prop,Cols2,X2,Legends2,'showpoints',1,'paired',0);
 ylabel('Sleepproportion')
 
-% Latency to state
-
-
-sleepdur = [20:20:200];
-Lim = 10;
-
-figure
-errorbar(sleepdur(1:Lim),nanmean(LatencyToState{1}(:,1:Lim))/60,stdError(LatencyToState{1}(:,1:Lim))/60,'color',Cols2{1})
-hold on
-errorbar(sleepdur(1:Lim),nanmean(LatencyToState{2}(:,1:Lim))/60,stdError(LatencyToState{2}(:,1:Lim)/60),'color',Cols2{2})
-makepretty
-xlim([0 220])
-xlabel('Min sleep duration')
-% ylim([0 120])
-ylabel('Latency (min)')
-
-
-
