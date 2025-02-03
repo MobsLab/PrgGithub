@@ -109,39 +109,6 @@ def generate_variable_shift_combinations(variables, max_shifts):
     return variables_shifts
 
 
-def generate_variable_shift_combinations_from_list(variables, shift_lists):
-    """
-    Generate all possible combinations of shift configurations for specified variables,
-    where shifts are explicitly provided as lists.
-
-    Parameters:
-    - variables (list of str): List of variable names to generate shifts for.
-    - shift_lists (dict): Dictionary where keys are variable names and values are lists of shifts.
-                          Example: {'BreathFreq': [0, -1, -2], 'Heartrate': [0, -1, -3]}
-
-    Returns:
-    - variables_shifts (list of dict): List of dictionaries with all combinations of variable shift configurations.
-    """
-    variables_shifts = []
-
-    # Prepare the shift ranges based on specified shift lists
-    shift_ranges = {var: shifts for var, shifts in shift_lists.items()}
-
-    # Generate all combinations of specified shift values
-    for shift_combination in product(*shift_ranges.values()):
-        shift_dict = {var: list(shifts) for var, shifts in zip(shift_ranges.keys(), shift_combination)}
-
-        # Add non-specified variables at baseline
-        for var in variables:
-            if var not in shift_dict:
-                shift_dict[var] = [0]
-        
-        variables_shifts.append(shift_dict)
-
-    return variables_shifts
-
-
-
 def extract_random_bouts(data, bout_length=10, percent=10, random_state=42):
     """
     Extract random bouts of data for testing and keep the rest for training.

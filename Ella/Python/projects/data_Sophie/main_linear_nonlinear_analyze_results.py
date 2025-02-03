@@ -49,7 +49,6 @@ spike_counts = spike_count_all_mice(maze_rebinned_data, maze_spike_times_data)
 
 # results_ln_loaded = load_results(load_path + 'results_ln_model.pkl')
 results_ln_loaded = load(load_path + 'results_ln_model_rs30.joblib')
-results_ln_loaded_bis = load(load_path + 'results_ln_model.joblib')
 
 
 # %% R2

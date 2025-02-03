@@ -23,7 +23,6 @@ from load_save_results import save_results
 # Load data and needed modules
 all_mat_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/alldata'
 maze_mat_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/justmaze'
-figures_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/figures'
 
 # Load variables and spike times for all mice during all recording sessions
 all_mice_data, all_spike_times_data = load_dataframes(all_mat_directory)

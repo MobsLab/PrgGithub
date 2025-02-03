@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import sem
 
+
 def extract_r2_values(results_list):
     """
     Extract R² values (train and test) for each neuron, model, and mouse from a list of results dictionaries.
@@ -50,7 +51,6 @@ def extract_r2_values(results_list):
     r2_data = pd.DataFrame(extracted_data)
 
     return r2_data
-
 
 
 def plot_r2_means_sem(results_list, r2_type='train'):

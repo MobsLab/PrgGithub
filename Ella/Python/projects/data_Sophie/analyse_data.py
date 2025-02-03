@@ -344,7 +344,8 @@ def spike_count_variable_mean_std(mice_data, mouse_id, spike_times_data, variabl
 
             # Compute mean and standard deviation for the interval
             mean_activity = np.mean(interval_spikes) if len(interval_spikes) > 0 else 0
-            std_activity = np.std(interval_spikes) if len(interval_spikes) > 0 else 0
+            # std_activity = np.std(interval_spikes) if len(interval_spikes) > 0 else 0
+            std_activity = np.std(interval_spikes) / np.sqrt(len(interval_spikes)) if len(interval_spikes) > 1 else 0
 
             mean_spikes.append(mean_activity)
             std_spikes.append(std_activity)

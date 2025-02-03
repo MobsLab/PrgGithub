@@ -14,11 +14,7 @@ import os
 os.chdir(r'/home/gruffalo/Documents/Python/projects/data_Sophie/')
 
 # Import necessary packages and modules
-from load_data import load_dataframes
-from preprocess_sort_data import (
-    denoise_mice_data,
-    create_sorted_column_replace_zeros
-    )
+from load_save_results import load_results
 from analyse_data import (
     spike_count
     )
@@ -38,40 +34,28 @@ from plot_data_linear_model import (
 
 # %% Load data
 
-# Load data and needed modules
-all_mat_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/alldata'
-maze_mat_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/justmaze'
-figures_directory = r'/home/gruffalo/Documents/Python/projects/data_Sophie/figures'
+load_path = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/'
+figures_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/figures/visualize_data'
 
-# Load variables and spike times for all mice during all recording sessions
-all_mice_data, all_spike_times_data = load_dataframes(all_mat_directory)
+maze_denoised_data = load_results(load_path + 'maze_denoised_data.pkl')
 
-# Load variables and spike times for all mice during the U-Maze session
-maze_mice_data, maze_spike_times_data = load_dataframes(maze_mat_directory)
-
-
-# %% Preprocess data
-
-# Denoise data
-all_denoised_data = denoise_mice_data(all_mice_data, ['BreathFreq', 'Heartrate', 'timebins', 'Accelero', 'LinPos'])
-maze_denoised_data = denoise_mice_data(maze_mice_data, ['BreathFreq', 'Heartrate', 'timebins', 'Accelero', 'Speed', 'LinPos'])
-
-# Scaling problems between sleep and UMaze
-create_sorted_column_replace_zeros(all_denoised_data, 'Mouse514', 'Accelero', replace=True)
-create_sorted_column_replace_zeros(maze_denoised_data, 'Mouse514', 'Accelero', replace=True)
-
+maze_spike_times_data = load_results(load_path + 'maze_spike_times_data.pkl')
 
 # %% Data visualization
 
 # Vizualize data before regression
-spike_count_df = spike_count(maze_mice_data, 'Mouse508', maze_spike_times_data)
-plot_scatter_neuron(maze_mice_data['Mouse508']['Heartrate'].values, spike_count_df['Neuron_16'].values, 'Heartrate', title='Neuron 16 vs HR M508')
+spike_count_df = spike_count(maze_denoised_data, 'Mouse508', maze_spike_times_data)
+plot_scatter_neuron(maze_denoised_data['Mouse508']['Heartrate'].values, 
+                    spike_count_df['Neuron_16'].values, 'Heartrate', 
+                    title='Neuron 16 vs HR M508')
 
 # Basic model with StatsModels
 
 # Physiological variables
-model_df = combine_dataframes_on_timebins(spike_count_df['Neuron_16'], maze_mice_data['Mouse508'][['Heartrate','BreathFreq','timebins']])
+model_df = combine_dataframes_on_timebins(spike_count_df, maze_denoised_data['Mouse508'][['Heartrate','BreathFreq','timebins']])
 df_col_corr_heatmap(model_df)
+
+# model_df.dropna(inplace=True)
 
 # %% Linear regression
 
@@ -96,7 +80,7 @@ sms.linear_harvey_collier(model1) # Linearity
 
 # %% Auto-correlations and Cross-correlations
 
-cross_corr_values = compute_cross_correlation(maze_mice_data, 'Mouse510', 'Heartrate', 'BreathFreq', max_lag=10, time_step=0.2)
+cross_corr_values = compute_cross_correlation(maze_denoised_data, 'Mouse508', 'Heartrate', 'BreathFreq', max_lag=10, time_step=0.2)
 
 
 # %% Linear regression with lagged features
