@@ -69,8 +69,17 @@ def ln_grid_cv(data, dependent_var, independent_vars, threshold_values=[0], vari
         
         # Align X and y by dropping NaNs after shifting
         aligned_data = pd.concat([X_shifted, y], axis=1).dropna()
+        if aligned_data.empty:
+            print(f"Skipping shift configuration {shift_config} due to lack of aligned data.")
+            continue
+        
         X_aligned = aligned_data[X_shifted.columns]
         y_aligned = aligned_data[dependent_var]
+        
+        # Ensure there are enough samples for cross-validation
+        if len(y_aligned) < k:
+            print(f"Skipping shift configuration {shift_config} due to insufficient data points for {k}-fold cross-validation.")
+            continue
 
         # Define the pipeline for the LN model with ReLU on predictions
         pipeline = Pipeline([
@@ -78,6 +87,10 @@ def ln_grid_cv(data, dependent_var, independent_vars, threshold_values=[0], vari
         ])
 
         # Define the parameter grid for GridSearchCV on threshold values and intercept options
+        if not threshold_values or not intercept_options:
+            raise ValueError("Threshold values and intercept options cannot be empty.")
+
+        
         param_grid = {
             'ln_model_with_relu__threshold': threshold_values,
             'ln_model_with_relu__fit_intercept': intercept_options
@@ -87,8 +100,12 @@ def ln_grid_cv(data, dependent_var, independent_vars, threshold_values=[0], vari
         kf = KFold(n_splits=k, shuffle=True, random_state=42)
         grid_search = GridSearchCV(estimator=pipeline, param_grid=param_grid, cv=kf, scoring='r2')
 
-        # Fit GridSearchCV with current shift configuration and threshold values
-        grid_search.fit(X_aligned, y_aligned)
+        try:
+            # Fit GridSearchCV with current shift configuration and threshold values
+            grid_search.fit(X_aligned, y_aligned)
+        except ValueError as e:
+            print(f"Skipping shift configuration {shift_config} due to error: {e}")
+            continue
 
         # Get best score and parameters for the current shift configuration
         if grid_search.best_score_ > best_score:

@@ -327,7 +327,7 @@ def spike_count_variable_mean_std(mice_data, mouse_id, spike_times_data, variabl
     # Iterate through all neurons for the given mouse
     for neuron_key in spike_times_data[mouse_id].columns:
         # Extract spike times for the current neuron
-        neuron_data = spike_times_data[mouse_id][neuron_key]
+        neuron_data = spike_times_data[mouse_id][neuron_key].dropna()
 
         # Compute spike counts using np.histogram
         spike_counts, _ = np.histogram(neuron_data, bins=mice_data[mouse_id]['timebins'], density=False)
@@ -362,9 +362,6 @@ def spike_count_variable_mean_std(mice_data, mouse_id, spike_times_data, variabl
     result_df = pd.concat([pd.DataFrame({variable: time_intervals})] + neuron_columns, axis=1)
 
     return result_df
-
-
-
 
 
 
