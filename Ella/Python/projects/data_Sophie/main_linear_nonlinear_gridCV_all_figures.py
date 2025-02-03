@@ -32,7 +32,7 @@ from preprocess_ln_model import (
 from model_ln_regression import (
     ln_grid_cv
     )
-from plot_results_ln_model import (
+from plot_recap_linear_nonlinear_model import (
     plot_spike_rate_histogram,
     plot_neuron_tuning_curve,
     plot_r2_values,
