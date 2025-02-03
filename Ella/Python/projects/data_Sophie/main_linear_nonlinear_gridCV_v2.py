@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Oct  7 14:43:01 2024
+Created on Wed Nov 27 12:27:14 2024
 
 @author: gruffalo
 """
@@ -33,15 +33,10 @@ from model_ln_regression import (
     ln_grid_cv
     )
 from plot_results_ln_model import (
-    plot_spike_rate_histogram,
-    plot_neuron_tuning_curve,
-    plot_r2_values,
-    plot_coefficients,
-    plot_interpolated_coefficients,
-    plot_predictions,
     create_recapitulatory_figure,
     create_visualization_figure
     )
+from save_plots import save_plot_as_svg
 
 # %% Load data
 
@@ -74,7 +69,6 @@ maze_rebinned_data = rebin_mice_data(maze_denoised_data, ['BreathFreq', 'Heartra
 # Compute spike counts
 spike_counts = spike_count_all_mice(maze_rebinned_data, maze_spike_times_data)
 
-
 # %% LN model 
 
 # Chose a given neuron
@@ -87,49 +81,13 @@ model_all_df = combine_dataframes_on_timebins(spike_counts[mouse_id], maze_rebin
 
 # Split the data 
 data = model_all_df
-train_data, test_data = extract_random_bouts(data, bout_length=10, percent=10, random_state=42)
+train_data, test_data = extract_random_bouts(data, bout_length=10, percent=10, random_state=22)
 
 # Set threshold values
 # threshold_values = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]
 
 percentages = [0, 0.001, 0.002, 0.003, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05]
 threshold_values = calculate_amplitude_thresholds(model_all_df, dependent_var, percentages)
-
-
-# %% Dependent variable
-
-plot_spike_rate_histogram(
-    spike_counts,
-    mouse_id=mouse_id, 
-    neurons=[dependent_var], 
-    bins=25)
-
-
-# Tuning curve of a neuron
-# Breathing Frequency
-plot_neuron_tuning_curve(
-    mice_data=maze_rebinned_data, 
-    mouse_id=mouse_id, 
-    spike_times_data=maze_spike_times_data, 
-    variable='Heartrate', 
-    neuron_key=dependent_var,
-    interval_step=0.3, 
-    min_value=8, 
-    max_value=13
-    )
-
-
-# Heart rate
-plot_neuron_tuning_curve(
-    mice_data=maze_rebinned_data, 
-    mouse_id=mouse_id, 
-    spike_times_data=maze_spike_times_data, 
-    variable='BreathFreq', 
-    neuron_key=dependent_var,
-    interval_step=0.3, 
-    min_value=2.5, 
-    max_value=11
-    )
 
 
 # %% Motion variables
@@ -147,15 +105,6 @@ resultsmotion = ln_grid_cv(
     intercept_options=[True, False],
     k=5
 )
-
-plot_coefficients(resultsmotion)
-
-# Plot the predictions on the test data
-plot_predictions(test_data, 
-                 resultsmotion, 
-                 independent_vars=independent_vars_motion, 
-                 dependent_var=dependent_var,
-                 variables_shifts=resultsmotion['best_shift_config'])
 
 
 # %% Heartrate
@@ -175,17 +124,6 @@ resultsHR = ln_grid_cv(
 )
 
 
-plot_interpolated_coefficients(resultsHR['coefficients_with_names'],
-                               'Heartrate', interpolation_kind='cubic')
-
-# Plot the predictions on the test data
-plot_predictions(test_data, 
-                 resultsHR, 
-                 independent_vars=independent_vars_HR, 
-                 dependent_var=dependent_var,
-                 variables_shifts=resultsHR['best_shift_config'])
-
-
 # %% Heartrate + motion variables
 
 independent_vars_HRmotion = ['Heartrate', 'LinPos', 'Speed', 'Accelero']
@@ -201,17 +139,6 @@ resultsHRmotion = ln_grid_cv(
     intercept_options=[True, False],
     k=5
 )
-
-plot_interpolated_coefficients(resultsHRmotion['coefficients_with_names'], 
-                               'Heartrate', interpolation_kind='cubic')
-
-
-# Plot the predictions on the test data
-plot_predictions(test_data, 
-                 resultsHRmotion, 
-                 independent_vars=independent_vars_HRmotion, 
-                 dependent_var=dependent_var,
-                 variables_shifts=resultsHRmotion['best_shift_config'])
 
 
 # %% Breathing rate
@@ -231,18 +158,6 @@ resultsBF = ln_grid_cv(
 )
 
 
-plot_interpolated_coefficients(resultsBF['coefficients_with_names'],
-                               'BreathFreq', interpolation_kind='cubic')
-
-# Plot the predictions on the test data
-plot_predictions(test_data, 
-                 resultsBF, 
-                 independent_vars=independent_vars_BF, 
-                 dependent_var=dependent_var,
-                 variables_shifts=resultsBF['best_shift_config'])
-
-
-
 # %% Breathing rate + motion variables
 
 independent_vars_BFmotion = ['BreathFreq', 'LinPos', 'Speed', 'Accelero']
@@ -258,17 +173,6 @@ resultsBFmotion = ln_grid_cv(
     intercept_options=[True, False],
     k=5
 )
-
-plot_interpolated_coefficients(resultsBFmotion['coefficients_with_names'], 
-                               'BreathFreq', interpolation_kind='cubic')
-
-# Plot the predictions on the test data
-plot_predictions(test_data, 
-                 resultsBFmotion, 
-                 independent_vars=independent_vars_BFmotion, 
-                 dependent_var=dependent_var,
-                 variables_shifts=resultsBFmotion['best_shift_config'])
-
 
 # %% All variables
 
@@ -287,81 +191,60 @@ resultsall = ln_grid_cv(
 )
 
 
-plot_interpolated_coefficients(resultsall['coefficients_with_names'], 
-                               'Heartrate', interpolation_kind='cubic')
-
-
-plot_interpolated_coefficients(resultsall['coefficients_with_names'], 
-                               'BreathFreq', interpolation_kind='cubic')
-
-# Plot the predictions on the test data
-plot_predictions(test_data, 
-                 resultsall, 
-                 independent_vars=independent_vars_all, 
-                 dependent_var=dependent_var,
-                 variables_shifts=resultsall['best_shift_config'])
-
 # Summarize the R2 results
 results_list = [resultsmotion, resultsBF, resultsBFmotion, resultsHR, resultsHRmotion, resultsall]
 
 model_names = ['Motion', 'BF', 'BF+Motion', 'HR', 'HR+Motion', 'All']
 
-plot_r2_values(results_list, model_names)
-
 
 # %% Recap figure
 
 
-create_recapitulatory_figure(
-    mouse_id=mouse_id,
-    dependent_var=dependent_var,
-    spike_count_dict=spike_counts,
-    maze_rebinned_data=maze_rebinned_data,
-    maze_spike_times_data=maze_spike_times_data,
-    test_data=test_data,
-    resultsmotion=resultsmotion,
-    resultsHR=resultsHR,
-    resultsHRmotion=resultsHRmotion,
-    resultsBF=resultsBF,
-    resultsBFmotion=resultsBFmotion,
-    resultsall=resultsall,
-    independent_vars_motion=independent_vars_motion,
-    independent_vars_HR=independent_vars_HR,
-    independent_vars_HRmotion=independent_vars_HRmotion,
-    independent_vars_BF=independent_vars_BF,
-    independent_vars_BFmotion=independent_vars_BFmotion,
-    independent_vars_all=independent_vars_all,
-    accelerometer_column="Accelero"
+recap_fig = create_recapitulatory_figure(
+            mouse_id=mouse_id,
+            dependent_var=dependent_var,
+            spike_count_dict=spike_counts,
+            maze_rebinned_data=maze_rebinned_data,
+            maze_spike_times_data=maze_spike_times_data,
+            test_data=test_data,
+            resultsmotion=resultsmotion,
+            resultsHR=resultsHR,
+            resultsHRmotion=resultsHRmotion,
+            resultsBF=resultsBF,
+            resultsBFmotion=resultsBFmotion,
+            resultsall=resultsall,
+            independent_vars_motion=independent_vars_motion,
+            independent_vars_HR=independent_vars_HR,
+            independent_vars_HRmotion=independent_vars_HRmotion,
+            independent_vars_BF=independent_vars_BF,
+            independent_vars_BFmotion=independent_vars_BFmotion,
+            independent_vars_all=independent_vars_all,
+            variable_column="Accelero"
 )
 
+save_plot_as_svg(figures_directory + '/ln_recap_figures', 
+                 f'241127_{dependent_var}_ln_recap_figure',
+                 fig=recap_fig)
 
-create_visualization_figure(
-    data_predictions=data,
-    data_variables=maze_rebinned_data[mouse_id],
-    resultsmotion=resultsmotion,
-    resultsHR=resultsHR,
-    resultsHRmotion=resultsHRmotion,
-    resultsBF=resultsBF,
-    resultsBFmotion=resultsBFmotion,
-    resultsall=resultsall,
-    independent_vars_motion=independent_vars_motion,
-    independent_vars_HR=independent_vars_HR,
-    independent_vars_HRmotion=independent_vars_HRmotion,
-    independent_vars_BF=independent_vars_BF,
-    independent_vars_BFmotion=independent_vars_BFmotion,
-    independent_vars_all=independent_vars_all,
-    dependent_var=dependent_var
+
+visu_fig =  create_visualization_figure(
+            data_predictions=data,
+            data_variables=maze_rebinned_data[mouse_id],
+            resultsmotion=resultsmotion,
+            resultsHR=resultsHR,
+            resultsHRmotion=resultsHRmotion,
+            resultsBF=resultsBF,
+            resultsBFmotion=resultsBFmotion,
+            resultsall=resultsall,
+            independent_vars_motion=independent_vars_motion,
+            independent_vars_HR=independent_vars_HR,
+            independent_vars_HRmotion=independent_vars_HRmotion,
+            independent_vars_BF=independent_vars_BF,
+            independent_vars_BFmotion=independent_vars_BFmotion,
+            independent_vars_all=independent_vars_all,
+            dependent_var=dependent_var
 )
 
-
-
-
-
-
-
-
-
-
-
-
-
+save_plot_as_svg(figures_directory + '/ln_recap_figures', 
+                 f'241127_{dependent_var}_ln_visualize_figure',
+                 fig=visu_fig)
