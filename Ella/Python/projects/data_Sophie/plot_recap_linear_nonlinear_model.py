@@ -272,6 +272,7 @@ def plot_interpolated_coefficients(coefficients, variable, interpolation_kind='l
     # Handle case where only one coefficient is available
     if len(lags) == 1:
         ax.bar(0, coef_values[0], color='brown', alpha=0.8)
+        ax.axhline(0, color='black', linestyle='--', linewidth=1, alpha=0.7)  # Add horizontal line at y=0
         ax.set_title(f"Single Coefficient for {variable}", fontsize=14)
         ax.set_xlabel("Lag")
         ax.set_ylabel("Coefficient Value")
@@ -296,6 +297,12 @@ def plot_interpolated_coefficients(coefficients, variable, interpolation_kind='l
     # Plot the interpolated coefficients
     ax.scatter(sorted_lags, sorted_coefs, color='brown', marker='o', label='Original Coefficients')
     ax.plot(dense_lags, interpolated_coefs, color='brown', linewidth=3, label='Interpolated Curve')
+
+    # Add horizontal line at y=0
+    ax.axhline(0, color='black', linestyle='--', linewidth=1, alpha=0.7)
+
+    # Add x-axis limits for multiple coefficients
+    ax.set_xlim(-5, 0)    
 
     # Add titles and labels
     ax.set_xlabel('Lag', fontsize=12)

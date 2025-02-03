@@ -10,6 +10,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.utils.validation import check_is_fitted
 import numpy as np
 import pandas as pd
 from preprocess_linear_model import create_time_shifted_features
@@ -22,16 +23,29 @@ class ReLUPredictionWrapper(BaseEstimator, RegressorMixin):
         self.model = LinearRegression(fit_intercept=self.fit_intercept)
 
     def fit(self, X, y):
-        # Adjust the model’s intercept setting if needed before fitting
-        self.model = LinearRegression(fit_intercept=self.fit_intercept)
+        # Fit the internal LinearRegression model
         self.model.fit(X, y)
+        # Mark the wrapper as fitted
+        self.is_fitted_ = True
         return self
 
     def predict(self, X):
-        # Apply linear regression prediction followed by ReLU transformation on predictions
+        # Apply linear regression prediction followed by ReLU transformation
+        check_is_fitted(self, 'is_fitted_') # Ensure the wrapper is fitted before predicting
         linear_pred = self.model.predict(X)
         relu_pred = np.maximum(0, linear_pred - self.threshold)
         return relu_pred
+
+    def get_params(self, deep=True):
+        return {'threshold': self.threshold, 'fit_intercept': self.fit_intercept}
+
+    def set_params(self, **params):
+        for param, value in params.items():
+            setattr(self, param, value)
+        # Update internal LinearRegression model's intercept setting if changed
+        if 'fit_intercept' in params:
+            self.model.set_params(fit_intercept=params['fit_intercept'])
+        return self
 
 
 def ln_grid_cv(data, dependent_var, independent_vars, threshold_values=[0], variables_shifts=None, intercept_options=[True, False], k=5):
@@ -100,12 +114,16 @@ def ln_grid_cv(data, dependent_var, independent_vars, threshold_values=[0], vari
         kf = KFold(n_splits=k, shuffle=True, random_state=42)
         grid_search = GridSearchCV(estimator=pipeline, param_grid=param_grid, cv=kf, scoring='r2')
 
+        
+        # Fit GridSearchCV with current shift configuration and threshold values
         try:
-            # Fit GridSearchCV with current shift configuration and threshold values
+            print(f"Fitting GridSearchCV for shift configuration: {shift_config}")
             grid_search.fit(X_aligned, y_aligned)
+            print(f"GridSearchCV fitted successfully for shift configuration: {shift_config}")
         except ValueError as e:
             print(f"Skipping shift configuration {shift_config} due to error: {e}")
             continue
+  
 
         # Get best score and parameters for the current shift configuration
         if grid_search.best_score_ > best_score:
@@ -139,6 +157,23 @@ def ln_grid_cv(data, dependent_var, independent_vars, threshold_values=[0], vari
     }
 
 
+# class ReLUPredictionWrapper(BaseEstimator, RegressorMixin):
+#     def __init__(self, threshold=0.0, fit_intercept=True):
+#         self.threshold = threshold
+#         self.fit_intercept = fit_intercept
+#         self.model = LinearRegression(fit_intercept=self.fit_intercept)
+
+#     def fit(self, X, y):
+#         # Adjust the model’s intercept setting if needed before fitting
+#         self.model = LinearRegression(fit_intercept=self.fit_intercept)
+#         self.model.fit(X, y)
+#         return self
+
+#     def predict(self, X):
+#         # Apply linear regression prediction followed by ReLU transformation on predictions
+#         linear_pred = self.model.predict(X)
+#         relu_pred = np.maximum(0, linear_pred - self.threshold)
+#         return relu_pred
 
 
 
