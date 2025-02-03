@@ -147,3 +147,38 @@ def correct_predictions(predictions_all, model_type):
     return corrected_results
 
 
+
+def correct_combined_data(combined_data, corrected_predictions):
+    """
+    Apply corrections to the neural spike counts in the combined dataset using the output of correct_predictions.
+
+    Parameters:
+    - combined_data (dict): Dictionary containing combined DataFrames of spike counts and physiological data for each mouse.
+    - corrected_predictions (list): List of dictionaries containing corrected predictions.
+
+    Returns:
+    - corrected_combined_data (dict): Dictionary with corrected spike counts while preserving other physiological variables.
+    """
+
+    # Make a deep copy to avoid modifying the original combined data
+    corrected_combined_data = {mouse: df.copy() for mouse, df in combined_data.items()}
+
+    for entry in corrected_predictions:
+        mouse_id = entry['Mouse_ID']
+        neuron_id = entry['Neuron_ID']
+        correction = entry['Correction']
+
+        # Check if the mouse and neuron exist in the combined data
+        if mouse_id in corrected_combined_data and neuron_id in corrected_combined_data[mouse_id].columns:
+            original_neuron_data = corrected_combined_data[mouse_id][neuron_id]
+
+            # Ensure alignment between original data and corrections
+            if len(correction) == len(original_neuron_data):
+                corrected_combined_data[mouse_id][neuron_id] = correction
+            else:
+                print(f"Skipping correction for {mouse_id} - {neuron_id}: Length mismatch (Original: {len(original_neuron_data)}, Correction: {len(correction)})")
+        else:
+            print(f"Skipping correction for {mouse_id} - {neuron_id}: Not found in combined_data.")
+
+    return corrected_combined_data
+

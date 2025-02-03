@@ -26,7 +26,8 @@ from preprocess_linear_model import (
     )
 from analyse_ln_corrected_TC import (
     predict_all_neurons,
-    correct_predictions
+    correct_predictions,
+    correct_combined_data
     )
 from plot_ln_corrected_TC import (
     plot_predictions_trace,
@@ -67,16 +68,24 @@ plot_predictions_trace(predicted, 'Mouse508', 'Neuron_16', 'motion')
 corrected_motion = correct_predictions(predicted, 'motion')
 
 # %% Plot the original and corrected tuning curves
- for i in range(1,100):
-    # I modified to plot the mean subtracter tuning curve to compare shapes
-    neuron_id ='Neuron_{0}'.format(i)
-    mouse_id = 'Mouse507'
-    
-    plot_tuning_curve(neuron_id, mouse_id, 'Heartrate', 
-                      8, 13, 0.3, combined_data_raw, corrected_motion)
-    
-    plot_tuning_curve(neuron_id, mouse_id, 'BreathFreq', 
-                      2.5, 11, 0.3, combined_data_raw, corrected_motion)
+
+mouse_id = 'Mouse508'
+
+import numpy as np
+for i in range(1,np.shape(spike_counts[mouse_id])[1]):
+   # I modified to plot the mean subtracter tuning curve to compare shapes
+   neuron_id ='Neuron_{0}'.format(i)
+   
+   plot_tuning_curve(neuron_id, mouse_id, 'Heartrate', 
+                     8, 13, 0.3, combined_data_raw, corrected_motion)
+   
+   plot_tuning_curve(neuron_id, mouse_id, 'BreathFreq', 
+                     2.5, 11, 0.3, combined_data_raw, corrected_motion)
+
+
+# %% Create a corrected combined dataframe 
+
+corrected_combined_data = correct_combined_data(combined_data, corrected_motion)
 
 
 

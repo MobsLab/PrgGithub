@@ -119,6 +119,7 @@ def plot_tuning_curve(neuron_id, mouse_id, physiological_var, min_val, max_val, 
 
     plt.xlabel(physiological_var, fontsize=14)
     plt.ylabel("Mean Spike Rate", fontsize=14)
+    plt.ylim([-1, 1])
     plt.title(f"Tuning Curve for Neuron {neuron_id} (Mouse {mouse_id})", fontsize=16)
     plt.legend(fontsize=12)
     plt.grid(alpha=0.4)
