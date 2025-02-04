@@ -1,1 +1,11 @@
 __pycache__*
+
+# Matlab temp files 
+*.m~ 
+*.asv 
+
+# Python temp files 
+*.pyc 
+*.pyo 
+*.pyd 
+*.swp 
