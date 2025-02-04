@@ -9,9 +9,8 @@ Created on Mon Oct  7 14:43:01 2024
 # %%
 
 # Set working directory
-import os
-# os.chdir(r'/home/gruffalo/Dropbox/Mobs_member/EllaCallas/ADA_project/submitted')
-os.chdir(r'/home/gruffalo/Documents/Python/projects/data_Sophie/')
+# import os
+# os.chdir(r'/home/gruffalo/PrgGithub/Ella/Python/projects/data_Sophie')
 
 # Import necessary packages and modules
 from load_save_results import ( 
