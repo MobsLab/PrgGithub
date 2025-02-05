@@ -11,7 +11,7 @@ import pandas as pd
 # For the linear regression using StatsModels
 def combine_dataframes_on_timebins(spike_count_df, physiological_df):
     """
-    Combine two dataframes based on the 'timebins' column and remove rows with NaN values.
+    Combine two dataframes based on the 'timebins' column.
     Ensures efficient merging by indexing both DataFrames on 'timebins' and checking that both timebins are aligned.
 
     Parameters:
@@ -124,24 +124,36 @@ def create_time_shifted_features(df, variables_shifts, include_original=False):
     return shifted_df
 
 
-def combine_mouse_data(spike_counts, mice_data, mice_list):
+def combine_mouse_data(spike_counts, mice_data, mice_list=None, drop_na=False):
     """
     Combine the spike counts and physiological data for each mouse in the provided list.
 
     Parameters:
     - spike_counts (dict): Dictionary containing DataFrames of neural data (spike counts) for each mouse.
     - mice_data (dict): Dictionary containing DataFrames of physiological data for each mouse.
-    - mice_list (list): List of mice to combine data for.
+    - mice_list (list, optional): List of mice to combine data for. If None, all mice are processed.
+    - drop_na (bool, optional): If True, rows with any NaN values are removed from the combined DataFrames, ignoring entirely NaN-filled columns.
 
     Returns:
     - combined_data (dict): Dictionary of combined DataFrames for each mouse.
     """
+    if mice_list is None:
+        mice_list = list(mice_data.keys())
+
     combined_data = {}
     for mouse in mice_list:
         print(f"Combining data for mouse {mouse}...")
         combined_df = combine_dataframes_on_timebins(spike_counts[mouse], mice_data[mouse])
+
+        if drop_na:
+            # Identify and exclude entirely NaN-filled columns
+            non_nan_columns = combined_df.loc[:, combined_df.notna().any()].columns
+            combined_df = combined_df[non_nan_columns].dropna()
+
         combined_data[mouse] = combined_df
+
     return combined_data
+
 
 
 

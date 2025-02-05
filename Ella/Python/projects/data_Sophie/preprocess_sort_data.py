@@ -8,6 +8,9 @@ Created on Wed Sep 18 12:17:05 2024
 
 import numpy as np
 import pandas as pd
+from preprocess_ln_model import (
+    zscore_columns
+    )
 
 
 def denoise_mice_data(mice_data, columns_to_denoise):
@@ -295,6 +298,34 @@ def rebin_mice_data(mice_data, columns_to_rebin, new_bin_size):
         rebinned_data[mouse_id] = rebinned_df
 
     return rebinned_data
+
+
+def normalize_data(maze_rebinned_data, columns_to_normalize):
+    """
+    Normalize specified columns for each mouse in the maze_rebinned_data dictionary.
+
+    Parameters:
+    - maze_rebinned_data (dict): Dictionary containing rebinned data for each mouse.
+    - columns_to_normalize (list): List of column names to normalize.
+
+    Returns:
+    - normalized_data (dict): Dictionary with the same structure as maze_rebinned_data,
+      but with normalized specified columns.
+    """
+    normalized_data = {}
+
+    for mouse_id, mouse_df in maze_rebinned_data.items():
+        # Make a copy to avoid modifying the original data
+        mouse_df_copy = mouse_df.copy()
+        
+        # Apply zscore normalization to the specified columns
+        mouse_df_copy = zscore_columns(mouse_df_copy, columns_to_normalize)
+        
+        # Store the normalized DataFrame in the new dictionary
+        normalized_data[mouse_id] = mouse_df_copy
+
+    return normalized_data
+
 
 
 # def rebin_mice_data(mice_data, columns_to_rebin, new_bin_size):

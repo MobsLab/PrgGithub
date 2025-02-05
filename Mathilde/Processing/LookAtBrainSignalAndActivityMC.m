@@ -1,13 +1,13 @@
 %% Section 1 : Load data
 %get the EMG channel
-% res = pwd;
-% nam = 'EMG';
-% eval(['tempchEMG=load([res,''/ChannelsToAnalyse/',nam,'''],''channel'');'])
-% chEMG = tempchEMG.channel;
-% eval(['load(''',res,'','/LFPData/LFP',num2str(chEMG),'.mat'');'])
-% LFP_emg = LFP;
-% % resample + square signal
-% SqurdEMG = ResampleTSD(tsd(Range(LFP_emg), Data(LFP_emg).^2),10);
+res = pwd;
+nam = 'EMG';
+eval(['tempchEMG=load([res,''/ChannelsToAnalyse/',nam,'''],''channel'');'])
+chEMG = tempchEMG.channel;
+eval(['load(''',res,'','/LFPData/LFP',num2str(chEMG),'.mat'');'])
+LFP_emg = LFP;
+% resample + square signal
+SqurdEMG = ResampleTSD(tsd(Range(LFP_emg), Data(LFP_emg).^2),10);
 
 %%get sleep scoring
 load('SleepScoring_Accelero.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info');
@@ -71,8 +71,8 @@ line([0 3.3E4],[Info.mov_threshold Info.mov_threshold],'color','r')
 SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[1e8 1e8]);
 set(gca,'xticklabel',[])
 %EMG
-% subplot(816), plot(Range(SqurdEMG)/1E4, 10*log10(Data(SqurdEMG))),ylim([0 120]),colorbar
-% SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[80 4]);
+subplot(816), plot(Range(SqurdEMG)/1E4, 10*log10(Data(SqurdEMG))),ylim([0 120]),colorbar
+SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[80 4]);
 set(gca,'xticklabel',[])
 %smooth theta
 subplot(817),plot(Range(SmoothTheta)/1E4,Data(SmoothTheta)),ylim([0 6]), ylabel('Smooth theta'),colorbar

@@ -7,8 +7,8 @@ Created on Tue Dec  3 16:34:39 2024
 """
 
 # %% Set working directory
-import os
-os.chdir(r'/home/gruffalo/Documents/Python/projects/data_Sophie/')
+# import os
+# os.chdir(r'/home/gruffalo/PrgGithub/Ella/Python/projects/data_Sophie')
 
 from load_save_results import ( 
     load_results
