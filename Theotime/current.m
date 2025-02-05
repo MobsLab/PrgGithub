@@ -137,6 +137,7 @@ for imouse = 1:length(Dir.path)
     LossPredTsdCorrected=tsd(TimeStepsPred*1E4,LossPredCorrected);
     LossPredTsd = LossPredTsdCorrected;
 
+    if fig:
     %% Plot the network confidence around ripples events, and the predicted vs actual Linear predicted distance.
 
     figure, plot(Range(Restrict(LossPredTsd, RipplesEpoch)), zscore(Data(Restrict(LossPredTsd, RipplesEpoch))), 'k.')
@@ -297,7 +298,7 @@ colormap('jet'); % set the colorscheme
 axis equal;
 title("Error Matrix during bad Epochs")
 set(gca, 'XLim', pts([1 end]), 'YLim', pts([1 end]), 'YDir', 'normal')
-
+saveFigure_BM(2, ['ErroMatrixGoodBadnMice9'], '/home/mickey/download/figures/')
 
 
 figure
@@ -305,13 +306,17 @@ subplot(121)
 Data_to_use = movmean(cell2mat(all_params.mean_conf),20,'omitnan')';
 Conf_Inter = nanstd(Data_to_use)./sqrt(size(Data_to_use,1));
 
-h=shadedErrorBar(tps , nanmean(Data_to_use) , Conf_Inter , '-k');
+h=shadedErrorBar(all_params.tps{1} , nanmean(Data_to_use) , Conf_Inter , '-k');
+title("20-moving average mean loss prediction")
+
 
 subplot(122)
 Data_to_use = movmean(cell2mat(all_params.std_conf),20,'omitnan')';
 Conf_Inter = nanstd(Data_to_use)./sqrt(size(Data_to_use,1));
-h=shadedErrorBar(tps , nanmean(Data_to_use) , Conf_Inter , '-k');
+h=shadedErrorBar(all_params.tps{1} , nanmean(Data_to_use) , Conf_Inter , '-k');
+title("20-moving average std of loss prediction")
 
+saveFigure_BM(3, ['SubplotConfidenceRipples_allMicen9_movingaverage'], '/home/mickey/download/figures/')
 
 figure
 plot(cell2mat(all_params.mean_conf))
