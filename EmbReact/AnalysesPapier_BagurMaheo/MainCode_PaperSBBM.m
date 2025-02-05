@@ -20,6 +20,16 @@ https://docs.google.com/document/d/15JBBGA7BdG0gwBFOFU0SV3Uk78D262OxBIgkDLFSYh0/
 % Make example
 MakeExampleFig1_UmazePaper.m
 
+% Quantification of behaviour
+
+% Quantification of parameters during freezing
+
+% SVM
+SVMscores_SomaticOnly_Maze_BM.m
+SVMmultiClass_DifferentStates.m
+
+% Compare safe freezing to shock freezing
+/home/pinky/git_hub/mobs_codes/PrgGithub/Baptiste/Paper/SophieCodesCheckPaper/SVMmultiClass_DifferentStates.m
 
 %% Figure 2 - stress score correlates with recovery imombility
 % SDS / DZP / Ripples stress score
@@ -33,7 +43,8 @@ LookAtAllStressScore_Rip_DZP_Sal_SDS_UMaze.m
 % COde for example data
 
 % Code for ripple quantification
-
+PlaceCells_Replay_Subsampling_FreezingShock_BM_SB_VFin.m
+PlaceCells_Replay_Subsampling_FreezingSafe_BM_SB_VFin.m
 % Code for shock / mid / safe cell activation
 
 % Code for reactivation analysis

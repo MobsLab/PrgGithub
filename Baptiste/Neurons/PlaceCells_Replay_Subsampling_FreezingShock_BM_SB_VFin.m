@@ -2,8 +2,7 @@
 clear all
 cd /media/DataMOBsRAIDN/ProjectEmbReact/Figures/HPC_Reactivations/Data
 
-MiceNumber = [905,911,994,1161,1162,1168,1186,1230,1239];
-% MiceNumber = [911,994,1161,1162]; % use these mice to analyse shock
+MiceNumber = [911,994,1161,1162]; % use these mice to analyse shock
 % freezing
 Session_type={'Hab1','Hab2','Hab','Cond'};
 
@@ -180,7 +179,7 @@ for mm=1:length(MiceNumber)
     TotalNoiseEpoch = or(or(StimEpoch , NoiseEpoch) , AfterStimEpoch);
     
     % Only use safe side ripples
-    FreezeSafe = and(thresholdIntervals(LinPos,0.4,'Direction','Above') , FreezeEpoch);
+    FreezeSafe = and(thresholdIntervals(LinPos,0.5,'Direction','Below') , FreezeEpoch);
     Ripples_Epoch = mergeCloseIntervals(intervalSet(Range(Ripples)-window_around_rip(1)*1e4,Range(Ripples)+window_around_rip(2)*1e4),0.1*1e4);
     Ripples_FreezeSafe = and(Ripples_Epoch , FreezeSafe);
     Ripples_FreezeSafe = Ripples_FreezeSafe-TotalNoiseEpoch;

@@ -1,6 +1,8 @@
 
 clear all
-load('/media/nas7/ProjetEmbReact/DataEmbReact/DataForSVM_AllStates_SB.mat')
+% Load the UMaze mice
+load('/media/nas7/ProjetEmbReact/DataEmbReact/DataForSVM_AllStates_SB.mat');
+% SoundContext = load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_SoundTest.mat');
 
 CatData = [];
 DATA2  = rmfield(DATA2,'ActiveWake');
@@ -12,6 +14,8 @@ for ep = 1:length(AllEpoch)
 end
 
 DatMat = (zscore(CatData(:,find(sum(isnan(CatData))==0))')');
+% NO HPC
+% DatMat = DatMat(1:5,:);
 [EigVect,EigVals]=PerformPCA(DatMat);
 
 
@@ -21,7 +25,6 @@ EpType_Red = EpType(find(sum(isnan(CatData))==0));
 cols = lines(ep);
 for ep = 1:length(AllEpoch)
     plot(nanmean(EigVect(:,1)'*DatMat(:,EpType_Red==ep)),nanmean(EigVect(:,2)'*DatMat(:,EpType_Red==ep)),'.','MarkerSize',50,'color',cols(ep,:))
-    
 end
 
 for ep = 1:length(AllEpoch)

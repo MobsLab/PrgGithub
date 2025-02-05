@@ -10,15 +10,21 @@ for sess=1:length(Session_type)
     [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('sound_test',Mouse,lower(Session_type{sess}),...
         'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','ob_low');
 end
+save('Data_SoundTest.mat','Epoch1','Mouse','NameEpoch','OutPutData',...
+    'Session_type','sess') % Mast saved by SB 4/02/2024 with correction for ob_gamma
 
 
 %% Paired data for sound cond & Maze
-Mouse=[439 490 507 508 509 510 512 514];
-Session_type={'sound_test'};
+
+Mouse=[439 490 507 508 509 510 512 514];    
+Session_type={'sound_test_umze'};
 for sess=1:length(Session_type) 
-    [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('sound_test',Mouse,lower(Session_type{sess}),...
+    [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('sound_test_umze',Mouse,lower(Session_type{sess}),...
         'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','ob_low');
 end
+cd /media/nas7/ProjetEmbReact/DataEmbReact
+save('Data_SoundTest_MazeMice.mat','Epoch1','Mouse','NameEpoch','OutPutData',...
+    'Session_type','sess') % Mast saved by SB 4/02/2024 with correction for ob_gamma
 
 
 %% Contextual fear conditionning
@@ -28,7 +34,8 @@ for sess=1:length(Session_type)
     [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM(Session_type{sess},Mouse,lower(Session_type{sess}),...
         'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_power','ob_low');
 end
-
+save('Data_FearCtxt.mat','Epoch1','Mouse','NameEpoch','OutPutData',...
+    'Session_type','sess') % Mast saved by SB 4/02/2024 with correction for ob_gamma
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
