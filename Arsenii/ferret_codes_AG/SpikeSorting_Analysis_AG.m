@@ -22,7 +22,7 @@ function SpikeSorting_Analysis_AG(directory)
 % By: A. Goriachenkov, 01/2025
 % -------------------------------------------------------------------------
 
-%% SECTION 1: Basic Setup & Parameters
+%% SECTION 1.1: Basic Setup & Parameters
 % if nargin < 1
 %    error('Please provide a directory path to your ferret session data.');
 % end
@@ -41,24 +41,24 @@ sessions = {...
 
 
 exp_path  = '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/';
-session = sessions{1};
+session = sessions{3};
 
 directory = [exp_path session];
 cd(directory)
 rasterDir = fullfile([directory '/wave_clus/'], 'raster_figures');
 if ~exist(rasterDir, 'dir'), mkdir(rasterDir); end
 
-%% SECTION 2: Load wave_clus Spikes (or KlustaKwik if you prefer)
+%% SECTION 1.2: Load wave_clus Spikes (or KlustaKwik if you prefer)
 
 [spikes, metadata] = load_wave_clus(directory);
 
-%% Optional: Remove bad data for a specific session
+% Optional: Remove bad data for a specific session
 % if strcmp(session, '20241205_TORCs')
 %     metadata([64:75], :) = [];
 %     spikes(:, [64:75])   = [];
 % end
 
-%% SECTION 4: Load LFP Data & Extract Stimulus Onsets
+%% SECTION 1.3: Load LFP Data & Extract Stimulus Onsets
 lfpFile = fullfile(directory, 'LFPData', 'LFP111.mat');
 if exist(lfpFile,'file')
     load(lfpFile,'LFP');
@@ -75,6 +75,13 @@ Starttime  = Start(StartSound);
 % Convert to convinient format for Yves (STRF)
 % stim_start = Starttime/1e4;
 % save([exp_path 'stim_starts/' 'stim_start_' session], 'stim_start')
+
+%% SECTION 1.4: Apply ZETA test to select spiking channels
+for s_count = 1:size(spikes, 2)
+    
+    [dblZetaP,vecLatencies,sZETA,sRate] = getZeta(spikes(:, s_count)/1e3, Starttime/1e4);
+    getIFR
+end
 
 %% FIGURE: Quick Raster Plots for Each Cluster
 
@@ -95,7 +102,7 @@ for ii = 1:size(spikes,2)
     close(fh); 
 end
 
-%% SECTION 5: Selecting “Good” Clusters (colIndex) Based on Preselection
+%% WILL BE INTEGRATED WITH SECTION 1.4 SOON...... Selecting “Good” Clusters (colIndex) Based on Preselection
 clear chcl
 chcl = get_chcl(session);  % function that returns list of [channel cluster]
 colIndex = [];
@@ -107,7 +114,7 @@ end
 % spikeTimes = spikes(:, colIndex);
 % spikeTimes = spikeTimes(~isnan(spikeTimes)); % Remove NaN values
 
-%% SECTION 6: Create a Cell Array A{n} for Neurons
+%% SECTION 1.5: Create a Cell Array A{n} for Neurons
 % A{n} = ts(...) for each selected cluster
 A = {};
 n=1;
@@ -120,7 +127,7 @@ end
 figure('Name','Raster of Chosen Clusters');
 RasterPlot(A);
 
-%% SECTION 7: Load Sleep & Gamma Data
+%% SECTION 1.6: Load Sleep & Gamma Data
 % Load SleepScoring info, e.g. Epoch, Wake, Sleep, SWSEpoch, REMEpoch, etc.
 sleepFile = fullfile(directory,'SleepScoring_OBGamma.mat');
 if exist(sleepFile,'file')
@@ -129,7 +136,11 @@ else
     warning('No SleepScoring_OBGamma.mat found in %s', directory);
 end
 
-%% SECTION 8: Binning of spikes
+%% SECTION 2: STRF calculation
+STRF_calculation(directory, Starttime/1e4)
+
+
+%% SECTION 3.1: Binning of spikes
 clear B Q D
 
 Binsize = 10*1e4;  % or 120*1e4
@@ -163,7 +174,7 @@ close
 figure('Name','Channels matrix');
 imagesc(corr(D))
 
-%% SECTION 9: Gamma-FR covariance
+%% SECTION 3.2: Gamma-FR covariance
 % Interpolate firing rate on Gamma's timeline
 Mean_FR_on_Gamma = interp1(linspace(0,1,length(D)), movmean(nanmean(D'),5), ...
                    linspace(0,1,length(SmoothGamma)));
@@ -198,7 +209,7 @@ figure('Name','FR-Gamma time correlation','Color','w');
 plot(lags*(median(diff(Range(Mean_FR_on_Gamma_tsd,'s'))))/60,c)
 vline(0,'--r')
 
-%% SECTION 10: Correlation Analyses (Gamma, Firing Rates, etc.)
+%% SECTION 3.3: Correlation Analyses (Gamma, Firing Rates, etc.)
 % Firing rate across states: 
 Q_Wake = Restrict(Q, Wake); D_Wake = Data(Q_Wake);
 Q_NREM = Restrict(Q, SWSEpoch); D_NREM = Data(Q_NREM);
@@ -355,7 +366,7 @@ clear d, d=D_NREM1(:,i); d(or(d<-2.5 , d>2.5))=NaN;
 hist(d,100)
 xlim([-2.5 2.5]);
 
-%% SECTION 11: Restrict Gamma on spikes across states
+%% SECTION 3.4: Restrict Gamma on spikes across states
 SmoothGamma_onSpikes = Restrict(SmoothGamma , Q);
 SmoothGamma_onSpikes_Wake = Restrict(SmoothGamma_onSpikes , Wake);
 SmoothGamma_onSpikes_NREM = Restrict(SmoothGamma_onSpikes , SWSEpoch);
@@ -462,12 +473,7 @@ ylabel('R values'), ylim([-1 1])
 
 [h,p] = ttest(R_Wake(P_Wake<.05) , zeros(1,12))
 
-
-
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%% SECTION 12: Build Stimulus Onset States for PSTH
+%% SECTION 4.1: Build Stimulus Onset States for PSTH
 stim_onset = ts(Starttime);
 stim_onset_Wake = Restrict(stim_onset, Wake);
 stim_onset_Sleep = Restrict(stim_onset, Sleep);
@@ -481,7 +487,7 @@ stim_states = {stim_onset_Wake; stim_onset_Sleep; stim_onset_NREM; ...
                stim_onset_REM; stim_onset_NREM1; stim_onset_NREM2};
 conditionNames = {'Wake','Sleep','NREM','REM','NREM1','NREM2'};
 
-%% SECTION 13: PSTH ANALYSIS (Raw & Z-score) + Population Figures + Controls
+%% SECTION 4.2: PSTH ANALYSIS (Raw & Z-score) + Population Figures + Controls
 [popRawPSTH, popZscoredPSTH, popAvgRate, popAvgZ, timeCenters] = PSTH_Analysis_AllNeurons(A, chcl, stim_states, conditionNames, directory);
 
 outFile = fullfile([directory '/wave_clus/'], sprintf('spike_analysis_%s.mat', session));
@@ -507,7 +513,7 @@ for count = 1:numel(A)
     PSTH_GammaBins_SingleNeuron(A, count, SmoothGamma, Wake, Starttime, directory)
 end
 
-%% Take all sessions and plot average figures
+%% SECTION 4.3: Take all sessions and plot average figures
 MultiSession_Analysis
 
 %% LEGACY: for KlustaKwik preprocessing generate list of .spk files
