@@ -41,7 +41,7 @@ sessions = {...
 
 
 exp_path  = '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/';
-session = sessions{3};
+session = sessions{5};
 
 directory = [exp_path session];
 cd(directory)

@@ -1,4 +1,4 @@
-function strfs = ephys_TORC2STRF(raster,options)
+function strfs = STRFfromTORC_baphy(raster,options)
 % WorkingFolder = '/home/yves/Dropbox (Equipe Audition)/myScripts_Yves/myMatlabscripts_Yves/2p_TORCstrf_Yves/20_01_30';
 % cd (WorkingFolder);
 % load('A2.mat')
@@ -216,9 +216,9 @@ for cnt = 1:min(25,size(raster,1)-cellbatch*25)
                 if isfield(options,'tfrac') && options.tfrac>0 && options.tfrac<StimParam.basep,
                     bp=StimParam.basep*options.tfrac;
                     ts=strfest(:,1:round(size(strfest,2).*options.tfrac));
-                    clim = stplot(ts,StimParam.lfreq,bp,1,StimParam.octaves,clim);
+%                     clim = stplot(ts,StimParam.lfreq,bp,1,StimParam.octaves,clim);
                 else
-                    clim = stplot(strfest,StimParam.lfreq,StimParam.basep,1,StimParam.octaves,clim);
+%                     clim = stplot(strfest,StimParam.lfreq,StimParam.basep,1,StimParam.octaves,clim);
                 end
                 if options.scalesnr
                     scalemax=1;
