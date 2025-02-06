@@ -40,6 +40,7 @@ ExecuteNDM_BM
 for f=1:length(FolderName)
     
     cd([FolderName{f}])
+    disp([FolderName{f}])
     try
         %   NewFolderName=strrep(FolderName{f}(max(findstr(FolderName{f},'ProjectEmbReact')):end),'/','_');
         

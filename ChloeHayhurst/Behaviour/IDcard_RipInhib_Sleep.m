@@ -5,7 +5,7 @@ load('/media/nas8-2/ProjetEmbReact/transfer/AllSessions.mat')
 % GetEmbReactMiceFolderList_BM
 Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear','LastCondPre'};
 
-Mouse_names = 'M1691';
+Mouse_names = 'M1713';
 
 RangeLow = linspace(0.1526,20,261);
 RangeHigh = linspace(22,98,32);
@@ -37,7 +37,7 @@ for sess=1:length(Session_type)
     % epochs
     TotEpoch.(Session_type{sess}) = intervalSet(0,max(Range(Speed.(Session_type{sess}))));
     FreezeEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freezeepoch');
-    FreezeEpoch_camera.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freeze_epoch_camera');
+%     FreezeEpoch_camera.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freeze_epoch_camera');
     
     ActiveEpoch.(Session_type{sess}) = TotEpoch.(Session_type{sess})-FreezeEpoch.(Session_type{sess});
     ZoneEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'zoneepoch');
@@ -79,8 +79,8 @@ for sess=1:length(Session_type)
     FreezeSafeCornerEpoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , SafeCornerEpoch.(Session_type{sess}));
     FreezeShockCornerEpoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , ShockCornerEpoch.(Session_type{sess}));
     
-    FreezeShockEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
-    FreezeSafeEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , SafeZoneEpoch.(Session_type{sess}));
+%     FreezeShockEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
+%     FreezeSafeEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , SafeZoneEpoch.(Session_type{sess}));
     
     ActiveShockEpoch.(Session_type{sess}) = and(ActiveEpoch.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
     ActiveSafeEpoch.(Session_type{sess}) = and(ActiveEpoch.(Session_type{sess}) , SafeZoneEpoch_freezing.(Session_type{sess}));

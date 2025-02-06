@@ -55,11 +55,11 @@ while i<v.NumFrames
         go_backFlag = false;
     end
     
-        if go_forwardFlag
+    if go_forwardFlag
         i = max([1,i+100]);
         go_forwardFlag = false;
     end
-
+    
     i=i+1;
     pause(0.1)
 end
