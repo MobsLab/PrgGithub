@@ -2137,7 +2137,7 @@ switch(lower(TypeVariable))
             end
         end
         
-            case 'respi_freq_bm_clean'
+    case 'respi_freq_bm_clean'
         
         OutPutVar = tsd([],[]);
         tps = 0; % this variable counts the total time of all concatenated data
@@ -2154,7 +2154,7 @@ switch(lower(TypeVariable))
                 tpsmax = max(Range(LFP)); % use LFP to get precise end time
                 
                 load('B_vHC_Clean_Low_Spectrum.mat')
-                Spectrum_Frequency = ConvertSpectrum_in_Frequencies_BM(Spectro{3} , Spectro{2}*1e4 , Spectro{1});
+                Spectrum_Frequency = ConvertSpectrum_in_Frequencies_BM(Spectro{3} , Spectro{2}*1e4 , Spectro{1},'frequency_band',[1.5 10]);
                 
                 rg = Range(Spectrum_Frequency);
                 dt=Data(Spectrum_Frequency);

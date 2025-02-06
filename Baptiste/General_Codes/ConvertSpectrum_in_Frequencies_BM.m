@@ -29,8 +29,8 @@ F1 = min(find(f>frequency_band(1)-median(diff(f)) & f<frequency_band(1)+median(d
 F2 = min(find(f>frequency_band(2)-median(diff(f)) & f<frequency_band(2)+median(diff(f))));
 
 if bin_size==1
-    [Power , Spectrum_Peak] = max(Data_Spectro(:,F1:F2)'); % changed on 20/07/2023
-%     [Power,Spectrum_Peak] = max((f(F1:F2).*Data_Spectro(:,F1:F2))');
+%     [Power , Spectrum_Peak] = max(Data_Spectro(:,F1:F2)'); % changed on 20/07/2023
+    [Power,Spectrum_Peak] = max((f(F1:F2).*Data_Spectro(:,F1:F2))');
     time=t;
 else
     for i=1:ceil(max(length(t))./bin_size)-1
@@ -40,7 +40,13 @@ else
 end
 Frequencies_withNoise = f(Spectrum_Peak+F1-1);
 Frequencies_withNoise(Frequencies_withNoise==f(F1))=NaN;
-
+% 
+% imagesc(1:size(Data_Spectro,1),f,log(Data_Spectro)')
+% axis xy
+% hold on
+% plot(Frequencies_withNoise)
+% pause
+% clf
 
 if exist('smooth_fact','var')
     Frequencies_withNoise = runmean_BM(Frequencies_withNoise,smooth_fact);
