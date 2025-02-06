@@ -56,12 +56,8 @@ catch
 end
 
 
-which -all readtable
-% uiopen('/media/mickey/DataMOBS210/DimaERC2/M1199TEST1_Basile/TEST/results/200/featurePred.csv',1)
-
-% testcsv=uiopen('/media/mickey/DataMOBS210/DimaERC2/M1199TEST1_Basile/TEST/results/200/featurePred.csv');
-
 m = csvread('/media/mickey/DataMOBS210/DimaERC2/M1199TEST1_Basile/TEST/results/200/featurePred.csv');
+
 % size(m)
 % figure, plot(m(:,1),m(:,2))
 % figure, plot(m(:,1),m(:,3))
