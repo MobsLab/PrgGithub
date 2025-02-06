@@ -1,4 +1,3 @@
-
 function Correct_Subsampling_BM_Edel(comp_name)
 % directory = '/media/nas7/React_Passive_AG/OBG/Edel/head-fixed';
 sessions = PathForExperimentsOB('Edel');
@@ -85,54 +84,54 @@ for p=1:length(sess)
     is_OpenEphys = false;
     
     % delete part
-    try
-        delete B_Low_Spectrum.mat
-    end
-    try
-        delete B_Middle_Spectrum.mat
-    end
-    try
-        delete B_High_Spectrum.mat
-    end
-    try
-        delete B_UltraLow_Spectrum.mat
-    end
-    try
-        delete([BaseFileName '.lfp'])
-    end
-    for i=0:42
-        delete(['LFPData/LFP' num2str(i) '.mat'])
-    end
+%     try
+%         delete B_Low_Spectrum.mat
+%     end
+%     try
+%         delete B_Middle_Spectrum.mat
+%     end
+%     try
+%         delete B_High_Spectrum.mat
+%     end
+%     try
+%         delete B_UltraLow_Spectrum.mat
+%     end
+%     try
+%         delete([BaseFileName '.lfp'])
+%     end
+%     for i=0:42
+%         delete(['LFPData/LFP' num2str(i) '.mat'])
+%     end
+%     
+%     % correct the .xml
+%     XmlStructure = xml2struct_SB([BaseFileName '.xml']);
+%     try
+%         XmlStructure.parameters.programs.program{1, 5}.parameters.parameter.value.Text='1250';
+%     catch
+%         XmlStructure.parameters.programs.program{1, 4}.parameters.parameter.value.Text='1250';
+%     end
+%     XmlStructure.parameters.fieldPotentials.lfpSamplingRate.Text='1250';
     
-    % correct the .xml
-    XmlStructure = xml2struct_SB([BaseFileName '.xml']);
-    try
-        XmlStructure.parameters.programs.program{1, 5}.parameters.parameter.value.Text='1250';
-    catch
-        XmlStructure.parameters.programs.program{1, 4}.parameters.parameter.value.Text='1250';
-    end
-    XmlStructure.parameters.fieldPotentials.lfpSamplingRate.Text='1250';
-    
-    switch comp_name
-        case 'rick'
-            XmlStructure.parameters.acquisitionSystem.samplingRate.Text='30000';
-        case 'ratatouille'
-            XmlStructure.parameters.acquisitionSystem.samplingRate.Text='30000';
-        case 'gruffalo_1'
-            XmlStructure.parameters.acquisitionSystem.samplingRate.Text='30000';
-        case 'gruffalo_2'
-            XmlStructure.parameters.acquisitionSystem.samplingRate.Text='20000';
-        case 'greta_1'
-            XmlStructure.parameters.acquisitionSystem.samplingRate.Text='20000';
-        case 'greta_2'
-            XmlStructure.parameters.acquisitionSystem.samplingRate.Text='20000';
-        case 'pinky'
-            XmlStructure.parameters.acquisitionSystem.samplingRate.Text='20000';
-        case 'mickey'
-            XmlStructure.parameters.acquisitionSystem.samplingRate.Text='20000';
-    end
-    struct2xml_SB(XmlStructure,[BaseFileName '.xml']);
-    
+%     switch comp_name
+%         case 'rick'
+%             XmlStructure.parameters.acquisitionSystem.samplingRate.Text='30000';
+%         case 'ratatouille'
+%             XmlStructure.parameters.acquisitionSystem.samplingRate.Text='30000';
+%         case 'gruffalo_1'
+%             XmlStructure.parameters.acquisitionSystem.samplingRate.Text='30000';
+%         case 'gruffalo_2'
+%             XmlStructure.parameters.acquisitionSystem.samplingRate.Text='20000';
+%         case 'greta_1'
+%             XmlStructure.parameters.acquisitionSystem.samplingRate.Text='20000';
+%         case 'greta_2'
+%             XmlStructure.parameters.acquisitionSystem.samplingRate.Text='20000';
+%         case 'pinky'
+%             XmlStructure.parameters.acquisitionSystem.samplingRate.Text='20000';
+%         case 'mickey'
+%             XmlStructure.parameters.acquisitionSystem.samplingRate.Text='20000';
+%     end
+%     struct2xml_SB(XmlStructure,[BaseFileName '.xml']);
+%     
     % recalculate everything
     system(['ndm_lfp ' BaseFileName])
     SetCurrentSession([BaseFileName '.xml'])
@@ -140,7 +139,7 @@ for p=1:length(sess)
     
     load(fullfile(pwd,'LFPData','InfoLFP.mat'), 'InfoLFP');
     try
-        for i=[[1, 24, 25, 26]+1]
+        for i=[[36, 37, 42]+1]%[[1, 24, 25, 26]+1]
             if ~exist(['LFPData/LFP' num2str(InfoLFP.channel(i)) '.mat'],'file') %only LFP signals
                 
                 disp(['loading and saving LFP' num2str(InfoLFP.channel(i)) ' in LFPData...']);
@@ -158,12 +157,12 @@ for p=1:length(sess)
     catch
         disp('problem for lfp')
     end
-    disp('Calculating Bulb Spectros')
-    load('ChannelsToAnalyse/Bulb_deep.mat')
-    LowSpectrumSB([cd filesep],channel,'B')
-    MiddleSpectrum_BM([cd filesep],channel,'B')
-    HighSpectrum([cd filesep],channel,'B');
-    UltraLowSpectrumBM([cd filesep],channel,'B');
+%     disp('Calculating Bulb Spectros')
+%     load('ChannelsToAnalyse/Bulb_deep.mat')
+%     LowSpectrumSB([cd filesep],channel,'B')
+%     MiddleSpectrum_BM([cd filesep],channel,'B')
+%     HighSpectrum([cd filesep],channel,'B');
+%     UltraLowSpectrumBM([cd filesep],channel,'B');
 end
 
 end

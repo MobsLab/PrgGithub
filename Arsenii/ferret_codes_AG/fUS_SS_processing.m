@@ -57,7 +57,9 @@ Activation_maps
 
 
 %% 
+Data(fUS_ACx_tsd{2})
 
+a = Range(fUS_ACx_tsd{2}, 's'); a(1)
 
 
 
