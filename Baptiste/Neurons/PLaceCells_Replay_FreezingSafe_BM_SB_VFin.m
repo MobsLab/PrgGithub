@@ -154,6 +154,8 @@ for sess=1:length(Session_type)
 end
 
 %% Get ripples triggered activity
+clear FR_Ripples FR_PreRipples MeanFR_AroundRip
+
 for mm=1:length(MiceNumber)
     disp(['RipAct ' num2str(MiceNumber(mm))])
     
@@ -180,12 +182,13 @@ for mm=1:length(MiceNumber)
     TotalNoiseEpoch = or(or(StimEpoch , NoiseEpoch) , AfterStimEpoch);
     
     % Only use safe side ripples
-    FreezeSafe = and(thresholdIntervals(LinPos,0.4,'Direction','Above') , FreezeEpoch);
+    FreezeSafe = and(thresholdIntervals(LinPos,0.6,'Direction','Above') , FreezeEpoch);
+%     FreezeSafe = FreezeEpoch;
     Ripples_Epoch = mergeCloseIntervals(intervalSet(Range(Ripples)-window_around_rip(1)*1e4,Range(Ripples)+window_around_rip(2)*1e4),0.1*1e4);
     Ripples_FreezeSafe = and(Ripples_Epoch , FreezeSafe);
     Ripples_FreezeSafe = Ripples_FreezeSafe-TotalNoiseEpoch;
     length(Start(Ripples_FreezeSafe))
-    
+
     
     Ripples_ts_FreezeSafe = Restrict(Ripples , FreezeSafe-TotalNoiseEpoch);
     
@@ -316,7 +319,7 @@ end
 
 % Plot juste the shock cells
 figure
-ShockPlaceFields = find(PlaceCellpeak_2D{4}>0.4 & PlaceCellpeak_2D{4}<0.7);
+ShockPlaceFields = find( PlaceCellpeak_2D{4}<0.4);
 for ii = 1:length(ShockPlaceFields)
     subplot(3,4,ii)
     imagesc(squeeze(PlaceCellMap{4}(ShockPlaceFields(ii),8:56,8:56)))

@@ -2137,6 +2137,32 @@ switch(lower(TypeVariable))
             end
         end
         
+            case 'respi_freq_bm_clean'
+        
+        OutPutVar = tsd([],[]);
+        tps = 0; % this variable counts the total time of all concatenated data
+        
+        for ff=1:length(FolderList)
+            try
+                cd(FolderList{ff})
+                try
+                    load('LFPData/LFP0.mat')
+                catch
+                    load('ChannelsToAnalyse/Bulb_deep.mat')
+                    load(['LFPData/LFP' num2str(channel) '.mat'])
+                end
+                tpsmax = max(Range(LFP)); % use LFP to get precise end time
+                
+                load('B_vHC_Clean_Low_Spectrum.mat')
+                Spectrum_Frequency = ConvertSpectrum_in_Frequencies_BM(Spectro{3} , Spectro{2}*1e4 , Spectro{1});
+                
+                rg = Range(Spectrum_Frequency);
+                dt=Data(Spectrum_Frequency);
+                
+                OutPutVar = tsd([Range(OutPutVar);rg+tps],[Data(OutPutVar);dt]);
+                tps=tps + tpsmax;
+            end
+        end
         
     case 'respivar'
         
