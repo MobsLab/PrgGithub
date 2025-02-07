@@ -28,6 +28,7 @@ end
 Dir = PathForExperimentsERC(pathForExperimentName);
 % We prepare the variable that will be saved.
 % Dir = RestrictPathForExperiment(Dir,'nMice', Mice_to_analyze);
+all_params.speed = {};
 all_params.mean_conf = {};
 all_params.std_conf = {};
 all_params.mean_conf_moving = {};
@@ -152,6 +153,11 @@ for imouse = 1:length(Dir.path)
     LossPredTsd=tsd(TimeStepsPred*1E4,LossPred);
     LinearTrueTsd=tsd(TimeStepsPred*1E4,LinearTrue);
     LinearPredTsd=tsd(TimeStepsPred*1E4,LinearPred);
+
+    LossPredCorrected=LossPred;
+    LossPredCorrected(LossPredCorrected<-15)=NaN;
+    LossPredTsdCorrected=tsd(TimeStepsPred*1E4,LossPredCorrected);
+    LossPredTsd = LossPredTsdCorrected;
     try
         LinearPredSleepTsd=tsd(TimeStepsPredSleep*1E4,LinearPredSleep);
     catch
@@ -163,11 +169,6 @@ for imouse = 1:length(Dir.path)
     GoodEpoch=thresholdIntervals(LossPredTsd,-5,'Direction','Below');
     stim=ts(Start(StimEpoch));
     RipEp=intervalSet(Range(tRipples)-0.2*1E4,Range(tRipples)+0.2*1E4);RipEp=mergeCloseIntervals(RipEp,1);
-
-    LossPredCorrected=LossPred;
-    LossPredCorrected(LossPredCorrected<-15)=NaN;
-    LossPredTsdCorrected=tsd(TimeStepsPred*1E4,LossPredCorrected);
-    LossPredTsd = LossPredTsdCorrected;
 
     if fig
         close all
@@ -287,22 +288,25 @@ for imouse = 1:length(Dir.path)
         scatter(Data(Restrict(Restrict(LinearTrueTsd,testPre), BadEpoch)),Data(Restrict(Restrict(LinearPredTsd,testPre), BadEpoch)), 'r')
         xlabel('True Linear Position')
         ylabel('Predicted Linear Position')
-        legend({'BadEpochs', 'GoodEpochs'}, 'Location', 'best');
+        legend({'GoodEpochs', 'BadEpochs'}, 'Location', 'best');
         saveFigure_BM(7, ['predError'  '_M' num2str(Dir.ExpeInfo{imouse}.nmouse)], '/home/mickey/download/figures/')
 
         figure;
         subplot(1,2,1);
         imagesc(pts,pts,errorgood)
-        colormap('jet'); % set the colorscheme
+        % colormap('jet'); % set the colorscheme
+        crameri('cork','pivot',0) 
         axis equal;
         set(gca, 'XLim', pts([1 end]), 'YLim', pts([1 end]), 'YDir', 'normal');
-        title("Error Matrix during good Epochs")
+        title("Precision Matrix during good Epochs")
         grid on;
         subplot(1,2,2)
         imagesc(pts,pts,errorbad)
-        colormap('jet'); % set the colorscheme
+        % colormap('jet'); % set the colorscheme
+        crameri('cork','pivot',0) 
+
         axis equal;
-        title("Error Matrix during bad Epochs")
+        title("Precision Matrix during bad Epochs")
         set(gca, 'XLim', pts([1 end]), 'YLim', pts([1 end]), 'YDir', 'normal');
         saveFigure_BM(8, ['predErrorMatrix'  '_M' num2str(Dir.ExpeInfo{imouse}.nmouse)], '/home/mickey/download/figures/')
     end
@@ -390,7 +394,7 @@ figure
 plot(cell2mat(all_params.mean_conf))
 
 
-%% TODO
+%% Bonus
 % plot according to moving or not - freezing or not...
 % instead of tRipples, chose a random range of times to plot the confidence around it
 % monte carlo simulation to see if the confidence is different around ripples than in general
@@ -409,6 +413,9 @@ figure, [fh,sq,sweeps] = RasterPETH(PoolNeurons(Stsd,1:50), ts(sw(1:100)), -1500
 title('my neurons have a nice ripple')
 figure, [fh,sq,sweeps] = RasterPETH(PoolNeurons(Stsd,1:50), ts(events_to_center(1:100)), -1500,+1500,'BinSize',10);
 title(strcat( 'if shifted by  ',  num2str(to_shift/1e4), ' s the ripples are less nice'))
+
+
+%% Plot figures for moving and non moving Epochs
 
 figure;
 subplot(1,2,1)
@@ -530,3 +537,93 @@ xlabel('Time around ripples (ms)')
 ylabel('std')
 text(1,3,'rip time','Color','r')
 title('Standard error decreases right after the ripple  - only nmovingnrip epochs.')
+
+%% Do the same figures WITHOUT zscore, in order to compare absolute values
+
+%%% for non moving non rip
+figure;
+subplot(1,2,1)
+shadedErrorBar(all_params.tps{1},mean(movmean(cell2mat(all_params.mean_conf_nmovingnrip), 5),2,'omitnan'),mean(movmean(cell2mat(all_params.std_conf_nmovingnrip), 5), 2, 'omitnan'))
+
+title("Prediction Loss decreases around ripples - only nmovingnrip epochs. n_{mice} = 9")
+vline(0,'--r')
+xlabel('Time around ripples (ms)')
+ylabel('Prediction Loss')
+text(1,3,'rip time','Color','r')
+
+legend('loss prediction')
+
+subplot(1,2,2)
+
+ystd = fillmissing(mean(movmean(cell2mat(all_params.std_conf_nmovingnrip), 5), 2, 'omitnan'), 'previous');
+x = all_params.tps{1};
+size(x)
+coefficients = polyfit(x, ystd, 30);
+xFit = linspace(min(x), max(x), 1000);
+yFit = polyval(coefficients , xFit);
+plot(x, ystd, 'b.', 'MarkerSize', 10, 'MarkerFaceColor', [0.7 0.7 0.7]); % Plot training data.
+hold on; % Set hold on so the next plot does not blow away the one we just drew.
+plot(xFit, yFit, 'r-', 'LineWidth', 2); % Plot fitted line.
+hline(0,'g--')
+vline(0,'--r')
+xlabel('Time around ripples (ms)')
+ylabel('std')
+text(1,3,'rip time','Color','r')
+title('Standard error decreases right after the ripple  - only nmovingnrip epochs.')
+
+%%% for non moving rip
+figure;
+subplot(1,2,1)
+shadedErrorBar(all_params.tps{1},mean(movmean(cell2mat(all_params.mean_conf_nmovingrip), 5),2,'omitnan'),mean(movmean(cell2mat(all_params.std_conf_nmovingrip), 5), 2, 'omitnan'))
+
+title("Prediction Loss decreases around ripples - only nmovingrip epochs. n_{mice} = 9")
+vline(0,'--r')
+xlabel('Time around ripples (ms)')
+ylabel('Prediction Loss')
+text(1,3,'rip time','Color','r')
+
+legend('loss prediction')
+
+subplot(1,2,2)
+
+ystd = fillmissing(mean(movmean(cell2mat(all_params.std_conf_nmovingrip), 5), 2, 'omitnan'), 'previous');
+x = all_params.tps{1};
+size(x)
+coefficients = polyfit(x, ystd, 30);
+xFit = linspace(min(x), max(x), 1000);
+yFit = polyval(coefficients , xFit);
+plot(x, ystd, 'b.', 'MarkerSize', 10, 'MarkerFaceColor', [0.7 0.7 0.7]); % Plot training data.
+hold on; % Set hold on so the next plot does not blow away the one we just drew.
+plot(xFit, yFit, 'r-', 'LineWidth', 2); % Plot fitted line.
+hline(0,'g--')
+vline(0,'--r')
+xlabel('Time around ripples (ms)')
+ylabel('std')
+text(1,3,'rip time','Color','r')
+title('Standard error decreases right after the ripple  - only nmovingrip epochs.')
+
+%%% for moving
+figure;
+subplot(1,2,1)
+shadedErrorBar(all_params.tps{1},mean(movmean(cell2mat(all_params.mean_conf_moving), 5),2,'omitnan'),mean(movmean(cell2mat(all_params.std_conf_moving), 5), 2, 'omitnan'))
+title("Prediction Loss decreases around ripples - only moving epochs. n_{mice} = 9")
+vline(0,'--r')
+xlabel('Time around ripples (ms)')
+ylabel('Prediction Loss')
+text(1,3,'rip time','Color','r')
+legend('loss prediction')
+subplot(1,2,2)
+ystd = fillmissing(mean(movmean(cell2mat(all_params.std_conf_moving), 5), 2, 'omitnan'), 'previous');
+x = all_params.tps{1};
+size(x)
+xFit = linspace(min(x), max(x), 1000);
+yFit = polyval(coefficients , xFit);
+plot(x, ystd, 'b.', 'MarkerSize', 10, 'MarkerFaceColor', [0.7 0.7 0.7]); % Plot training data.
+hold on; % Set hold on so the next plot does not blow away the one we just drew.
+plot(xFit, yFit, 'r-', 'LineWidth', 2); % Plot fitted line.
+hline(0,'g--')
+vline(0,'--r')
+xlabel('Time around ripples (ms)')
+ylabel('std')
+text(1,3,'rip time','Color','r')
+title('Standard error decreases right after the ripple  - only moving epochs.')

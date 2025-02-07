@@ -66,8 +66,8 @@ end
 
 %%
 mice = 1199;
-Dir = PathForExperiments_TC("Sub");
-Dir = RestrictPathForExperiment_TC(Dir, 'nMice', mice);
+Dir = PathForExperimentsERC("Sub");
+Dir = RestrictPathForExperiment(Dir, 'nMice', mice);
 
 csvLinearPred = csvread([ Dir.path{1}{1}  '/TEST/results/200/linearPred.csv']);
 idxLinearPred = csvLinearPred(2:end,1);
