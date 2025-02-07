@@ -31,7 +31,8 @@ from analyse_ln_corrected_TC import (
     )
 from plot_ln_corrected_TC import (
     plot_predictions_trace,
-    plot_tuning_curve
+    plot_tuning_curve,
+    plot_tuning_curve_heatmap
     )
 
 # %% Load data and results
@@ -70,6 +71,7 @@ corrected_motion = correct_predictions(predicted, 'motion')
 # %% Plot the original and corrected tuning curves
 
 mouse_id = 'Mouse508'
+neuron_id = 'Neuron_16'
 
 import numpy as np
 for i in range(1,np.shape(spike_counts[mouse_id])[1]):
@@ -81,7 +83,36 @@ for i in range(1,np.shape(spike_counts[mouse_id])[1]):
    
    plot_tuning_curve(neuron_id, mouse_id, 'BreathFreq', 
                      2.5, 11, 0.3, combined_data_raw, corrected_motion)
+   
+# %% Plot heat maps of original and corrected tuning curves
 
+plot_tuning_curve_heatmap(
+    mouse_list=['Mouse507', 'Mouse508', 'Mouse509', 'Mouse510'],
+    physiological_var="Heartrate",
+    min_val=8,
+    max_val=13,
+    step=0.45,
+    combined_data=combined_data_raw,
+    model_results=corrected_motion,
+    model_types=['original', 'motion'],
+    vmin=-2,
+    vmax=2,
+    smooth_sigma=0.5,
+    global_zscore=True
+)
+
+plot_tuning_curve_heatmap(
+    mouse_list=['Mouse507', 'Mouse508', 'Mouse509', 'Mouse510'],
+    physiological_var="BreathFreq",
+    min_val=2.5,
+    max_val=11,
+    step=0.45,
+    combined_data=combined_data_raw,
+    model_results=corrected_motion,
+    model_types=['original', 'motion'],
+    smooth_sigma=0.5,
+    global_zscore=True
+)
 
 # %% Create a corrected combined dataframe 
 
