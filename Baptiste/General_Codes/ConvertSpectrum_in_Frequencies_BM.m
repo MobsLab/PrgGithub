@@ -29,8 +29,8 @@ F1 = min(find(f>frequency_band(1)-median(diff(f)) & f<frequency_band(1)+median(d
 F2 = min(find(f>frequency_band(2)-median(diff(f)) & f<frequency_band(2)+median(diff(f))));
 
 if bin_size==1
-%     [Power , Spectrum_Peak] = max(Data_Spectro(:,F1:F2)'); % changed on 20/07/2023
-    [Power,Spectrum_Peak] = max((f(F1:F2).*Data_Spectro(:,F1:F2))');
+    [Power , Spectrum_Peak] = max(Data_Spectro(:,F1:F2)'); % changed on 20/07/2023
+%     [Power,Spectrum_Peak] = max((f(F1:F2).*Data_Spectro(:,F1:F2))');
     time=t;
 else
     for i=1:ceil(max(length(t))./bin_size)-1
