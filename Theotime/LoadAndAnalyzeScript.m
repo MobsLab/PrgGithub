@@ -165,8 +165,9 @@ for imouse = 1:length(Dir.path)
 
 
 
-    BadEpoch=thresholdIntervals(LossPredTsd,-3,'Direction','Above');
-    GoodEpoch=thresholdIntervals(LossPredTsd,-5,'Direction','Below');
+
+    BadEpoch=thresholdIntervals(LossPredTsd,quantile(Data(LossPredTsd), 0.75),'Direction','Above');
+    GoodEpoch=thresholdIntervals(LossPredTsd,quantile(Data(LossPredTsd), 0.15),'Direction','Below');
     stim=ts(Start(StimEpoch));
     RipEp=intervalSet(Range(tRipples)-0.2*1E4,Range(tRipples)+0.2*1E4);RipEp=mergeCloseIntervals(RipEp,1);
 
