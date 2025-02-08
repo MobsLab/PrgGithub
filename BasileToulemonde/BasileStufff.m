@@ -292,6 +292,7 @@ plot(Range(Restrict(LinearPredTsd, BadEpoch),'s'), Data(Restrict(LinearPredTsd, 
 line([Range(stim,'s') Range(stim,'s')],ylim,'color','k')
 line([Range(tRipples,'s') Range(tRipples,'s')],ylim/2,'color','b')
 
+figure;
 subplot(1,2,1);
 [hBad,bBad]=hist(Data(Restrict(LinearPredTsd, BadEpoch))-Data(Restrict(LinearTrueTsd, BadEpoch)),500);
 [hGood,bGood]=hist(Data(Restrict(LinearPredTsd, GoodEpoch))-Data(Restrict(LinearTrueTsd, GoodEpoch)),500);
