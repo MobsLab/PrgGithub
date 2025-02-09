@@ -216,9 +216,9 @@ for cnt = 1:min(25,size(raster,1)-cellbatch*25)
                 if isfield(options,'tfrac') && options.tfrac>0 && options.tfrac<StimParam.basep,
                     bp=StimParam.basep*options.tfrac;
                     ts=strfest(:,1:round(size(strfest,2).*options.tfrac));
-%                     clim = stplot(ts,StimParam.lfreq,bp,1,StimParam.octaves,clim);
+                    stplot(ts,StimParam.lfreq,bp,1,StimParam.octaves,clim);
                 else
-%                     clim = stplot(strfest,StimParam.lfreq,StimParam.basep,1,StimParam.octaves,clim);
+                    stplot(strfest,StimParam.lfreq,StimParam.basep,1,StimParam.octaves,clim);
                 end
                 if options.scalesnr
                     scalemax=1;

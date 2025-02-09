@@ -4,7 +4,7 @@ load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_Saline_Eyelid
 Session_type={'Cond'}; sess=1;
 Drug_Group={'Saline'};
 
-FreqLim = 4; n=1;
+FreqLim = 4.5; n=1;
 for mouse = 1:length(Mouse)
     
     clear D, D = Data(OutPutData.(Session_type{sess}).respi_freq_bm.tsd{mouse,3});

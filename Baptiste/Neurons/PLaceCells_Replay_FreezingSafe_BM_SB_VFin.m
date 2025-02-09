@@ -32,7 +32,6 @@ X2_plo=[1:3];
 
 
 %% Get the place fields
-
 for sess=1:length(Session_type)
     disp(Session_type{sess})
     for mm=1:length(MiceNumber)
@@ -287,9 +286,11 @@ end
 
 %% figures
 % 1) example
+figure
 sess=4;
-for mm=1:length(stats{3})
+for mm=1:length(stats{sess})
     for neur = 1:length(SpatialInfo{sess}{mm})
+        disp([num2str(mm) ' ' num2str(neur)])
         clf
         if SpatialInfo{sess}{mm}(neur)>1
             subplot(3,1,1:2)

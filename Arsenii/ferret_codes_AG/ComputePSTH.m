@@ -28,7 +28,7 @@ end
 
 meanPSTH = mean(trialsPSTH,1);
 stdPSTH  = std(trialsPSTH,0,1);
-semPSTH  = stdPSTH / sqrt(nOnsets);
+semPSTH  = stdPSTH / sqrt(size(trialsPSTH, 1));
 
 % Z-score
 idxBL = (timeEdges>=-1 & timeEdges<0);
