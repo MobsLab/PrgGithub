@@ -63,7 +63,8 @@ for sess=1:length(Session_type)
         % get the spatial firing maps
         for neur=1:length(Spikes)
             try
-                if max(size(Restrict(Spikes{neur},MovEpoch)))>10 % Only use cells with at least 10 spikes in move epoch
+                if max(size(Restrict(Spikes{neur},MovEpoch)))>10 % Only use cells with at least 20 spikes in move epoch
+                    
                     
                     [map_mov{sess}{mm}{neur}, mapNS_mov{sess}{mm}{neur}, stats{sess}{mm}{neur}, px{sess}{mm}{neur}, py{sess}{mm}{neur}, FR_mov{sess}{mm}(neur)] = PlaceField_DB(Spikes{neur}, Xtsd,...
                         Ytsd , 'PlotResults' , 0 , 'PlotPoisson' ,0 , 'epoch' , MovEpoch);
@@ -116,7 +117,18 @@ for sess=1:length(Session_type)
                     mapNS_mov{sess}{mm}{neur}.time = [];
                     stats{sess}{mm}{neur} = 0;
                 end
+            catch
+                FR_mov{sess}{mm}(neur) = NaN;
+                SpatialInfo{sess}{mm}(neur) = 0;
+                LinearizeFiring_binned{sess}{mm}(neur,:) = nan(1,100);
+                map_mov{sess}{mm}{neur}.rate = [];
+                map_mov{sess}{mm}{neur}.time = [];
+                map_mov{sess}{mm}{neur}.count = [];
+                mapNS_mov{sess}{mm}{neur}.rate = [];
+                mapNS_mov{sess}{mm}{neur}.time = [];
+                stats{sess}{mm}{neur} = 0;
             end
+            
         end
         
         % Distribution of linearized positions
@@ -141,6 +153,8 @@ for sess=1:length(Session_type)
 end
 
 %% Get ripples triggered activity
+clear FR_Ripples FR_PreRipples MeanFR_AroundRip
+
 for mm=1:length(MiceNumber)
     disp(['RipAct ' num2str(MiceNumber(mm))])
     
@@ -167,13 +181,14 @@ for mm=1:length(MiceNumber)
     TotalNoiseEpoch = or(or(StimEpoch , NoiseEpoch) , AfterStimEpoch);
     
     % Only use safe side ripples
-    FreezeSafe = and(thresholdIntervals(LinPos,0.4,'Direction','Above') , FreezeEpoch);
+    FreezeSafe = and(thresholdIntervals(LinPos,0.6,'Direction','Above') , FreezeEpoch);
+%     FreezeSafe = FreezeEpoch;
     Ripples_Epoch = mergeCloseIntervals(intervalSet(Range(Ripples)-window_around_rip(1)*1e4,Range(Ripples)+window_around_rip(2)*1e4),0.1*1e4);
     Ripples_FreezeSafe = and(Ripples_Epoch , FreezeSafe);
     Ripples_FreezeSafe = Ripples_FreezeSafe-TotalNoiseEpoch;
     length(Start(Ripples_FreezeSafe))
 
-
+    
     Ripples_ts_FreezeSafe = Restrict(Ripples , FreezeSafe-TotalNoiseEpoch);
     
     Pre_Ripples_Epoch = mergeCloseIntervals(intervalSet(Range(Ripples)-2*1e4,Range(Ripples)-1.75*1e4),0.1*1e4);
@@ -235,7 +250,7 @@ for sess=1:length(Session_type)
                     if SpatialInfo{SessDefinePlaceCell}{mm}(neur)>SpatialInfoThresh
                         % 1D
                         LinFiring_AllPlaceCells{sess} = [LinFiring_AllPlaceCells{sess};LinearizeFiring_binned{sess}{mm}(neur,:)];
-                       [~,ind] = max(LinFiring_AllPlaceCells{sess}(end,:)');
+                        [~,ind] = max(LinFiring_AllPlaceCells{sess}(end,:)');
                         PlaceCellpeak_1D{sess}(end+1)  = ind/100;
                         % 2D
                         PeakLoc{sess} = [PeakLoc{sess}, [stats{sess}{mm}{neur}.x(1);stats{sess}{mm}{neur}.y(1)]];
@@ -243,7 +258,7 @@ for sess=1:length(Session_type)
                         PlaceCellpeak_2D{sess} = [PlaceCellpeak_2D{sess},lin_proj];
                         
                         PlaceCellMap{sess}(end+1,:,:) = map_mov{sess}{mm}{neur}.rate;
-
+                        
                         % Get ripples firing rate
                         if sess==4
                             FR_PreRipples = [FR_PreRipples,FR_PreRipples_all(neur)];
@@ -305,16 +320,16 @@ end
 
 % Plot juste the shock cells
 figure
-ShockPlaceFields = find(PlaceCellpeak_2D{4}>0.4 & PlaceCellpeak_2D{4}<0.7);
+ShockPlaceFields = find( PlaceCellpeak_2D{4}<0.4);
 for ii = 1:length(ShockPlaceFields)
     subplot(3,4,ii)
-        imagesc(squeeze(PlaceCellMap{4}(ShockPlaceFields(ii),8:56,8:56)))
-        axis xy
-        sizeMap=50; Maze_Frame_BM, hold on
-        a=area([19 32],[37 37]);
-        a.FaceColor=[1 1 1];
-        a.LineWidth=1e-6;
-%     plot( LinFiring_AllPlaceCells{sess}(ShockPlaceFields(ii),:))
+    imagesc(squeeze(PlaceCellMap{4}(ShockPlaceFields(ii),8:56,8:56)))
+    axis xy
+    sizeMap=50; Maze_Frame_BM, hold on
+    a=area([19 32],[37 37]);
+    a.FaceColor=[1 1 1];
+    a.LineWidth=1e-6;
+    %     plot( LinFiring_AllPlaceCells{sess}(ShockPlaceFields(ii),:))
     
 end
 
@@ -381,7 +396,7 @@ RippleAmp = nanmean(MeanFR_AroundRip_all(OrderToUse,[190:210])');
 [~,RippleTiming]=max(zscore(MeanFR_AroundRip_all(OrderToUse,[190:210])'));
 RippleTiming = (RippleTiming/length([190:210]) - 0.5)*100; % Convert to ms, centered on ripple middle
 
-% Use weighted mean and not peak for timing estimate 
+% Use weighted mean and not peak for timing estimate
 % W = ([190:210] - 200)*0.05;
 % for ii = 1:length(OrderToUse)
 %     A = MeanFR_AroundRip_all(OrderToUse(ii),[190:210]);
@@ -393,7 +408,7 @@ RippleTiming = (RippleTiming/length([190:210]) - 0.5)*100; % Convert to ms, cent
 % %     pause
 % %     clf
 % end
-% 
+%
 % RippleTiming = Wmean*1e2;
 % RippleTiming(abs(RippleTiming)>20) = NaN;
 
@@ -488,7 +503,7 @@ end
 set(gca,'YDir','Reverse')
 
 
-figure, [R,P,a,b,LINE]=PlotCorrelations_BM(RippleTiming,PeakToUse(OrderToUse), 'method' , 'pearson'); close
+figure, [R,P,a,b,LINE] =PlotCorrelations_BM(RippleTiming,PeakToUse(OrderToUse), 'method' , 'pearson'); close
 % Average position by time block
 clear M
 RippleBins = [-50:10:50];

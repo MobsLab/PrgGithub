@@ -66,8 +66,8 @@ end
 
 %%
 mice = 1199;
-Dir = PathForExperiments_TC("Sub");
-Dir = RestrictPathForExperiment_TC(Dir, 'nMice', mice);
+Dir = PathForExperimentsERC("Sub");
+Dir = RestrictPathForExperiment(Dir, 'nMice', mice);
 
 csvLinearPred = csvread([ Dir.path{1}{1}  '/TEST/results/200/linearPred.csv']);
 idxLinearPred = csvLinearPred(2:end,1);
@@ -252,6 +252,10 @@ LinearTrueTsd=tsd(TimeStepsPred*1E4,LinearTrue);
 LinearPredTsd=tsd(TimeStepsPred*1E4,LinearPred);
 LinearPredSleepTsd=tsd(TimeStepsPredSleep*1E4,LinearPredSleep);
 
+LossPredCorrected=LossPred;
+LossPredCorrected(LossPredCorrected<-15)=NaN;
+LossPredTsdCorrected=tsd(TimeStepsPred*1E4,LossPredCorrected);
+LossPredTsd = LossPredTsdCorrected;
 
 BadEpoch=thresholdIntervals(LossPredTsd,-3,'Direction','Above');
 GoodEpoch=thresholdIntervals(LossPredTsd,-5,'Direction','Below');

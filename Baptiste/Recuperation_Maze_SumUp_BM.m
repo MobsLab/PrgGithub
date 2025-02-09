@@ -6,7 +6,7 @@ Eyelid = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/All_Eyelid_Slee
 Respi = load('/media/nas7/ProjetEmbReact/DataEmbReact/ThesisData/Physio_BehavGroup.mat', 'DATA_SAL');
 HR = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/HR_Homecage_Eyelid.mat');
 Thigmo = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/Thigmo_Eyelid.mat');
-load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/Fear_related_measures.mat', 'Respi_safe')
+load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/Fear_related_measures.mat')
 % 668 bad recording of sleep post
 HR.HR_Wake_First5min{1}(7)=NaN;
 Eyelid.Prop.REM_s_l_e_e_p{2}(7)=NaN;
@@ -146,7 +146,7 @@ xlabel('Breathing, fz shock side (Hz)'), ylabel('Breathing, fz safe side (Hz)')
 axis square
 
 
-%%
+%% Homeostasis with low vs highbreathig states
 figure
 subplot(131)
 A = log10(Length_shock)'; A(A==-Inf)=NaN;
@@ -184,6 +184,43 @@ xlabel('distance to fit'), ylabel('Stress score')
 axis square
 xlim([-1.2 .8]), ylim([-.7 1])
 
+%% Homeostasis with safe vs shock side
+figure
+subplot(131)
+A = log10(Length_shock_side)'; A(A==-Inf)=NaN;
+B = log10(Length_safe_side)';
+[R,P] = PlotCorrelations_BM(A , B , 'conf_bound',1);
+makepretty
+xlabel('Duration shock arm freezing (log scale)'), ylabel('Duration safe arm freezing (log scale)')
+axis square
+
+tbl = table(A,B);
+mdl = fitlm(tbl,'B ~ A');
+for mouse=1:29
+    residual(mouse) = B(mouse)-(A(mouse)*.6839+.9349);
+    if residual(mouse)>0
+        line([A(mouse) A(mouse)],[B(mouse) B(mouse)-residual(mouse)],'LineStyle','--','Color','g')
+    else
+        line([A(mouse) A(mouse)],[B(mouse) B(mouse)-residual(mouse)],'LineStyle','--','Color','r')
+    end
+end
+f=get(gca,'Children'); legend([f(32)],['R = ' num2str(R) '     P = ' num2str(P)]);
+
+
+subplot(132)
+PlotCorrelations_BM(residual , Respi_safe , 'conf_bound',1)
+makepretty
+xlabel('distance to fit'), ylabel('Breathing, safe side (Hz)')
+axis square
+xlim([-1.2 .8]), ylim([1.5 5])
+
+load('PC_values.mat', 'PCVal')
+subplot(133)
+PlotCorrelations_BM(residual , PCVal , 'conf_bound',1)
+makepretty
+xlabel('distance to fit'), ylabel('Stress score')
+axis square
+xlim([-1.2 .8]), ylim([-.7 1])
 
 
 figure

@@ -87,6 +87,9 @@ elseif convertCharsToStrings(List_Type) == 'drugs'
 elseif convertCharsToStrings(List_Type) == 'sound_test'
     SoundCondSess = SoundCondSess2;
     %     SoundCondSess = SoundCondSess_Maze;
+elseif convertCharsToStrings(List_Type) == 'sound_test_umze'
+    SoundCondSess = SoundCondSess_Maze;
+
 elseif convertCharsToStrings(List_Type) == 'fear_ctxt'
     FearContextSess = FearContextSess2;
 end
@@ -163,6 +166,9 @@ switch(lower(Session_Type))
         fear=0; sleep=0; FolderList=HeadRestraintSess;
     case 'sound_test'
         fear=2; sleep=0; FolderList=SoundCondSess;
+            case 'sound_test_umze'
+        fear=1; sleep=0; FolderList=SoundCondSess;
+
     case 'fear_ctxt'
         fear=3; sleep=0; FolderList=FearContextSess;
 end
@@ -306,6 +312,7 @@ end
 
 % calculating the differents variables that you will use
 for i = 1:length(varargin)
+    clear OutPutVar
     if ischar(varargin{i})
         switch(lower(varargin{i}))
             case 'accelero'
@@ -444,9 +451,9 @@ for i = 1:length(varargin)
                 
             case 'ob_gamma_freq'
                 for mouse=1:length(Mouse_names)
-                    try
+%                     try
                         OutPutVar.(Mouse_names{mouse})=ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'ob_gamma_freq');
-                    end
+%                     end
                 end
                 
             case 'ob_gamma_power'

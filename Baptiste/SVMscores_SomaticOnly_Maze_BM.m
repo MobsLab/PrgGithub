@@ -9,7 +9,7 @@ codename = mfilename;
 SessionTypes = {'Cond'};
 
 %% load data
-SessType = SessionTypes{sess};
+SessType = SessionTypes{1};
 load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_Saline_Eyelid_Cond_2sFullBins.mat')
 
 AllMice = fieldnames(DATA.(SessType));
