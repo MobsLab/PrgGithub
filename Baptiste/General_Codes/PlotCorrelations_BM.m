@@ -78,6 +78,7 @@ if binned==1
     LINE = [(x(1:end-1)+x(2:end))/2 ; y];
     
 else
+    
     %     plot(x,y,cols2{1},'LineWidth',2);
     l = [xlim ylim];
     %     LINE = [l(1)*.8 l(2)*.8 ; a*l(1)+b a*l(2)+b];

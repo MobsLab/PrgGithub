@@ -29,11 +29,10 @@ for mm=1:length(MiceNumber)
         
         FreezeSafe = and(thresholdIntervals(LinPos,0.6,'Direction','Above') , FreezeEpoch);
         Ripples_Epoch = mergeCloseIntervals(intervalSet(Range(Ripples)-window_around_rip(1)*1e4,Range(Ripples)+window_around_rip(2)*1e4),0.1*1e4);
-        Ripples_FreezeSafe = and(Ripples_Epoch , FreezeSafe);
-        Ripples_FreezeSafe = Ripples_FreezeSafe-TotalNoiseEpoch;
+        Ripples_Epoch = Ripples_Epoch-TotalNoiseEpoch;
         
         try
-            OccupMap(mm,:,:) = hist2d([Data(Restrict(Xtsd , Ripples_FreezeSafe)) ;0; 0; 1; 1] , [Data(Restrict(Ytsd , Ripples_FreezeSafe)) ;0;1;0;1] , 100 , 100);
+            OccupMap(mm,:,:) = hist2d([Data(Restrict(Xtsd , Ripples_Epoch)) ;0; 0; 1; 1] , [Data(Restrict(Ytsd , Ripples_Epoch)) ;0;1;0;1] , 100 , 100);
             OccupMap2(mm,:,:) = OccupMap(mm,:,:)/sum(sum(squeeze(OccupMap(mm,:,:))));
             OccupMap3(mm,:,:) = squeeze(OccupMap2(mm,:,:))';
         end

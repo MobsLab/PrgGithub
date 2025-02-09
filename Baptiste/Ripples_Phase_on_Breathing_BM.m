@@ -6,10 +6,10 @@ Session_type={'Cond'};
 Side={'All','Shock','Safe'};
 
 GetEmbReactMiceFolderList_BM
-Mouse=Drugs_Groups_UMaze_BM(23);
+Mouse=Drugs_Groups_UMaze_BM(22);
 
 %%
-load('/media/nas6/ProjetEmbReact/DataEmbReact/Ripples_On_Breathing.mat')
+% load('/media/nas6/ProjetEmbReact/DataEmbReact/SWR_BreathingPhase.mat')
 % or
 for sess=1:length(Session_type) % generate all data required for analyses
     [OutPutData.(Session_type{sess}) , Epoch.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('all_saline',...
@@ -66,10 +66,9 @@ end
 
 
 for mouse=1:length(Mouse)
-    Mean_LFP_respi_shock(mouse,:) = OutPutData.Cond.hpc_vhigh_on_respi_phase_pref.MeanLFP{mouse,5};
-    Mean_LFP_respi_safe(mouse,:) = OutPutData.Cond.hpc_vhigh_on_respi_phase_pref.MeanLFP{mouse,6};
+    Mean_LFP_respi_shock(mouse,1:30) = OutPutData.Cond.hpc_vhigh_on_respi_phase_pref.MeanLFP{mouse,5};
+    Mean_LFP_respi_safe(mouse,1:30) = OutPutData.Cond.hpc_vhigh_on_respi_phase_pref.MeanLFP{mouse,6};
 end
-
 
 
 for sess=1:length(Session_type)
@@ -144,7 +143,7 @@ shadedErrorBar(linspace(0,720,60) , runmean([Mean_All_Sp Mean_All_Sp],5) , runme
 xlim([0 720]), xticks([0 180 360 540 720]), xticklabels({'0','π','2π','3π','4π'})
 box off, xlabel('Phase (rad)')
 makepretty_BM, makepretty_BM2
-ylim([0 .2])
+ylim([0 .25])
 
 
 % Safe
@@ -184,7 +183,7 @@ xlim([0 720]), xticks([0 180 360 540 720]), xticklabels({'0','π','2π','3π','4
 box off
 xlabel('Phase (rad)'), ylabel('number of events (#/cycle)')
 makepretty_BM, makepretty_BM2
-ylim([0 .2])
+ylim([0 .25])
 
 
 

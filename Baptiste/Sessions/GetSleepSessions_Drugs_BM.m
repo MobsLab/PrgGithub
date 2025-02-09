@@ -26,11 +26,11 @@ SleepInfo.path{m}{3}='/media/nas6/ProjetEmbReact/Mouse1225/20210730/';
 SleepInfo.path{m}{4}='/media/nas6/ProjetEmbReact/Mouse1226/20210730/';
 SleepInfo.path{m}{5}='/media/nas6/ProjetEmbReact/Mouse1227/20210730/';
 SleepInfo.path{m}{6}='/media/nas6/ProjetEmbReact/Mouse1199/20211027';
-SleepInfo.path{m}{7}='/media/nas6/ProjetEmbReact/Mouse1203/20211027';
-SleepInfo.path{m}{8}='/media/nas6/ProjetEmbReact/Mouse1230/20211027';
-SleepInfo.path{m}{9}='/media/nas6/ProjetEmbReact/Mouse1251/20220103';
-SleepInfo.path{m}{10}='/media/nas6/ProjetEmbReact/Mouse1252/20220103';
-SleepInfo.path{m}{11}='/media/nas6/ProjetEmbReact/Mouse1253/20220106';
+SleepInfo.path{m}{7}='/media/nas6/ProjetEmbReact/Mouse1203/20211027/';
+SleepInfo.path{m}{8}='/media/nas6/ProjetEmbReact/Mouse1230/20211027/';
+SleepInfo.path{m}{9}='/media/nas6/ProjetEmbReact/Mouse1251/20220103/';
+SleepInfo.path{m}{10}='/media/nas6/ProjetEmbReact/Mouse1252/20220103/';
+SleepInfo.path{m}{11}='/media/nas6/ProjetEmbReact/Mouse1253/20220106/';
 SleepInfo.path{m}{12}='/media/nas6/ProjetEmbReact/Mouse1254/20220106/';
 
 

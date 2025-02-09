@@ -68,9 +68,6 @@ OB_Low_Fz_Before_Sleep(OB_Low_Fz_Before_Sleep==0)=NaN;
 
 
 
-
-
-
 %% sleep
 load('/media/nas7/ProjetEmbReact/DataEmbReact/States_Comparison_Fz_Sleep_QW_Act.mat')
 Params = Fear.Params; Params{8} = 'hpc_theta_delta';
@@ -102,7 +99,7 @@ axis square
 
 figure
 for param = 1:3
-    subplot(1,3,param)
+    subplot(1,4,param)
     
         ind = and(and(~isnan(Sleep.OutPutData.sleep_pre.(Params2{param}).mean(:,3)) , ~isnan(Fear.OutPutData.Fear.(Params2{param}).mean(:,5))) ,...
             ~isnan(Fear.OutPutData.Fear.(Params2{param}).mean(:,6)));
@@ -204,6 +201,7 @@ save('/media/nas7/ProjetEmbReact/DataEmbReact/NewData/CondPost_corrected.mat','D
 
 load('/media/nas7/ProjetEmbReact/DataEmbReact/Control_TemporalBiased.mat', 'FreezeSafe_Time', 'FreezeShock_Time')
 for mouse=1:length(Mouse)
+    try, Sleep.Epoch1.sleep_pre{mouse,3} = dropShortIntervals(Sleep.Epoch1.sleep_pre{mouse,3} , 2e4); end
     try, MeanDur{1}(mouse) = nanmean(DurationEpoch(Sleep.Epoch1.sleep_pre{mouse,3})/1e4); end
     try, MeanDur{2}(mouse) = nanmean([FreezeSafe_Time{3}{mouse} ; FreezeSafe_Time{4}{mouse}]); end
     try, MeanDur{3}(mouse) = nanmean([FreezeShock_Time{3}{mouse} ; FreezeShock_Time{4}{mouse}]); end
@@ -608,9 +606,6 @@ save('/media/nas7/ProjetEmbReact/DataEmbReact/NewData/CondPost_corrected.mat','D
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Freezing is not sleep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
 Mouse=[1376 1377 1385 1386 1502 1530 1532];
 
 Session_type={'Fear','sleep_pre'};
@@ -668,15 +663,15 @@ axis square
 xlim([3 7])
 
 subplot(132)
-imagesc(Confus_Matrix_all)
+imagesc(-Confus_Matrix_all)
 xticks([1:4]), yticks([1:4])
 xticklabels({'Fz shock','Fz safe','Wake homecage','Sleep homecage'}), xtickangle(45)
 yticklabels({'Fz shock','Fz safe','Wake homecage','Sleep homecage'})
 axis square
-caxis([0 2])
-c=colorbar; c.Ticks=[0 2];
-c.Label.String='KLD (nats)';
-colormap jet
+% caxis([0 2])
+% c=colorbar; c.Ticks=[0 2];
+% c.Label.String='KLD (nats)';
+colormap parula
 makepretty
 axis xy
 
