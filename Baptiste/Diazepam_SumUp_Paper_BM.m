@@ -87,13 +87,28 @@ ylabel('shocks (#)')
 
 
 % TestPost occupancy
-subplot(172)
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({ShockZone_Occupancy.TestPre{1} ShockZone_Occupancy.TestPre{2}},Cols2,X2,Legends2,'showpoints',1,'paired',0);
+ylabel('SZ occupancy (prop)'), ylim([0 .6])
+
+subplot(122)
 MakeSpreadAndBoxPlot3_SB({ShockZone_Occupancy.TestPost{1} ShockZone_Occupancy.TestPost{2}},Cols2,X2,Legends2,'showpoints',1,'paired',0);
 ylabel('SZ occupancy (prop)'), ylim([0 .35])
 
-subplot(173)
-MakeSpreadAndBoxPlot3_SB({ShockZone_Occupancy.TestPre{1} ShockZone_Occupancy.TestPre{2}},Cols2,X2,Legends2,'showpoints',1,'paired',0);
-ylabel('SZ occupancy (prop)'), ylim([0 .6])
+
+%Freezing
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB(FreezingShock_Dur.Cond,Cols3,X3,Legends3,'showpoints',1,'paired',0);
+ylabel('Fz duration, shock zone (s)')%, ylim([0 .4])
+makepretty_BM2
+
+subplot(122)
+MakeSpreadAndBoxPlot3_SB(FreezingSafe_Dur.Cond,Cols3,X3,Legends3,'showpoints',1,'paired',0);
+ylabel('Fz duration, safe zone (s)')%, ylim([0 .4])
+makepretty_BM2
+
 
 
 % thigmotaxis
@@ -483,25 +498,29 @@ line(xlim,[.5 .5],'color','k','LineStyle','--')
 makepretty_BM2
 
 
+Drug_Group={'SalineSB','ChronicFlx','AcuteFlx','Midazolam','SalineBM_Short','Diazepam_Short','RipSham','RipInhib','PAG','All_eyelid','All_saline','Elisa','Saline','RipInhib2','Diazepam','ChronicBUS','AcuteBUS','RipControl','RipInhib1','RipControl1','RipInhibPaired','RipControlPaired','Sal_Maze1_1stMaze','Sal_Maze4_1stMaze','DZP_Maze1_1stMaze','DZP_Maze4_1stMaze'};
 L = load('/media/nas7/ProjetEmbReact/DataEmbReact/ThesisData/DATA_DZP_Physio_Cond.mat');
 Session_type={'Cond'}; sess=1;
+Group=[13 15];
 
+FreqLim=4.5;
 n=1;
 for group=Group
     Mouse=Drugs_Groups_UMaze_BM(group);
     for mouse = 1:length(Mouse)
         
         clear D, D = Data(L.OutPutData.(Drug_Group{group}).(Session_type{sess}).respi_freq_bm.tsd{mouse,3});
-        Prop_shock(n,mouse) = sum(D>4.5)/length(D);
-        Prop_safe(n,mouse) = sum(D<4.5)/length(D);
-        Length_shock(n,mouse) = sum(D>4.5)*.2;
+        Prop_shock(n,mouse) = sum(D>FreqLim)/length(D);
+        Prop_safe(n,mouse) = sum(D<FreqLim)/length(D);
+        Length_shock(n,mouse) = sum(D>FreqLim)*.2;
+        Length_safe(n,mouse) = sum(D<FreqLim)*.2;
         
         clear D_shock, D_shock = Data(L.OutPutData.(Drug_Group{group}).(Session_type{sess}).respi_freq_bm.tsd{mouse,5});
-        Prop_shockShock(n,mouse) = sum(D_shock>4.5)/length(D);
-        Prop_safeShock(n,mouse) = sum(D_shock<4.5)/length(D);
+        Prop_shockShock(n,mouse) = sum(D_shock>FreqLim)/length(D);
+        Prop_safeShock(n,mouse) = sum(D_shock<FreqLim)/length(D);
         clear D_safe, D_safe = Data(L.OutPutData.(Drug_Group{group}).(Session_type{sess}).respi_freq_bm.tsd{mouse,6});
-        Prop_shockSafe(n,mouse) = sum(D_safe>4.5)/length(D);
-        Prop_safeSafe(n,mouse) = sum(D_safe<4.5)/length(D);
+        Prop_shockSafe(n,mouse) = sum(D_safe>FreqLim)/length(D);
+        Prop_safeSafe(n,mouse) = sum(D_safe<FreqLim)/length(D);
         
     end
     n=n+1;
@@ -513,6 +532,8 @@ Prop_shockShock(Prop_shockShock==0)=NaN;
 Prop_safeShock(Prop_safeShock==0)=NaN;
 Prop_shockSafe(Prop_shockSafe==0)=NaN;
 Prop_safeSafe(Prop_safeSafe==0)=NaN;
+
+
 
 
 figure

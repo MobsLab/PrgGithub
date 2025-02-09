@@ -114,7 +114,7 @@ axis square
 xlabel('SWR occurence, fz safe side (#/s)'), ylabel('thigmo score, Sleep Post'), xlim([0 1.2]), ylim([0 .15])
 
 
-%% Correlations
+%% Correlations, homeostasis
 figure
 subplot(141)
 A = log10(Length_shock_side)'; A(A==-Inf)=NaN;

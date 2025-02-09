@@ -82,6 +82,8 @@ if ~exist('PowerNormValue','var')
     Freq_Max = Range(Freq_Max+thr-1);
     Freq_Max(Freq_Max==Range(thr)) = NaN;
 else
+    MaxPowerValues = NaN;
+    Freq_Max = NaN;
     try
         Data_to_use = Data./PowerNormValue;
     catch
