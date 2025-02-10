@@ -30,6 +30,7 @@ for group=1:length(Drug_Group)
                 load('behavResources_SB.mat', 'Behav')
                 load('behavResources.mat', 'Ratio_IMAonREAL')
                 load('behavResources.mat', 'mask')
+                
                 polygon = GetCageEdgesWithVideo(Data(Behav.Ytsd).*Ratio_IMAonREAL,Data(Behav.Xtsd).*Ratio_IMAonREAL);
                 x = polygon.Position(:,2);
                 y = polygon.Position(:,1);

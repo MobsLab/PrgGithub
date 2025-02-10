@@ -24,13 +24,17 @@ This repository is seen as a total replacement of our current Dropbox folder for
 In your terminal, navigate to the folder where you want to clone the repository. Then, run the following command :
 
 ```bash
-git clone --recurse-submodules=yes git@github.com:MobsLab/PrgGithub.git
+git clone --recurse-submodules git@github.com:MobsLab/PrgGithub.git
 ```
 
 This will create a folder named `PrgGithub` in the folder you are currently in. This folder will contain all the codes that are in the repository.
 
 **This folder can be anywhere, as long as your computer always has access to it.** I suggest you put it in your home folder, or in your Documents. This "clone" will be your local version of the repository, and will be where you will work on the codes.
 
+**Important**: once this is done, please go to the PrgGithub folder and run:
+```bash
+git config --global submodule.recurse true
+```
 ### Set up the repository as a Matlab path
 
 After cloning the repository, you will need to set it up as a Matlab path. This will allow you to use the functions and scripts in the repository from anywhere in your Matlab environment. You probably already have a `startup.m` file in your Matlab path that currently loads the Dropbox/PrgMatlab folder. If you don't, you can create one in your home folder (usually in `$HOME/Documents/MATLAB/startup.m`). If you don't know where is this file, you can run the following command in Matlab :

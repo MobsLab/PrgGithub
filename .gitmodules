@@ -10,12 +10,6 @@
 [submodule "OnlinePlaceDecoding"]
 	path = OnlinePlaceDecoding
 	url = git@github.com:MobsLab/OnlinePlaceDecoding.git
-[submodule "PreProcessing"]
-	path = PreProcessing/NomenclatureCodes
-	url = git@github.com:MobsLab/PreProcessing.git
-[submodule "GetFunctions"]
-	path = Processing
-	url = git@github.com:MobsLab/GetFunctions.git
 [submodule "KilosortWrapper_Peyrache"]
 	path = KilosortWrapper_Peyrache
 	url = git@github.com:PeyracheLab/KilosortWrapper.git

@@ -7,11 +7,14 @@ Respi = load('/media/nas7/ProjetEmbReact/DataEmbReact/ThesisData/Physio_BehavGro
 HR = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/HR_Homecage_Eyelid.mat');
 Thigmo = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/Thigmo_Eyelid.mat');
 load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/Fear_related_measures.mat', 'Respi_safe')
+
 % 668 bad recording of sleep post
 HR.HR_Wake_First5min{1}(7)=NaN;
 Eyelid.Prop.REM_s_l_e_e_p{2}(7)=NaN;
 Eyelid.Prop.Wake{2}(7)=NaN;
 
+
+%% Plot the correlations of al lthe elements of the stress score with breathing on the safe side
 figure(1)
 subplot(521)
 PlotCorrelations_BM(Respi_safe , Eyelid.Prop.Wake{2})
@@ -33,7 +36,6 @@ PlotCorrelations_BM(Respi_safe , Thigmo.Thigmo_score{1} , 'method' , 'spearman')
 axis square
 xlabel('Breathing, safe side (Hz)'), ylabel('thigmo score, Sleep Post'), xlim([1.5 5.5]), ylim([0 .15])
 
-
 AllDat = [Eyelid.Prop.Wake{2};Eyelid.Prop.REM_s_l_e_e_p{2};HR.HR_Wake_First5min{1};Thigmo.Thigmo_score{1}];
 AllDat = AllDat(:,sum(isnan(AllDat))==0);
 StdTouse = nanstd(AllDat')';
@@ -46,15 +48,19 @@ for mm = 1:size(AllDat_all,2)
     PCVal(mm) = nanmean(EigVect(:,1)'.*AllDat_all(:,mm)');
 end
 subplot(5,2,9)
- PlotCorrelations_BM(Respi_safe ,PCVal , 'method' , 'spearman')
+PlotCorrelations_BM(Respi_safe ,PCVal , 'method' , 'spearman')
 axis square
-xlabel('Breathing, safe side (Hz)'), ylabel('Stress score'), xlim([1.5 5.5]), 
+xlabel('Breathing, safe side (Hz)'), ylabel('Stress score'), xlim([1.5 5.5]),
+
+%% Plot the correlations of  the stress score with breathing on the safe side
 
 figure(2)
 subplot(1,2,1)
  PlotCorrelations_BM(Respi_safe ,PCVal , 'method' , 'spearman')
 axis square
 xlabel('Breathing, safe side (Hz)'), ylabel('Stress score'), xlim([1.5 5.5]), 
+
+%% Plot the impact of rip inhib on al lthese markers
 
 figure(1)
 % Rip
@@ -101,14 +107,16 @@ MakeSpreadAndBoxPlot3_SB(PCVal_Rip,Cols,X,Legends,'showpoints',1,'paired',0)
 ylabel('stress score')
 ylim([-1 3])
 
+%% Plot the impact of rip inhib on stress score
+
 figure(2)
 subplot(1,4,3)
 MakeSpreadAndBoxPlot3_SB(PCVal_Rip,Cols,X,Legends,'showpoints',1,'paired',0)
 ylabel('stress score')
 ylim([-1 3])
 
+%% Plot the impact of DZP on al lthese markers
 figure(1)
-
 % DZP
 DZP = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/DZP_Sleep.mat','Prop');
 Cols = {[.3, .745, .93],[.85, .325, .098]};
@@ -153,6 +161,7 @@ MakeSpreadAndBoxPlot3_SB(PCVal_Dzp,Cols,X,Legends,'showpoints',1,'paired',0)
 ylabel('stress score')
 ylim([-1 3])
 
+%% Plot the impact of dzp on stress score
 figure(2)
 subplot(1,4,4)
 MakeSpreadAndBoxPlot3_SB(PCVal_Dzp,Cols,X,Legends,'showpoints',1,'paired',0)

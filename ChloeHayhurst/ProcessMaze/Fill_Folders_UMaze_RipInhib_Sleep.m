@@ -8,8 +8,8 @@
 %     - Sleep_Post_Pre
 %     - Sleep_Pre
 %     - All of the intan files (from habituation 24h pre to Extinction)
-% There should be : Hab _03, BlockedWall_09, Cond_06,
-% CondWallShock/Safe_04, SleepSession_02, TestPost_07, TestPre_03
+%     - All of the matlab files, there should be in order : Hab _03, BlockedWall_09, Cond_06,
+% CondWallSafe/Shock_04, SleepSession_02, TestPost_07, TestPre_03
 
 
 load('AllFolderNames.mat')
@@ -94,7 +94,7 @@ for b=1:length(FolderName)
     FolderName{b} = [SaveFolderName,FolderName{b}];
 end
 
-source_UMaze = uigetdir('','please provide Maze folder');
+% source_UMaze = uigetdir('','please provide Maze folder');
 
 files_UMaze = dir(fullfile(source_UMaze));
 
