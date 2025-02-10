@@ -77,7 +77,7 @@ set(gca,'xticklabel',[])
 %smooth theta
 subplot(817),plot(Range(SmoothTheta)/1E4,Data(SmoothTheta)),ylim([0 6]), ylabel('Smooth theta'),colorbar
 SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[3,0.5]);
-line([0 3.3E4],[Info.theta_thresh Info.theta_thresh],'color','r')
+line([0 4.3E4],[Info.theta_thresh Info.theta_thresh],'color','r')
 set(gca,'xticklabel',[])
 %smooth gamma
 subplot(818), plot(Range(SmoothGamma)/1E4,Data(SmoothGamma)), ylabel('Smooth gamma'),colorbar
@@ -88,7 +88,7 @@ SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[400,100]);
 a=500; 
 %move forward in time 
 dur=500;
-a=a+dur; subplot(811), xlim([a a+dur]),subplot(812), xlim([a a+dur]),subplot(813), xlim([a a+dur]),subplot(814), xlim([a a+dur]),subplot(815), xlim([a a+dur]),subplot(816), xlim([a a+dur]),subplot(817), xlim([a a+dur]),subplot(818), xlim([a a+dur])
+a=a+dur;subplot(811), xlim([a a+dur]),subplot(812), xlim([a a+dur]),subplot(813), xlim([a a+dur]),subplot(814), xlim([a a+dur]),subplot(815), xlim([a a+dur]),subplot(816), xlim([a a+dur]),subplot(817), xlim([a a+dur]),subplot(818), xlim([a a+dur])
 
 %% Section 5 : define variables (keep the old ones and the updated ones)
 %keep old variables
@@ -129,10 +129,10 @@ epoch=subset(SWSEpoch,k);SWSEpoch2=SWSEpoch2-epoch;Wake2=or(Wake2,epoch); %if it
 epoch=subset(SWSEpoch,k);SWSEpoch2=SWSEpoch2-epoch;REMEpoch2=or(REMEpoch2,epoch); %if it is REM
 
 %% Section 9 : Save acc
-clear REMEpoch SWSEpoch Wake
-REMEpoch=REMEpoch2; SWSEpoch=SWSEpoch2; Wake=Wake2;
+% clear REMEpoch SWSEpoch Wake
+% REMEpoch=REMEpoch2; SWSEpoch=SWSEpoch2; Wake=Wake2;
 % save('SleepScoring_Accelero.mat','REMEpoch_old','SWSEpoch_old','Wake_old','REMEpoch','SWSEpoch','Wake','-append')
-% save('SleepScoring_Accelero.mat','REMEpoch','SWSEpoch','Wake','-append')
+save('SleepScoring_Accelero.mat','REMEpoch','SWSEpoch','Wake','-append')
 
 
 % 
