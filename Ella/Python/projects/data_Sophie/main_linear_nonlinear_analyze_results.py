@@ -48,7 +48,7 @@ spike_counts = spike_count_all_mice(maze_rebinned_data, maze_spike_times_data)
 # %% Load results
 
 # results_ln_loaded = load_results(load_path + 'results_ln_model.pkl')
-results_ln_loaded = load(load_path + 'results_ln_model_rs30.joblib')
+results_ln_loaded = load(load_path + 'all_results_ln_model_rs30.joblib')
 
 
 # %% R2
@@ -63,7 +63,7 @@ plot_r2_means_sem(results_ln_loaded, r2_type='test')
 plot_mean_firing_rate_vs_r2(results_ln_loaded, spike_counts, separate_subplots=False, r2_type='train')
 
 plot_r2_comparison(results_ln_loaded, model_1='BF', model_2='HR', r2_type = 'train')
-plot_r2_comparison(results_ln_loaded, model_1='motion', model_2='HRmotion', r2_type='test')
+plot_r2_comparison(results_ln_loaded, model_1='motion', model_2='BFmotion', r2_type='test')
 
 
 # %% Sort neurons according to firing rate

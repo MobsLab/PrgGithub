@@ -6,6 +6,8 @@ Created on Mon Oct  7 14:43:01 2024
 @author: gruffalo
 """
 
+import numpy as np
+import pandas as pd
 from preprocess_linear_model import (
     combine_dataframes_on_timebins,
     create_time_shifted_features
@@ -16,140 +18,366 @@ from preprocess_ln_model import (
     generate_variable_shift_combinations,
     extract_random_bouts
     )
+from sklearn.metrics import r2_score
 from model_ln_regression import (
     ln_grid_cv
     )
 from joblib import Parallel, delayed
 
 
-def process_neuron(mouse_id, dependent_var, spike_counts, maze_rebinned_data, random_seed=30):
+def process_neuron(mouse_id, dependent_var, combined_data, random_seed=30):
     """
     Fit LN models for a specific neuron of a given mouse and compute R² on test data.
 
     Parameters:
     - mouse_id (str): The ID of the mouse.
     - dependent_var (str): The dependent variable (neuron).
-    - spike_counts (dict): Dictionary of spike counts for all mice.
-    - maze_rebinned_data (dict): Dictionary of rebinned data for all mice.
+    - combined_data (dict): Dictionary containing the already combined DataFrame for each mouse.
     - random_seed (int): Random seed for reproducible train-test split.
 
     Returns:
     - dict: A dictionary containing results for all models, R² on test data, and the random seed.
     """
-    try:
-        # from scipy.stats import pearsonr
-        from sklearn.metrics import r2_score
-        import numpy as np
-        import pandas as pd
 
-        # Preprocess data
-        maze_rebinned_normalized_data = zscore_columns(
-            maze_rebinned_data[mouse_id],
-            ['BreathFreq', 'Heartrate', 'Accelero', 'Speed', 'LinPos']
-        )
-        model_all_df = combine_dataframes_on_timebins(spike_counts[mouse_id], maze_rebinned_normalized_data)
-        
-        # Check for sufficient data
-        if len(model_all_df) < 10:
-            print(f"Insufficient data for {mouse_id} - {dependent_var}. Skipping this neuron.")
-            return None
-        
-        # Split the data
-        train_data, test_data = extract_random_bouts(
-            model_all_df, bout_length=10, percent=10, random_state=random_seed
-        )
-        
-        # Calculate thresholds
-        percentages = [0, 0.001, 0.002, 0.003, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05]
-        threshold_values = calculate_amplitude_thresholds(model_all_df, dependent_var, percentages)
-        
-        # Define configurations
-        configs = {
-            "motion": (['LinPos', 'Speed', 'Accelero'], {}),
+    # Retrieve pre-combined data for the given mouse
+    if mouse_id not in combined_data:
+        print(f"Combined data for {mouse_id} not found. Skipping.")
+        return None
+
+    model_all_df = combined_data[mouse_id]
+
+    # Check for sufficient data
+    if len(model_all_df) < 10:
+        print(f"Insufficient data for {mouse_id} - {dependent_var}. Skipping this neuron.")
+        return None
+
+    # Check if Heartrate is missing or full of NaNs
+    has_valid_heartrate = 'Heartrate' in model_all_df.columns and model_all_df['Heartrate'].notna().any()
+
+    # Split the data
+    train_data, test_data = extract_random_bouts(
+        model_all_df, bout_length=10, percent=10, random_state=random_seed
+    )
+
+    # Calculate thresholds
+    percentages = [0, 0.001, 0.002, 0.003, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05]
+    threshold_values = calculate_amplitude_thresholds(model_all_df, dependent_var, percentages)
+
+    # Define configurations based on Heartrate availability
+    configs = {
+        "motion": (['LinPos', 'Speed', 'Accelero'], {}),
+        "BF": (['BreathFreq'], {'BreathFreq': 5}),
+        "BFmotion": (['BreathFreq', 'LinPos', 'Speed', 'Accelero'], {'BreathFreq': 5})
+    }
+
+    # Add Heartrate-based models only if Heartrate is available and valid
+    if has_valid_heartrate:
+        configs.update({
             "HR": (['Heartrate'], {'Heartrate': 5}),
             "HRmotion": (['Heartrate', 'LinPos', 'Speed', 'Accelero'], {'Heartrate': 5}),
-            "BF": (['BreathFreq'], {'BreathFreq': 5}),
-            "BFmotion": (['BreathFreq', 'LinPos', 'Speed', 'Accelero'], {'BreathFreq': 5}),
             "all": (['Heartrate', 'BreathFreq', 'LinPos', 'Speed', 'Accelero'], {'BreathFreq': 5, 'Heartrate': 5})
-        }
-        
-        results = {}
-        
-        # Fit models for each configuration
-        for name, (independent_vars, shifts) in configs.items():
-            variables_shifts = generate_variable_shift_combinations(independent_vars, shifts)
-            model_result = ln_grid_cv(
-                data=train_data,
-                dependent_var=dependent_var,
-                independent_vars=independent_vars,
-                threshold_values=threshold_values,
-                variables_shifts=variables_shifts,
-                intercept_options=[True, False],
-                k=5
-            )
-            
-            # Extract the best model and shifts
-            best_model = model_result['best_model']
-            best_shift_config = model_result['best_shift_config']
-            
-            # Clean and align test data
-            test_data_cleaned = test_data.dropna(subset=[dependent_var] + independent_vars)
-            if test_data_cleaned.empty:
-                print(f"No aligned test data for {name}. Skipping R² calculation.")
+        })
+
+    results = {}
+
+    # Fit models for each configuration
+    for name, (independent_vars, shifts) in configs.items():
+        variables_shifts = generate_variable_shift_combinations(independent_vars, shifts)
+        model_result = ln_grid_cv(
+            data=train_data,
+            dependent_var=dependent_var,
+            independent_vars=independent_vars,
+            threshold_values=threshold_values,
+            variables_shifts=variables_shifts,
+            intercept_options=[True, False],
+            k=5
+        )
+
+        # Extract the best model and shifts
+        best_model = model_result['best_model']
+        best_shift_config = model_result['best_shift_config']
+
+        # Clean and align test data
+        test_data_cleaned = test_data.dropna(subset=[dependent_var] + independent_vars)
+        if test_data_cleaned.empty:
+            print(f"No aligned test data for {name}. Skipping R² calculation.")
+            r2_test = np.nan
+        else:
+            X_test_shifted = create_time_shifted_features(test_data_cleaned[independent_vars], best_shift_config)
+            aligned_data = pd.concat([X_test_shifted, test_data_cleaned[dependent_var].reset_index(drop=True)], axis=1).dropna()
+            if aligned_data.empty:
+                print(f"No aligned data available after applying shifts for {name}.")
                 r2_test = np.nan
             else:
-                X_test_shifted = create_time_shifted_features(test_data_cleaned[independent_vars], best_shift_config)
-                aligned_data = pd.concat([X_test_shifted, test_data_cleaned[dependent_var].reset_index(drop=True)], axis=1).dropna()
-                if aligned_data.empty:
-                    print(f"No aligned data available after applying shifts for {name}.")
-                    r2_test = np.nan
-                else:
-                    X_test = aligned_data[X_test_shifted.columns]
-                    y_test = aligned_data[dependent_var]
-                    y_pred = best_model.predict(X_test)
-                    
-                    # Compute R²
-                    # r, _ = pearsonr(y_test, y_pred)
-                    # r2_test = r ** 2
-                    r2_test = r2_score(y_test, y_pred)
+                X_test = aligned_data[X_test_shifted.columns]
+                y_test = aligned_data[dependent_var]
+                y_pred = best_model.predict(X_test)
 
-            
-            # Store results
-            model_result['r2_test'] = r2_test
-            results[name] = model_result
+                # Compute R²
+                r2_test = r2_score(y_test, y_pred)
+
+        # Store results
+        model_result['r2_test'] = r2_test
+        results[name] = model_result
+
+    return {
+        "mouse_id": mouse_id,
+        "dependent_var": dependent_var,
+        "results": results,
+        "random_seed": random_seed
+    }
+
+
+
+# def process_neuron(mouse_id, dependent_var, combined_data, random_seed=30):
+#     """
+#     Fit LN models for a specific neuron of a given mouse and compute R² on test data.
+
+#     Parameters:
+#     - mouse_id (str): The ID of the mouse.
+#     - dependent_var (str): The dependent variable (neuron).
+#     - combined_data (dict): Dictionary containing the already combined DataFrame for each mouse.
+#     - random_seed (int): Random seed for reproducible train-test split.
+
+#     Returns:
+#     - dict: A dictionary containing results for all models, R² on test data, and the random seed.
+#     """
+#     try:
+#         # Retrieve pre-combined data for the given mouse
+#         if mouse_id not in combined_data:
+#             print(f"Combined data for {mouse_id} not found. Skipping.")
+#             return None
         
-        return {
-            "mouse_id": mouse_id,
-            "dependent_var": dependent_var,
-            "results": results,
-            "random_seed": random_seed
-        }
-    except KeyError as ke:
-        print(f"KeyError processing {mouse_id} - {dependent_var}: {ke}")
-    except ValueError as ve:
-        print(f"ValueError processing {mouse_id} - {dependent_var}: {ve}")
-    except Exception as e:
-        print(f"Unexpected error processing {mouse_id} - {dependent_var}: {e}")
-    return None
+#         model_all_df = combined_data[mouse_id]
+
+#         # Check for sufficient data
+#         if len(model_all_df) < 10:
+#             print(f"Insufficient data for {mouse_id} - {dependent_var}. Skipping this neuron.")
+#             return None
+
+#         # Split the data
+#         train_data, test_data = extract_random_bouts(
+#             model_all_df, bout_length=10, percent=10, random_state=random_seed
+#         )
+
+#         # Calculate thresholds
+#         percentages = [0, 0.001, 0.002, 0.003, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05]
+#         threshold_values = calculate_amplitude_thresholds(model_all_df, dependent_var, percentages)
+
+#         # Define configurations
+#         configs = {
+#             "motion": (['LinPos', 'Speed', 'Accelero'], {}),
+#             "HR": (['Heartrate'], {'Heartrate': 5}),
+#             "HRmotion": (['Heartrate', 'LinPos', 'Speed', 'Accelero'], {'Heartrate': 5}),
+#             "BF": (['BreathFreq'], {'BreathFreq': 5}),
+#             "BFmotion": (['BreathFreq', 'LinPos', 'Speed', 'Accelero'], {'BreathFreq': 5}),
+#             "all": (['Heartrate', 'BreathFreq', 'LinPos', 'Speed', 'Accelero'], {'BreathFreq': 5, 'Heartrate': 5})
+#         }
+
+#         results = {}
+
+#         # Fit models for each configuration
+#         for name, (independent_vars, shifts) in configs.items():
+#             variables_shifts = generate_variable_shift_combinations(independent_vars, shifts)
+#             model_result = ln_grid_cv(
+#                 data=train_data,
+#                 dependent_var=dependent_var,
+#                 independent_vars=independent_vars,
+#                 threshold_values=threshold_values,
+#                 variables_shifts=variables_shifts,
+#                 intercept_options=[True, False],
+#                 k=5
+#             )
+
+#             # Extract the best model and shifts
+#             best_model = model_result['best_model']
+#             best_shift_config = model_result['best_shift_config']
+
+#             # Clean and align test data
+#             test_data_cleaned = test_data.dropna(subset=[dependent_var] + independent_vars)
+#             if test_data_cleaned.empty:
+#                 print(f"No aligned test data for {name}. Skipping R² calculation.")
+#                 r2_test = np.nan
+#             else:
+#                 X_test_shifted = create_time_shifted_features(test_data_cleaned[independent_vars], best_shift_config)
+#                 aligned_data = pd.concat([X_test_shifted, test_data_cleaned[dependent_var].reset_index(drop=True)], axis=1).dropna()
+#                 if aligned_data.empty:
+#                     print(f"No aligned data available after applying shifts for {name}.")
+#                     r2_test = np.nan
+#                 else:
+#                     X_test = aligned_data[X_test_shifted.columns]
+#                     y_test = aligned_data[dependent_var]
+#                     y_pred = best_model.predict(X_test)
+
+#                     # Compute R²
+#                     r2_test = r2_score(y_test, y_pred)
+
+#             # Store results
+#             model_result['r2_test'] = r2_test
+#             results[name] = model_result
+
+#         return {
+#             "mouse_id": mouse_id,
+#             "dependent_var": dependent_var,
+#             "results": results,
+#             "random_seed": random_seed
+#         }
+
+#     except KeyError as ke:
+#         print(f"KeyError processing {mouse_id} - {dependent_var}: {ke}")
+#     except ValueError as ve:
+#         print(f"ValueError processing {mouse_id} - {dependent_var}: {ve}")
+#     except Exception as e:
+#         print(f"Unexpected error processing {mouse_id} - {dependent_var}: {e}")
+#     return None
 
 
-def process_all_neurons(mouse_id, dependent_vars, spike_counts, maze_rebinned_data, random_seed=30):
+def process_all_neurons(mouse_id, dependent_vars, combined_data, random_seed=30):
     """
     Process all neurons for a given mouse using parallelization.
-    
+
     Parameters:
     - mouse_id (str): The ID of the mouse.
     - dependent_vars (list): List of dependent variables (neurons) for the mouse.
-    - spike_counts (dict): Spike counts dictionary for all mice.
-    - maze_rebinned_data (dict): Rebinned physiological data for all mice.
-    
+    - combined_data (dict): Dictionary of pre-combined DataFrames for each mouse.
+
     Returns:
     - list: Results for all neurons of the mouse.
     """
     return Parallel(n_jobs=-1, verbose=10)(
-        delayed(process_neuron)(mouse_id, dependent_var, spike_counts, maze_rebinned_data, random_seed=30)
+        delayed(process_neuron)(mouse_id, dependent_var, combined_data, random_seed)
         for dependent_var in dependent_vars
     )
+
+
+# def process_neuron(mouse_id, dependent_var, spike_counts, maze_rebinned_data, random_seed=30):
+#     """
+#     Fit LN models for a specific neuron of a given mouse and compute R² on test data.
+
+#     Parameters:
+#     - mouse_id (str): The ID of the mouse.
+#     - dependent_var (str): The dependent variable (neuron).
+#     - spike_counts (dict): Dictionary of spike counts for all mice.
+#     - maze_rebinned_data (dict): Dictionary of rebinned data for all mice.
+#     - random_seed (int): Random seed for reproducible train-test split.
+
+#     Returns:
+#     - dict: A dictionary containing results for all models, R² on test data, and the random seed.
+#     """
+#     try:
+#         # from scipy.stats import pearsonr
+#         from sklearn.metrics import r2_score
+#         import numpy as np
+#         import pandas as pd
+
+#         # Preprocess data
+#         maze_rebinned_normalized_data = zscore_columns(
+#             maze_rebinned_data[mouse_id],
+#             ['BreathFreq', 'Heartrate', 'Accelero', 'Speed', 'LinPos']
+#         )
+#         model_all_df = combine_dataframes_on_timebins(spike_counts[mouse_id], maze_rebinned_normalized_data)
+        
+#         # Check for sufficient data
+#         if len(model_all_df) < 10:
+#             print(f"Insufficient data for {mouse_id} - {dependent_var}. Skipping this neuron.")
+#             return None
+        
+#         # Split the data
+#         train_data, test_data = extract_random_bouts(
+#             model_all_df, bout_length=10, percent=10, random_state=random_seed
+#         )
+        
+#         # Calculate thresholds
+#         percentages = [0, 0.001, 0.002, 0.003, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05]
+#         threshold_values = calculate_amplitude_thresholds(model_all_df, dependent_var, percentages)
+        
+#         # Define configurations
+#         configs = {
+#             "motion": (['LinPos', 'Speed', 'Accelero'], {}),
+#             "HR": (['Heartrate'], {'Heartrate': 5}),
+#             "HRmotion": (['Heartrate', 'LinPos', 'Speed', 'Accelero'], {'Heartrate': 5}),
+#             "BF": (['BreathFreq'], {'BreathFreq': 5}),
+#             "BFmotion": (['BreathFreq', 'LinPos', 'Speed', 'Accelero'], {'BreathFreq': 5}),
+#             "all": (['Heartrate', 'BreathFreq', 'LinPos', 'Speed', 'Accelero'], {'BreathFreq': 5, 'Heartrate': 5})
+#         }
+        
+#         results = {}
+        
+#         # Fit models for each configuration
+#         for name, (independent_vars, shifts) in configs.items():
+#             variables_shifts = generate_variable_shift_combinations(independent_vars, shifts)
+#             model_result = ln_grid_cv(
+#                 data=train_data,
+#                 dependent_var=dependent_var,
+#                 independent_vars=independent_vars,
+#                 threshold_values=threshold_values,
+#                 variables_shifts=variables_shifts,
+#                 intercept_options=[True, False],
+#                 k=5
+#             )
+            
+#             # Extract the best model and shifts
+#             best_model = model_result['best_model']
+#             best_shift_config = model_result['best_shift_config']
+            
+#             # Clean and align test data
+#             test_data_cleaned = test_data.dropna(subset=[dependent_var] + independent_vars)
+#             if test_data_cleaned.empty:
+#                 print(f"No aligned test data for {name}. Skipping R² calculation.")
+#                 r2_test = np.nan
+#             else:
+#                 X_test_shifted = create_time_shifted_features(test_data_cleaned[independent_vars], best_shift_config)
+#                 aligned_data = pd.concat([X_test_shifted, test_data_cleaned[dependent_var].reset_index(drop=True)], axis=1).dropna()
+#                 if aligned_data.empty:
+#                     print(f"No aligned data available after applying shifts for {name}.")
+#                     r2_test = np.nan
+#                 else:
+#                     X_test = aligned_data[X_test_shifted.columns]
+#                     y_test = aligned_data[dependent_var]
+#                     y_pred = best_model.predict(X_test)
+                    
+#                     # Compute R²
+#                     # r, _ = pearsonr(y_test, y_pred)
+#                     # r2_test = r ** 2
+#                     r2_test = r2_score(y_test, y_pred)
+
+            
+#             # Store results
+#             model_result['r2_test'] = r2_test
+#             results[name] = model_result
+        
+#         return {
+#             "mouse_id": mouse_id,
+#             "dependent_var": dependent_var,
+#             "results": results,
+#             "random_seed": random_seed
+#         }
+#     except KeyError as ke:
+#         print(f"KeyError processing {mouse_id} - {dependent_var}: {ke}")
+#     except ValueError as ve:
+#         print(f"ValueError processing {mouse_id} - {dependent_var}: {ve}")
+#     except Exception as e:
+#         print(f"Unexpected error processing {mouse_id} - {dependent_var}: {e}")
+#     return None
+
+
+# def process_all_neurons(mouse_id, dependent_vars, spike_counts, maze_rebinned_data, random_seed=30):
+#     """
+#     Process all neurons for a given mouse using parallelization.
+    
+#     Parameters:
+#     - mouse_id (str): The ID of the mouse.
+#     - dependent_vars (list): List of dependent variables (neurons) for the mouse.
+#     - spike_counts (dict): Spike counts dictionary for all mice.
+#     - maze_rebinned_data (dict): Rebinned physiological data for all mice.
+    
+#     Returns:
+#     - list: Results for all neurons of the mouse.
+#     """
+#     return Parallel(n_jobs=-1, verbose=10)(
+#         delayed(process_neuron)(mouse_id, dependent_var, spike_counts, maze_rebinned_data, random_seed=30)
+#         for dependent_var in dependent_vars
+#     )
 
 
 

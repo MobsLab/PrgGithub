@@ -232,6 +232,7 @@ def plot_r2_comparison(loaded_results, model_1, model_2, r2_type='train'):
 
     # Merge the two datasets on Mouse_ID and Neuron_ID
     merged_data = pd.merge(r2_model_1, r2_model_2, on=['Mouse_ID', 'Neuron_ID'], how='inner')
+    print(len(merged_data))
 
     # Plot R² values for model_1 vs model_2
     plt.figure(figsize=(8, 8))

@@ -14,7 +14,11 @@ from load_save_results import (
     load_results
     )
 from preprocess_sort_data import (
-    rebin_mice_data
+    rebin_mice_data,
+    normalize_data
+    )
+from preprocess_linear_model import (
+    combine_mouse_data
     )
 from analyse_data import (
     spike_count_all_mice,
@@ -43,9 +47,13 @@ maze_spike_times_data = load_results(load_path + 'maze_spike_times_data.pkl')
 # Rebin data
 new_bin_size = 0.6
 maze_rebinned_data = rebin_mice_data(maze_denoised_data, ['BreathFreq', 'Heartrate', 'Accelero', 'Speed', 'LinPos'], new_bin_size)
+maze_rebinned_normalized_data = normalize_data(maze_rebinned_data, ['BreathFreq', 'Heartrate', 'Accelero', 'Speed', 'LinPos'])
 
 # Compute spike counts
 spike_counts = spike_count_all_mice(maze_rebinned_data, maze_spike_times_data)
+
+combined_data = combine_mouse_data(spike_counts, 
+                                   maze_rebinned_normalized_data, drop_na=True)
 
 # %% Fit model (long calculation)
 
@@ -56,7 +64,7 @@ all_results = []
 
 for mouse_id in spike_counts.keys():
     dependent_vars = spike_counts[mouse_id].columns.tolist()
-    mouse_results = process_all_neurons(mouse_id, dependent_vars, spike_counts, maze_rebinned_data, random_seed=random_seed)
+    mouse_results = process_all_neurons(mouse_id, dependent_vars, combined_data, random_seed=random_seed)
     all_results.extend([res for res in mouse_results if res is not None])
     
 # %% Save results
@@ -66,7 +74,7 @@ results_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/'
 # file_path = save_results(all_results, results_directory, 'results_ln_model.pkl')
 
 # Using joblib
-dump(all_results, results_directory+'results_ln_model_rs30.joblib')
+dump(all_results, results_directory+'all_results_ln_model_rs30.joblib')
     
 # %% Save figures
 
