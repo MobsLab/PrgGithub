@@ -41,7 +41,7 @@ sessions = {...
 
 
 exp_path  = '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/';
-session = sessions{5};
+session = sessions{5}; %5
 
 directory = [exp_path session];
 cd(directory)
@@ -76,10 +76,10 @@ Starttime  = Start(StartSound);
 % stim_start = Starttime/1e4;
 % save([exp_path 'stim_starts/' 'stim_start_' session], 'stim_start')
 
-%% SECTION 1.4: Apply ZETA test to select spiking channels
+%% IN PROGRESS:       SECTION 1.4: Apply ZETA test to select spiking channels
 for s_count = 1:size(spikes, 2)
     
-    [dblZetaP,vecLatencies,sZETA,sRate] = getZeta(spikes(:, s_count)/1e3, Starttime/1e4);
+    [dblZetaP,sZETA,sRate,sLatencies] = zetatest(spikes(:, s_count)/1e3, Starttime/1e4);
     getIFR
 end
 
@@ -136,7 +136,7 @@ else
     warning('No SleepScoring_OBGamma.mat found in %s', directory);
 end
 
-%% SECTION 2: STRF calculation
+%% IN PROGRESSS:     SECTION 2: STRF calculation
 STRF_calculation(directory, Starttime/1e4)
 
 
@@ -339,7 +339,7 @@ Legends = {'Wake','REM','NREM1','NREM2'};
 
 figure
 MakeSpreadAndBoxPlot3_SB({FiringRate_State(2,:) FiringRate_State(4,:) ...
-    FiringRate_State(5,:) FiringRate_State(6,:)},Cols,X,Legends,'showpoints',0,'paired',1)
+    FiringRate_State(5,:) FiringRate_State(6,:)},Cols,X,Legends,'showpoints',1,'paired',1)
 % set(gca , 'Yscale','log')
 ylabel('firing rate (Hz)')
 makepretty_BM2
@@ -350,7 +350,7 @@ X = [1 2];
 Legends = {'NREM1','NREM2'};
 
 figure
-MakeSpreadAndBoxPlot3_SB({FiringRate_State(5,:) FiringRate_State(6,:)},Cols,X,Legends,'showpoints',0,'paired',1)
+MakeSpreadAndBoxPlot3_SB({FiringRate_State(5,:) FiringRate_State(6,:)},Cols,X,Legends,'showpoints',1,'paired',1)
 title(['n_{clusters} = ' num2str(length(FiringRate_State))])
 
 %% FIGURE: Histograms
@@ -488,16 +488,20 @@ stim_states = {stim_onset_Wake; stim_onset_Sleep; stim_onset_NREM; ...
 conditionNames = {'Wake','Sleep','NREM','REM','NREM1','NREM2'};
 
 %% SECTION 4.2: PSTH ANALYSIS (Raw & Z-score) + Population Figures + Controls
-[popRawPSTH, popZscoredPSTH, popAvgRate, popAvgZ, timeCenters] = PSTH_Analysis_AllNeurons(A, chcl, stim_states, conditionNames, directory);
+fig_vis = 'on';
+[rawRates, popRawPSTH, zRates, popZscoredPSTH, zBaselineCorrectedRates, popZscoredPSTH_BC, timeCenters] = PSTH_Analysis_AllNeurons(A, chcl, stim_states, conditionNames, directory, fig_vis);
 
 outFile = fullfile([directory '/wave_clus/'], sprintf('spike_analysis_%s.mat', session));
 save(outFile, ...
-    'popRawPSTH', 'popZscoredPSTH', ...
-    'popAvgRate', 'popAvgZ', ...
+    'rawRates', 'zRates', 'zBaselineCorrectedRates',...
+    'popRawPSTH', 'popZscoredPSTH', 'popZscoredPSTH_BC', ...
     'timeCenters', 'conditionNames', ...
     'metadata', 'colIndex', 'chcl', ...
     '-v7.3');
 fprintf('Saved PSTH results to %s\n', outFile);
+
+%% this is just selected relevant blocs from this scrips to run calculate spike_analysis file for all sessions
+run_PSTH_analysis_all_sess
 
 %% FIGURE: Simple PSTH with rasters for different states
 i = 2; % select the neuron
@@ -509,9 +513,16 @@ for j = 1:6
 end
 
 %% FIGURE: WakeGamma-dependent PSTH
-for count = 1:numel(A)
-    PSTH_GammaBins_SingleNeuron(A, count, SmoothGamma, Wake, Starttime, directory)
-end
+[rawRatesGamma, popRawPSTHGamma, zRatesGamma, popZscoredPSTHGamma, zBaselineCorrectedRatesGamma, popZscoredPSTH_BCGamma, timeCentersGamma, GammaEpochs, GammaConditionNames] = PSTH_GammaBins_SingleNeuron(A, count, SmoothGamma, Wake, Starttime, directory);
+
+save(outFile, ...
+    'rawRatesGamma', 'zRatesGamma', 'zBaselineCorrectedRatesGamma',...
+    'popRawPSTHGamma', 'popZscoredPSTHGamma', 'popZscoredPSTH_BCGamma', ...
+    'timeCentersGamma', 'GammaEpochs', 'GammaConditionNames', ...
+    'metadata', 'colIndex', 'chcl', ...
+    '-v7.3', '-append');
+fprintf('Saved PSTH results to %s\n', outFile);
+
 
 %% SECTION 4.3: Take all sessions and plot average figures
 MultiSession_Analysis

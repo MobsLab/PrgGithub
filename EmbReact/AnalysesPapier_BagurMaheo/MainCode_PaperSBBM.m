@@ -37,7 +37,7 @@ LookAtAllStressScore_Rip_DZP_Sal_SDS_UMaze.m
 % Code by Baptistes that does the same Recuperation_Maze_SumUp_BM_ScoreSB.m
 
 % Code for "homeostasis" measure of freezing level missing
-
+GetStressScore_Sal_DZP_Rip.m
 % Code for correlating stress score with freezing types missing
 
 %% Figure 3 - Hippocampal place cell

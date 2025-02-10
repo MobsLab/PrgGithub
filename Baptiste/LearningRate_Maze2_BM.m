@@ -125,7 +125,12 @@ for group=1:length(Group)
                     nanmean(meanHeartRatesInBins_Shock{1}{group}(mouse,:,ind),2)).*squeeze(Dur_in_bin_Shock{2}{group}(mouse,i,ind)));
                 Average_HR_Above_Safe{group}(mouse,i) = nansum(squeeze(meanHeartRatesInBins_Safe{2}{group}(mouse,i,ind)-...
                     nanmean(meanHeartRatesInBins_Safe{1}{group}(mouse,:,ind),2)).*squeeze(Dur_in_bin_Safe{2}{group}(mouse,i,ind)));
-            
+                
+                if length(OutPutData.Cond.Saline.ripples.ts{mouse,3})>30
+                    Rip_Numb_Tot{group}(mouse,i) = length(Data(Restrict(OutPutData.Cond.Saline.ripples.ts{mouse,3} , SmallEp)))./length(Data(OutPutData.Cond.Saline.ripples.ts{mouse,3}));
+                    Rip_Numb_Safe{group}(mouse,i) = length(Data(Restrict(OutPutData.Cond.Saline.ripples.ts{mouse,6} , SmallEp)))./length(Data(OutPutData.Cond.Saline.ripples.ts{mouse,6}));
+                end
+                
             end
             disp(Mouse_names{mouse})
         end
@@ -149,6 +154,61 @@ end
 Average_HR_Above_Shock{1}(:,16)=NaN; % all eyelid
 HR_Active_Shock{1}(:,16)=NaN;
 
+figure
+Data_to_use = movmean(STIM_Number{1}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-r',1); hold on;
+color= [.5 .3 .1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+box off, ylim([0 2])
+ylabel('shocks (#/min)')
+makepretty
+yyaxis right
+Data_to_use = movmean(RESPI_Safe{1}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+xlim([0 100]), xlabel('time (min)'), ylabel('Breathing, safe freezing (Hz)')
+makepretty
+
+
+
+
+figure
+Data_to_use = movmean(Rip_Numb_Tot{1}',3,'omitnan')';
+% Data_to_use = Rip_Numb_Safe{1};
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-r',1); hold on;
+color= [.1 .3 .5]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+xlim([0 100]), xlabel('time (min)'), ylabel('SWR numb (norm)'), hline(.0678,'--k')
+makepretty
+
+
+
+Data_to_use = movmean(Rip_Numb_Tot{1}',3,'omitnan')';
+for i=1:18
+    clear d, d = Data_to_use(:,i);
+    try, [h(i) , p(i)] = ttest(d(~isnan(d)) , ones(sum(~isnan(d)),1)*.0678); end
+end
+[corrected_p, h]=bonf_holm(p);
+X_ax = [bin_size/2:bin_size:bin_tot*bin_size-bin_size/2];
+plot(X_ax(corrected_p<.05) , .15 , '*k')
+
+
+
+figure
+Data_to_use = movmean(Rip_Safe{1}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-r',1); hold on;
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+xlim([0 100]), ylim([.25 .75]), xlabel('time (min)'), ylabel('SWR occurence (#/s)')
+makepretty
+
+
+%% others
 figure
 subplot(231)
 Data_to_use = movmean(STIM_Number{1}',3,'omitnan')';
@@ -744,5 +804,208 @@ figure
 Data_to_use = DATA_stim;
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 h=shadedErrorBar(x , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+
+
+%% cumulative ripples
+Session_type={'TestPre','Cond'};
+for sess=1:2
+    for group=1:length(Drug_Group)
+        Mouse=Drugs_Groups_UMaze_BM(Group(group));
+        [OutPutData.(Session_type{sess}).(Drug_Group{group}) , Epoch1.(Session_type{sess}).(Drug_Group{group}) , NameEpoch] = ...
+            MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'speed','heartrate','ripples');
+    end
+end
+
+for mouse=1:length(Mouse)
+    try, RipCumTsd{mouse} = tsd(Range(OutPutData.Cond.Saline.ripples.ts{mouse,3}) , ([1:length(OutPutData.Cond.Saline.ripples.ts{mouse,3})]./length(OutPutData.Cond.Saline.ripples.ts{mouse,3}))'); end
+    try, RipCumTsd_shock{mouse} = tsd(Range(OutPutData.Cond.Saline.ripples.ts{mouse,5}) , ([1:length(OutPutData.Cond.Saline.ripples.ts{mouse,5})]./length(OutPutData.Cond.Saline.ripples.ts{mouse,5}))'); end
+    try, RipCumTsd_safe{mouse} = tsd(Range(OutPutData.Cond.Saline.ripples.ts{mouse,6}) , ([1:length(OutPutData.Cond.Saline.ripples.ts{mouse,6})]./length(OutPutData.Cond.Saline.ripples.ts{mouse,6}))'); end
+end
+
+
+
+
+Session_type={'Cond'}; sess=1;
+Mouse=Drugs_Groups_UMaze_BM(22);
+[OutPutData , Epoch1 , NameEpoch] = MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ripples');
+
+
+
+for mouse=1:length(Mouse)
+    try, RipCumTsd{mouse} = tsd(Range(OutPutData.ripples.ts{mouse,3}) , ([1:length(OutPutData.ripples.ts{mouse,3})]./length(OutPutData.ripples.ts{mouse,3}))'); end
+end
+
+
+for mouse = 1:length(Mouse)
+    if length(RipCumTsd{mouse})>30
+        try
+            clear D, D = Range(OutPutData.ripples.ts{mouse,3});
+            DATA_Fz(mouse,:) = interp1(linspace(0,1,length(D)) , D , linspace(0,1,100));
+        end
+    end
+end
+DATA_Fz(DATA_Fz==0) = NaN;
+
+
+figure
+plot(nanmean(DATA_Fz) , [1:100])
+
+plot(Range(RipCumTsd{mouse}) , Data(RipCumTsd{mouse})')
+
+figure
+for mouse=1:length(Mouse)
+    try, plot(Range(OutPutData.ripples.ts{mouse,3}) , ([1:length(OutPutData.ripples.ts{mouse,3})]./length(OutPutData.ripples.ts{mouse,3}))'), hold on, end
+end
+
+
+
+
+
+
+
+
+
+
+load('/media/nas7/ProjetEmbReact/DataEmbReact/Respi_FromModel.mat')
+clear RESPI_Safe RESPI_Shock RESPI_Diff RESPI_Shock_corr RESPI_Safe_corr
+Session_type={'Cond'}; sess=1;
+for group=1:length(Group)
+    Mouse=Drugs_Groups_UMaze_BM(Group(group));
+    for sess=1:length(Session_type)
+        for mouse=1:length(Mouse)
+            Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+            
+            Sessions_List_ForLoop_BM
+            
+            %             StimEpoch.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'epoch','epochname','stimepoch');
+            for i=1:bin_tot
+                SmallEp = intervalSet((i-1)*60e4*bin_size , i*60e4*bin_size);
+                
+                %                 if sum(DurationEpoch(and(SmallEp , Active_Unblocked.(Mouse_names{mouse}))))>0
+                %                     STIM_Number{group}(mouse,i) = length(Start(and(StimEpoch.(Session_type{sess}).(Mouse_names{mouse}) , and(SmallEp , Active_Unblocked.(Mouse_names{mouse})))));
+                %                 else
+                %                     STIM_Number{group}(mouse,i) = NaN;
+                %                 end
+                try
+                    RESPI_Safe{group}(mouse,i) = nanmean(Data(Restrict(Respi_safe_tsd{mouse} , SmallEp)));
+                    RESPI_Safe_corr{group}(mouse,i) = nanmean(Data(Restrict(Respi_safe_corr_tsd{mouse} , SmallEp)));
+                    RESPI_Diff{group}(mouse,i) = nanmean(Data(Restrict(Respi_shock_tsd{mouse} , SmallEp)))-nanmean(Data(Restrict(Respi_safe_tsd{mouse} , SmallEp)));
+                end
+                try
+                    RESPI_Shock{group}(mouse,i) = nanmean(Data(Restrict(Respi_shock_tsd{mouse} , SmallEp)));
+                    RESPI_Shock_corr{group}(mouse,i) = nanmean(Data(Restrict(Respi_shock_corr_tsd{mouse} , SmallEp)));
+                end
+                
+                if length(RipCumTsd{mouse})>30
+                    Rip_Numb_Tot{group}(mouse,i) = length(Data(Restrict(OutPutData.Cond.Saline.ripples.ts{mouse,3} , SmallEp)))./length(Data(OutPutData.Cond.Saline.ripples.ts{mouse,3}));
+                    Rip_Numb_Safe{group}(mouse,i) = length(Data(Restrict(OutPutData.Cond.Saline.ripples.ts{mouse,6} , SmallEp)))./length(Data(OutPutData.Cond.Saline.ripples.ts{mouse,6}));
+                    
+                    
+                    RipCum{group}(mouse,i) = nanmean(Data(Restrict(RipCumTsd{mouse} , SmallEp)));
+                    %                     RipCum_shock{group}(mouse,i) = nanmean(Data(Restrict(RipCumTsd_shock{mouse} , SmallEp)));
+                    RipCum_safe{group}(mouse,i) = nanmean(Data(Restrict(RipCumTsd_safe{mouse} , SmallEp)));
+                end
+            end
+            disp(Mouse_names{mouse})
+        end
+    end
+    RESPI_Safe{group}(RESPI_Safe{group}>6) = NaN;
+    RipCum{group}(RipCum{group}==0) = NaN;
+    RipCum_safe{group}(RipCum_safe{group}==0) = NaN;
+    %     RipCum_shock{group}(RipCum_shock{group}==0) = NaN;
+    RESPI_Safe{group}(RESPI_Safe{group}==0) = NaN;
+    RESPI_Diff{group}(RESPI_Diff{group}==0) = NaN;
+    RESPI_Shock{group}(RESPI_Shock{group}==0) = NaN;
+    RESPI_Shock_corr{group}(RESPI_Shock_corr{group}==0) = NaN;
+    RESPI_Safe_corr{group}(RESPI_Safe_corr{group}==0) = NaN;
+    Rip_Numb_Tot{group}(isnan(STIM_Number{1})) = NaN;
+    Rip_Numb_Safe{group}(isnan(STIM_Number{1})) = NaN;
+end
+
+
+figure
+Data_to_use = movmean(STIM_Number{1}',3,'omitnan')';
+% Data_to_use = STIM_Number{1};
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+box off, ylim([0 2])
+ylabel('shocks (#/min)')
+makepretty
+yyaxis right
+Data_to_use = movmean(RESPI_Safe{1}',3,'omitnan')';
+% Data_to_use = RESPI_Safe{1};
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+xlim([0 100]), ylim([2.5 3.9])
+makepretty
+
+
+RipCum_safe{1}(21,:)=NaN;
+RipCum_safe{1} = RipCum_safe{1}./max(RipCum_safe{1}(:,1:12)')';
+plot(RipCum_safe{1}')
+
+Data_to_use = RipCum_safe{1};
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+line([0 69],[0 1],'LineStyle','--','Color','r','LineWidth',2)
+xlim([0 69])
+
+
+RipCum_shock{1}(21,:)=NaN;
+RipCum_shock{1} = RipCum_shock{1}./max(RipCum_shock{1}(:,1:12)')';
+plot(RipCum_shock{1}')
+
+figure
+Data_to_use = RipCum_shock{1};
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+line([0 69],[0 1],'LineStyle','--','Color','r','LineWidth',2)
+xlim([0 69])
+
+
+
+
+
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+xlim([0 100]), xlabel('time (min)'), ylabel('Breathing, freezing (Hz)')
+makepretty
+
+
+f=get(gca,'Children'); legend([f(5),f(1)],'shock','safe');
+
+
+
+
+figure
+Data_to_use = movmean(RipCum{1}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+
+
+RipCum{1}(21,:)=NaN;
+RipCum{1} = RipCum{1}./max(RipCum{1}(:,1:12)')';
+
+figure
+imagesc(RipCum{1}), xlim([.5 12.5]), caxis([0 1])
+
+
+figure
+plot(RipCum{1}'), xlim([.5 12.5]), caxis([0 1])
+
+
+figure
+plot(nanmean(RipCum{1})), xlim([0 12])
+line([0 12],[0 1],'LineStyle','--','Color','r','LineWidth',2)
+
+
+
+
+
 
 

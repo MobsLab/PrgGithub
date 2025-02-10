@@ -31,7 +31,7 @@ Mice_to_analyze = [994 1239];
 XLinPos = [0:0.05:1];
 % Get paths
 Dir = PathForExperiments_TC('Sub');
-Dir = RestrictPathForExperiment_TC(Dir,'nMice', Mice_to_analyze);
+Dir = RestrictPathForExperiment(Dir,'nMice', Mice_to_analyze);
     
 % Initialize
 for ss = 1:length(SessNames)

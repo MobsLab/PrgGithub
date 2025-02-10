@@ -188,6 +188,7 @@ read_Intan_RHD2000_file
 
 
 RefSubtraction_multi('amplifier.dat',106,3,'M1693',[],[],[0:31,96,97,98,105],'M1694',[32:44,46:63],45,[45,99,100,101,105],'M1695',[64:75,77:95],76,[76,102,103,104,105]);
+RefSubtraction_multi('amplifier.dat',106,3,'M1696',[0:6,8:31],7,[7,96,97,98,105],'M1697',[32:44,46:63],45,[45,99,100,101,105],'M1698',[64:76,78:95],77,[77,102,103,104,105]);
 
 %% Make your .xls file
 %% Make your .xml file for LFP amplifier.xml %% Baseline sleep

@@ -66,8 +66,8 @@ end
 
 %%
 mice = 1199;
-Dir = PathForExperiments_TC("Sub");
-Dir = RestrictPathForExperiment_TC(Dir, 'nMice', mice);
+Dir = PathForExperimentsERC("Sub");
+Dir = RestrictPathForExperiment(Dir, 'nMice', mice);
 
 csvLinearPred = csvread([ Dir.path{1}{1}  '/TEST/results/200/linearPred.csv']);
 idxLinearPred = csvLinearPred(2:end,1);
@@ -252,6 +252,10 @@ LinearTrueTsd=tsd(TimeStepsPred*1E4,LinearTrue);
 LinearPredTsd=tsd(TimeStepsPred*1E4,LinearPred);
 LinearPredSleepTsd=tsd(TimeStepsPredSleep*1E4,LinearPredSleep);
 
+LossPredCorrected=LossPred;
+LossPredCorrected(LossPredCorrected<-15)=NaN;
+LossPredTsdCorrected=tsd(TimeStepsPred*1E4,LossPredCorrected);
+LossPredTsd = LossPredTsdCorrected;
 
 BadEpoch=thresholdIntervals(LossPredTsd,-3,'Direction','Above');
 GoodEpoch=thresholdIntervals(LossPredTsd,-5,'Direction','Below');
@@ -288,6 +292,7 @@ plot(Range(Restrict(LinearPredTsd, BadEpoch),'s'), Data(Restrict(LinearPredTsd, 
 line([Range(stim,'s') Range(stim,'s')],ylim,'color','k')
 line([Range(tRipples,'s') Range(tRipples,'s')],ylim/2,'color','b')
 
+figure;
 subplot(1,2,1);
 [hBad,bBad]=hist(Data(Restrict(LinearPredTsd, BadEpoch))-Data(Restrict(LinearTrueTsd, BadEpoch)),500);
 [hGood,bGood]=hist(Data(Restrict(LinearPredTsd, GoodEpoch))-Data(Restrict(LinearTrueTsd, GoodEpoch)),500);

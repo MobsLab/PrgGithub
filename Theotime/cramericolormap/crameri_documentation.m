@@ -56,7 +56,7 @@ crameri('hawaii',12)
 %% 
 % Get the RGB values of a 5-level buda colormap: 
 
-RGB = crameri('buda',5)
+RGB = crameri(' buda',5)
 
 %%
 % Some of the values in the image are below zero and others are above. If this dataset represents
