@@ -30,22 +30,29 @@ oebin = fileread([sync_folder '/structure.oebin']);
 samplingrate = str2double(oebin(sr_id(1)+1:sr_id(1)+5));
 
 % Start time
-% AG has had issue with loading large files, so below is for him (2025/01/12)
-special_sync_folders = { ...
-    '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20250107_LSP_saline/recording1/', ...
-    '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241228_LSP_saline/recording1/', ...
-    '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241224_LSP_saline/recording1/', ...
-    '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241217_LSP_saline/recording1/', ...
-    '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241126_LSP/recording1/'};
+sync = readNPY('timestamps.npy');
+starttime = sync(1);
 
-% Check if the sync_folder is in the special list
-if ismember(sync_folder, special_sync_folders)
-    sync = h5read([sync_folder '/continuous/continuous_Rhythm_FPGA-100.0.mat'], '/timestamps');
-    starttime = sync(1);
-else
-    sync = load([sync_folder '/continuous/continuous_Rhythm_FPGA-100.0.mat']);
-    starttime = sync.timestamps(1);
-end
+
+
+% AG has had issue with loading large files, so below is for him (2025/01/12)
+% special_sync_folders = { ...
+%     '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20250107_LSP_saline/recording1/', ...
+%     '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241228_LSP_saline/recording1/', ...
+%     '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241224_LSP_saline/recording1/', ...
+%     '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241217_LSP_saline/recording1/', ...
+%     '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241126_LSP/recording1/'};
+% 
+% % Check if the sync_folder is in the special list
+% if ismember(sync_folder, special_sync_folders)
+%     sync = h5read([sync_folder '/continuous/continuous_Rhythm_FPGA-100.0.mat'], '/timestamps');
+%     starttime = sync(1);
+% else
+%     sync = load([sync_folder '/continuous/continuous_Rhythm_FPGA-100.0.mat']);
+%     starttime = sync.timestamps(1);
+% end
+
+
 
 
 %% load file
