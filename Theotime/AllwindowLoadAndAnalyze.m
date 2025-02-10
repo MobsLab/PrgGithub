@@ -71,6 +71,8 @@ for idx = 1:length(window_list)
     all_params.std_err_post{idx} = {};
     all_params.conf_post{idx} = {};
     all_params.std_conf_post{idx} = {};
+    all_params.pred_ripples{idx} = {};
+    all_params.std_pred_ripples{idx} = {};
 end
 
 for imouse = 1:length(Dir.path)
@@ -260,6 +262,11 @@ for imouse = 1:length(Dir.path)
         all_params.std_conf{idx}{imouse} = s;
         all_params.tps{idx}{imouse} = tps;
 
+        % Compute the mean and std of LinearPred around ripples
+        [m, s, tps] = mETAverage(Range(tRipples), Range(LinearPredTsd), Data(LinearPredTsd), 1, 2000);
+        all_params.pred_ripples{idx}{imouse} = m;
+        all_params.std_pred_ripples{idx}{imouse} = s;
+
         % Compute the mean and std of confidence around ripples for moving and non moving epochs (around and not around ripples)
         [m, s, tps] = mETAverage(Range(tRipples), Range(Restrict(LossPredTsdCorrected, Moving)), Data(Restrict(LossPredTsdCorrected, Moving)), 1, 2000);
         all_params.mean_conf_moving{idx}{imouse} = m;
@@ -422,7 +429,7 @@ if fig
         subplot(1,2,1)
         shadedErrorBar(x,mean(movmean(zscore_nan_BM(cell2mat(all_params.mean_conf{idx})), 5),2,'omitnan'),mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf{idx})), 5), 2, 'omitnan'))
 
-        title(["Prediction Loss decreases around ripples. n_{mice} = 9" num2str(window_list(idx)) 'ms'])
+        title(['Prediction Loss decreases around ripples.'  num2str(window_list(idx)) 'ms. n_{mice} = 9'])
         vline(0,'--r')
         xlabel('Time around ripples (ms)')
         ylabel('Prediction Loss')
