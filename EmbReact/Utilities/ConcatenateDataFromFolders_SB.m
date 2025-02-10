@@ -655,8 +655,8 @@ switch(lower(TypeVariable))
                     
                     if isfield(Behav,'ZoneEpoch')
                         for ep=1:min([length(Behav.ZoneEpoch),5])
-                            OutPutVar{ep} = intervalSet([Start(OutPutVar{ep});Start(Behav.ZoneEpoch{ep}-RemovEpoch)+tps],...
-                                [Stop(OutPutVar{ep});Stop(Behav.ZoneEpoch{ep}-RemovEpoch)+tps]);
+                                OutPutVar{ep} = intervalSet([Start(OutPutVar{ep});Start(Behav.ZoneEpoch{ep}-RemovEpoch)+tps],...
+                                    [Stop(OutPutVar{ep});Stop(Behav.ZoneEpoch{ep}-RemovEpoch)+tps]);
                         end
                     end
                     tps=tps + tpsmax;

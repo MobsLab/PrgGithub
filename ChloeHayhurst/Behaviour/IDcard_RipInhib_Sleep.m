@@ -37,13 +37,17 @@ for sess=1:length(Session_type)
     % epochs
     TotEpoch.(Session_type{sess}) = intervalSet(0,max(Range(Speed.(Session_type{sess}))));
     FreezeEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freezeepoch');
-%     FreezeEpoch_camera.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freeze_epoch_camera');
+    FreezeEpoch.(Session_type{sess}) = mergeCloseIntervals(FreezeEpoch.(Session_type{sess}),1);
+
+        FreezeEpoch_camera.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freeze_epoch_camera');
     
     ActiveEpoch.(Session_type{sess}) = TotEpoch.(Session_type{sess})-FreezeEpoch.(Session_type{sess});
+    ActiveEpoch.(Session_type{sess}) = mergeCloseIntervals(ActiveEpoch.(Session_type{sess}),1);
     ZoneEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'zoneepoch');
     BlockedEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'blockedepoch');
     UnblockedEpoch.(Session_type{sess}) = TotEpoch.(Session_type{sess})-BlockedEpoch.(Session_type{sess});
-    
+    UnblockedEpoch.(Session_type{sess}) = mergeCloseIntervals(UnblockedEpoch.(Session_type{sess}),1);
+
     try
         StimEpochUnblocked.(Session_type{sess}) = and(StimEpoch.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
     catch
@@ -62,10 +66,15 @@ for sess=1:length(Session_type)
     YtsdStim.(Session_type{sess}) = Restrict(Ytsd.(Session_type{sess}), Start(StimEpoch.(Session_type{sess})));
     
     ShockZoneEpoch.(Session_type{sess}) = ZoneEpoch.(Session_type{sess}){1};
+    ShockZoneEpoch.(Session_type{sess}) = mergeCloseIntervals(ShockZoneEpoch.(Session_type{sess}),1);
     SafeZoneEpoch.(Session_type{sess}) = ZoneEpoch.(Session_type{sess}){2};
+    SafeZoneEpoch.(Session_type{sess}) = mergeCloseIntervals(SafeZoneEpoch.(Session_type{sess}),1);
     ShockCornerEpoch.(Session_type{sess}) = ZoneEpoch.(Session_type{sess}){4};
+    ShockCornerEpoch.(Session_type{sess}) = mergeCloseIntervals(ShockCornerEpoch.(Session_type{sess}),1);
     SafeCornerEpoch.(Session_type{sess}) = ZoneEpoch.(Session_type{sess}){5};
+    SafeCornerEpoch.(Session_type{sess}) = mergeCloseIntervals(SafeCornerEpoch.(Session_type{sess}),1);
     MiddleZoneEpoch.(Session_type{sess}) = ZoneEpoch.(Session_type{sess}){3};
+    MiddleZoneEpoch.(Session_type{sess}) = mergeCloseIntervals(MiddleZoneEpoch.(Session_type{sess}),1);
     SafeZoneEpoch_freezing.(Session_type{sess}) = or(ZoneEpoch.(Session_type{sess}){2} , ZoneEpoch.(Session_type{sess}){5});
     ShockUnblockedEpoch.(Session_type{sess})= and(ShockZoneEpoch.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
     SafeUnblockedEpoch.(Session_type{sess})= and(SafeZoneEpoch.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
@@ -79,8 +88,8 @@ for sess=1:length(Session_type)
     FreezeSafeCornerEpoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , SafeCornerEpoch.(Session_type{sess}));
     FreezeShockCornerEpoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , ShockCornerEpoch.(Session_type{sess}));
     
-%     FreezeShockEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
-%     FreezeSafeEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , SafeZoneEpoch.(Session_type{sess}));
+    FreezeShockEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
+    FreezeSafeEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , SafeZoneEpoch.(Session_type{sess}));
     
     ActiveShockEpoch.(Session_type{sess}) = and(ActiveEpoch.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
     ActiveSafeEpoch.(Session_type{sess}) = and(ActiveEpoch.(Session_type{sess}) , SafeZoneEpoch_freezing.(Session_type{sess}));

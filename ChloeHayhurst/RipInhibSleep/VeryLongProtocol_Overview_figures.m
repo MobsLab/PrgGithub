@@ -174,12 +174,12 @@ mtitle('Active unblocked')
 % 
 % figure
 % subplot(121)
-% MakeSpreadAndBoxPlot3_SB({GammaPower_Shock_mean.(Name{group}).Cond GammaPower_Safe_mean.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1,,'optiontest','ttest');
+% MakeSpreadAndBoxPlot3_SB({GammaPower_Shock_mean.(Name{group}).Cond GammaPower_Safe_mean.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest',);
 % title('Gamma Power')
 % makepretty_CH
 % 
 % subplot(122)
-% MakeSpreadAndBoxPlot3_SB({ThetaPower_Shock_mean.(Name{group}).Cond ThetaPower_Safe_mean.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1,,'optiontest','ttest');
+% MakeSpreadAndBoxPlot3_SB({ThetaPower_Shock_mean.(Name{group}).Cond ThetaPower_Safe_mean.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest',);
 % title('Theta Power')
 % makepretty_CH
 % 
@@ -190,17 +190,17 @@ mtitle('Active unblocked')
 % Legends={'TestPre','CondPre','PostPre','ExtPre','CondPost','PostPost','ExtPost'};
 % 
 % subplot(131)
-% MakeSpreadAndBoxPlot3_SB({SleepyProp.(Name{group}).TestPre SleepyProp.(Name{group}).CondPre SleepyProp.(Name{group}).TestPostPre SleepyProp.(Name{group}).ExtPre SleepyProp.(Name{group}).CondPost SleepyProp.(Name{group}).TestPostPost SleepyProp.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1);
+% MakeSpreadAndBoxPlot3_SB({SleepyProp.(Name{group}).TestPre SleepyProp.(Name{group}).CondPre SleepyProp.(Name{group}).TestPostPre SleepyProp.(Name{group}).ExtPre SleepyProp.(Name{group}).CondPost SleepyProp.(Name{group}).TestPostPost SleepyProp.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
 % makepretty_CH
 % title('sleepy prop')
 % 
 % subplot(132)
-% MakeSpreadAndBoxPlot3_SB({SleepyTime.(Name{group}).TestPre SleepyTime.(Name{group}).CondPre SleepyTime.(Name{group}).TestPostPre SleepyTime.(Name{group}).ExtPre SleepyTime.(Name{group}).CondPost SleepyTime.(Name{group}).TestPostPost SleepyTime.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1);
+% MakeSpreadAndBoxPlot3_SB({SleepyTime.(Name{group}).TestPre SleepyTime.(Name{group}).CondPre SleepyTime.(Name{group}).TestPostPre SleepyTime.(Name{group}).ExtPre SleepyTime.(Name{group}).CondPost SleepyTime.(Name{group}).TestPostPost SleepyTime.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
 % makepretty_CH
 % title('sleepy time')
 % 
 % subplot(133)
-% MakeSpreadAndBoxPlot3_SB({GammaPower_mean.(Name{group}).TestPre GammaPower_mean.(Name{group}).CondPre GammaPower_mean.(Name{group}).TestPostPre GammaPower_mean.(Name{group}).ExtPre GammaPower_mean.(Name{group}).CondPost GammaPower_mean.(Name{group}).TestPostPost GammaPower_mean.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1);
+% MakeSpreadAndBoxPlot3_SB({GammaPower_mean.(Name{group}).TestPre GammaPower_mean.(Name{group}).CondPre GammaPower_mean.(Name{group}).TestPostPre GammaPower_mean.(Name{group}).ExtPre GammaPower_mean.(Name{group}).CondPost GammaPower_mean.(Name{group}).TestPostPost GammaPower_mean.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
 % makepretty_CH
 % title('mean gamma power')
 
@@ -310,26 +310,26 @@ Legends={'Pre','PostPre','PostPost',};
 for group = Group
 figure('color',[1 1 1])
 subplot(222)
-MakeSpreadAndBoxPlot3_SB({Frag_REM.(Name{group}).SleepPre Frag_REM.(Name{group}).SleepPostPre Frag_REM.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1,'optiontest','ttest');
+MakeSpreadAndBoxPlot3_SB({Frag_REM.(Name{group}).SleepPre Frag_REM.(Name{group}).SleepPostPre Frag_REM.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1);
 title('REM fragmentation')
 makepretty_CH
 subplot(221)
-MakeSpreadAndBoxPlot3_SB({LatencyToSleep.(Name{group}).SleepPre LatencyToSleep.(Name{group}).SleepPostPre LatencyToSleep.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1,'optiontest','ttest');
+MakeSpreadAndBoxPlot3_SB({LatencyToSleep.(Name{group}).SleepPre LatencyToSleep.(Name{group}).SleepPostPre LatencyToSleep.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1);
 title('Latency to sleep')
 makepretty_CH
 
 subplot(234)
-MakeSpreadAndBoxPlot3_SB({Wake_prop.(Name{group}).SleepPre Wake_prop.(Name{group}).SleepPostPre Wake_prop.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1,'optiontest','ttest');
+MakeSpreadAndBoxPlot3_SB({Wake_prop.(Name{group}).SleepPre Wake_prop.(Name{group}).SleepPostPre Wake_prop.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1);
 ylabel('Wake proportion')
 % ylim([0.1 0.8])
 makepretty_CH
 subplot(235)
-MakeSpreadAndBoxPlot3_SB({REM_prop.(Name{group}).SleepPre REM_prop.(Name{group}).SleepPostPre REM_prop.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1,'optiontest','ttest');
+MakeSpreadAndBoxPlot3_SB({REM_prop.(Name{group}).SleepPre REM_prop.(Name{group}).SleepPostPre REM_prop.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1);
 ylabel('REM proportion all')
 % ylim([0.1 0.8])
 makepretty_CH
 subplot(236)
-MakeSpreadAndBoxPlot3_SB({REM_prop2.(Name{group}).SleepPre REM_prop2.(Name{group}).SleepPostPre REM_prop2.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1,'optiontest','ttest');
+MakeSpreadAndBoxPlot3_SB({REM_prop2.(Name{group}).SleepPre REM_prop2.(Name{group}).SleepPostPre REM_prop2.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1);
 ylabel('REM proportion sleep')
 % ylim([0 0.16])
 makepretty_CH
@@ -337,6 +337,9 @@ mtitle(Name{group})
 end
 
 %
+
+Session_type={'SleepPre','SleepPostPre','SleepPostPost'};
+
 Col1 = [0.3 0.3 0.3];
 Col2 = [0.7 0.7 0.7];
 
