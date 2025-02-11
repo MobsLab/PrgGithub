@@ -22,7 +22,7 @@ function SpikeSorting_Analysis_AG(directory)
 % By: A. Goriachenkov, 01/2025
 % -------------------------------------------------------------------------
 
-%% SECTION 1.1: Basic Setup & Parameters
+%% SECTION 1.0: Basic Setup & Parameters
 % if nargin < 1
 %    error('Please provide a directory path to your ferret session data.');
 % end
@@ -41,12 +41,21 @@ sessions = {...
 
 
 exp_path  = '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/';
-session = sessions{5}; %5
+session = sessions{1}; %5
 
 directory = [exp_path session];
 cd(directory)
 rasterDir = fullfile([directory '/wave_clus/'], 'raster_figures');
 if ~exist(rasterDir, 'dir'), mkdir(rasterDir); end
+
+%% IN PROGRESS:       SECTION 1.1: Apply ZETA test to select spiking channels
+nSessions = length(sessions);
+for s = 3:nSessions
+    sessName = sessions{s};
+    directory = [exp_path sessName];
+    run_zeta_test_AG(directory, sessName)
+end
+
 
 %% SECTION 1.2: Load wave_clus Spikes (or KlustaKwik if you prefer)
 
@@ -76,13 +85,6 @@ Starttime  = Start(StartSound);
 % stim_start = Starttime/1e4;
 % save([exp_path 'stim_starts/' 'stim_start_' session], 'stim_start')
 
-%% IN PROGRESS:       SECTION 1.4: Apply ZETA test to select spiking channels
-for s_count = 1:size(spikes, 2)
-    
-    [dblZetaP,sZETA,sRate,sLatencies] = zetatest(spikes(:, s_count)/1e3, Starttime/1e4);
-    getIFR
-end
-
 %% FIGURE: Quick Raster Plots for Each Cluster
 
 % Below is a loop that draws PSTHs for each cluster, to quickly check data:
@@ -102,9 +104,11 @@ for ii = 1:size(spikes,2)
     close(fh); 
 end
 
-%% WILL BE INTEGRATED WITH SECTION 1.4 SOON...... Selecting “Good” Clusters (colIndex) Based on Preselection
+%% Selecting “Good” Clusters (colIndex) Based on zeta test
+
 clear chcl
-chcl = get_chcl(session);  % function that returns list of [channel cluster]
+chcl = get_chcl(directory, session);  % function that returns list of [channel cluster]
+
 colIndex = [];
 for s = 1:length(chcl)
     % Find row in metadata matching [channel cluster]
