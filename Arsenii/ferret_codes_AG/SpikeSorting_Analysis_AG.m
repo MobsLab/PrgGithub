@@ -26,6 +26,7 @@ function SpikeSorting_Analysis_AG(directory)
 % if nargin < 1
 %    error('Please provide a directory path to your ferret session data.');
 % end
+Dir = PathForExperimentsOB('Shropshire', 'freely-moving', 'all', 'TORCs');
 
 sessions = {...
             '20241205_TORCs', ...
@@ -41,7 +42,7 @@ sessions = {...
 
 
 exp_path  = '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/';
-session = sessions{1}; %5
+session = sessions{5}; %5
 
 directory = [exp_path session];
 cd(directory)
@@ -50,7 +51,7 @@ if ~exist(rasterDir, 'dir'), mkdir(rasterDir); end
 
 %% IN PROGRESS:       SECTION 1.1: Apply ZETA test to select spiking channels
 nSessions = length(sessions);
-for s = 3:nSessions
+for s = 1:nSessions
     sessName = sessions{s};
     directory = [exp_path sessName];
     run_zeta_test_AG(directory, sessName)

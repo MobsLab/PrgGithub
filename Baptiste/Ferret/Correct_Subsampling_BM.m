@@ -116,7 +116,7 @@ switch comp_name
             };
     case 'leftovers'
         sess = {...
-        '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241230_LSP_saline';...% premature end of file (xml issue)
+        '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241230_LSP_saline';...% premature end of file (xml issue) .Ignore
         '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241217_LSP_saline';...
         };
     case 'Edel'
