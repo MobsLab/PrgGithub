@@ -122,39 +122,59 @@ sizeMap2 = 1000;
 %     end
 % end
 
-
-
-for group = 4:5
-    if group == 4
-        Mouse_names = Mouse_names_SalHC;
-    elseif group == 5
-        Mouse_names = Mouse_names_NicHC;
-    end
-    for mouse=1:length(Mouse_names)
-        path = sprintf('%s{%d}', Name{group}, mouse);
-        
-        folder_path = eval(path);
-        cd(folder_path);
-        disp(folder_path);
-        clear AlignedXtsd AlignedYtsd Xtsd Ytsd X Y
-        load('behavResources.mat')
-        
-        satisfied = 0;
-        rotate = 0;
-        while satisfied ==0
-            
-            figure
-            plot(Data(Xtsd),Data(Ytsd))
-            [x(:,1),x(:,2)]=ginput(4);
-            [AlignedXtsd,AlignedYtsd] = affineTransform(Xtsd, Ytsd, x);
-            
-            satisfied = input('Satisfied?');
-        end
-        close all
-        save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd','-append');
-        
-    end
-end
+% 
+% figure
+% for group = 4:5
+%     if group == 4
+%         Mouse_names = Mouse_names_SalHC;
+%     elseif group == 5
+%         Mouse_names = Mouse_names_NicHC;
+%     end
+%     for mouse=1:length(Mouse_names)
+%         path = sprintf('%s{%d}', Name{group}, mouse);
+%         
+%         folder_path = eval(path);
+%         cd(folder_path);
+%         disp(folder_path);
+%         clear AlignedXtsd AlignedYtsd Xtsd Ytsd x y
+%         load('behavResources.mat')
+%         
+%         satisfied = 0;
+%         while satisfied ==0
+%             
+%             polygon = GetCageEdgesWithoutVideo(Data(Ytsd),Data(Xtsd));
+%             x = polygon.Position(:,2);
+%             y = polygon.Position(:,1);
+%             turn = input('cage vertical? (0/1)');
+%             if turn == 1
+%             Coord1 = [x(1)-x(2),y(1)-y(2)];
+%             Coord2 = [x(3)-x(2),y(3)-y(2)];
+%             elseif turn ==0
+%                 Coord2 = [x(1)-x(2),y(1)-y(2)];
+%                 Coord1 = [x(3)-x(2),y(3)-y(2)];
+%             end
+%             TranssMat = [Coord1',Coord2'];
+%             XInit = Data(Xtsd)-x(2);
+%             YInit = Data(Ytsd)-y(2);
+%             
+%             % The Xtsd and Ytsd in new coordinates
+%             A = ((pinv(TranssMat)*[XInit,YInit]')');
+%             AlignedXtsd = tsd(Range(Xtsd),40*A(:,1));
+%             AlignedYtsd = tsd(Range(Ytsd),20*A(:,2));
+%             clf
+%             %
+%             plot(Data(AlignedXtsd),Data(AlignedYtsd))
+%             xlim([0 40])
+%             ylim([0 40])
+%             
+%             satisfied = input('happy?');
+%             clf
+%         end
+%         close all
+%         save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd','-append');
+%         
+%     end
+% end
 
                
 for group = 1:3

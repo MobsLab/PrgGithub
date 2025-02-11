@@ -59,41 +59,35 @@ if strcmp(arena_type, 'OF')
     in_specific_zone = distances > specific_inner_radius & distances <= specific_outer_radius;  % Zone spécifique (entre 25% et 30%)
     
 elseif strcmp(arena_type, 'HC')
-    side_length = 1;
-    half_side = side_length / 2;
-    x_data = Data(Xtsd) - 0.5;
-    y_data = Data(Ytsd) - 0.5;
+    % HomeCage : AlignedXtsd is comprised between 0 and 40 and Aligned
+    % Ytsd between 0 and 20
     
-    abs_x = abs(x_data);
-    abs_y = abs(y_data);
-    max_coord = max(abs_x, abs_y);
+    cage_width = 40;
+    cage_height = 20;
     
-    distances = sqrt((x_data - 0).^2 + (y_data - 0).^2);
+    x_data = Data(Xtsd);
+    y_data = Data(Ytsd);
+        
+    distances = max(abs(x_data - cage_width / 2) / (cage_width / 2), abs(y_data - cage_height / 2) / (cage_height / 2));
     
-    inner_limit = half_side * sqrt(percent_inner);
-    specific_inner_limit = half_side * sqrt(ring(1));
-    specific_outer_limit = half_side * sqrt(ring(2));
+    % Définition des zones
+    inner_limit = sqrt(percent_inner);
+    specific_inner_limit = sqrt(ring(1));
+    specific_outer_limit = sqrt(ring(2));
     
-    in_inner_zone = max_coord <= inner_limit;
-    in_outer_zone = max_coord > inner_limit;
-    in_specific_zone = max_coord > specific_inner_limit & max_coord <= specific_outer_limit;
+    in_inner_zone = distances <= inner_limit;
+    in_outer_zone = distances > inner_limit;
+    in_specific_zone = distances > specific_inner_limit & distances <= specific_outer_limit;
 end
 
 % Création des epochs
-Xtemp = Data(Xtsd);  
-T1 = Range(Xtsd);    
-Ytemp = Data(Ytsd);  
-Xtemp2_outer = Xtemp * 0;
-Xtemp2_outer(in_outer_zone) = 1;
-Xtemp2_inner = Xtemp * 0;
-Xtemp2_inner(in_inner_zone) = 1;
-Xtemp2_specific = Xtemp * 0;
-Xtemp2_specific(in_specific_zone) = 1;
+distances_tsd = tsd(Range(Xtsd) , distances);
 
-% Détection des epochs dans les zones définies
-ZoneEpoch_Inner = thresholdIntervals(tsd(T1, Xtemp2_inner), 0.5, 'Direction', 'Above'); 
-ZoneEpoch_Outer = thresholdIntervals(tsd(T1, Xtemp2_outer), 0.5, 'Direction', 'Above'); 
-ZoneEpoch_Specific = thresholdIntervals(tsd(T1, Xtemp2_specific), 0.5, 'Direction', 'Above');  % Zone entre 25% et 30%
+ZoneEpoch_Outer = thresholdIntervals(distances_tsd , inner_limit , 'Direction' , 'Above');
+ZoneEpoch_Inner = thresholdIntervals(distances_tsd , inner_limit , 'Direction' , 'Below');
+Temp1 = thresholdIntervals(distances_tsd , specific_inner_limit , 'Direction' , 'Above');
+Temp2 = thresholdIntervals(distances_tsd , specific_outer_limit , 'Direction' , 'Below');
+ZoneEpoch_Specific = and(Temp1,Temp2);
 
 if figure_flag == 1
     figure;
@@ -107,10 +101,10 @@ if figure_flag == 1
         plot(center(1) + specific_inner_radius * cos(theta), center(2) + specific_inner_radius * sin(theta), 'b--', 'LineWidth', 2);
         plot(center(1) + specific_outer_radius * cos(theta), center(2) + specific_outer_radius * sin(theta), 'b-', 'LineWidth', 2);
     else
-        rectangle('Position', [-half_side, -half_side, side_length, side_length], 'EdgeColor', 'k', 'LineWidth', 2);
-        rectangle('Position', [-inner_limit, -inner_limit, 2*inner_limit, 2*inner_limit], 'EdgeColor', 'k', 'LineStyle', '--', 'LineWidth', 2);
-        rectangle('Position', [-specific_inner_limit, -specific_inner_limit, 2*specific_inner_limit, 2*specific_inner_limit], 'EdgeColor', 'b', 'LineStyle', '--', 'LineWidth', 2);
-        rectangle('Position', [-specific_outer_limit, -specific_outer_limit, 2*specific_outer_limit, 2*specific_outer_limit], 'EdgeColor', 'b', 'LineWidth', 2);
+       rectangle('Position', [0, 0, cage_width, cage_height], 'EdgeColor', 'k', 'LineWidth', 2);
+        rectangle('Position', [cage_width * (1 - inner_limit)/2, cage_height * (1 - inner_limit)/2, cage_width * inner_limit, cage_height * inner_limit], 'EdgeColor', 'k', 'LineStyle', '--', 'LineWidth', 2);
+        rectangle('Position', [cage_width * (1 - specific_inner_limit)/2, cage_height * (1 - specific_inner_limit)/2, cage_width * specific_inner_limit, cage_height * specific_inner_limit], 'EdgeColor', 'b', 'LineStyle', '--', 'LineWidth', 2);
+        rectangle('Position', [cage_width * (1 - specific_outer_limit)/2, cage_height * (1 - specific_outer_limit)/2, cage_width * specific_outer_limit, cage_height * specific_outer_limit], 'EdgeColor', 'b', 'LineWidth', 2);
     end
 %     
 %     theta = linspace(0, 2*pi, 100);

@@ -123,7 +123,7 @@ sizeMap2 = 1000;
 % end
 
 
-
+figure
 for group = 4:5
     if group == 4
         Mouse_names = Mouse_names_SalHC;
@@ -140,37 +140,39 @@ for group = 4:5
         load('behavResources.mat')
         
         satisfied = 0;
+        rotate = 0;
         while satisfied ==0
             
-            X=Data(Xtsd);Y=Data(Ytsd);
-            XRotate = -Data(Ytsd);
-            YRotate = -Data(Xtsd);
-            figure
-            %             imagesc(double(ref)), colormap jet, hold on
-            plot(X,Y)
-            
-            title('give 3 corners : bottom left, bottom right and top left')
-            [x,y] = ginput(3);
-            
-            close all
-            
-            AlignedXtsd = tsd(Range(Xtsd),(XRotate-x(1))./(x(2)-x(1))*1.6);
-            AlignedYtsd = tsd(Range(Ytsd),(YRotate-y(1))./(y(3)-y(1)));
-            
-            AlignedXtsd = tsd(Range(Xtsd),(X-x(1))./(x(2)-x(1)));
-            AlignedYtsd = tsd(Range(Ytsd),(Y-y(1))./(y(3)-y(1)));
-            
-            figure, hold on
-            %             plot(Data(AlignedXtsd),Data(AlignedYtsd))
-            plot(Data(AlignedYtsd),Data(AlignedXtsd))
-            
-            vline(0)
-            vline(1)
-            hline(0)
-            hline(1.6)
-            
-            satisfied = input('Satisfied?')
+                            polygon = GetCageEdgesWithoutVideo(Data(Ytsd),Data(Xtsd));
+                x = polygon.Position(:,2);
+                y = polygon.Position(:,1);
+                if abs(x(1)-x(2))>abs(x(3)-x(2))
+                    Coord1 = [x(1)-x(2),y(1)-y(2)];
+                    Coord2 = [x(3)-x(2),y(3)-y(2)];
+                else
+                    Coord2 = [x(1)-x(2),y(1)-y(2)];
+                    Coord1 = [x(3)-x(2),y(3)-y(2)];
+                end
+                TranssMat = [Coord1',Coord2'];
+                XInit = Data(Behav.Xtsd).*Ratio_IMAonREAL-x(2);
+                YInit = Data(Behav.Ytsd).*Ratio_IMAonREAL-y(2);
+                
+                % The Xtsd and Ytsd in new coordinates
+                A = ((pinv(TranssMat)*[XInit,YInit]')');
+                AlignedXtsd = tsd(Range(Xtsd),40*A(:,1));
+                AlignedYtsd = tsd(Range(Ytsd),20*A(:,2));
+                clf
+                %
+                plot(Data(Restrict(AlignedYtsd,PreSleep)),Data(Restrict(AlignedXtsd,PreSleep)))
+                xlim([0 20])
+                ylim([0 40])
+                
+                satisfied = input('happy?')
+                clf
         end
+        close all
+        save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd','-append');
+        
     end
 end
 

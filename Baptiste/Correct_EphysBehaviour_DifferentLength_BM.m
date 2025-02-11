@@ -5,18 +5,26 @@ max(Range(LFP,'s'))
 load('behavResources.mat', 'Xtsd')
 max(Range(Xtsd,'s'))
 load('behavResources_SB.mat')
-max(Start(Behav.ZoneEpoch{3},'s'))
-
+for i=1:5
+    p(i) = max(Start(Behav.ZoneEpoch{i},'s'));
+end
+p_max = max(p)
 
 %%
+
 load('LFPData/LFP0.mat')
 
+% If LFP is the smallest
 Epoch = intervalSet(0,max(Range(LFP)));
 
+% If behaviour is the smallest
+Epoch = intervalSet(0,max(Range(Xtsd)));
+
+% If zone is the smallest
+Epoch = intervalSet(0,p_max*1e4-1);
+
 LFP = Restrict(LFP,Epoch);
-
 save('LFPData/LFP0.mat','LFP')
-
 
 load('behavResources.mat', 'Xtsd','Ytsd','Vtsd', 'Imdifftsd' ,'FreezeEpoch', 'ZoneEpoch')
 load('behavResources_SB.mat', 'Behav')

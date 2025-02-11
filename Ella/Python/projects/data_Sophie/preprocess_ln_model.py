@@ -109,6 +109,56 @@ def generate_variable_shift_combinations(variables, max_shifts):
     return variables_shifts
 
 
+# def extract_random_bouts(data, bout_length=10, percent=10, random_state=42):
+#     """
+#     Extract random bouts of data for testing and keep the rest for training.
+
+#     Parameters:
+#     - data (pd.DataFrame): Input data.
+#     - bout_length (int): Length of each bout.
+#     - percent (float): Percent of data to allocate to testing.
+#     - random_state (int, optional): Random seed for reproducibility. Default is 42.
+
+#     Returns:
+#     - train_data (pd.DataFrame): Data for training.
+#     - test_data (pd.DataFrame): Data for testing.
+#     """
+#     if not 0 < percent < 100:
+#         raise ValueError("Percent must be between 0 and 100.")
+    
+#     if bout_length <= 0:
+#         raise ValueError("Bout length must be greater than 0.")
+    
+#     # Clean the data by dropping rows with at least one NaN value
+#     data_cleaned = data.dropna()
+    
+#     # Set random seed for reproducibility
+#     rng = np.random.default_rng(seed=random_state)
+    
+#     # Calculate the total number of test samples
+#     n_samples = len(data_cleaned)
+#     total_test_samples = int((percent / 100) * n_samples)
+    
+#     if total_test_samples < bout_length:
+#         raise ValueError("Total test samples are less than bout length. Adjust bout length or percent.")
+    
+#     # Generate random starting indices for bouts
+#     num_bouts = total_test_samples // bout_length
+#     possible_indices = np.arange(0, n_samples - bout_length + 1)
+#     bout_start_indices = rng.choice(possible_indices, size=num_bouts, replace=False)
+    
+#     # Generate test indices from the bout starts
+#     test_indices = set()
+#     for start in bout_start_indices:
+#         test_indices.update(range(start, start + bout_length))
+    
+#     # Create train and test data
+#     test_data = data_cleaned.iloc[list(test_indices)]
+#     train_data = data_cleaned.drop(index=test_data.index)
+    
+#     return train_data, test_data
+
+
 def extract_random_bouts(data, bout_length=10, percent=10, random_state=42):
     """
     Extract random bouts of data for testing and keep the rest for training.
@@ -128,10 +178,13 @@ def extract_random_bouts(data, bout_length=10, percent=10, random_state=42):
     
     if bout_length <= 0:
         raise ValueError("Bout length must be greater than 0.")
-    
-    # Clean the data by dropping rows with at least one NaN value
-    data_cleaned = data.dropna()
-    
+
+    # Remove columns that are entirely NaN
+    data_filtered = data.dropna(axis=1, how='all')  
+
+    # Drop rows with NaN values but keep all valid columns
+    data_cleaned = data_filtered.dropna()
+
     # Set random seed for reproducibility
     rng = np.random.default_rng(seed=random_state)
     
@@ -157,9 +210,6 @@ def extract_random_bouts(data, bout_length=10, percent=10, random_state=42):
     train_data = data_cleaned.drop(index=test_data.index)
     
     return train_data, test_data
-
-
-
 
 
 
