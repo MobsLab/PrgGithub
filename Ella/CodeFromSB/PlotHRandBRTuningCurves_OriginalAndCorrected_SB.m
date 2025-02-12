@@ -92,9 +92,9 @@ ZScSp2 = ZScSp2(ind,:);
 clf,ha = tight_subplot(11,20,0,0.01,0.01);
 for ind = 1:size(ZScSp,1)
     axes(ha((ind)));
-plot(ZScSp(ind,:),'k')
+plot(ZScSp(:,:),'k')
 hold on
-plot(ZScSp2(ind,:),'r')
+plot(ZScSp2(:,:),'r')
 % pause
 % clf
  set(gca,'XTick',[],'YTick',[])
