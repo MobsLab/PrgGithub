@@ -47,7 +47,7 @@ data = {
     % Shropshire head-fixed
     'Shropshire', 'head-fixed', 'none', 'puretones', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241120_puretones'};
     'Shropshire', 'head-fixed', 'none', 'TCI', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241123_TCI', '20241125_TCI', '20241126_TCI', '20241128_TCI', '20241129_TCI', '20241130_TCI'};
-    'Shropshire', 'head-fixed', 'none', 'resting', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241220_resting', '20241210_resting', '20241211_resting', '20241212_resting', '20241213_resting', '20241214_resting'};
+    'Shropshire', 'head-fixed', 'none', 'resting', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241120_resting', '20241210_resting', '20241211_resting', '20241212_resting', '20241213_resting', '20241214_resting'};
     'Shropshire', 'head-fixed', 'none', 'yves', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241120_yves_train', '20241123_yves_train', '20241125_yves_train', '20241126_yves_train', '20241128_yves_train', '20241129_yves_test', '20241130_yves_test', '20241203_yves_test'};
     'Shropshire', 'head-fixed', 'none', 'contstream', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241209_contstream', '20241210_contstream', '20241211_contstream', '20241212_contstream', '20241213_contstream', '20241214_contstream'};
     'Shropshire', 'head-fixed', 'none', 'TORCs', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241204_TORCs', '20241205_TORCs', '20241206_TORCs', '20241209_TORCs', '20241210_TORCs', '20241211_TORCs', '20241212_TORCs', '20241213_TORCs', '20241214_TORCs'};

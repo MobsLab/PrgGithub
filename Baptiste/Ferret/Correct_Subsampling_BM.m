@@ -360,7 +360,6 @@ sess = sessions.path;
 
 for p=2:length(sess)
     disp(['Calculating ' sess{p} ' ' num2str(length(sess)-p) '/' num2str(length(sess)) ' is left...'])
-    %     cd()
     
     % basal informations regarding session
     clearvars -except path p sess comp_name directory
@@ -369,7 +368,6 @@ for p=2:length(sess)
     FinalFolder = sess{p};
     is_OpenEphys = false;
     cd(FinalFolder)
-    system(['ndm_lfp ' BaseFileName])
     SetCurrentSession([BaseFileName '.xml'])
     InfoLFP = ExpeInfo.InfoLFP;
     
@@ -393,5 +391,7 @@ for p=2:length(sess)
     catch
         disp('problem for lfp')
     end
+    
+    MakeData_Accelero(FinalFolder, 'recompute', 1)
 end
 end
