@@ -8,63 +8,72 @@ function Ferret_Eye_Movement_BM()
 
 %% Manual initialization of sessions (done)
 % User input parameters
-Session_params.session_selection = '20241212_TORCs';
-Session_params.fps = 15;
-
-% Flags
-Session_params.animal_selection = 3;
-Session_params.experiment_type_selection = 1;
-Session_params.pharma_selection = 1;
-Session_params.plt = [0 1]; 
-Session_params.fig_visibility = 'on';
-
-% Parameters       
-Session_params.animal_name = {'Labneh','Brynza', 'Shropshire'};
-Session_params.experiment_type = {'head-fixed', 'freely_moving'};
-Session_params.pharma = {'No pharmacology','Domitor', 'Atropine'};
-datapath = ['/media/nas7/React_Passive_AG/OBG/' Session_params.animal_name{Session_params.animal_selection} '/' Session_params.experiment_type{Session_params.experiment_type_selection} '/' Session_params.session_selection];
+% Session_params.session_selection = '20241212_TORCs';
+% Session_params.fps = 15;
+% 
+% % Flags
+% Session_params.animal_selection = 3;
+% Session_params.experiment_type_selection = 1;
+% Session_params.pharma_selection = 1;
+% Session_params.plt = [0 1]; 
+% Session_params.fig_visibility = 'on';
+% 
+% % Parameters       
+% Session_params.animal_name = {'Labneh','Brynza', 'Shropshire'};
+% Session_params.experiment_type = {'head-fixed', 'freely_moving'};
+% Session_params.pharma = {'No pharmacology','Domitor', 'Atropine'};
+% datapath = ['/media/nas7/React_Passive_AG/OBG/' Session_params.animal_name{Session_params.animal_selection} '/' Session_params.experiment_type{Session_params.experiment_type_selection} '/' Session_params.session_selection];
 
 %% List of sessions
-dataset_path{1} = '/media/nas7/React_Passive_AG/OBG/Labneh/head-fixed/';
-dataset_path{2} = '/media/nas7/React_Passive_AG/OBG/Brynza/head-fixed/';
+Dir = PathForExperimentsOB({'Shropshire', 'Labneh', 'Brynza'}, 'head-fixed');
+sessions = Dir.path';
 
-session_list = {...
-                % Labneh
-                [dataset_path{1} '20230208'];...
-                [dataset_path{1} '20230225'];...
-                [dataset_path{1} '20230227'];...    
-                [dataset_path{1} '20230303'];...
-                [dataset_path{1} '20230307'];...    
-                [dataset_path{1} '20230308'];...
-                [dataset_path{1} '20230315'];...    
-                [dataset_path{1} '20230321'];...
-                [dataset_path{1} '20230323'];...    
-                [dataset_path{1} '20230407'];...
-                [dataset_path{1} '20230418'];...    
-                [dataset_path{1} '20230419'];...
-%                 [dataset_path{1} '20230427'];...    % shit
-                [dataset_path{1} '20230504_1'];...
-                [dataset_path{1} '20230504_2'];...    
-                [dataset_path{1} '20230505_1'];...
-                [dataset_path{1} '20230505_2'];...    
-%                 [dataset_path{1} '20230505_3'];...  % shit
-                [dataset_path{1} '20230508_1'];...    
-                [dataset_path{1} '20230508_2'];...
-                [dataset_path{1} '20230508_3'];...    
-                % Brynza
-%                 [dataset_path{2} '20240124'];...  % shit
-                [dataset_path{2} '20240125'];...    
-                [dataset_path{2} '20240126'];...
-                [dataset_path{2} '20240129'];...    
-                [dataset_path{2} '20240204'];...
-                [dataset_path{2} '20240205'];...    
-                [dataset_path{2} '20240305'];...
-                [dataset_path{2} '20240307'];...    
-                [dataset_path{2} '20240308'];...    
-                };
+k = 1;
+session_dlc = {};
+
+for c = 1:length(sessions)
+    dlc_path = fullfile(sessions{c}, 'DLC'); 
+    files = dir(fullfile(dlc_path, '*_filtered.csv')); % Search for files ending with "_filtered.csv"
+    
+    if ~isempty(files) % Check if there are any matching files
+        session_dlc{k} = sessions{c}; % Store the session path
+        k = k + 1;
+    else
+        disp([Dir.path{c} ' - No DLC found']);
+    end
+end
+
+session_dlc = session_dlc';
+
+%% Synchronize LFP and DLC
+% Produces synced timeline in DLC_data.mat
+for sess = 2:length(session_dlc)
+    % cd(session_dlc{1})
+    disp(['Running session: ' session_dlc{sess}])
+    disp('Syncing DLC and Ephys...')
+    sync_video_ob(session_dlc{sess})
+end
+    %% Do the basic DLC pre-processing
+    % Produces raw behavioural variables in DLC_data.mat
+%     cd(session_dlc{sess})
+for sess = 1:length(session_dlc)
+    disp('Analysing DLC data...')
+    OB_face_analysis_DLC(session_dlc{sess})
+end  
+    
+    %% Correlate brain signals with pupil size
+    cd(session_dlc{sess})
+    disp('Running pupil-brain correlation analysis...')
+    gamma_pupil_corr(Session_params, session_dlc{sess})
+end
+
+%% Under construction: Generate composition video
+cd(session_dlc{sess})
+
+composition_video_OB_DLC_ferret
 
 %% Template to run scripts for the full dataset
-allCorrelations = NaN(6, length(session_list), 8); % 27 sessions, 8 epochs
+allCorrelations = NaN(6, length(session_list), 8);
 allPValues = NaN(6, length(session_list), 8);
 
 for sess = 1:length(session_list)
@@ -101,27 +110,6 @@ for sess = 1:length(session_list)
 
 end
 
-%% Synchronize LFP and DLC
-% Produces synced timeline in DLC_data.mat
-cd(datapath)
-disp('Syncing DLC and Ephys...')
-sync_video_ob(Session_params, datapath)
-
-%% Do the basic DLC pre-processing
-% Produces raw behavioural variables in DLC_data.mat
-cd(datapath)
-disp('Analysing DLC data...')
-OB_face_analysis_DLC(Session_params, datapath)
-
-%% Correlate brain signals with pupil size
-cd(datapath)
-disp('Running pupil-brain correlation analysis...')
-gamma_pupil_corr(Session_params, datapath)
-
-%% Under construction: Generate composition video
-cd(datapath)
-
-composition_video_OB_DLC_ferret
 
 %% Under construction: Manual correction of outlier DLC scoring frames
 % it could work but I was lazy and decided to smooth data instead AG 05/11/24

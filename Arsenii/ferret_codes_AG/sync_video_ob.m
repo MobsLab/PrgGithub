@@ -1,4 +1,4 @@
-function sync_video_ob(Session_params, datapath)
+function sync_video_ob(datapath)
 %%%%%% synchronisation of videos and OB signal %%%%%%%%%
 
 % ToDo:
@@ -13,36 +13,81 @@ function sync_video_ob(Session_params, datapath)
 %% Load data
 % Load LFP
 % load('ExpeInfo.mat')
-cd(datapath)
-if Session_params.animal_selection == 1 % Labneh
-    for l = [42] % vtrig
-        load(['LFPData/LFP' num2str(l) '.mat'])
-        LFP_ferret{l} = LFP;
-    end
-elseif Session_params.animal_selection == 2 % Brynza
-    for l = [42] % vtrig
-        load(['LFPData/LFP' num2str(l) '.mat'])
-        LFP_ferret{l} = LFP;
-    end
-elseif Session_params.animal_selection == 3 % Shropshire
+% cd(datapath)
+% thresholdIntervals
+Session_params.plt = 0;
+if contains(datapath, 'Shropshire')
     for l = [112] % vtrig
-        load(['LFPData/LFP' num2str(l) '.mat'])
+        load([datapath '/LFPData/LFP' num2str(l) '.mat'])
         LFP_ferret{l} = LFP;
     end
-    
+elseif contains(datapath, 'Brynza')
+    for l = [42] % vtrig
+        load([datapath '/LFPData/LFP' num2str(l) '.mat'])
+        LFP_ferret{l} = LFP;
+    end
+elseif contains(datapath, 'Labneh')
+    for l = [42] % vtrig
+        load([datapath '/LFPData/LFP' num2str(l) '.mat'])
+        LFP_ferret{l} = LFP;
+    end
 end
 
-% Load video .csv
-cd([datapath '/DLC'])
-file=dir('*frames.csv');
-data_csv = csvread(fullfile([datapath '/DLC'],file.name)); %loads the csv from line 3 to the end (to skip the Header)
+% % Load video .csv
+dlc_path = fullfile(datapath, '/DLC');
+files = dir(fullfile(dlc_path, '*frames.csv'));
+data_csv = csvread(fullfile(dlc_path, files.name)); %loads the csv from line 3 to the end (to skip the Header)
 
 % Define the time scales
-time_lfp = Range(LFP_ferret{l}, 's');
+time_lfp = Range(LFP_ferret{l});
+
 % time_trig = data_csv;
 % time_trig = time_trig - time_trig(1);
+% 
+%% New version (doesn't work well) in ts
+time_lfp = Range(LFP_ferret{l});
 
-%% find triggers and events
+% trig_onset = thresholdIntervals(LFP_ferret{l}, 1e4, 'Direction','Above');
+
+trig_onset = Start(thresholdIntervals(LFP_ferret{l}, 1e4, 'Direction','Above'));
+if trig_onset(1) ~= 0
+    time_1st_trig = trig_onset(1);
+elseif trig_onset(1) == 0
+    trig_onset(1) = [];
+    time_1st_trig = trig_onset(1);
+end
+
+disp([num2str(time_1st_trig/1e4) ' s'])
+
+[found, indices] = ismember(trig_onset, time_lfp);
+peak_indices_new = indices(found);
+
+time_trig = trig_onset;
+
+% time_1st_trig_new = time_lfp(peak_indices_new(1));
+% save([datapath '/DLC/DLC_data.mat'], 'time_1st_trig', 'time_trig', '-append');
+
+%YB
+% time_trig = time_lfp(peak_indices)-time_1st_trig;
+% time_trig = time_lfp(peak_indices);
+
+% 
+% % Save data
+if exist([datapath '/DLC/DLC_data.mat'])
+    save([datapath '/DLC/DLC_data.mat'], 'time_1st_trig', 'time_trig', '-append');
+else
+    save([datapath '/DLC/DLC_data.mat'], 'time_1st_trig', 'time_trig');
+end
+
+missing_values  = [];
+for i = 1:length(B)
+    if all(abs(A-B(i))> tolerance)
+        missing_values = [missing_values; i];
+    end
+end
+
+%% Old version:
+% find triggers and events
 LFP_trig_data = Data(LFP_ferret{l});
 
 tmp = diff(LFP_trig_data);
@@ -64,7 +109,7 @@ for i = 2:num_points
 end
 event_indices = [event_indices, num_points];
 
-%% Select the peak value for each event
+% Select the peak value for each event
 num_events = numel(event_indices) - 1;
 peak_values = nan(num_events, 1);
 peak_indices = nan(num_events, 1);
@@ -94,7 +139,7 @@ if find(isnan(peak_indices)) == size(peak_indices,1)
 end
 
 
-%% Control plots
+% Control plots
 if Session_params.plt(1) == 1
     % Plot the triggers with peak indices
     figure;
@@ -118,7 +163,7 @@ if Session_params.plt(1) == 1
     grid on;
 end
 
-%% Inter-peak interval and outliers (modify the threshold)
+% Inter-peak interval and outliers (modify the threshold)
 % Calculate interpeak intervals
 interpeak_intervals = diff(peak_indices);
 
@@ -132,7 +177,7 @@ threshold = 3;
 outlier_indices = find(z_scores > threshold | z_scores < -threshold);
 outlier_intervals = interpeak_intervals(outlier_indices);
 
-%% Control plots
+% Control plots
 if Session_params.plt(1) == 1
     
     % Plot the histogram of interpeak intervals with outliers
@@ -163,7 +208,7 @@ if Session_params.plt(1) == 1
     figure; plot(LFP_trig_data); hold on; scatter(peak_indices, peak_values, 'r', 'filled')
     
 end
-%%
+%
 % time_csv_trig_tmp = time_trig + time_1st_trig;
 % time_lfp_trig_tmp = time_lfp(peak_indices);
 % 
@@ -176,7 +221,7 @@ end
 %     
 %     disp([num2str(diff_csv_lfp_trigs(end)*1e3) ' ms'])
 % end
-%% remove the outlier (the first one)
+% remove the outlier (the first one)
 % Check if the first peak is an outlier
 
 if ismember(1, outlier_indices)
@@ -203,14 +248,14 @@ time_1st_trig = time_lfp(peak_indices(1));
 % time_trig = time_lfp(peak_indices)-time_1st_trig;
 time_trig = time_lfp(peak_indices);
 
-%% Save data
-if exist('DLC_data.mat')
-    save(['DLC_data.mat'], 'time_1st_trig', 'time_trig', '-append');
+% Save data
+if exist([datapath '/DLC/DLC_data.mat'])
+    save([datapath '/DLC/DLC_data.mat'], 'time_1st_trig', 'time_trig', '-append');
 else
-    save(['DLC_data.mat'], 'time_1st_trig', 'time_trig');
+    save([datapath '/DLC/DLC_data.mat'], 'time_1st_trig', 'time_trig');
 end
 
-%% control plots
+% control plots
 if Session_params.plt(1) == 1
     figure;
     plot(time_lfp, LFP_trig_data);
@@ -227,7 +272,7 @@ if Session_params.plt(1) == 1
     % Display the plot
     grid on;
     
-    %% sync DLC and triggers
+% sync DLC and triggers
 %     figure;
 %     grid on;
 %     subplot(4, 1, 1)
@@ -262,7 +307,9 @@ if Session_params.plt(1) == 1
     
 end
 
-%% study the mismatch between the video csv time stamps and timestamps extracted from trigger LFP
+disp([num2str(time_1st_trig/1e4) ' s; nframes d: ' num2str(length(time_trig)-length(data_csv))])
+
+% study the mismatch between the video csv time stamps and timestamps extracted from trigger LFP
 % if you have 10 fps, then every lag <100ms is fine
 
 % time_csv_trig_tmp = time_trig + time_1st_trig;

@@ -45,7 +45,7 @@ Dir.name = {};
 % Session data (add paths and session names)
 data = {
     % Shropshire head-fixed
-    'Shropshire', 'head-fixed', 'none', 'puretones', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241220_puretones'};
+    'Shropshire', 'head-fixed', 'none', 'puretones', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241120_puretones'};
     'Shropshire', 'head-fixed', 'none', 'TCI', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241123_TCI', '20241125_TCI', '20241126_TCI', '20241128_TCI', '20241129_TCI', '20241130_TCI'};
     'Shropshire', 'head-fixed', 'none', 'resting', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241220_resting', '20241210_resting', '20241211_resting', '20241212_resting', '20241213_resting', '20241214_resting'};
     'Shropshire', 'head-fixed', 'none', 'yves', '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed', {'20241120_yves_train', '20241123_yves_train', '20241125_yves_train', '20241126_yves_train', '20241128_yves_train', '20241129_yves_test', '20241130_yves_test', '20241203_yves_test'};
