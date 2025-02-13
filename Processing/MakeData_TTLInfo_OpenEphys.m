@@ -1,4 +1,4 @@
-function TTLInfo = MakeData_TTLInfo_OpenEphys(File, sync_folder, ExpeInfo)
+function TTLInfo = MakeData_TTLInfo_OpenEphys(sync_folder, ExpeInfo)
 
 % This function creates timestamps of ONOFF and Stim TTL events from OpenEphys
 % 
@@ -29,11 +29,10 @@ oebin = fileread([sync_folder '/structure.oebin']);
 [~, sr_id] = regexp(oebin,'"sample_rate": ');
 samplingrate = str2double(oebin(sr_id(1)+1:sr_id(1)+5));
 
-% Start time
+% Start time - modification SB 12/02/2024
+cd([sync_folder 'continuous/OE_FPGA_Acquisition_Board-109.Rhythm Data-B/'])
 sync = readNPY('timestamps.npy');
 starttime = sync(1);
-
-
 
 % AG has had issue with loading large files, so below is for him (2025/01/12)
 % special_sync_folders = { ...
@@ -54,17 +53,21 @@ starttime = sync(1);
 
 
 
+%% load file  - modification SB 12/02/2024
+cd([sync_folder 'events/OE_FPGA_Acquisition_Board-109.Rhythm Data-B/TTL'])
+channel_states = readNPY('states.npy');
+full_words = readNPY('full_words.npy');
+timestamps = readNPY('timestamps.npy');
 
-%% load file
 % Check if the sync_folder is in the special list
-if ismember(sync_folder, special_sync_folders)
-   channel_states = h5read(File, '/channel_states');
-   channels = h5read(File, '/channels');
-   full_words = h5read(File, '/full_words');
-   timestamps = h5read(File, '/timestamps');
-else
-    load(File);
-end
+% if ismember(sync_folder, special_sync_folders)
+%    channel_states = h5read(File, '/channel_states');
+%    channels = h5read(File, '/channels');
+%    full_words = h5read(File, '/full_words');
+%    timestamps = h5read(File, '/timestamps');
+% else
+%     load(File);
+% end
 
 %% Loop over all possible dig inputs
 for dig = 1:length(ExpeInfo.DigID)
@@ -74,18 +77,23 @@ for dig = 1:length(ExpeInfo.DigID)
         id_off = find(channel_states == -dig);
         
         if length(id_on) == 1
-            TTLInfo.StartSession = double((timestamps(id_on) - starttime))/samplingrate*1e4;
+            TTLInfo.StartSession = double((timestamps(id_on) - starttime)*1e4);
         else
             TTLInfo.StartSession = 0;
             warning('You syncroniztion will not be precise!!! You had to start recording before start of tracking!!!')
         end
-        TTLInfo.StopSession = double((timestamps(id_off) - starttime))/samplingrate*1e4;
+        TTLInfo.StopSession = double((timestamps(id_off) - starttime))*1e4;
         
-    elseif strcmp(ExpeInfo.DigID{dig},'STIM')
+    else
+       
+        DigName = (ExpeInfo.DigID{dig});
+        DigName = strrep(DigName,'+','pl');
+        DigName = strrep(DigName,'-','mn');
+        
         id_stimon = find(channel_states == dig);
         
-        TTLInfo.StimEpoch = intervalSet(double((timestamps(id_stimon) - starttime))/samplingrate*1e4, ...
-            double((timestamps(id_stimon)) - starttime)/samplingrate*1e4);
+        TTLInfo.(DigName) = intervalSet(double((timestamps(id_stimon) - starttime))*1e4, ...
+            double((timestamps(id_stimon)) - starttime)*1e4);
         
     end
 end

@@ -44,10 +44,14 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
                 
                 disp(['File starts at ' num2str(TimeBeginRec_Allfiles(f,1:3)) ' and ends at ' num2str(TimeEndRec_Allfiles(f,1:3))])
                 
-                %% Make TTLInfo
-                TTLInfo_sess{f} = MakeData_TTLInfo_OpenEphys([ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{f}(1:out_ind-1) ...
-                    'events/Rhythm_FPGA-100.0_TTL_1.mat'],ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{f}(1:out_ind-1),...
+                %% Make TTLInfo - modification SB 12/02/2024
+%                 TTLInfo_sess{f} = MakeData_TTLInfo_OpenEphys([ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{f}(1:out_ind-1) ...
+%                     'events/Rhythm_FPGA-100.0_TTL_1.mat'],ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{f}(1:out_ind-1),...
+%                     ExpeInfo);
+                
+                   TTLInfo_sess{f} = MakeData_TTLInfo_OpenEphys(ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{f}(1:out_ind-1),...
                     ExpeInfo);
+
 
                 %% here is the place where we check if the ephys is the right length comapred to the behav resources - to do
                 

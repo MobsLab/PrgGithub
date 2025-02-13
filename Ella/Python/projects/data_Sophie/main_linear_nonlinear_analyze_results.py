@@ -29,10 +29,14 @@ from plot_results_linear_nonlinear_model import (
 from analyse_ln_results import (
     filter_neurons_by_mean_firing_rate
     )
+from save_plots import (
+    save_plot_as_svg
+    )
 
 # %% Load data
 
 load_path = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/'
+figures_directory = load_path + 'figures/linear_nonlinear_model'
 
 maze_denoised_data = load_results(load_path + 'maze_denoised_data.pkl')
 maze_spike_times_data = load_results(load_path + 'maze_spike_times_data.pkl')
@@ -55,15 +59,18 @@ results_ln_loaded = load(load_path + 'all_results_ln_model_rs30.joblib')
 
 r2_dataframe = extract_r2_values(results_ln_loaded)
 
-plot_r2_means_sem(results_ln_loaded, r2_type='train')
-plot_r2_means_sem(results_ln_loaded, r2_type='test')
+r2_train_bp = plot_r2_means_sem(results_ln_loaded, r2_type='train')
+r2_test_bp = plot_r2_means_sem(results_ln_loaded, r2_type='test')
 # plot_r2_means_sem(results_ln_loaded_bis, r2_type='test')
-
 
 plot_mean_firing_rate_vs_r2(results_ln_loaded, spike_counts, separate_subplots=False, r2_type='train')
 
 plot_r2_comparison(results_ln_loaded, model_1='BF', model_2='HR', r2_type = 'train')
 plot_r2_comparison(results_ln_loaded, model_1='motion', model_2='BFmotion', r2_type='test')
+
+
+save_plot_as_svg(figures_directory, 'r2_train_bp', r2_train_bp)
+save_plot_as_svg(figures_directory, 'r2_test_bp', r2_test_bp)
 
 
 # %% Sort neurons according to firing rate
