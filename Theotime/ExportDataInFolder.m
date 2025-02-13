@@ -16,7 +16,10 @@ Folder = '~/Dropbox/Mobs_member/Theotime De Charrin/data/';
 function [data, idx] = loadAndSaveCSV(filePath, varName, varargin)
 p = inputParser;
 defaultwindowFlag = false;
+defaultforceFlag = false;
 addOptional(p,'window',defaultwindowFlag);
+addOptional(p,'force',defaultforceFlag);
+
 parse(p,varargin{:});
 windowFlag = p.Results.window;
 csvData = csvread(filePath);
@@ -25,10 +28,11 @@ data = csvData(2:end, 2);
 eval([strcat('idx', varName) '= idx;']);
 eval([varName '= data;']);
 if ~windowFlag
-    save([varName '.mat'], strcat('idx', varName), strcat(varName));
-else
-    save([varName windowFlag '.mat'], strcat('idx', varName), strcat(varName));
-end
+    if isfi
+        save([varName '.mat'], strcat('idx', varName), strcat(varName));
+    else
+        save([varName windowFlag '.mat'], strcat('idx', varName), strcat(varName));
+    end
 end
 
 
@@ -252,4 +256,4 @@ for imouse = 1:length(Dir.path)
 
 end
 save([Folder 'nnAllParams.mat'], '-struct','all_params');
-disp(['Your params were saved under' Folder 'nnAllParams.mat'])
+disp(['Your params were saved under ' Folder 'nnAllParams.mat'])

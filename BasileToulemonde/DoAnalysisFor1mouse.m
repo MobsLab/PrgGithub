@@ -1,4 +1,4 @@
-function R=DoAnalysisFor1mouse(DirAnalyse,DirAnalyse2,dur,removemissingPoint,movEp)
+²function R=DoAnalysisFor1mouse(DirAnalyse,DirAnalyse2,dur,removemissingPoint,movEp)
 
 
 try

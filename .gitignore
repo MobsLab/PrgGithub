@@ -10,3 +10,7 @@ __pycache__*
 *.pyd 
 *.swp 
 .directory
+tmp*
+*tmp.m
+*test.m
+test*

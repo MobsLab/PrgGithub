@@ -21,6 +21,11 @@ nameMice=[];
 nameTreatment=[];
 nameSession=[];
 
+if strcmp(varargin(2), 'all')
+    DirR = Dir;
+    return
+end
+
 if strcmp(varargin(1),'Group')
     temp=varargin{2};
     try temp{1};nameGroup=temp; catch, nameGroup{1}=temp;end
@@ -42,8 +47,9 @@ elseif  strcmp(varargin(1),'Treatment')
     try tempT{1};nameTreatment=tempT; catch, nameTreatment{1}=tempT;end
     tempT=[]; for nt=1:length(nameTreatment), tempT=[tempT,' ',nameTreatment{nt},' +'];end
     disp(['Getting Treatments',tempT(1:end-1),' from Dir'])
+
 else
-    error('accepted vargin = ''Group'' or ''nMice'' or ''Treatment''')
+    error('accepted vargin = ''Group'' or ''nMice'' or ''Treatment'' or ''all''')
 end
 
 
@@ -115,6 +121,7 @@ for nn=1:length(nameMice)
     
     if sum(strcmp(unique(Dir.name),nameM))==0
         disp(['No ',nameM,' in Dir'])
+        continue
     else
         index=find(strcmp(Dir.name,nameM));
         idx = [idx index];

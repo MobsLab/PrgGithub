@@ -11,6 +11,7 @@ function saveResults(dirAnalysis1, dirAnalysis2)
         LossPredTsd36tot=tsd(tps36,lossPredtot36);
         save(strcat(dirAnalysis1,'/DataPred36'), 'TimeStepsPred36', 'LinearTrue36', 'LinearPred36', 'TimeStepsPredPreSleep36', 'TimeStepsPredPostSleep36', 'LinearPredPreSleep36', 'LinearPredPostSleep36', 'LossPred36', 'LossPredPreSleep36', 'LossPredPostSleep36', 'LossPredTsd36', 'LossPredPreSleepTsd36', 'LossPredPostSleepTsd36', 'LinearTrueTsd36', 'LinearPredTsd36', 'LinearPredPreSleepTsd36', 'LinearPredPostSleepTsd36', 'LinearPredTsd36tot','LossPredTsd36tot', 'XpredTsd36', 'YpredTsd36')
 
+        try
         [TimeStepsPred200,LinearTrue200,LinearPred200,TimeStepsPredPreSleep200,TimeStepsPredPostSleep200,LinearPredPreSleep200,LinearPredPostSleep200,LossPred200, LossPredPreSleep200,LossPredPostSleep200,LossPredTsd200, LossPredPreSleepTsd200,LossPredPostSleepTsd200,LinearTrueTsd200, LinearPredTsd200,LinearPredPreSleepTsd200,LinearPredPostSleepTsd200,XpredTsd200,YpredTsd200] = importResultsf(dirAnalysis1, dirAnalysis2, 200);
         tps200=[TimeStepsPredPreSleep200;TimeStepsPred200;TimeStepsPredPostSleep200]*1E4;
         linearPred200tot=[LinearPredPreSleep200;LinearPred200;LinearPredPostSleep200];
@@ -24,6 +25,8 @@ function saveResults(dirAnalysis1, dirAnalysis2)
         dist2Wall = distanceToTheWall(dirAnalysis1);
         dist2WallTsd = tsd(TimeStepsPred200*1E4,dist2Wall);
         save(strcat(dirAnalysis1,'/DataPred200'), 'TimeStepsPred200', 'LinearTrue200', 'LinearPred200', 'TimeStepsPredPreSleep200', 'TimeStepsPredPostSleep200', 'LinearPredPreSleep200', 'LinearPredPostSleep200', 'LossPred200', 'LossPredPreSleep200', 'LossPredPostSleep200', 'LossPredTsd200', 'LossPredPreSleepTsd200', 'LossPredPostSleepTsd200', 'LinearTrueTsd200', 'LinearPredTsd200', 'LinearPredPreSleepTsd200', 'LinearPredPostSleepTsd200','LinearPredTsd200tot','LossPredTsd200tot', 'XpredTsd200', 'YpredTsd200', 'dist2WallTsd') 
+        catch
+        end
         
         [TimeStepsPred504,LinearTrue504,LinearPred504,TimeStepsPredPreSleep504,TimeStepsPredPostSleep504,LinearPredPreSleep504,LinearPredPostSleep504,LossPred504, LossPredPreSleep504,LossPredPostSleep504,LossPredTsd504, LossPredPreSleepTsd504,LossPredPostSleepTsd504,LinearTrueTsd504, LinearPredTsd504,LinearPredPreSleepTsd504,LinearPredPostSleepTsd504,XpredTsd504,YpredTsd504] = importResultsf(dirAnalysis1, dirAnalysis2, 504);
         tps504=[TimeStepsPredPreSleep504;TimeStepsPred504;TimeStepsPredPostSleep504]*1E4;
