@@ -132,16 +132,16 @@ epoch=subset(SWSEpoch,k);SWSEpoch2=SWSEpoch2-epoch;REMEpoch2=or(REMEpoch2,epoch)
 % clear REMEpoch SWSEpoch Wake
 % REMEpoch=REMEpoch2; SWSEpoch=SWSEpoch2; Wake=Wake2;
 % save('SleepScoring_Accelero.mat','REMEpoch_old','SWSEpoch_old','Wake_old','REMEpoch','SWSEpoch','Wake','-append')
-save('SleepScoring_Accelero.mat','REMEpoch','SWSEpoch','Wake','-append')
+% save('SleepScoring_Accelero.mat','REMEpoch','SWSEpoch','Wake','-append')
 
 
 % 
-limREM=1; 
-REMEpoch = mergeCloseIntervals(REMEpoch, limREM*1e4); SWSEpoch=SWSEpoch-REMEpoch; Wake=Wake-REMEpoch;
-limSWS=1; 
-SWSEpoch = mergeCloseIntervals(SWSEpoch, limSWS*1e4); REMEpoch=REMEpoch-SWSEpoch; Wake=Wake-SWSEpoch;
-limWake=1; 
-Wake = mergeCloseIntervals(Wake, limWake*1e4); SWSEpoch=SWSEpoch-Wake; REMEpoch=REMEpoch-Wake;
+% limREM=1; 
+% REMEpoch = mergeCloseIntervals(REMEpoch, limREM*1e4); SWSEpoch=SWSEpoch-REMEpoch; Wake=Wake-REMEpoch;
+% limSWS=1; 
+% SWSEpoch = mergeCloseIntervals(SWSEpoch, limSWS*1e4); REMEpoch=REMEpoch-SWSEpoch; Wake=Wake-SWSEpoch;
+% limWake=1; 
+% Wake = mergeCloseIntervals(Wake, limWake*1e4); SWSEpoch=SWSEpoch-Wake; REMEpoch=REMEpoch-Wake;
 
 
 
