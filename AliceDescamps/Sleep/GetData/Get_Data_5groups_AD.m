@@ -221,15 +221,21 @@ tempbin = 3600; %bin size to plot variables overtime
 % tempbin = 7200; %bin size to plot variables overtime
 
 time_st = 0*3600*1e4; %begining of the sleep session
-time_end=3*1e8;  %end of the sleep session
+% time_end=3*1e8;  %end of the sleep session
+time_end=3.25*1e8;  %end of the sleep session
 
-time_mid_end_first_period = 1.5*3600*1e4;
-% time_mid_end_first_period = 2.5*3600*1e4;
-% time_mid_end_first_period = 8*3600*1e4;
-time_mid_end_snd_period = 3.3*3600*1e4;
-% time_mid_end_snd_period = 5*3600*1e4;
-% time_mid_end_snd_period = 5.5*3605,[20]0*1e4;
-% time_mid_end_snd_period = 8.1*3600*1e4;
+%Injection at 10am
+% time_mid_end_first_period = 1.5*3600*1e4;
+% % time_mid_end_first_period = 2.5*3600*1e4;
+% % time_mid_end_first_period = 8*3600*1e4;
+% time_mid_end_snd_period = 3.3*3600*1e4;
+% % time_mid_end_snd_period = 5*3600*1e4;
+% % time_mid_end_snd_period = 5.5*3605,[20]0*1e4;
+% % time_mid_end_snd_period = 8.1*3600*1e4;
+
+%Injection at 1pm
+time_mid_end_first_period = 1.4*1E8;
+time_mid_end_snd_period = 1.65*1E8;
 
 lim_short_rem_1 = 25; %25 take all rem bouts shorter than limit
 lim_short_rem_2 = 15;
