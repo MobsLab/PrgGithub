@@ -1,24 +1,29 @@
 Reorder = 1;
 SmoFact = 2;
 cd /media/DataMOBsRAIDN/ProjectEmbReact/Data_ella
+
+%% Plot tuning curves
 load('BF_tuning.mat')
-subplot(221)
+% subplot(221)
+subplot(121)
 ZScSp = smooth2a(nanzscore(original')',0,SmoFact);
 [val,ind]= max(ZScSp');
 [~,ind]= sort(ind);
 if Reorder ==0
     ind = 1:length(ind);
 end
-imagesc(FreqLims,1:length(ind),ZScSp(ind,:))
+FreqLimsBF=2:11;
+imagesc(FreqLimsBF,1:length(ind),ZScSp(ind,:))
 colormap parula
 xlabel('OB Frequency')
 ylabel('# SU ordered by preferred frequency')
 title('original')
 caxis([-2 2])
 
-subplot(222)
+% subplot(222)
+subplot(122)
 ZScSp = smooth2a(nanzscore(motion')',0,SmoFact);
-imagesc(FreqLims,1:length(ind),ZScSp(ind,:))
+imagesc(FreqLimsBF,1:length(ind),ZScSp(ind,:))
 colormap parula
 xlabel('OB Frequency')
 ylabel('# SU ordered by preferred frequency')
@@ -26,11 +31,13 @@ title('corrected')
 caxis([-2 2])
 
 load('HR_tuning.mat')
-subplot(223)
+% subplot(223)
+subplot(121)
 ZScSp = smooth2a(nanzscore(original')',0,SmoFact);
 [val,ind]= max(ZScSp');
 [~,ind]= sort(ind);
-imagesc(8.2:12.2,1:length(ind),ZScSp(ind,:))
+FreqLimsHR = 8.2:12.2;
+imagesc(FreqLimsHR,1:length(ind),ZScSp(ind,:))
 colormap parula
 xlabel('HR Frequency')
 ylabel('# SU ordered by preferred frequency')
@@ -38,9 +45,10 @@ title('original')
 caxis([-1.5 1.5])
 
 
-subplot(224)
+% subplot(224)
+subplot(122)
 ZScSp = smooth2a(nanzscore(motion')',0,SmoFact);
-imagesc(FreqLims,1:length(ind),ZScSp(ind,:))
+imagesc(FreqLimsHR,1:length(ind),ZScSp(ind,:))
 if Reorder ==0
     ind = 1:length(ind);
 end
@@ -101,11 +109,12 @@ plot(ZScSp2(:,:),'r')
 makepretty
 end
 
+%% 
 
 figure
 subplot(211)
 load('BF_tuning.mat')
-plot(nanmean(zscore(original(ind,:)' - motion(ind,:)')')')
+plot(nanmean(zscore(original(:,:)' - motion(:,:)')')')
 ylim([-1.5 1.5])
 line(xlim,[0 0])
 line(xlim,[0 0],'color','k')
@@ -113,13 +122,13 @@ title('HR')
 ylabel('diff original - corrected')
 title('BR')
 makepretty
-subplot(211)
-load('BF_tuning.mat')
-plot(nanmean(zscore(original(ind,:)' - motion(ind,:)')')')
+subplot(212)
+load('HR_tuning.mat')
+plot(nanmean(zscore(original(:,:)' - motion(:,:)')')')
 ylim([-1.5 1.5])
 line(xlim,[0 0])
 line(xlim,[0 0],'color','k')
 title('HR')
 ylabel('diff original - corrected')
-title('BR')
+title('HR')
 makepretty

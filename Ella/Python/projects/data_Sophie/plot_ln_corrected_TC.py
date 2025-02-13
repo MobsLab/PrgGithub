@@ -9,7 +9,7 @@ Created on Mon Jan 27 16:47:24 2025
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage import gaussian_filter
-
+from scipy.stats import sem
 
 def plot_predictions_trace(predictions_all, mouse_id, neuron_id, model_type):
     """
@@ -57,7 +57,7 @@ def plot_predictions_trace(predictions_all, mouse_id, neuron_id, model_type):
 
 def plot_tuning_curve(neuron_id, mouse_id, physiological_var, min_val, max_val, step, combined_data, corrected_results):
     """
-    Plot the original and corrected tuning curves for a specific neuron and mouse.
+    Plot the original and corrected tuning curves for a specific neuron and mouse, including SEM as error bars.
 
     Parameters:
     - neuron_id (str): The ID of the neuron.
@@ -92,11 +92,14 @@ def plot_tuning_curve(neuron_id, mouse_id, physiological_var, min_val, max_val, 
     bins = np.arange(min_val, max_val, step)
     bin_indices = np.digitize(physiological_data, bins)
 
-    # Compute the mean spike rate for each bin (original tuning curve)
+    # Compute the mean spike rate and SEM for each bin (original tuning curve)
     tuning_curve_original = []
+    sem_original = []
     for i in range(1, len(bins)):
         in_bin = bin_indices == i
-        tuning_curve_original.append(neural_activity[in_bin].mean())
+        values = neural_activity[in_bin]
+        tuning_curve_original.append(np.nanmean(values))
+        sem_original.append(sem(values, nan_policy='omit'))
 
     # Extract corrected predictions
     correction_entry = next((entry for entry in corrected_results if entry['Mouse_ID'] == mouse_id and entry['Neuron_ID'] == neuron_id), None)
@@ -105,29 +108,43 @@ def plot_tuning_curve(neuron_id, mouse_id, physiological_var, min_val, max_val, 
 
     corrected_activity = correction_entry['Correction']
 
-    # Compute the mean corrected spike rate for each bin (corrected tuning curve)
+    # Compute the mean corrected spike rate and SEM for each bin (corrected tuning curve)
     tuning_curve_corrected = []
+    sem_corrected = []
     for i in range(1, len(bins)):
         in_bin = bin_indices == i
-        tuning_curve_corrected.append(corrected_activity[in_bin].mean())
+        values = corrected_activity[in_bin]
+        tuning_curve_corrected.append(np.nanmean(values))
+        sem_corrected.append(sem(values, nan_policy='omit'))
 
-    # Plot the tuning curves
-    plt.figure(figsize=(10, 6))
+    # Plot the tuning curves with SEM as error bars
+    fig = plt.figure(figsize=(10, 6))
 
     bin_centers = bins[:-1] + step / 2
 
-    plt.plot(bin_centers, tuning_curve_original - np.mean(tuning_curve_original), label="Original Tuning Curve", marker='o', color='blue', alpha=0.7)
-    plt.plot(bin_centers, tuning_curve_corrected - np.mean(tuning_curve_corrected), label="Corrected Tuning Curve", marker='o', color='red', alpha=0.7)
+    plt.errorbar(bin_centers, 
+                 np.array(tuning_curve_original) - np.nanmean(tuning_curve_original),
+                 # np.array(tuning_curve_original),
+                 yerr=np.array(sem_original), 
+                 label="Original Tuning Curve",
+                 fmt='o-', color='blue', alpha=0.7, capsize=4)
+
+    plt.errorbar(bin_centers, 
+                 np.array(tuning_curve_corrected) - np.nanmean(tuning_curve_corrected),
+                 # np.array(tuning_curve_corrected),
+                 yerr=np.array(sem_corrected), 
+                 label="Corrected Tuning Curve",
+                 fmt='o-', color='red', alpha=0.7, capsize=4)
 
     plt.xlabel(physiological_var, fontsize=14)
     plt.ylabel("Mean Spike Rate", fontsize=14)
-    plt.ylim([-1, 1])
-    plt.title(f"Tuning Curve for Neuron {neuron_id} (Mouse {mouse_id})", fontsize=16)
+    plt.title(f"Tuning Curve for {neuron_id} ({mouse_id})", fontsize=16)
     plt.legend(fontsize=12)
     plt.grid(alpha=0.4)
     plt.tight_layout()
     plt.show()
-    
+     
+    return fig
 
 def plot_tuning_curve_heatmap(
     mouse_list, physiological_var, min_val, max_val, step, 
@@ -182,7 +199,6 @@ def plot_tuning_curve_heatmap(
 
         # Compute bin indices for physiological variable
         bin_indices = np.digitize(mouse_data[physiological_var], bins, right=True)
-        print(f"Mouse {mouse_id} has unique bin indices: {np.unique(bin_indices)}")
 
         for neuron_id in [col for col in mouse_data.columns if col.startswith('Neuron')]:
             # Create a unique ID for the neuron
@@ -241,7 +257,7 @@ def plot_tuning_curve_heatmap(
         all_tuning_matrices = []
         for model_type in model_types:
             tuning_matrix = [np.nanmean(all_tuning_curves[model_type][neuron_id], axis=0) for neuron_id in ordered_neurons if neuron_id in all_tuning_curves[model_type]]
-            if tuning_matrix.size > 0:
+            if tuning_matrix:
                 all_tuning_matrices.append(np.array(tuning_matrix))
         if all_tuning_matrices:
             concatenated_matrix = np.hstack(all_tuning_matrices)
@@ -296,7 +312,7 @@ def plot_tuning_curve_heatmap(
 
     plt.show()
     
-    return plotted_matrices
+    return fig, plotted_matrices
     
 
 
@@ -311,3 +327,67 @@ def plot_tuning_curve_heatmap(
 #     model_types=['original','motion']
 # )
 
+
+def plot_mean_correction(plotted_matrices, variable_name, min_val, max_val, step):
+    """
+    Plot the mean correction applied to all tuning curves based on the given physiological variable.
+
+    This function computes:
+    - The z-scored difference between "original" and "motion" tuning curves.
+    - variable_name (str): The name of the variable to use as the x-axis label.
+    - The mean correction applied across all neurons.
+    - The standard error of the mean (SEM) as error bars.
+
+    Parameters:
+    - plotted_matrices (dict): Dictionary containing tuning matrices from `plot_tuning_curve_heatmap`.
+                               Must have keys: 'original' and 'motion'.
+    - min_val (float): Minimum bin value.
+    - max_val (float): Maximum bin value.
+    - step (float): Step size for binning.
+
+    Returns:
+    - None: Displays the plot.
+    """
+    bins = np.arange(min_val, max_val, step)
+    bin_centers = bins[:-1] + step / 2  # Compute bin centers
+
+    # Extract tuning matrices
+    original_matrix = np.array(plotted_matrices.get("original", []))  # Shape: (neurons, bins)
+    motion_matrix = np.array(plotted_matrices.get("motion", []))
+
+    # Check if matrices are available
+    if original_matrix.size == 0 or motion_matrix.size == 0:
+        raise ValueError("Missing data in plotted_matrices: 'original' or 'motion' key is empty.")
+
+    # Ensure same shape
+    min_length = min(original_matrix.shape[1], motion_matrix.shape[1], len(bin_centers))
+    original_matrix = original_matrix[:, :min_length]
+    motion_matrix = motion_matrix[:, :min_length]
+    bin_centers = bin_centers[:min_length]
+
+    # **Z-score** each tuning curve across bins (axis=1 means per neuron)
+    # original_zscore = (original_matrix - np.nanmean(original_matrix, axis=1, keepdims=True)) / np.nanstd(original_matrix, axis=1, keepdims=True)
+    # motion_zscore = (motion_matrix - np.nanmean(motion_matrix, axis=1, keepdims=True)) / np.nanstd(motion_matrix, axis=1, keepdims=True)
+
+    # Compute correction: Z-scored difference (Original - Motion)
+    correction = original_matrix - motion_matrix
+    correction = (correction - np.nanmean(correction, axis=1, keepdims=True))/np.nanstd(correction, axis=1, keepdims=True)
+    # Compute Mean & SEM across neurons (axis=0 means across neurons)
+    mean_correction = np.nanmean(correction, axis=0)  # Mean across neurons
+    sem_correction = sem(correction, axis=0, nan_policy='omit')  # SEM
+
+    # **Plotting**
+    fig = plt.figure(figsize=(8, 5))
+    plt.errorbar(bin_centers, mean_correction, yerr=sem_correction, fmt='o-', color='red', alpha=0.8, capsize=4, label="Mean Correction")
+
+    plt.axhline(0, color='black', linestyle='--', linewidth=1)  # Horizontal line at zero
+    plt.xlabel(f"{variable_name}", fontsize=14)
+    plt.ylabel("Correction (Original-Corrected)", fontsize=14)
+    plt.ylim(-1.5,1.5)
+    plt.title("Mean Correction Across Neurons", fontsize=16)
+    plt.legend(fontsize=12)
+    plt.grid(alpha=0.4)
+    plt.tight_layout()
+    plt.show()
+    
+    return fig
