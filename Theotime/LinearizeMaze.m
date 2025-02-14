@@ -50,7 +50,7 @@ else
         t(isnan(xxx))=NaN;
 
         subplot(211)
-        imagesc(mask+Zone{1})
+        imagesc(Params.mask+Params.Zone{1})
         hold on
         plot(Data(Params.Ytsd)'*Params.Ratio_IMAonREAL,Data(Params.Xtsd)'*Params.Ratio_IMAonREAL)
         subplot(212)

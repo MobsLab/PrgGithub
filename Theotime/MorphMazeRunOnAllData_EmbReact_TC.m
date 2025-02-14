@@ -8,8 +8,7 @@ load('behavResources.mat', 'SessionEpoch', 'Xtsd', 'Ytsd')
 SessionNames = fieldnames(SessionEpoch);
 OutPutXtsd = tsd([],[]);
 OutPutYtsd = tsd([],[]);
-OutPutXYOutput = tsd([],[]);
-OutputLinearized = tsd([], []);
+OutPutLinearized = tsd([], []);
 
 tps = 0;
 for i = 1:length(SessionNames)
@@ -27,44 +26,46 @@ for i = 1:length(SessionNames)
             Params.Ratio_IMAonREAL = Ratio_IMAonREAL;
         end
         if strfind(lower(SessionNames{i}), lower('Sleep'))
-            [AlignedXtsd,AlignedYtsd,XYOutput] = MorphCageToSingleShape_Align(Params.Xtsd,Params.Ytsd);
+            [Params.AlignedXtsd,Params.AlignedYtsd,Params.XYOutput] = MorphCageToSingleShape_Align(Params.Xtsd,Params.Ytsd);
+            Params.LinearDist = tsd([], []);
+
         end
     else
         if ~isfield(Params, 'CleanXtsd')
             clean = 0;
             [Params.AlignedXtsd,Params.AlignedYtsd,Params.ZoneEpochAligned,Params.XYOutput] = MorphMazeToSingleShape_EmbReact_DB...
                 (Params.Xtsd,Params.Ytsd, Params.Zone{1}, Params.ref, Ratio_IMAonREAL);
-
+            Params.LinearDist = LinearizeMaze(Params, 1);
         else
             clean = 1;
             [Params.CleanAlignedXtsd,Params.CleanAlignedYtsd,Params.CleanZoneEpochAligned,Params.CleanXYOutput] = MorphMazeToSingleShape_EmbReact_DB...
                 (Params.CleanXtsd,Params.CleanYtsd, Params.Zone{1}, Params.ref, Ratio_IMAonREAL);
-
+            Params.CleanLinearDist = LinearizeMaze(Params, 1);
         end
     end
 
-    LinearDist = LinearizeMaze(Params, 1)
-
-    tpsmax = max(Range(LinearDist)); % use LFP to get precise end time
-    TotEpoch = intervalSet(0,max(Range(LinearDist)));
 
     if isfield(Params,'CleanAlignedXtsd')
+        tpsmax = max(Range(Params.CleanAlignedXtsd));
+        TotEpoch = intervalSet(0,tpsmax);
         rg = Range(Restrict(Params.CleanAlignedXtsd,TotEpoch));
         dt = Data(Restrict(Params.CleanAlignedXtsd,TotEpoch));
-        dt2 = Data(Restrict(Params.AlignedYtsd,TotEpoch));
-        OutPutXtsd = tsd([Range(OutPutXtsd);rg+tps],[Data(OutPutXtsd);[dt,dt2]]);
-        OutPutYtsd = tsd([Range(OutPutYtsd);rg+tps],[Data(OutPutYtsd);[dt,dt2]]);
-        OutPutXYOutput = tsd([Range(OutPutXYOutput);rg+tps],[Data(OutPutXYOutput);[dt,dt2]]);
-        OutPutLinearized = tsd([Range(OutPutLinearized);rg+tps],[Data(OutPutLinearized);[dt,dt2]]);
+        dt2 = Data(Restrict(Params.CleanAlignedYtsd,TotEpoch));
+        dt4 = Data(Restrict(Params.CleanLinearDist, TotEpoch));
+        OutPutXtsd = tsd([Range(OutPutXtsd);rg+tps],[Data(OutPutXtsd);dt]);
+        OutPutYtsd = tsd([Range(OutPutYtsd);rg+tps],[Data(OutPutYtsd);[dt2]]);
+        OutPutLinearized = tsd([Range(OutPutLinearized);rg+tps],[Data(OutPutLinearized);dt4]);
 
     elseif isfield(Params,'AlignedXtsd')
+            tpsmax = max(Range(Params.AlignedXtsd));
+        TotEpoch = intervalSet(0,tpsmax);
         rg = Range(Restrict(Params.AlignedXtsd,TotEpoch));
         dt = Data(Restrict(Params.AlignedXtsd,TotEpoch));
         dt2 = Data(Restrict(Params.AlignedYtsd,TotEpoch));
-        OutPutXtsd = tsd([Range(OutPutXtsd);rg+tps],[Data(OutPutXtsd);[dt,dt2]]);
-        OutPutYtsd = tsd([Range(OutPutYtsd);rg+tps],[Data(OutPutYtsd);[dt,dt2]]);
-        OutPutXYOutput = tsd([Range(OutPutXYOutput);rg+tps],[Data(OutPutXYOutput);[dt,dt2]]);
-        OutPutLinearized = tsd([Range(OutPutLinearized);rg+tps],[Data(OutPutLinearized);[dt,dt2]]);
+        dt4 = Data(Restrict(Params.LinearDist, TotEpoch));
+        OutPutXtsd = tsd([Range(OutPutXtsd);rg+tps],[Data(OutPutXtsd);dt]);
+        OutPutYtsd = tsd([Range(OutPutYtsd);rg+tps],[Data(OutPutYtsd);[dt2]]);
+        OutPutLinearized = tsd([Range(OutPutLinearized);rg+tps],[Data(OutPutLinearized);dt4]);
     else 
         error('achtung')
     end
@@ -72,11 +73,11 @@ for i = 1:length(SessionNames)
 
 keyboard
 
-%     save(['behavResources-' num2str(i, '%02d') 'eheheheh.mat'],'-struct', 'Params')
+%     save(['behavResources-' num2str(i, '%02d') '.mat'],'-struct', 'Params')
 
 
 % if clean
-%     save(['behavResources-' num2str(i, '%02d') 'eheheheh.mat'],'-struct', 'Params')
+%     save(['behavResources-' num2str(i, '%02d') '.mat'],'-struct', 'Params')
 % else
 %     save(['behavResources-' num2str(i, '%02d') '.mat'],'Params')
 % end

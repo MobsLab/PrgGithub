@@ -3,9 +3,8 @@ function [AlignedXtsd,AlignedYtsd, XYOutput] = MorphCageToSingleShape_Align(Xtsd
 
 satisfied = 0;
 
-figure
+f  = figure;
 while satisfied ==0
-
     polygon = GetCageEdgesWithoutVideo(Data(Ytsd),Data(Xtsd));
     x = polygon.Position(:,2);
     y = polygon.Position(:,1);
@@ -24,14 +23,20 @@ while satisfied ==0
     A = ((pinv(TranssMat)*[XInit,YInit]')');
     AlignedXtsd = tsd(Range(Xtsd),40*A(:,1));
     AlignedYtsd = tsd(Range(Ytsd),20*A(:,2));
-
-    plot(Data(AlignedYtsd),Data(AlignedXtsd))
-    xlim([0 20])
-    ylim([0 40])
-
-    satisfied = input('satisfied?')
-    en
     clf
+    f.Position = [100 100 900 1800];
+    plot(Data(AlignedYtsd),Data(AlignedXtsd))
+    xlim([-5 25])
+    ylim([-5 45])
+    hline(0)
+    hline(40)
+    vline(0)
+    vline(20,'-r')
+
+    satisfied = input('satisfied?');
+end
     XYOutput(1,:) = x;
     XYOutput(2,:) = y;
+clf;
+close
 end

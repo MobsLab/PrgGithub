@@ -19,7 +19,7 @@
 function p = dropbox(varargin)
 
 switch strtrim(evalc('system(''hostname'');'))
-% Start hostname cases
+    % Start hostname cases
     case 'MobsEcolo'
         p = fullfile('/home/greta/Dropbox',varargin{:});
     case 'mobsrick-HP-Z440-Workstation'
@@ -58,7 +58,7 @@ switch strtrim(evalc('system(''hostname'');'))
         p = fullfile('C:\Users\samue\Dropbox',varargin{:});
     case 'Arsenii-PC'
         p = fullfile('C:\Users\Arsenii Goriachenkov\Dropbox\',varargin{:});
-%         p = fullfile('C:\Users\Arsenii Goriachenkov\Dropbox\Kteam\PrgMatlab\Arsenii\',varargin{:});
+        %         p = fullfile('C:\Users\Arsenii Goriachenkov\Dropbox\Kteam\PrgMatlab\Arsenii\',varargin{:});
     case 'mobsmorty'
         p = fullfile('/home/mobsmorty/Dropbox',varargin{:});
     case 'mobshamilton-HP-Z440-Workstation'
@@ -76,9 +76,11 @@ switch strtrim(evalc('system(''hostname'');'))
     case 'pinky'
         p = fullfile('/home/pinky/Dropbox',varargin{:});
     case 'mouse'
-        p = fullfile('/home/mickey/download/figures',varargin{:});
-%##%
-% End hostname cases
+        p = fullfile('/home/mickey/Dropbox/Mobs_member/Theotime De Charrin/Figures',varargin{:});
+    case 'theodechrn'
+        p = fullfile('/home/theodechrn/Dropbox/Mobs_member/Theotime De Charrin/Figures',varargin{:});
+        %##%
+        % End hostname cases
     otherwise
         dbdr = uigetdir(pwd,'Please locate your Dropbox folder.');
         if ~dbdr
