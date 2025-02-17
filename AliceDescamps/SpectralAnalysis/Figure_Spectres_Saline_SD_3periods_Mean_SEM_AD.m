@@ -17,13 +17,13 @@ col_1 = [.2 .2 .2];
 col_2 = [1 0 0];
 
 % suptitle ('PFC low CNO/SD1+CNO (OB scoring)')
-suptitle ('PFC low CNO/SD1+CNO')
+% suptitle ('PFC low CNO/SD1+CNO')
 % suptitle ('HPC low CNO/SD+CNO (OB scoring)')
 % suptitle ('HPC low CNO/SD+CNO')
 % suptitle ('OB low CNO/SD+CNO (OB scoring)')
 % suptitle ('OB low CNO/SD+CNO')
 % suptitle ('OB high CNO/SD+CNO (OB scoring)')
-% suptitle ('OB high CNO/SD+CNO')
+suptitle ('OB high CNO/SD+CNO')
 % suptitle ('PFC high CNO/SD+CNO (OB scoring)')
 % suptitle ('PFC high CNO/SD+CNO')
 

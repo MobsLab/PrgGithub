@@ -250,7 +250,7 @@ elseif strcmp(experiment,'exciDREADD_homo_CRH_VLPO_CNOInjection_1pm') %test homo
     a=a+1;Dir.path{a}{1}='';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;    
     
-elseif strcmp(experiment,'exciDREADD_homo_CRH_VLPO_CNOInjection_1pm') %test homo/hetero
+elseif strcmp(experiment,'exciDREADD_hetero_CRH_VLPO_SalineInjection_1pm') %test homo/hetero
     % Mouse 1674
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1674/20241002/Sleep_SalineInjection_13h/exci_CRH_Hetero_1674_SalInj_13h_241002_085548/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
@@ -258,10 +258,10 @@ elseif strcmp(experiment,'exciDREADD_homo_CRH_VLPO_CNOInjection_1pm') %test homo
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1675/20241002/Sleep_SalineInjection_13h/exci_CRH_Hetero_1675_SalInj_13h_241002_085548/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     % Mouse 1676
-    a=a+1;Dir.path{a}{1}='';
+    a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1676/20241010/Sleep_SalineInjection_13h/exci_CRH_Hetero_1676_SalInj_241010_090757/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     % Mouse 1677
-    a=a+1;Dir.path{a}{1}='';
+    a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1677/20241010/Sleep_SalineInjection_13h/exci_CRH_Hetero_1677_SalInj_241010_090757/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     
 elseif strcmp(experiment,'exciDREADD_hetero_CRH_VLPO_CNOInjection_1pm') %test homo/hetero
@@ -272,10 +272,10 @@ elseif strcmp(experiment,'exciDREADD_hetero_CRH_VLPO_CNOInjection_1pm') %test ho
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1675/20241009/Sleep_CNOInjection_13h/exci_CRH_Hetero_1675_CNOInj_241009_085721/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     % Mouse 1676
-    a=a+1;Dir.path{a}{1}='';
+    a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1676/20241007/Sleep_CNOInjection_13h/exci_CRH_Hetero_1676_CNOInjection_13h_241007_085748/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     % Mouse 1677
-    a=a+1;Dir.path{a}{1}='';
+    a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1677/20241007/Sleep_CNOInjection_13h/exci_CRH_Hetero_1677_CNOInjection_13h_241007_085748/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
 
 %==========================================================================

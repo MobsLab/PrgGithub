@@ -55,7 +55,7 @@ mindurREM = 25;
 % load('Bulb_deep_Low_Spectrum.mat');
 % load('H_Low_Spectrum.mat');
 % load('PFCx_deep_High_Spectrum.mat');
-spectro = 'PFCx_deep_Low_Spectrum.mat';
+spectro = 'B_High_Spectrum.mat';
 
 %% GET DATA - 1st group
 

@@ -101,7 +101,7 @@ SWSEpoch2=SWSEpoch;
 Wake2=Wake;
 
 %% Section 6 : Parameters
-st = Start(REMEpoch)/1E4;
+st = Start(SWSEpoch)/1E4;
 k=1;
 len=300;
 
