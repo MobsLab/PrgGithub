@@ -140,8 +140,8 @@ save_plot_as_svg(figures_directory, 'BF_tuning_smoothed', figBF_tuning)
 BFmeancorr = plot_mean_correction(BF_tuning, 'BreathFreq', 2.5, 11.5, 0.5)
 HRmeancorr = plot_mean_correction(HR_tuning, 'Heartrate', 8, 13, 0.5)
 
-save_plot_as_svg(figures_directory, 'HR_mean_corr', HRmeancorr)
-save_plot_as_svg(figures_directory, 'BF_mean_corr', BFmeancorr)
+save_plot_as_svg(figures_directory, 'HR_mean_corr_pretty', HRmeancorr)
+save_plot_as_svg(figures_directory, 'BF_mean_corr_pretty', BFmeancorr)
 
 # %% Create a corrected combined dataframe 
 

@@ -365,29 +365,49 @@ def plot_mean_correction(plotted_matrices, variable_name, min_val, max_val, step
     motion_matrix = motion_matrix[:, :min_length]
     bin_centers = bin_centers[:min_length]
 
-    # **Z-score** each tuning curve across bins (axis=1 means per neuron)
-    # original_zscore = (original_matrix - np.nanmean(original_matrix, axis=1, keepdims=True)) / np.nanstd(original_matrix, axis=1, keepdims=True)
-    # motion_zscore = (motion_matrix - np.nanmean(motion_matrix, axis=1, keepdims=True)) / np.nanstd(motion_matrix, axis=1, keepdims=True)
-
     # Compute correction: Z-scored difference (Original - Motion)
     correction = original_matrix - motion_matrix
-    correction = (correction - np.nanmean(correction, axis=1, keepdims=True))/np.nanstd(correction, axis=1, keepdims=True)
+    correction = (correction - np.nanmean(correction, axis=1, keepdims=True)) / np.nanstd(correction, axis=1, keepdims=True)
+
     # Compute Mean & SEM across neurons (axis=0 means across neurons)
     mean_correction = np.nanmean(correction, axis=0)  # Mean across neurons
     sem_correction = sem(correction, axis=0, nan_policy='omit')  # SEM
 
     # **Plotting**
-    fig = plt.figure(figsize=(8, 5))
-    plt.errorbar(bin_centers, mean_correction, yerr=sem_correction, fmt='o-', color='red', alpha=0.8, capsize=4, label="Mean Correction")
+    fig, ax = plt.subplots(figsize=(8, 5))
 
-    plt.axhline(0, color='black', linestyle='--', linewidth=1)  # Horizontal line at zero
-    plt.xlabel(f"{variable_name}", fontsize=14)
-    plt.ylabel("Correction (Original-Corrected)", fontsize=14)
-    plt.ylim(-1.5,1.5)
-    plt.title("Mean Correction Across Neurons", fontsize=16)
-    plt.legend(fontsize=12)
-    plt.grid(alpha=0.4)
+    # Plot error bars
+    ax.errorbar(bin_centers, mean_correction, yerr=sem_correction, 
+                fmt='-', color='tomato', alpha=0.8, capsize=4, label="Mean Correction", linewidth=3)
+
+    # Formatting axes
+    ax.spines["top"].set_linewidth(2)
+    ax.spines["right"].set_linewidth(2)
+    ax.spines["left"].set_linewidth(2)
+    ax.spines["bottom"].set_linewidth(2)
+
+    # Ticks settings
+    ax.tick_params(axis="both", which="major", direction="out", width=2, length=6, labelsize=12)
+    ax.tick_params(axis="both", which="minor", direction="out", width=1.5, length=4)
+    
+    # Labels and title
+    ax.set_xlabel(f"{variable_name}", fontsize=16, fontweight='bold')
+    ax.set_ylabel("Correction (Original-Corrected)", fontsize=16, fontweight='bold')
+    ax.set_title("Mean Correction Across Neurons", fontsize=18, fontweight='bold')
+
+    # Remove grid
+    ax.grid(False)
+
+    # Reference line at zero
+    ax.axhline(0, color='black', linestyle='--', linewidth=2)
+
+    # Legend
+    ax.legend(fontsize=14, frameon=False)
+
+    # Tight layout for better spacing
     plt.tight_layout()
+    
     plt.show()
     
     return fig
+
