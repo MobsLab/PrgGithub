@@ -144,11 +144,24 @@ def combine_mouse_data(spike_counts, mice_data, mice_list=None, drop_na=False):
     for mouse in mice_list:
         print(f"Combining data for mouse {mouse}...")
         combined_df = combine_dataframes_on_timebins(spike_counts[mouse], mice_data[mouse])
-
+        
         if drop_na:
-            # Identify and exclude entirely NaN-filled columns
-            non_nan_columns = combined_df.loc[:, combined_df.notna().any()].columns
-            combined_df = combined_df[non_nan_columns].dropna()
+            # # Identify and exclude entirely NaN-filled columns
+            # non_nan_columns = combined_df.loc[:, combined_df.notna().any()].columns
+            
+            # Identify columns that are entirely NaN or contain only NaN and 0
+            excluded_columns = [
+                col for col in combined_df.columns 
+                if combined_df[col].isna().all() or (combined_df[col].fillna(0) == 0).all()
+            ]
+            
+            # Print the excluded columns
+            print(f"Excluded columns: {mouse}, {excluded_columns}")
+            
+            # Drop the excluded columns
+            combined_df = combined_df.drop(columns=excluded_columns).dropna()
+            
+            # combined_df = combined_df[non_nan_columns].dropna()
 
         combined_data[mouse] = combined_df
 

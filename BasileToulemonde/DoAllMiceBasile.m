@@ -1,54 +1,17 @@
 %DoAllMiceBasile
-addpath(genpath('/home/mobs/Dropbox/Kteam/PrgMatlab/FMAtoolbox/'))
-addpath(genpath('/home/mobs/Dropbox/Kteam/Fra'))
-addpath(genpath('/home/mobs/Dropbox/Kteam/PrgMatlab'))
-addpath('/home/mobs/Dropbox/Kteam/PrgMatlab')
 
-% 1161
-DirAnalyse{1} = '/media/mobs/DimaERC2/DataERC2/M1161/TEST';
-DirAnalyse2{1}= '/media/nas5/ProjetERC2/Mouse-K161/20201224/_Concatenated/resultsDecoding';
-% 1199
-DirAnalyse{2} =  '/media/mobs/DimaERC2/TEST1_Basile/TEST';
-DirAnalyse2{2}  = '/media/nas6/ProjetERC2/Mouse-K199/20210408/_Concatenated/resultsDecoding';
-% 905
-DirAnalyse{3} =  '/media/mobs/DimaERC2/DataERC2/M905/TEST';
-DirAnalyse2{3}  = '/media/nas5/ProjetERC2/Mouse-905/20190404/PAGExp/_Concatenated/resultsDecoding';
-
-%1186 PAG
-DirAnalyse{4} = '/media/mobs/DimaERC2/DataERC2/M1186/TEST';
-DirAnalyse2{4} = '/media/nas6/ProjetERC2/Mouse-K186/20210409/_Concatenated/resultsDecoding';
-
-% 1336 MFB
-DirAnalyse{5} = '/media/mobs/DimaERC2/Known_M1336/TEST';
-DirAnalyse2{5} = '/media/nas7/ProjetERC1/Known/M1336/resultsDecoding';
-% 1281 MFB
-DirAnalyse{6} =  '/media/mobs/DimaERC2/TEST3_Basile_1281MFB/TEST';
-DirAnalyse2{6}  = '/media/nas7/ProjetERC1/StimMFBWake/M1281/resultsDecoding';
-% 1239 MFB
-DirAnalyse{7} =  '/media/mobs/DimaERC2/TEST3_Basile_M1239/TEST';
-DirAnalyse2{7}  = '/media/nas6/ProjetERC1/StimMFBWake/M1239/Exp2/resultsDecoding';
-% 1168 MFB
-DirAnalyse{8} = '/media/mobs/DimaERC2/DataERC1/M1168/TEST';
-DirAnalyse2{8} = '/media/nas5/ProjetERC1/StimMFBWake/M1168/resultsDecoding';
-%1117 MFB
-DirAnalyse{9} = '/media/mobs/DimaERC2/DataERC1/M1117/TEST';
-DirAnalyse2{9} = '/media/nas5/ProjetERC1/StimMFBWake/M1117/resultsDecoding';
-
-% % Control : 1161 tested with 1199 model
-% DirAnalyse{7} = '/media/mobs/DimaERC2/DataERC2/M1161/TEST_with_1199_model';
-% DirAnalyse2{7}= '/media/nas5/ProjetERC2/Mouse-K161/20201224/_Concatenated/resultsDecoding';
-
+% load('~/Dropbox/Mobs_member/Theotime De Charrin/data/nnAllParams.mat')
 
 %%
-for i =1:9
-    saveResults(DirAnalyse{i}, DirAnalyse2{i})
+for i =1:length(Dir.results)
+    saveResults(Dir.results{i}{1}, Dir.results{i}{1})
 end
 %%
 
 %%
 
 for i=1:9
-    RP36(i,:)=occupationVSdecoding(DirAnalyse{i},36);
+    RP36(i,:)=occupationVSdecoding(Dir.results{i}{1},36);
 end
 for i=1:9
     RP200(i,:)=occupationVSdecoding(DirAnalyse{i},200);

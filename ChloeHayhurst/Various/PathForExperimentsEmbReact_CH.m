@@ -124,9 +124,9 @@ elseif strcmp(experiment,'Habituation24HPre_PreDrug')
 elseif strcmp(experiment,'Habituation_PreDrug')
     
     % Mouse 1686
-    a=a+1;Dir.path{a}{1}='/media/nas7/ProjetEmbReact/Mouse1686/20240926/ProjectEmbReact_M1686_20240926_Habituation24HPre_PreDrug/Hab1/';
+    a=a+1;Dir.path{a}{1}='/media/nas7/ProjetEmbReact/Mouse1686/20240926/ProjectEmbReact_M1686_20240926_Habituation_PreDrug/Hab1/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
-    Dir.path{a}{2}='/media/nas7/ProjetEmbReact/Mouse1686/20240926/ProjectEmbReact_M1686_20240926_Habituation24HPre_PreDrug/Hab2/';
+    Dir.path{a}{2}='/media/nas7/ProjetEmbReact/Mouse1686/20240926/ProjectEmbReact_M1686_20240926_Habituation_PreDrug/Hab2/';
     load([Dir.path{a}{2},'ExpeInfo.mat']),Dir.ExpeInfo{a}{2}=ExpeInfo;
     
     %  Mouse 1685

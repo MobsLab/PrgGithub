@@ -2,7 +2,7 @@ clear all
 MiceNumber=[490,507,508,509,510,514]; % add 512 back in later
 for mm=1:length(MiceNumber)
     FileNames=GetAllMouseTaskSessions(MiceNumber(mm));
-    
+
     for k=1:length(FileNames)
         cd(FileNames{k})
         load('SpikeData.mat')
@@ -25,10 +25,10 @@ for mm=1:length(MiceNumber)
                 FR.(ExpeInfo.SessionType).Wake{sp}(max(ExpeInfo.SessionNumber,1))=length(Restrict(S{sp},Wake))/sum(Stop(Wake,'s')-Start(Wake,'s'));
                 FR.(ExpeInfo.SessionType).Sleep{sp}(max(ExpeInfo.SessionNumber,1))=length(Restrict(S{sp},Sleep))/sum(Stop(Sleep,'s')-Start(Sleep,'s'));
             end
-            
+
         end
     end
-    
+
     allfields=fieldnames(FR);
     for k=1:length(allfields)
         for sp=1:length(S)
@@ -36,7 +36,7 @@ for mm=1:length(MiceNumber)
         end
     end
     % PlotErrorBar(frtemp')
-    
+
     for sp=1:length(S)
         plot([1,2,4,5,7,8,9,11,13],frtemp([1,2,4,5,7,8,9,11,13],sp),'*')
         hold on
@@ -46,7 +46,7 @@ for mm=1:length(MiceNumber)
         clf
     end
 end
-    
+
 % for k=1:length(FileNames)
 %     cd(FileNames{k})
 %     load('SpikeData.mat')
@@ -61,5 +61,5 @@ end
 % length(S{sp})
 % hist(Range(S{1}))
 % pause
-% 
+%
 % end

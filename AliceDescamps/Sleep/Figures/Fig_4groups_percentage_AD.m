@@ -18,13 +18,13 @@ col_3 = [1 .4 0];
 col_4 = [.5 .6 .2];
 
 % legend = {'1','2','3','4'};
-% legend = {'Sal mCherry (n=3)','SD + Sal mCherry (n=3)','CNO mCherry (n=4)','SD + CNO mCherry (n=4)'};
-legend = {'Sal CRH (n=11)','SD + Sal C57 (n=11)','SD + Sal CRH (n=3)','SD Wisden + Sal CRH (n=4)'};
+legend = {'Sal mCherry (n=10)','SD + Sal mCherry (n=4)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
+% legend = {'Sal CRH (n=11)','SD + Sal C57 (n=11)','SD + Sal CRH (n=3)','SD Wisden + Sal CRH (n=4)'};
 
 
 figure('color',[1 1 1])
 % suptitle ('xxxxxxxxxxxxx')
-suptitle ('Wisden protocole')
+suptitle ('Effect of CRH inhibition after SD')
 
 subplot(4,6,[4],'align') %WAKE percentage phase1
 hold on, title('0-1h30')

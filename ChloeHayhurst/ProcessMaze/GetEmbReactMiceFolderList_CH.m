@@ -36,8 +36,8 @@ for mouse = 1:length(Mouse)
 
         % Protocole très long! 
         
-        CondPreSess.(Mouse_names{mouse}) = CondSess.(Mouse_names{mouse})(1:6);
-        CondPostSess.(Mouse_names{mouse}) = CondSess.(Mouse_names{mouse})(7:end);
+        CondPreSess.(Mouse_names{mouse}) = CondSess.(Mouse_names{mouse})(1:9);
+        CondPostSess.(Mouse_names{mouse}) = CondSess.(Mouse_names{mouse})(10:end);
 
     end
 end

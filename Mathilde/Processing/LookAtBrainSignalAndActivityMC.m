@@ -10,14 +10,15 @@ LFP_emg = LFP;
 SqurdEMG = ResampleTSD(tsd(Range(LFP_emg), Data(LFP_emg).^2),10);
 
 %%get sleep scoring
-load('SleepScoring_Accelero.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info');
+% load('SleepScoring_Accelero.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info');
 % load('SleepScoring_Accelero_KB_corrections.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info','tsdMovement');
-
 % load('SleepScoring_OBGamma.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info');
+load('SleepScoring_OBGamma_newgamma.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info');
 
 load('behavResources.mat','Vtsd','MovAcctsd')
 
-load('SleepScoring_OBGamma.mat','SmoothGamma')
+% load('SleepScoring_OBGamma.mat','SmoothGamma')
+load('SleepScoring_OBGamma_newgamma.mat','SmoothGamma')
 
 %%get spectro
 SpectroOBhi = load('B_High_Spectrum','Spectro');
@@ -67,17 +68,18 @@ set(gca,'xticklabel',[])
 subplot(815), 
 plot(Range(MovAcctsd)/1E4, (Data(MovAcctsd))),ylim([0 7e8]),ylabel('Accelero'),colorbar
 % plot(Range(tsdMovement)/1E4, (Data(tsdMovement))),ylim([0 7e8]),ylabel('Accelero'),colorbar
-line([0 3.3E4],[Info.mov_threshold Info.mov_threshold],'color','r')
+% line([0 3.3E4],[Info.mov_threshold Info.mov_threshold],'color','r')
 SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[1e8 1e8]);
 set(gca,'xticklabel',[])
 %EMG
-subplot(816), plot(Range(SqurdEMG)/1E4, 10*log10(Data(SqurdEMG))),ylim([0 120]),colorbar
+subplot(816),
+plot(Range(SqurdEMG)/1E4, 10*log10(Data(SqurdEMG))),ylim([0 120]),colorbar
 SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[80 4]);
 set(gca,'xticklabel',[])
 %smooth theta
 subplot(817),plot(Range(SmoothTheta)/1E4,Data(SmoothTheta)),ylim([0 6]), ylabel('Smooth theta'),colorbar
 SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[3,0.5]);
-line([0 3.3E4],[Info.theta_thresh Info.theta_thresh],'color','r')
+line([0 4.3E4],[Info.theta_thresh Info.theta_thresh],'color','r')
 set(gca,'xticklabel',[])
 %smooth gamma
 subplot(818), plot(Range(SmoothGamma)/1E4,Data(SmoothGamma)), ylabel('Smooth gamma'),colorbar
@@ -88,7 +90,7 @@ SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[400,100]);
 a=500; 
 %move forward in time 
 dur=500;
-a=a+dur; subplot(811), xlim([a a+dur]),subplot(812), xlim([a a+dur]),subplot(813), xlim([a a+dur]),subplot(814), xlim([a a+dur]),subplot(815), xlim([a a+dur]),subplot(816), xlim([a a+dur]),subplot(817), xlim([a a+dur]),subplot(818), xlim([a a+dur])
+a=a+dur;subplot(811), xlim([a a+dur]),subplot(812), xlim([a a+dur]),subplot(813), xlim([a a+dur]),subplot(814), xlim([a a+dur]),subplot(815), xlim([a a+dur]),subplot(816), xlim([a a+dur]),subplot(817), xlim([a a+dur]),subplot(818), xlim([a a+dur])
 
 %% Section 5 : define variables (keep the old ones and the updated ones)
 %keep old variables
@@ -102,7 +104,7 @@ Wake2=Wake;
 
 %% Section 6 : Parameters
 st = Start(REMEpoch)/1E4;
-k=1;
+k=0;
 len=300;
 
 %% Section 7 : to move forward (next episode)
@@ -129,30 +131,29 @@ epoch=subset(SWSEpoch,k);SWSEpoch2=SWSEpoch2-epoch;Wake2=or(Wake2,epoch); %if it
 epoch=subset(SWSEpoch,k);SWSEpoch2=SWSEpoch2-epoch;REMEpoch2=or(REMEpoch2,epoch); %if it is REM
 
 %% Section 9 : Save acc
-clear REMEpoch SWSEpoch Wake
-REMEpoch=REMEpoch2; SWSEpoch=SWSEpoch2; Wake=Wake2;
+% clear REMEpoch SWSEpoch Wake
+% REMEpoch=REMEpoch2; SWSEpoch=SWSEpoch2; Wake=Wake2;
 % save('SleepScoring_Accelero.mat','REMEpoch_old','SWSEpoch_old','Wake_old','REMEpoch','SWSEpoch','Wake','-append')
 % save('SleepScoring_Accelero.mat','REMEpoch','SWSEpoch','Wake','-append')
 
-
-% 
-limREM=1; 
-REMEpoch = mergeCloseIntervals(REMEpoch, limREM*1e4); SWSEpoch=SWSEpoch-REMEpoch; Wake=Wake-REMEpoch;
-limSWS=1; 
-SWSEpoch = mergeCloseIntervals(SWSEpoch, limSWS*1e4); REMEpoch=REMEpoch-SWSEpoch; Wake=Wake-SWSEpoch;
-limWake=1; 
-Wake = mergeCloseIntervals(Wake, limWake*1e4); SWSEpoch=SWSEpoch-Wake; REMEpoch=REMEpoch-Wake;
-
-
-
-
+% limREM=1; 
+% REMEpoch = mergeCloseIntervals(REMEpoch, limREM*1e4); SWSEpoch=SWSEpoch-REMEpoch; Wake=Wake-REMEpoch;
+% limSWS=1; 
+% SWSEpoch = mergeCloseIntervals(SWSEpoch, limSWS*1e4); REMEpoch=REMEpoch-SWSEpoch; Wake=Wake-SWSEpoch;
+% limWake=1; 
+% Wake = mergeCloseIntervals(Wake, limWake*1e4); SWSEpoch=SWSEpoch-Wake; REMEpoch=REMEpoch-Wake;
 
 %% save OB
+% clear REMEpoch SWSEpoch Wake
 % REMEpoch=REMEpoch2; SWSEpoch=SWSEpoch2; Wake=Wake2;
 % save('SleepScoring_OBGamma.mat','REMEpoch_old','SWSEpoch_old','Wake_old','REMEpoch','SWSEpoch','Wake','-append')
 % save('SleepScoring_OBGamma.mat','REMEpoch','SWSEpoch','Wake','-append')
 
-
+%% save OB 50-100Hz
+% clear REMEpoch SWSEpoch Wake
+% REMEpoch=REMEpoch2; SWSEpoch=SWSEpoch2; Wake=Wake2;
+% save('SleepScoring_OBGamma_newgamma.mat','REMEpoch_old','SWSEpoch_old','Wake_old','REMEpoch','SWSEpoch','Wake','-append')
+% save('SleepScoring_OBGamma_newgamma.mat','REMEpoch','SWSEpoch','Wake','-append')
 
 %%
 

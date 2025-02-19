@@ -284,7 +284,9 @@ Create_Occup_Map_CH
 % GetEmbReactMiceFolderList_BM
 % Group = [1 2 3 4];
 % Group = [1 2];
-Group = [3 4 7];
+% Group = [3 4 7];
+Group = 7;
+
 
 Session_type={'SleepPre','SleepPostPre','SleepPostPost'};
 Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline'};
@@ -547,53 +549,53 @@ end
 % end
 
 
-
-Session_type={'SleepPostPre','SleepPostPost'};
-
-for group = Group
-    Mouse=Drugs_Groups_UMaze_CH(group);
-    disp (Name{group})
-    for sess=1:length(Session_type)
-        if convertCharsToStrings(Session_type{sess})=='SleepPostPre'
-            FolderList=SleepPostPreSess;
-        elseif convertCharsToStrings(Session_type{sess})=='SleepPostPost'
-            FolderList=SleepPostPostSess;
-        end
-        
-        disp(Session_type{sess})
-        for mouse=1:length(Mouse)
-            Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
-            disp(Mouse_names{mouse})
-%             LFP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'lfp','ChanNumber',rip_chan.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-%             Fil_FLP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FilterLFP(LFP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),[100 250],96);
-            StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'epoch','epochname','stimepoch2');
-            a = length(StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            Stim_num2.(Name{group}).(Session_type{sess})(mouse) = length(a);
-            
-%             [m,s,t] = mETAverage(Start(StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Range(LFP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Data(LFP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),1,1000);
-%             [m,s,t] = mETAverage(Start(StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Range(Fil_FLP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Data(Fil_FLP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),1,1000);
-            
-%             m2.(Name{group}).(Session_type{sess}){mouse} = m;
-%             s2.(Name{group}).(Session_type{sess}){mouse} = s;
-            
-%             mAll.(Name{group}).(Session_type{sess})(mouse,:) = m2.(Name{group}).(Session_type{sess}){:,mouse}';
-%             sAll.(Name{group}).(Session_type{sess})(mouse,:) = s2.(Name{group}).(Session_type{sess}){:,mouse}';
-        end
-    end
-end
-
-
-
-
-for group = Group
-    Mouse=Drugs_Groups_UMaze_CH(group);
-    disp (Name{group})
-    for mouse=1:length(Mouse)
-        Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
-        disp(Mouse_names{mouse})
-        Stim_num2All.(Name{group})(mouse) = Stim_num2.(Name{group}).SleepPostPre(mouse) + Stim_num2.(Name{group}).SleepPostPost(mouse);
-    end
-end
+% 
+% Session_type={'SleepPostPre','SleepPostPost'};
+% 
+% for group = Group
+%     Mouse=Drugs_Groups_UMaze_CH(group);
+%     disp (Name{group})
+%     for sess=1:length(Session_type)
+%         if convertCharsToStrings(Session_type{sess})=='SleepPostPre'
+%             FolderList=SleepPostPreSess;
+%         elseif convertCharsToStrings(Session_type{sess})=='SleepPostPost'
+%             FolderList=SleepPostPostSess;
+%         end
+%         
+%         disp(Session_type{sess})
+%         for mouse=1:length(Mouse)
+%             Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+%             disp(Mouse_names{mouse})
+% %             LFP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'lfp','ChanNumber',rip_chan.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+% %             Fil_FLP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FilterLFP(LFP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),[100 250],96);
+%             StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'epoch','epochname','stimepoch2');
+%             a = length(StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             Stim_num2.(Name{group}).(Session_type{sess})(mouse) = length(a);
+%             
+% %             [m,s,t] = mETAverage(Start(StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Range(LFP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Data(LFP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),1,1000);
+% %             [m,s,t] = mETAverage(Start(StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Range(Fil_FLP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Data(Fil_FLP_rip.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),1,1000);
+%             
+% %             m2.(Name{group}).(Session_type{sess}){mouse} = m;
+% %             s2.(Name{group}).(Session_type{sess}){mouse} = s;
+%             
+% %             mAll.(Name{group}).(Session_type{sess})(mouse,:) = m2.(Name{group}).(Session_type{sess}){:,mouse}';
+% %             sAll.(Name{group}).(Session_type{sess})(mouse,:) = s2.(Name{group}).(Session_type{sess}){:,mouse}';
+%         end
+%     end
+% end
+% 
+% 
+% 
+% 
+% for group = Group
+%     Mouse=Drugs_Groups_UMaze_CH(group);
+%     disp (Name{group})
+%     for mouse=1:length(Mouse)
+%         Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+%         disp(Mouse_names{mouse})
+%         Stim_num2All.(Name{group})(mouse) = Stim_num2.(Name{group}).SleepPostPre(mouse) + Stim_num2.(Name{group}).SleepPostPost(mouse);
+%     end
+% end
 
 %% Figures
 
@@ -850,7 +852,7 @@ MakeSpreadAndBoxPlot3_SB({RespiFzSafe_mean.RipInhibSleep.CondPre RespiFzSafe_mea
 makepretty_CH
 ylim([1 6])
 
-mtitle('Freezing Breathing evolution'):
+mtitle('Freezing Breathing evolution');
 
 %%
 
@@ -1291,7 +1293,7 @@ end
 mtitle('Normalized')
 
 %%
-Cols={[0.8 0.8 0.8],[0.5 0.5 0.5],[0.8 0.8 0.8],[0.5 0.5 0.5],[0.8 0.8 0.8],,j[0.5 0.5 0.5]};
+Cols={[0.8 0.8 0.8],[0.5 0.5 0.5],[0.8 0.8 0.8],[0.5 0.5 0.5],[0.8 0.8 0.8],[0.5 0.5 0.5]};
 X=[1:6];
 Legends={'Pre','Pre','PostPre','PostPre','PostPost','PostPost'};
 

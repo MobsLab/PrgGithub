@@ -7,26 +7,27 @@ isparam=0;
 iscorr=1;
 
 %classic
-col_1 = [.7 .7 .7];
-col_2 = [1 .4 0];
-col_3 = [0 .4 .6];
+% col_1 = [.7 .7 .7];
+% col_2 = [1 .4 0];
+% col_3 = [0 .4 .6];
 
 %classic
-% col_1 = [.2 .2 .2];
-% col_2 = [1 0 0];
-% col_3 = [0 .2 .6];
+col_1 = [.2 .2 .2];
+col_2 = [1 0 0];
+col_3 = [0 .4 .4];
 
 % legend = {'1','2','3'};
 % legend = {'Sal mCherry (n=3)','SD + Sal mCherry (n=3)','CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
 % legend = {'Sal mCherry (n=11)','SD1 + Sal mCherry (n=3)','SD2 + Sal mCherry (n=4)'};
-legend = {'Sal mCherry (n=11)','SD + Sal mCherry homo (n=3)','SD + Sal DREADD+ hétéro (n=4)'};
-% legend = {'CNO mCherry (n=10)','SD1 + CNO mCherry (n=4)','SD2 + CNO mCherry (n=2)'};
+% legend = {'Sal mCherry (n=11)','SD + Sal mCherry homo (n=3)','SD + Sal DREADD+ hétéro (n=4)'};
+legend = {'CNO mCherry (n=6)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
 
 
 figure('color',[1 1 1])
 % suptitle ('xxxxxxxxxxxxx')
 % suptitle ('Comparison between SD1 and SD2 saline')
-suptitle ('Comparison between SD on homo or on hetero mice')
+% suptitle ('Comparison between SD on homo or on hetero mice')
+suptitle ('Effect of CRH inhibition after SD and CNO injection')
 
 subplot(4,6,[4],'align') %WAKE number phase1
 hold on, title('0-1h30')

@@ -1,23 +1,23 @@
-function OB_face_analysis_DLC(Session_params, datapath)
+function OB_face_analysis_DLC(datapath)
 % This script calculates the set of basic parameters (on raw data) and figures from the DLC tracking 
 
 %% Load data
-cd(datapath)
+% cd(datapath)
 
 % Load DLC csv file
-cd([datapath '/DLC'])
-file=dir('*_filtered.csv'); % smoothed by DLC
+% cd([datapath '/DLC'])
+dlc_file=dir(fullfile([datapath '/DLC/'], '*_filtered.csv')); % smoothed by DLC
 % file=dir('*900000.csv'); % not smoothed
 
-filename=file.name; disp(['DLC data: ' filename]) %don't forget to specify the csv if you have many
-data = csvread(fullfile(pwd,filename),3); %loads the csv from line 3 to the end (to skip the Header)
+filename=dlc_file.name; disp(['DLC data: ' filename]) %don't forget to specify the csv if you have many
+data = csvread(fullfile([datapath '/DLC/'],filename),3); %loads the csv from line 3 to the end (to skip the Header)
 
 % Load video csv file
-file=dir('*frames.csv'); 
-filename=file.name; disp(['Video framse: ' filename]) %don't forget to specify the csv if you have many
-data_csv = csvread(fullfile(pwd,filename)); %loads the csv from line 3 to the end (to skip the Header)
+% video_file=dir(fullfile([datapath '/DLC/'],'*frames.csv')); 
+% filename=video_file.name; disp(['Video frames: ' filename]) %don't forget to specify the csv if you have many
+% data_csv = csvread(fullfile([datapath '/DLC/'],filename)); %loads the csv from line 3 to the end (to skip the Header)
 
-load('DLC_data.mat', 'time_1st_trig', 'time_trig')
+load([datapath '/DLC/DLC_data.mat'], 'time_1st_trig', 'time_trig')
 
 %% Prepare data
 nframes = size(data,1);
@@ -28,9 +28,12 @@ data = data(1:nframes, :);
 if length(time_trig) > length(data)
    time_trig = time_trig(1:length(data));
    disp(['Camera trigger signal is longer than DLC data by ' num2str(length(time_trig) - length(data)) ' frames. I am restricting it on DLC data length'])
+elseif length(time_trig) < length(data)
+    
+    disp(['Camera trigger signal is shorter than DLC data by ' num2str(length(time_trig) - length(data)) ' frames. I am interpolating it on DLC data length'])
 end
-time = ts(time_trig*1e4);
 
+time = ts(time_trig);
 
 % Pupil
 pupil_x = data(:, 2:3:23);
@@ -178,14 +181,14 @@ if ~exist('DLC_data.mat','file')
         'eye_x','eye_y','areas_eye',...
         'nostril_x','nostril_y','areas_nostril','nostril_center','velocity_nostril_center', 'acceleration_nostril_center',...
         'whiskers_x','whiskers_y',...
-        'Session_params','time');
+        'time');
 else
     save('DLC_data.mat','pupil_x','pupil_y','areas_pupil_tsd','pupil_center',...
         'pupil_mvt_tsd','velocity_pupil_center','acceleration_pupil_center',...
         'eye_x','eye_y','areas_eye',...
         'nostril_x','nostril_y','areas_nostril','nostril_center','velocity_nostril_center', 'acceleration_nostril_center',...
         'whiskers_x','whiskers_y',...
-        'Session_params','time', '-append');
+        'time', '-append');
 end
  
 %% Plot figures

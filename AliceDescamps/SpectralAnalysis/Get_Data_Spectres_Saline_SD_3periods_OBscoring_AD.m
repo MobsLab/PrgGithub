@@ -9,7 +9,7 @@ Dir_2 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_mCherry_CRH_VLPO_SalineI
 % Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1566 1581 1635]);
 Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1635]);
 %%3
-Dir_3 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_SecondRun_mCherry_CRH_VLPO_SalineInjection_10am');
+% Dir_3 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_SecondRun_mCherry_CRH_VLPO_SalineInjection_10am');
 % Dir_3 = RestrictPathForExperiment (Dir_3, 'nMice', [1566 1581 1635]);
 
 %% parameters
@@ -44,7 +44,7 @@ mindurREM = 25;
 % load('PFCx_deep_High_Spectrum.mat');
 % load('Bulb_deep_Low_Spectrum.mat');
 % load('H_Low_Spectrum.mat');
-spectro = 'H_Low_Spectrum.mat';
+spectro = 'Bulb_deep_Low_Spectrum.mat';
 
 %% GET DATA - 1st group
 

@@ -7,14 +7,14 @@ isparam=0;
 iscorr=1;
 
 %classic
-% col_1 = [.7 .7 .7];
-col_1 = [.2 .2 .2];
-% col_2 = [1 .4 0];
-col_2 = [1 0 0];
+col_1 = [.7 .7 .7];
+col_2 = [1 .4 0];
+% col_1 = [.2 .2 .2];
+% col_2 = [1 0 0];
 
 % legend = {'1','2'};
-% legend = {'Sal mCherry (n=4)','SD + CNO mCherry (n=4)'};
-legend = {'CNO mCherry (n=6)','SD + CNO mCherry (n=6)'};
+legend = {'Sal mCherry (n=4)','SD + Sal mCherry (n=4)'};
+% legend = {'CNO mCherry (n=6)','SD + CNO mCherry (n=6)'};
 
 
 figure('color',[1 1 1])

@@ -1,14 +1,18 @@
 %% To plot the figure you need to load data : 
-Get_Data_5groups_AD.m
+Get_Data_5groups_inj_1pm_AD.m
 
 %% FIGURE 2 groups
 txt_size = 15;
 isparam=0;
 iscorr=1;
 
-%classic
-col_1 = [.7 .7 .7];
-col_2 = [0 .8 .4];
+%homo
+% col_1 = [.7 .7 .7];
+% col_2 = [0 .8 .4];
+%hétéro
+col_1 = [.4 .4 .4];
+col_2 = [0 .6 .2];
+
 
 figure('color',[1 1 1]), hold on
 % suptitle ('xxxxxxxxxxxxx')

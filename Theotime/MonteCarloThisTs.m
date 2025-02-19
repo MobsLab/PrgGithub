@@ -9,6 +9,6 @@ function RandomizedData = MonteCarloThisTs(Ts, stddelay)
 % RandomizedData: a timeseries object with the same data as Ts, but with
 % random delays added to each data point
 RandomizedData = Range(Ts) - random('uniform',-stddelay, stddelay, size(Range(Ts)));
-RandomizedData = sort(RandomizedData)
+RandomizedData = sort(RandomizedData);
 end
 

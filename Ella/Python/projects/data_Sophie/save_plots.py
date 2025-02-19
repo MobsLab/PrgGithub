@@ -39,6 +39,7 @@ def save_plot(figure, filename, directory=None, bbox_inches='tight', dpi=300):
 
     return figure
 
+
 def save_plot_as_svg(directory, filename, fig=None):
     """
     Save the current or passed figure as an .svg file in the specified directory, ensuring that the plot is not cropped.

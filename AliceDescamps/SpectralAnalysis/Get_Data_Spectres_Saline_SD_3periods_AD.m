@@ -2,22 +2,26 @@
 %% input dir saline mCherry
 %1
 % Dir_1 = PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_SalineInjection_10am');
-% % Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1566 1580 1581 1635]);
-% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1580]);
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1566 1580 1581 1635]);
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1566 1581 1635]);
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1635]);
 % %%2
 % Dir_2 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_mCherry_CRH_VLPO_SalineInjection_10am');
-% % Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1566 1580 1581 1635]);
-% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1580]);
+% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1566 1580 1581 1635]);
+% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1566 1581 1635]);
+% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1635]);
 
 %% input dir cno mCherry
 %1
 Dir_1 = PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_10am');
 % Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1578 1579 1636 1637]);
-Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1637]);
+Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1636 1637]);
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1637]);
 %%2
 Dir_2 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_mCherry_CRH_VLPO_CNOInjection_10am');
 % Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1578 1579 1636 1637]);
-Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1637]);
+Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1636 1637]);
+% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1637]);
 
 %% parameters
 
@@ -51,7 +55,7 @@ mindurREM = 25;
 % load('Bulb_deep_Low_Spectrum.mat');
 % load('H_Low_Spectrum.mat');
 % load('PFCx_deep_High_Spectrum.mat');
-spectro = 'H_Low_Spectrum.mat';
+spectro = 'B_High_Spectrum.mat';
 
 %% GET DATA - 1st group
 
@@ -158,7 +162,7 @@ Spectre_REM_end_1_SEM = nanstd(Spectre_REM_end_1_mean)/sqrt(size(Spectre_REM_end
 
 %%
 % calculate mean spectrum for each mouse in group 2
-for i=1:length(sp_2)
+for k=1:length(sp_2)
     try
     Spectre_Wake_2_mean(k,:)= nanmean(10*(Data(Restrict(sp_2{k},and(same_epoch_all_sess_2{k},stages_2{k}.Wake)))),1);
     Spectre_SWS_2_mean(k,:)= nanmean(10*(Data(Restrict(sp_2{k},and(same_epoch_all_sess_2{k},stages_2{k}.SWSEpoch)))),1);

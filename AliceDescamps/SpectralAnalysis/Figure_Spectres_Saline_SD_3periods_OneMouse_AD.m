@@ -10,23 +10,24 @@ figure('color',[1 1 1]),
 
 %colors
 %saline
-% col_1 = [.7 .7 .7];
-% col_2 = [1 .4 0];
+col_1 = [.7 .7 .7];
+col_2 = [1 .4 0];
 %cno
-col_1 = [.2 .2 .2];
-col_2 = [1 0 0];
+% col_1 = [.2 .2 .2];
+% col_2 = [1 0 0];
 
-% suptitle ('PFC low Sal/SD1+Sal for 1637 (OB scoring)')
-% suptitle ('PFC low Sal/SD1+Sal for 1637')
-% suptitle ('HPC low Sal/SD+Sal for 1637 (OB scoring)')
-suptitle ('HPC low Sal/SD+Sal for 1637')
-% suptitle ('OB low Sal/SD+Sal for 1637 (OB scoring)')
-% suptitle ('OB low Sal/SD+Sal for 1637')
-% suptitle ('OB high Sal/SD+Sal for 1637 (OB scoring)')
-% suptitle ('OB high Sal/SD+Sal for 1637')
-% suptitle ('PFC high Sal/SD+Sal for 1637 (OB scoring)')
-% suptitle ('PFC high Sal/SD+Sal for 1637')
-label = {'CNO','SD1 + CNO'}
+% suptitle ('PFC low Sal/SD1+Sal for 1635 (OB scoring)')
+% suptitle ('PFC low Sal/SD1+Sal for 1635')
+% suptitle ('HPC low Sal/SD+Sal for 1635 (OB scoring)')
+% suptitle ('HPC low Sal/SD+Sal for 1635')
+suptitle ('OB low Sal/SD+Sal for 1635 (OB scoring)')
+% suptitle ('OB low Sal/SD+Sal for 1635')
+% suptitle ('OB high Sal/SD+Sal for 1635 (OB scoring)')
+% suptitle ('OB high Sal/SD+Sal for 1635')
+% suptitle ('PFC high Sal/SD+Sal for 1635 (OB scoring)')
+% suptitle ('PFC high Sal/SD+Sal for 1635')
+% label = {'CNO','SD1 + CNO'}
+label = {'Sal','SD1 + Sal'}
 
 subplot(3,6,1),
 plot(freq_1{1},  Spectre_Wake_1_mean,'color',col_1); hold on

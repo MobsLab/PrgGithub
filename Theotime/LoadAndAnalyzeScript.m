@@ -11,37 +11,62 @@
 
 pathForExperimentName = 'Sub';
 fig = false;
+fig = true
 to_shift = 1e4;
+speed_thresh = 2;
 
 
 % Function to load and save CSV data (in the current folder)
-function [data, idx] = loadAndSaveCSV(filePath, varName)
+function [data, idx] = loadAndSaveCSV(filePath, varName, varargin)
+p = inputParser;
+defaultwindowFlag = false;
+addOptional(p,'window',defaultwindowFlag);
+
+parse(p,varargin{:});
+windowFlag = p.Results.window;
 csvData = csvread(filePath);
 idx = csvData(2:end, 1);
 data = csvData(2:end, 2);
 eval([strcat('idx', varName) '= idx;']);
 eval([varName '= data;']);
-save([varName '.mat'], strcat('idx', varName), strcat(varName));
+if ~windowFlag
+    save([varName '.mat'], strcat('idx', varName), strcat(varName));
+else
+    save([varName windowFlag '.mat'], strcat('idx', varName), strcat(varName));
 end
+end
+
 
 % Mice_to_analyze = 994
 Dir = PathForExperimentsERC(pathForExperimentName);
+
 % We prepare the variable that will be saved.
 % Dir = RestrictPathForExperiment(Dir,'nMice', Mice_to_analyze);
-all_params.speed = {};
-all_params.mean_conf = {};
-all_params.std_conf = {};
-all_params.mean_conf_moving = {};
-all_params.std_conf_moving = {};
-all_params.mean_conf_nmoving = {};
-all_params.std_conf_nmoving = {};
-all_params.mean_conf_nmovingrip = {};
-all_params.std_conf_nmovingrip = {};
-all_params.mean_conf_nmovingnrip = {};
-all_params.std_conf_nmovingnrip = {};
-all_params.tps = {};
-all_params.error_good = {};
-all_params.error_bad = {};
+window_list = 200;
+for idx = 1:length(window_list)
+    all_params.speed{idx}= {};
+    all_params.LossPred{idx}= {};
+    all_params.mean_conf{idx}= {};
+    all_params.std_conf{idx}= {};
+    all_params.mean_conf_moving{idx}= {};
+    all_params.std_conf_moving{idx}= {};
+    all_params.mean_conf_nmoving{idx}= {};
+    all_params.std_conf_nmoving{idx}= {};
+    all_params.mean_conf_nmovingrip{idx}= {};
+    all_params.std_conf_nmovingrip{idx}= {};
+    all_params.mean_conf_nmovingnrip{idx}= {};
+    all_params.std_conf_nmovingnrip{idx}= {};
+    all_params.tps{idx}= {};
+    all_params.error_good{idx}= {};
+    all_params.error_bad{idx}= {};
+    all_params.Eerror_good{idx}= {};
+    all_params.Eerror_bad{idx}= {};
+
+    all_params.Eerror_bad{idx} = {};
+    all_params.Eerror_good{idx} = {};
+end
+
+window_size = num2str(window_list(1));
 
 for imouse = 1:length(Dir.path)
     cd(Dir.path{imouse}{1});
@@ -50,96 +75,109 @@ for imouse = 1:length(Dir.path)
     % load('SpikeData.mat');
     cd(Dir.results{imouse}{1});
     window_size = '200';
-
-    try
-        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearPred.csv'], 'LinearPred');
-        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/timeStepsPred.csv'], 'TimeStepsPred');
-        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/lossPred.csv'], 'LossPred');
-        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearTrue.csv'], 'LinearTrue');
-
-        % Importing decoded position during sleep
         try
-            loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/linearPred.csv'], 'LinearPredSleep');
-            loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/timeStepsPred.csv'], 'TimeStepsPredSleep');
-            load('LinearPredSleep.mat')
-            load('TimeStepsPredSleep.mat')
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearPred.csv'], 'LinearPred', 'window', window_size);
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/timeStepsPred.csv'], 'TimeStepsPred', 'window', window_size);
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/lossPred.csv'], 'LossPred', 'window', window_size);
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearTrue.csv'], 'LinearTrue', 'window', window_size);
+
+            % Importing decoded position during sleep
+            try
+                loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/linearPred.csv'], 'LinearPredSleep', 'window', window_size);
+                loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/timeStepsPred.csv'], 'TimeStepsPredSleep', 'window', window_size);
+                load(['LinearPredSleep' , window_size '.mat'])
+                load([ 'TimeStepsPredSleep' , window_size '.mat' ])
+            catch
+                disp("No sleep session found")
+            end
         catch
-            disp("No sleep session found")
+            window_size = '252';
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearPred.csv'], 'LinearPred', 'window', window_size);
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/timeStepsPred.csv'], 'TimeStepsPred', 'window', window_size);
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/lossPred.csv'], 'LossPred', 'window', window_size);
+            loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearTrue.csv'], 'LinearTrue', 'window', window_size);
+
+            % Importing decoded position during sleep
+            try
+                loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/linearPred.csv'], 'LinearPredSleep', 'window', window_size);
+                loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/timeStepsPred.csv'], 'TimeStepsPredSleep', 'window', window_size);
+                load(['LinearPredSleep' , window_size '.mat'])
+                load([ 'TimeStepsPredSleep' , window_size '.mat' ])
+            catch 
+                disp("No sleep session found")
+            end
         end
-    catch
-        window_size = '252';
-        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearPred.csv'], 'LinearPred');
-        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/timeStepsPred.csv'], 'TimeStepsPred');
-        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/lossPred.csv'], 'LossPred');
-        loadAndSaveCSV([Dir.results{imouse}{1} 'results/' window_size '/linearTrue.csv'], 'LinearTrue');
+        load([ 'LinearPred' , window_size '.mat' ]);
+        load([ 'TimeStepsPred' , window_size '.mat' ])
+        load([ 'LossPred' ,window_size '.mat' ])
+        load([ 'LinearTrue' ,  window_size '.mat' ])
+
 
         try
-            loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/linearPred.csv'], 'LinearPredSleep');
-            loadAndSaveCSV([Dir.results{imouse}{1} 'results_Sleep/' window_size '/PostSleep/timeStepsPred.csv'], 'TimeStepsPredSleep');
-            load('LinearPredSleep.mat')
-            load('TimeStepsPredSleep.mat')
+            % old fashion data
+            % Range(S{1});
+            % Stsd=S;
+            t=Range(AlignedXtsd);
+            X=AlignedXtsd;
+
+            Y=AlignedYtsd;
+            V=Vtsd;
+            preSleep=SessionEpoch.PreSleep;
+            try
+                hab = or(SessionEpoch.Hab1,SessionEpoch.Hab2);
+            catch error
+                hab = SessionEpoch.Hab;
+            end
+
+            try
+                testPre=or(or(SessionEpoch.Hab1,SessionEpoch.Hab2),or(or(SessionEpoch.TestPre1,SessionEpoch.TestPre2),or(SessionEpoch.TestPre3,SessionEpoch.TestPre4)));
+            catch
+                testPre=or(SessionEpoch.Hab,or(or(SessionEpoch.TestPre1,SessionEpoch.TestPre2),or(SessionEpoch.TestPre3,SessionEpoch.TestPre4)));
+            end
+
+            cond=or(or(SessionEpoch.Cond1,SessionEpoch.Cond2),or(SessionEpoch.Cond3,SessionEpoch.Cond4));
+            postSleep=SessionEpoch.PostSleep;
+            testPost=or(or(SessionEpoch.TestPost1,SessionEpoch.TestPost2),or(SessionEpoch.TestPost3,SessionEpoch.TestPost4));
+            try
+                extinct = SessionEpoch.Extinct;
+                sleep = or(preSleep,postSleep);
+                tot=or(or(hab,or(testPre,or(testPost,or(cond,extinct)))),sleep);
+            catch
+                disp('no extinct session')
+                sleep = or(preSleep,postSleep);
+                tot=or(or(hab,or(testPre,or(testPost, cond))),sleep);
+            end
+
+
         catch
-            disp("No sleep session found")
+            % Dima's style of data
+            % clear Stsd
+            % for i=1:length(S.C)
+            %     test=S.C{1,i};
+            %     Stsd{i}=ts(test.data);
+            % end
+            % Stsd=tsdArray(Stsd);
+            t = AlignedXtsd.data;
+            X = tsd(AlignedXtsd.t,AlignedXtsd.data);
+            Y = tsd(AlignedYtsd.t,AlignedYtsd.data);
+            V = tsd(Vtsd.t,Vtsd.data);
+            hab1 = intervalSet(SessionEpoch.Hab1.start,SessionEpoch.Hab1.stop);
+            hab2 = intervalSet(SessionEpoch.Hab2.start,SessionEpoch.Hab2.stop);
+            testPre1=intervalSet(SessionEpoch.TestPre1.start,SessionEpoch.TestPre1.stop);
+            testPre2=intervalSet(SessionEpoch.TestPre1.start,SessionEpoch.TestPre2.stop);
+            testPre3=intervalSet(SessionEpoch.TestPre1.start,SessionEpoch.TestPre3.stop);
+            testPre4=intervalSet(SessionEpoch.TestPre1.start,SessionEpoch.TestPre4.stop);
+            testPre=or(or(hab1,hab2),or(or(testPre1,testPre2),or(testPre3,testPre4)));
+            cond1 = intervalSet(SessionEpoch.Cond1.start,SessionEpoch.Cond1.stop);
+            cond2 = intervalSet(SessionEpoch.Cond2.start,SessionEpoch.Cond2.stop);
+            cond3 = intervalSet(SessionEpoch.Cond3.start,SessionEpoch.Cond3.stop);
+            cond4 = intervalSet(SessionEpoch.Cond4.start,SessionEpoch.Cond4.stop);
+            cond = or(or(cond1,cond2),or(cond3,cond4));
+            postSleep = intervalSet(SessionEpoch.PostSleep.start,SessionEpoch.PostSleep.stop);
+            preSleep = intervalSet(SessionEpoch.PreSleep.start,SessionEpoch.PreSleep.stop);
+            sleep = or(preSleep,postSleep);
+            tot = or(testPre,sleep);
         end
-    end
-    load('LinearPred.mat');
-    load('TimeStepsPred.mat')
-    load('LossPred.mat')
-    load('LinearTrue.mat')
-
-
-    try
-        % old fashion data
-        % Range(S{1});
-        % Stsd=S;
-        t=Range(AlignedXtsd);
-        X=AlignedXtsd;
-
-        Y=AlignedYtsd;
-        V=Vtsd;
-        % preSleep=SessionEpoch.PreSleep;
-        % hab = or(SessionEpoch.Hab1,SessionEpoch.Hab2);
-        try
-            testPre=or(or(SessionEpoch.Hab1,SessionEpoch.Hab2),or(or(SessionEpoch.TestPre1,SessionEpoch.TestPre2),or(SessionEpoch.TestPre3,SessionEpoch.TestPre4)));
-        catch
-            testPre=or(SessionEpoch.Hab,or(or(SessionEpoch.TestPre1,SessionEpoch.TestPre2),or(SessionEpoch.TestPre3,SessionEpoch.TestPre4)));
-        end
-
-        % cond=or(or(SessionEpoch.Cond1,SessionEpoch.Cond2),or(SessionEpoch.Cond3,SessionEpoch.Cond4));
-        % postSleep=SessionEpoch.PostSleep;
-        % testPost=or(or(SessionEpoch.TestPost1,SessionEpoch.TestPost2),or(SessionEpoch.TestPost3,SessionEpoch.TestPost4));
-        % extinct = SessionEpoch.Extinct;
-        % sleep = or(preSleep,postSleep);
-        % tot=or(or(hab,or(testPre,or(testPost,or(cond,extinct)))),sleep);
-    catch
-        % Dima's style of data
-        % clear Stsd
-        % for i=1:length(S.C)
-        %     test=S.C{1,i};
-        %     Stsd{i}=ts(test.data);
-        % end
-        % Stsd=tsdArray(Stsd);
-        t = AlignedXtsd.data;
-        X = tsd(AlignedXtsd.t,AlignedXtsd.data);
-        Y = tsd(AlignedYtsd.t,AlignedYtsd.data);
-        V = tsd(Vtsd.t,Vtsd.data);
-        % hab1 = intervalSet(SessionEpoch.Hab1.start,SessionEpoch.Hab1.stop);
-        % hab2 = intervalSet(SessionEpoch.Hab2.start,SessionEpoch.Hab2.stop);
-        testPre1=intervalSet(SessionEpoch.TestPre1.start,SessionEpoch.TestPre1.stop);
-        testPre2=intervalSet(SessionEpoch.TestPre1.start,SessionEpoch.TestPre2.stop);
-        testPre3=intervalSet(SessionEpoch.TestPre1.start,SessionEpoch.TestPre3.stop);
-        testPre4=intervalSet(SessionEpoch.TestPre1.start,SessionEpoch.TestPre4.stop);
-        testPre=or(or(hab1,hab2),or(or(testPre1,testPre2),or(testPre3,testPre4)));
-        cond1 = intervalSet(SessionEpoch.Cond1.start,SessionEpoch.Cond1.stop);
-        cond2 = intervalSet(SessionEpoch.Cond2.start,SessionEpoch.Cond2.stop);
-        cond3 = intervalSet(SessionEpoch.Cond3.start,SessionEpoch.Cond3.stop);
-        cond4 = intervalSet(SessionEpoch.Cond4.start,SessionEpoch.Cond4.stop);
-        cond = or(or(cond1,cond2),or(cond3,cond4));
-        % postSleep = intervalSet(SessionEpoch.PostSleep.start,SessionEpoch.PostSleep.stop);
-        % preSleep = intervalSet(SessionEpoch.PreSleep.start,SessionEpoch.PreSleep.stop);
-        % sleep = or(preSleep,postSleep);
-        % tot = or(testPre,sleep);
-    end
 
     disp([pwd,' ', window_size])
 
@@ -147,7 +185,7 @@ for imouse = 1:length(Dir.path)
     Smooth_Speed = tsd(Range(V) , movmean(Data(V), ceil(smootime/median(diff(Range(V,'s'))))));
     Vraw = V;
     V = Smooth_Speed;
-    Moving=thresholdIntervals(V,2,'Direction','Above');
+    Moving=thresholdIntervals(V,speed_thresh,'Direction','Above');
     TotEpoch=intervalSet(0,max(Range(V)));
     NonMoving=TotEpoch-Moving;
     LossPredTsd=tsd(TimeStepsPred*1E4,LossPred);
@@ -163,11 +201,11 @@ for imouse = 1:length(Dir.path)
     catch
     end
 
-
-
+    all_params.speed{imouse} = V;
+    all_params.LossPred{imouse} = LossPredTsd;
 
     BadEpoch=thresholdIntervals(LossPredTsd,quantile(Data(LossPredTsd), 0.75),'Direction','Above');
-    GoodEpoch=thresholdIntervals(LossPredTsd,quantile(Data(LossPredTsd), 0.15),'Direction','Below');
+    GoodEpoch=thresholdIntervals(LossPredTsd,quantile(Data(LossPredTsd), 0.10),'Direction','Below');
     stim=ts(Start(StimEpoch));
     RipEp=intervalSet(Range(tRipples)-0.2*1E4,Range(tRipples)+0.2*1E4);RipEp=mergeCloseIntervals(RipEp,1);
 
@@ -217,11 +255,7 @@ for imouse = 1:length(Dir.path)
         % 100]);3
     end
 
-    % Compute the mean and std of confidence around ripples
-    [m, s, tps] = mETAverage(Range(tRipples), Range(LossPredTsdCorrected), Data(LossPredTsdCorrected), 1, 2000);
-    all_params.mean_conf{imouse} = m;
-    all_params.std_conf{imouse} = s;
-    all_params.tps{imouse} = tps;
+
 
     % Compute the mean and std of confidence around ripples for moving and non moving epochs (around and not around ripples)
     [m, s, tps] = mETAverage(Range(tRipples), Range(Restrict(LossPredTsdCorrected, Moving)), Data(Restrict(LossPredTsdCorrected, Moving)), 1, 2000);
@@ -255,6 +289,12 @@ for imouse = 1:length(Dir.path)
     errorbad = histcounts2(Data(Restrict(Restrict(LinearPredTsd,testPre), BadEpoch)),Data(Restrict(Restrict(LinearTrueTsd,testPre), BadEpoch)), pts, pts);
     all_params.error_good{imouse} = errorgood;
     all_params.error_bad{imouse} = errorbad;
+
+    % Compute the mean and std of confidence around ripples
+    [m, s, tps] = mETAverage(Range(tRipples), Range(LossPredTsdCorrected), Data(LossPredTsdCorrected), 1, 2000);
+    all_params.mean_conf{imouse} = m;
+    all_params.std_conf{imouse} = s;
+    all_params.tps{imouse} = tps;
 
     if fig
         figure
@@ -296,16 +336,20 @@ for imouse = 1:length(Dir.path)
         subplot(1,2,1);
         imagesc(pts,pts,errorgood)
         % colormap('jet'); % set the colorscheme
-        crameri('cork','pivot',0) 
+        % crameri('cork','pivot',0)
+        crameri('-roma')
         axis equal;
+        xlabel('Predicted LinearPos', 'FontSize', 15)
+        ylabel('True LinearPos', 'FontSize', 15)
         set(gca, 'XLim', pts([1 end]), 'YLim', pts([1 end]), 'YDir', 'normal');
         title("Precision Matrix during good Epochs")
         grid on;
         subplot(1,2,2)
         imagesc(pts,pts,errorbad)
         % colormap('jet'); % set the colorscheme
-        crameri('cork','pivot',0) 
-
+        crameri('-roma')
+        xlabel('Predicted LinearPos', 'FontSize', 15)
+        ylabel('True LinearPos', 'FontSize', 15)
         axis equal;
         title("Precision Matrix during bad Epochs")
         set(gca, 'XLim', pts([1 end]), 'YLim', pts([1 end]), 'YDir', 'normal');
@@ -313,8 +357,8 @@ for imouse = 1:length(Dir.path)
     end
 
     close all
-    if ~imouse == length(Dir.path)
-        clearvars -except Dir all_params imouse fig to_shift
+    if ~(imouse == length(Dir.path))
+        clearvars -except Dir all_params imouse fig to_shift speed_thresh
     end
 end
 
@@ -324,7 +368,6 @@ end
 figure;
 subplot(1,2,1)
 shadedErrorBar(all_params.tps{1},mean(movmean(zscore_nan_BM(cell2mat(all_params.mean_conf)), 5),2,'omitnan'),mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf)), 5), 2, 'omitnan'))
-
 title("Prediction Loss decreases around ripples. n_{mice} = 9")
 vline(0,'--r')
 xlabel('Time around ripples (ms)')
@@ -337,7 +380,6 @@ subplot(1,2,2)
 
 ystd = fillmissing(mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf)), 5), 2, 'omitnan'), 'previous');
 x = all_params.tps{1};
-size(x)
 coefficients = polyfit(x, ystd, 30);
 xFit = linspace(min(x), max(x), 1000);
 yFit = polyval(coefficients , xFit);
@@ -359,17 +401,23 @@ subplot(1,2,1);
 pts = linspace(0, 1, 20);
 
 imagesc(pts,pts,mean(cat(3, all_params.error_good{:}),3, 'omitnan'))
-colormap('jet'); % set the colorscheme
+% colormap('jet'); % set the colorscheme
+crameri('-roma')
 axis equal;
 set(gca, 'XLim', pts([1 end]), 'YLim', pts([1 end]), 'YDir', 'normal');
 title("Error Matrix during good Epochs")
+        xlabel('Predicted LinearPos', 'FontSize', 15)
+        ylabel('True LinearPos', 'FontSize', 15)
 grid on;
 subplot(1,2,2)
 
 imagesc(pts,pts,mean(cat(3, all_params.error_bad{:}),3, 'omitnan'))
-colormap('jet'); % set the colorscheme
+% colormap('jet'); % set the colorscheme
+crameri('-roma')
 axis equal;
 title("Error Matrix during bad Epochs")
+        xlabel('Predicted LinearPos', 'FontSize', 15)
+        ylabel('True LinearPos', 'FontSize', 15)
 set(gca, 'XLim', pts([1 end]), 'YLim', pts([1 end]), 'YDir', 'normal')
 saveFigure_BM(2, ['ErroMatrixGoodBadnMice9'], '/home/mickey/download/figures/')
 
@@ -420,8 +468,7 @@ title(strcat( 'if shifted by  ',  num2str(to_shift/1e4), ' s the ripples are les
 
 figure;
 subplot(1,2,1)
-shadedErrorBar(all_params.tps{1},mean(movmean(zscore_nan_BM(cell2mat(all_params.mean_conf_moving)), 5),2,'omitnan'),mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf)), 5), 2, 'omitnan'))
-
+shadedErrorBar(all_params.tps{1},mean(movmean(zscore_nan_BM(cell2mat(all_params.mean_conf_moving)), 5),2,'omitnan'),mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf)), 5), 2, 'omitnan'));
 title("Prediction Loss decreases around ripples - only moving epochs. n_{mice} = 9")
 vline(0,'--r')
 xlabel('Time around ripples (ms)')
@@ -451,7 +498,7 @@ title('Standard error decreases right after the ripple  - only moving epochs.')
 
 figure;
 subplot(1,2,1)
-shadedErrorBar(all_params.tps{1},mean(movmean(zscore_nan_BM(cell2mat(all_params.mean_conf_nmoving)), 5),2,'omitnan'),mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf)), 5), 2, 'omitnan'))
+shadedErrorBar(all_params.tps{1},mean(movmean(zscore_nan_BM(cell2mat(all_params.mean_conf_nmoving)), 5),2,'omitnan'),mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf)), 5), 2, 'omitnan'));
 
 title("Prediction Loss decreases around ripples - only nmoving epochs. n_{mice} = 9")
 vline(0,'--r')
@@ -481,7 +528,7 @@ title('Standard error decreases right after the ripple  - only nmoving epochs.')
 
 figure;
 subplot(1,2,1)
-shadedErrorBar(all_params.tps{1},mean(movmean(zscore_nan_BM(cell2mat(all_params.mean_conf_nmovingrip)), 5),2,'omitnan'),mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf)), 5), 2, 'omitnan'))
+shadedErrorBar(all_params.tps{1},mean(movmean(zscore_nan_BM(cell2mat(all_params.mean_conf_nmovingrip)), 5),2,'omitnan'),mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf)), 5), 2, 'omitnan'));
 
 title("Prediction Loss decreases around ripples - only nmovingrip epochs. n_{mice} = 9")
 vline(0,'--r')
@@ -511,7 +558,7 @@ title('Standard error decreases right after the ripple  - only nmovingrip epochs
 
 figure;
 subplot(1,2,1)
-shadedErrorBar(all_params.tps{1},mean(movmean(zscore_nan_BM(cell2mat(all_params.mean_conf_nmovingnrip)), 5),2,'omitnan'),mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf)), 5), 2, 'omitnan'))
+shadedErrorBar(all_params.tps{1},mean(movmean(zscore_nan_BM(cell2mat(all_params.mean_conf_nmovingnrip)), 5),2,'omitnan'),mean(movmean(zscore_nan_BM(cell2mat(all_params.std_conf)), 5), 2, 'omitnan'));
 
 title("Prediction Loss decreases around ripples - only nmovingnrip epochs. n_{mice} = 9")
 vline(0,'--r')
@@ -544,7 +591,7 @@ title('Standard error decreases right after the ripple  - only nmovingnrip epoch
 %%% for non moving non rip
 figure;
 subplot(1,2,1)
-shadedErrorBar(all_params.tps{1},mean(movmean(cell2mat(all_params.mean_conf_nmovingnrip), 5),2,'omitnan'),mean(movmean(cell2mat(all_params.std_conf_nmovingnrip), 5), 2, 'omitnan'))
+shadedErrorBar(all_params.tps{1},mean(movmean(cell2mat(all_params.mean_conf_nmovingnrip), 5),2,'omitnan'),mean(movmean(cell2mat(all_params.std_conf_nmovingnrip), 5), 2, 'omitnan'));
 
 title("Prediction Loss decreases around ripples - only nmovingnrip epochs. n_{mice} = 9")
 vline(0,'--r')
@@ -575,7 +622,7 @@ title('Standard error decreases right after the ripple  - only nmovingnrip epoch
 %%% for non moving rip
 figure;
 subplot(1,2,1)
-shadedErrorBar(all_params.tps{1},mean(movmean(cell2mat(all_params.mean_conf_nmovingrip), 5),2,'omitnan'),mean(movmean(cell2mat(all_params.std_conf_nmovingrip), 5), 2, 'omitnan'))
+shadedErrorBar(all_params.tps{1},mean(movmean(cell2mat(all_params.mean_conf_nmovingrip), 5),2,'omitnan'),mean(movmean(cell2mat(all_params.std_conf_nmovingrip), 5), 2, 'omitnan'));
 
 title("Prediction Loss decreases around ripples - only nmovingrip epochs. n_{mice} = 9")
 vline(0,'--r')
@@ -606,7 +653,8 @@ title('Standard error decreases right after the ripple  - only nmovingrip epochs
 %%% for moving
 figure;
 subplot(1,2,1)
-shadedErrorBar(all_params.tps{1},mean(movmean(cell2mat(all_params.mean_conf_moving), 5),2,'omitnan'),mean(movmean(cell2mat(all_params.std_conf_moving), 5), 2, 'omitnan'))
+shadedErrorBar(all_params.tps{1},mean(movmean(cell2mat(all_params.mean_conf_moving), 5),2,'omitnan'),mean(movmean(cell2mat(all_params.std_conf_moving), 5), 2, 'omitnan'));
+
 title("Prediction Loss decreases around ripples - only moving epochs. n_{mice} = 9")
 vline(0,'--r')
 xlabel('Time around ripples (ms)')
@@ -628,3 +676,5 @@ xlabel('Time around ripples (ms)')
 ylabel('std')
 text(1,3,'rip time','Color','r')
 title('Standard error decreases right after the ripple  - only moving epochs.')
+
+CorrelateTSDs(all_params.speed, all_params.LossPred, 'fig', true)

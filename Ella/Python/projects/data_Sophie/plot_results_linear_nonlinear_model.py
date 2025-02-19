@@ -86,14 +86,14 @@ def plot_r2_means_sem(results_list, r2_type='train'):
     summary_stats = summary_stats.sort_values('Model')
 
     # Create the plot
-    plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(10, 6))
     plt.bar(summary_stats['Model'], summary_stats['mean'], yerr=summary_stats['sem'], capsize=5, alpha=0.7)
 
     # Add labels and title
     ylabel = 'Mean R² ± SEM (Train)' if r2_type == 'train' else 'Mean R² ± SEM (Test)'
     plt.ylabel(ylabel, fontsize=14)
     plt.xlabel('Model', fontsize=14)
-    plt.ylim(0,0.1)
+    plt.ylim(0,0.08)
     title = 'Mean R² Values Across Models with SEM (Train)' if r2_type == 'train' else 'Mean R² Values Across Models with SEM (Test)'
     plt.title(title, fontsize=16)
     plt.xticks(rotation=45, fontsize=12)
@@ -102,6 +102,8 @@ def plot_r2_means_sem(results_list, r2_type='train'):
     # Show the plot
     plt.tight_layout()
     plt.show()
+    
+    return fig
 
 
 def plot_mean_firing_rate_vs_r2(loaded_results, spike_counts, separate_subplots=False, r2_type='train'):
@@ -232,6 +234,7 @@ def plot_r2_comparison(loaded_results, model_1, model_2, r2_type='train'):
 
     # Merge the two datasets on Mouse_ID and Neuron_ID
     merged_data = pd.merge(r2_model_1, r2_model_2, on=['Mouse_ID', 'Neuron_ID'], how='inner')
+    print(len(merged_data))
 
     # Plot R² values for model_1 vs model_2
     plt.figure(figsize=(8, 8))

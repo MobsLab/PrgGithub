@@ -101,12 +101,10 @@ Correct_Ferret_Processing(directory, sessions)
 
 SleepScoring_Ferret_FV_BAMG('recompute', 1)
 
-%%                           ------------- PreProcessing Spike Sorting -------------
-directory = '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241205_TORCs';
-SpikeSorting_Analysis_AG(directory)
-
 %%                           ------------- Spike Sorting Analysis -------------
-SpikeSorting_Analysis_AG
+directory = '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241205_TORCs';
+
+SpikeSorting_Analysis_AG(directory)
 
 %%                           ------------- PreProcessing behaviour (DLC) -------------
 Ferret_Eye_Movement_BM
