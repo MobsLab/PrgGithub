@@ -57,16 +57,16 @@ elseif strcmp(experiment,'Atropine') %%corrections (sleep scoring/sleep events/s
     a=a+1;Dir.path{a}{1}='/media/nas6/ProjetPFCVLPO/M1112/20201204/Sleep_AtropineInjection/DREADD_Atropine_1112_Atropine_201204_091815/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     
-    % mouse 1245
-    a=a+1;Dir.path{a}{1}='/media/mobschapeau/DataMOBS160/DREADD_PFC_VLPO_1245_1247_1248_atropine_220407_090451/1245/';%% à updater quand sur serveur
-    load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
-    % mouse 1247
-    a=a+1;Dir.path{a}{1}='/media/mobschapeau/DataMOBS160/DREADD_PFC_VLPO_1245_1247_1248_atropine_220407_090451/1247/';%% à updater quand sur serveur
-    load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
-    % mouse 1248
-    a=a+1;Dir.path{a}{1}='/media/mobschapeau/DataMOBS160/DREADD_PFC_VLPO_1245_1247_1248_atropine_220407_090451/1248/';%% à updater quand sur serveur
-    load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
-    
+%     % mouse 1245
+%     a=a+1;Dir.path{a}{1}='/media/mobschapeau/DataMOBS160/DREADD_PFC_VLPO_1245_1247_1248_atropine_220407_090451/1245/';%% à updater quand sur serveur
+%     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
+%     % mouse 1247
+%     a=a+1;Dir.path{a}{1}='/media/mobschapeau/DataMOBS160/DREADD_PFC_VLPO_1245_1247_1248_atropine_220407_090451/1247/';%% à updater quand sur serveur
+%     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
+%     % mouse 1248
+%     a=a+1;Dir.path{a}{1}='/media/mobschapeau/DataMOBS160/DREADD_PFC_VLPO_1245_1247_1248_atropine_220407_090451/1248/';%% à updater quand sur serveur
+%     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
+%     
     
     
     
