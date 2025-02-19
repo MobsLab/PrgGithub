@@ -143,7 +143,7 @@ STRF_calculation(directory, Starttime/1e4)
 %% SECTION 3.1: Binning of spikes
 clear B Q D
 
-Binsize = 10*1e4;  % or 120*1e4
+Binsize = 1*1e4;  % or 120*1e4
 B = tsdArray(A);
 Q = MakeQfromS(B,Binsize);
 Q = tsd(Range(Q),nanzscore(full(Data(Q))));
@@ -180,13 +180,19 @@ Mean_FR_on_Gamma = interp1(linspace(0,1,length(D)), movmean(nanmean(D'),5), ...
                    linspace(0,1,length(SmoothGamma)));
 Mean_FR_on_Gamma_tsd = tsd(Range(SmoothGamma), Mean_FR_on_Gamma');
 
+
+Q_sleep = tsd(Range(Restrict(Q,Sleep)),nanzscore(full(Data(Restrict(Q,Sleep)))));
+D_Sleep = Data(Q_sleep);
+
 %% FIGURE: Gamma vs Firing Rate
 figure('Name','Gamma vs Firing Rate','Color','w');
 subplot(2,1,1)
-plot(Range(SmoothGamma,'s')/60, movmean(log10(Data(SmoothGamma)),1e3), 'k');
+clear R D, R = Range(SmoothGamma,'s'); D = Data(SmoothGamma);
+plot(R(1:1e3:end)/60, runmean(D(1:1e3:end),100), 'k');
 ylabel('OB gamma power (log scale)'); 
 yyaxis right
-plot(Range(Mean_FR_on_Gamma_tsd,'s')/60, Data(Mean_FR_on_Gamma_tsd), 'r');
+clear R D, R = Range(Mean_FR_on_Gamma_tsd,'s'); D = Data(Mean_FR_on_Gamma_tsd);
+plot(R(1:1e4:end)/60, runmean(D(1:1e4:end),10), 'r');
 xlabel('time (min)'); ylabel('FR (zscore)'); xlim([0 240]); makepretty
 
 subplot(2,4,6)
@@ -201,7 +207,7 @@ X = Data(Restrict(Mean_FR_on_Gamma_tsd,Sleep));
 Y = log10(Data(Restrict(SmoothGamma,Sleep)));
 PlotCorrelations_BM(X(1:1e4:end), Y(1:1e4:end));
 xlabel('Mean FR (zscore)'); ylabel('OB gamma power (log scale)');
-title('Sleep'); axis square; makepretty_BM2; xlim([-1 2.5]); ylim([15. 3]);
+title('Sleep'); axis square; makepretty_BM2; xlim([-1 2.5]); %ylim([15 3]);
 
 %% FIGURE: FR-Gamma time correlation
 figure('Name','FR-Gamma time correlation','Color','w');
