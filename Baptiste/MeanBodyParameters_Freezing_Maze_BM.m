@@ -49,6 +49,27 @@ makepretty_BM2
 
 
 
+%% mean spectrum
+Session_type={'Cond'};
+Mouse=Drugs_Groups_UMaze_BM(22);
+[OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
+MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ob_low');
+
+
+figure
+Data_to_use = squeeze(OutPutData.(Session_type{sess}).ob_low.mean(:,5,:));
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar(linspace(.15,20,261), nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color=[1 .5 .5]; h.mainLine.Color=color; h.patch.FaceColor=color; h.FaceAlpha=.5; h.edge(1).Color=color; h.edge(2).Color=color;
+Data_to_use = squeeze(OutPutData.(Session_type{sess}).ob_low.mean(:,6,:));
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar(linspace(.15,20,261), nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color=[.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.FaceAlpha=.5; h.edge(1).Color=color; h.edge(2).Color=color;
+makepretty
+xlim([0 10])
+xlabel('Frequency (Hz)'), ylabel('Power (a.u.)')
 
 
 %% old

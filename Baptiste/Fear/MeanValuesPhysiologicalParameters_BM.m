@@ -81,7 +81,7 @@ function [OutPutData , Epoch , NameEpoch , OutPutTSD] = MeanValuesPhysiologicalP
 if convertCharsToStrings(List_Type) == 'head_restraint'
     HeadRestraintSess = HeadRestraintSess_BM2;
 elseif convertCharsToStrings(List_Type) == 'all_saline'
-    GetAllSalineSessions_BM
+    GetEmbReactMiceFolderList_BM
 elseif convertCharsToStrings(List_Type) == 'drugs'
     GetEmbReactMiceFolderList_BM
 elseif convertCharsToStrings(List_Type) == 'sound_test'

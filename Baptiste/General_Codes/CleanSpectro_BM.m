@@ -5,7 +5,7 @@ function [Sc,Th,Epoch]=CleanSpectro_BM(S,f,id,f_thr)
 % id from 1 to 8 (the higher the more removal
 
 Sp=Data(S);
-temp=tsd(Range(S)',mean(Sp(:,f<f_thr)')');
+temp=tsd(Range(S)',mean(Sp(:,f>f_thr)')');
 
 m(1)=percentile(Data(temp),99.9);
 m(2)=percentile(Data(temp),99.5);
@@ -15,6 +15,7 @@ m(5)=percentile(Data(temp),92);
 m(6)=percentile(Data(temp),90);
 m(7)=percentile(Data(temp),85);
 m(8)=percentile(Data(temp),80);
+m(9)=percentile(Data(temp),50);
 
 
 % 
@@ -29,7 +30,7 @@ m(8)=percentile(Data(temp),80);
 
 
 
-for i=1:8
+for i=id
     EpochOK{i}=thresholdIntervals(temp,m(i),'Direction','Below');
 end
  

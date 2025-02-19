@@ -56,6 +56,16 @@ figure
 PlotCorrelations_BM(Y_wake , Z_wake , 10 , 1 , 'k')
 
 
+figure
+HRAxes=dscatter(X , Y ,'smoothing',7);
+xlim([-3.5 3.5]), ylim([-3.5 3.5])
+axis square
+makepretty
+xlabel('Heart rate (a.u.)')
+ylabel('Gamma (a.u)')
+title('Gamma/Heart rate correlations, head fixed session')
+
+
 %% other way
 % runmean, log on sime time stamps
 clear all

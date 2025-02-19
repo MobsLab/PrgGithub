@@ -28,7 +28,7 @@ params.Fs=1250;
 %
 meanSP=mean(Data(SpecOB_Fz.M929.Day2))/mean(mean(Data(SpecOB_Fz.M929.Day2)));
 
-point_1= find(Spectro{3}<2 & Spectro{3}>);
+point_1= find(Spectro{3}<70 & Spectro{3}>30);
 point_2 = find(meanSP==min(meanSP(Spectro{3}>0 & Spectro{3}<4)),1); % a adapt�, d'apr�s la courbe dans discord se serai plutot entre 1 et 3Hz
 vect = [point_1,point_2,find(Spectro{3}>6)]; %  a adapt�, toi ca serai plutot f>6
 ft = fittype('a*exp(-b*x/c)+d'); % eq utilis� pour le fit
