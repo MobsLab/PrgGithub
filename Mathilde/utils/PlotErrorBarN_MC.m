@@ -267,20 +267,20 @@ if showpoints && ~horizontal
         Cols{i} = [0.6 0.6 0.6];
         temp=A{i}(~isnan(A{i}));
 %         %blanc cnotours noirs
-        handlesplot=plotSpread(A{i}(:),'distributionColors','k','xValues',x(i),'spreadWidth',0.8); hold on;
-        set(handlesplot{1},'MarkerSize',20)
-        handlesplot=plotSpread(A{i}(:),'distributionColors','w','xValues',x(i),'spreadWidth',0.8); hold on;
-        set(handlesplot{1},'MarkerSize',10)
+%         handlesplot=plotSpread(A{i}(:),'distributionColors','k','xValues',x(i),'spreadWidth',0.8); hold on;
+%         set(handlesplot{1},'MarkerSize',20)
+%         handlesplot=plotSpread(A{i}(:),'distributionColors','w','xValues',x(i),'spreadWidth',0.8); hold on;
+%         set(handlesplot{1},'MarkerSize',10)
 %       
         % %%couleur des barplots
         %handlesplot=plotSpread(A{i}(:),'distributionColors',barcolors{i}*0.4,'xValues',x(i),'spreadWidth',2); hold on;
         %set(handlesplot{1},'MarkerSize',20)
         
         %blanc cnotours noirs %Alice
-%         handlesplot=plotSpread(A{i}(:),'distributionColors','k','xValues',x(i),'spreadWidth',1); hold on;
-%         set(handlesplot{1},'MarkerSize',5)
-%         handlesplot=plotSpread(A{i}(:),'distributionColors','w','xValues',x(i),'spreadWidth',1); hold on;
-%         set(handlesplot{1},'MarkerSize',20)
+        handlesplot=plotSpread(A{i}(:),'distributionColors','k','xValues',x(i),'spreadWidth',1); hold on;
+        set(handlesplot{1},'MarkerSize',5)
+        handlesplot=plotSpread(A{i}(:),'distributionColors','w','xValues',x(i),'spreadWidth',1); hold on;
+        set(handlesplot{1},'MarkerSize',20)
 %         
         
     end

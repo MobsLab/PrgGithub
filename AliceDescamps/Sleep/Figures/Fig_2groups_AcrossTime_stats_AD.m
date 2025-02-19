@@ -7,18 +7,24 @@ isparam=0;
 iscorr=1;
 
 %classic
-% % col_1 = [.7 .7 .7];
+% col_1 = [.7 .7 .7];
+% col_2 = [1 .4 0];
 % col_1 = [.2 .2 .2];
-% % col_2 = [1 .4 0];
 % col_2 = [1 0 0];
 
 %classic
-col_1 = [.7 .7 .7];
-col_2 = [0 .8 .4];
+% col_1 = [.7 .7 .7];
+% col_2 = [0 .8 .4];
+
+%classic
+% col_1 = [.7 .7 .7];
+% col_2 = [.2 0 1];
+% col_2 = [.2 0 1];
 
 figure('color',[1 1 1]), hold on
 % suptitle ('xxxxxxxxxxxxx')
 suptitle ('Effect of Social defeat');
+suptitle ('Effect of CNO');
 
 subplot(4,7,[8,9],'align') % wake percentage overtime
 plot(nanmean(data_perc_WAKE_1),'linestyle','-','marker','o','markersize',8,'markerfacecolor',col_1,'color',col_1), hold on
@@ -33,7 +39,7 @@ ylabel('Wake percentage')
 xlabel('Time after stress (h)')
 %%stats wake perc overtime
 if isparam ==0
-    [p_1,h_1,stats] = ranksum(data_perc_WAKE_1(:,1), data_perc_WAKE_2(:,1));
+    [p_1,h_1, stats] = ranksum(data_perc_WAKE_1(:,1), data_perc_WAKE_2(:,1));
     [p_2,h_2, stats] = ranksum(data_perc_WAKE_1(:,2), data_perc_WAKE_2(:,2));
     [p_3,h_3, stats] = ranksum(data_perc_WAKE_1(:,3), data_perc_WAKE_2(:,3));
     [p_4,h_4, stats] = ranksum(data_perc_WAKE_1(:,4), data_perc_WAKE_2(:,4));

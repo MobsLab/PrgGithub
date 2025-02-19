@@ -1,5 +1,5 @@
 %% To plot the figure you need to load data : 
-Get_Data_5groups_AD.m
+Get_Data_5groups_inj_1pm_AD.m
 
 %% FIGURE 4 groups
 txt_size = 15;
@@ -7,31 +7,23 @@ isparam=0;
 iscorr=1;
 
 %classic
-% col_1 = [.7 .7 .7];
-% col_2 = [1 .4 0];
-% col_3 = [0 .4 .6];
-% col_4 = [1 .2 0];
-%classic
 col_1 = [.7 .7 .7];
-col_2 = [1 .3 0];
-col_3 = [1 .4 0];
-col_4 = [.5 .6 .2];
+col_2 = [0 .8 .4];
+col_3 = [.4 .4 .4];
+col_4 = [0 .6 .2];
 
 % legend = {'1','2','3','4'};
-legend = {'Sal mCherry (n=10)','SD + Sal mCherry (n=4)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
-% legend = {'Sal CRH (n=11)','SD + Sal C57 (n=11)','SD + Sal CRH (n=3)','SD Wisden + Sal CRH (n=4)'};
+legend = {'Sal CRH homo (n=13)','CNO CRH homo (n=13)','Sal CRH hétéro (n=4)','CNO CRH hétéro (n=4)'};
 
 
 figure('color',[1 1 1])
 % suptitle ('xxxxxxxxxxxxx')
-suptitle ('Effect of CRH inhibition after SD')
+suptitle ('Activation CRH homo/hétéro')
 
 subplot(4,6,[4],'align') %WAKE percentage phase1
-hold on, title('0-1h30')
-subplot(4,6,[5],'align') %WAKE percentage phase2
-hold on, title('1h30-3h30')
+hold on, title('Pre injection')
 subplot(4,6,[6],'align') %WAKE percentage phase3
-hold on, title('3h30-8h')
+hold on, title('Post Injection')
 
 
 
@@ -44,7 +36,7 @@ plot(nanmean(data_perc_WAKE_3),'linestyle','-','LineWidth',2,'marker','^','marke
 errorbar(nanmean(data_perc_WAKE_3), stdError(data_perc_WAKE_3),'LineWidth',2,'color',col_3)
 plot(nanmean(data_perc_WAKE_4),'linestyle','-','LineWidth',2,'marker','o','markersize',8,'markerfacecolor',col_4,'color',col_4)
 errorbar(nanmean(data_perc_WAKE_4), stdError(data_perc_WAKE_4),'LineWidth',2,'color',col_4)
-xlim([0 8.5])
+xlim([0 9.5])
 xticks([1 3 5 7 9]); xticklabels({'1','3','5','7','9'})
 ylabel('Wake percentage')
 makepretty
@@ -60,7 +52,7 @@ plot(nanmean(data_perc_SWS_3),'linestyle','-','LineWidth',2,'marker','^','marker
 errorbar(nanmean(data_perc_SWS_3), stdError(data_perc_SWS_3),'LineWidth',2,'color',col_3)
 plot(nanmean(data_perc_SWS_4),'linestyle','-','LineWidth',2,'marker','o','markersize',8,'markerfacecolor',col_4,'color',col_4)
 errorbar(nanmean(data_perc_SWS_4), stdError(data_perc_SWS_4),'LineWidth',2,'color',col_4)
-xlim([0 8.5])
+xlim([0 9.5])
 xticks([1 3 5 7 9]); xticklabels({'1','3','5','7','9'}) 
 ylim([0 100])
 makepretty
@@ -75,7 +67,7 @@ plot(nanmean(data_perc_REM_3),'linestyle','-','LineWidth',2,'marker','^','marker
 errorbar(nanmean(data_perc_REM_3), stdError(data_perc_REM_3),'LineWidth',2,'color',col_3)
 plot(nanmean(data_perc_REM_4),'linestyle','-','LineWidth',2,'marker','o','markersize',8,'markerfacecolor',col_4,'color',col_4)
 errorbar(nanmean(data_perc_REM_4), stdError(data_perc_REM_4),'LineWidth',2,'color',col_4)
-xlim([0 8.5])
+xlim([0 9.5])
 xticks([1 3 5 7 9]); xticklabels({'1','3','5','7','9'}) 
 makepretty
 ylabel('REM percentage')
@@ -133,56 +125,56 @@ elseif iscorr==1
 else
 end
     
-
-subplot(4,6,[5],'align') %WAKE percentage phase2
-MakeSpreadAndBoxPlot2_MC({...
-    nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_2,2), nanmean(data_perc_WAKE_interPeriod_3,2), nanmean(data_perc_WAKE_interPeriod_4,2)},...
-    {col_1,col_2,col_3,col_4},[1:4],legend,'paired',0,'showsigstar','none') 
-set(gca,'xticklabels',[])
-ylabel('Wake percentage')
-% makepretty
-% ylim([0 100])
-
-if isparam==0 %%version ranksum (non param)
-    %phase2
-    [p_1_vs_2_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_2,2));
-    [p_1_vs_3_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_3,2));
-    [p_1_vs_4_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_4,2));
-    [p_2_vs_3_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_2,2), nanmean(data_perc_WAKE_interPeriod_3,2));
-    [p_2_vs_4_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_2,2), nanmean(data_perc_WAKE_interPeriod_4,2));
-    [p_3_vs_4_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_3,2), nanmean(data_perc_WAKE_interPeriod_4,2));
-elseif isparam==1 %%version ttest
-    %phase2
-    [h_1,p_1_vs_2_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_2,2));
-    [h_1,p_1_vs_3_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_3,2));
-    [h_1,p_1_vs_4_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_4,2));
-    [h_1,p_2_vs_3_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_2,2), nanmean(data_perc_WAKE_interPeriod_3,2));
-    [h_1,p_2_vs_4_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_2,2), nanmean(data_perc_WAKE_interPeriod_4,2));
-    [h_1,p_3_vs_4_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_3,2), nanmean(data_perc_WAKE_interPeriod_4,2));
-    else
-end
-%%add corrections for multiple comparisons
-if iscorr==0
-    %phase2
-    if p_1_vs_2_2<0.05; sigstar_MC({[1 2]},p_1_vs_2_2,0,'LineWigth',16,'StarSize',24);end
-    if p_1_vs_3_2<0.05; sigstar_MC({[1 3]},p_1_vs_3_2,0,'LineWigth',16,'StarSize',24);end
-    if p_1_vs_4_2<0.05; sigstar_MC({[1 4]},p_1_vs_4_2,0,'LineWigth',16,'StarSize',24);end
-    if p_2_vs_3_2<0.05; sigstar_MC({[2 3]},p_2_vs_3_2,0,'LineWigth',16,'StarSize',24);end
-    if p_2_vs_4_2<0.05; sigstar_MC({[2 4]},p_2_vs_4_2,0,'LineWigth',16,'StarSize',24);end
-    if p_3_vs_4_2<0.05; sigstar_MC({[3 4]},p_3_vs_4_2,0,'LineWigth',16,'StarSize',24);end
-elseif iscorr==1
-    p_values = [p_1_vs_2_1 p_1_vs_3_1 p_1_vs_4_1 p_2_vs_3_1 p_2_vs_4_1 p_3_vs_4_1];
-    [h_1, crit_p_1, adj_ci_cvrg_1, adj_p] = fdr_bh(p_values);
-    %phase2
-    if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(2)<0.05; sigstar_MC({[1 3]},adj_p(2),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(3)<0.05; sigstar_MC({[1 4]},adj_p(3),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(4)<0.05; sigstar_MC({[2 3]},adj_p(4),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(5)<0.05; sigstar_MC({[2 4]},adj_p(5),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(6)<0.05; sigstar_MC({[3 4]},adj_p(6),0,'LineWigth',16,'StarSize',24);end
-else
-end
-    
+% 
+% subplot(4,6,[5],'align') %WAKE percentage phase2
+% MakeSpreadAndBoxPlot2_MC({...
+%     nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_2,2), nanmean(data_perc_WAKE_interPeriod_3,2), nanmean(data_perc_WAKE_interPeriod_4,2)},...
+%     {col_1,col_2,col_3,col_4},[1:4],legend,'paired',0,'showsigstar','none') 
+% set(gca,'xticklabels',[])
+% ylabel('Wake percentage')
+% % makepretty
+% % ylim([0 100])
+% 
+% if isparam==0 %%version ranksum (non param)
+%     %phase2
+%     [p_1_vs_2_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_2,2));
+%     [p_1_vs_3_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_3,2));
+%     [p_1_vs_4_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_4,2));
+%     [p_2_vs_3_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_2,2), nanmean(data_perc_WAKE_interPeriod_3,2));
+%     [p_2_vs_4_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_2,2), nanmean(data_perc_WAKE_interPeriod_4,2));
+%     [p_3_vs_4_1, h_1] = ranksum(nanmean(data_perc_WAKE_interPeriod_3,2), nanmean(data_perc_WAKE_interPeriod_4,2));
+% elseif isparam==1 %%version ttest
+%     %phase2
+%     [h_1,p_1_vs_2_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_2,2));
+%     [h_1,p_1_vs_3_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_3,2));
+%     [h_1,p_1_vs_4_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_1,2), nanmean(data_perc_WAKE_interPeriod_4,2));
+%     [h_1,p_2_vs_3_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_2,2), nanmean(data_perc_WAKE_interPeriod_3,2));
+%     [h_1,p_2_vs_4_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_2,2), nanmean(data_perc_WAKE_interPeriod_4,2));
+%     [h_1,p_3_vs_4_1] = ttest2(nanmean(data_perc_WAKE_interPeriod_3,2), nanmean(data_perc_WAKE_interPeriod_4,2));
+%     else
+% end
+% %%add corrections for multiple comparisons
+% if iscorr==0
+%     %phase2
+%     if p_1_vs_2_2<0.05; sigstar_MC({[1 2]},p_1_vs_2_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_1_vs_3_2<0.05; sigstar_MC({[1 3]},p_1_vs_3_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_1_vs_4_2<0.05; sigstar_MC({[1 4]},p_1_vs_4_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_2_vs_3_2<0.05; sigstar_MC({[2 3]},p_2_vs_3_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_2_vs_4_2<0.05; sigstar_MC({[2 4]},p_2_vs_4_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_3_vs_4_2<0.05; sigstar_MC({[3 4]},p_3_vs_4_2,0,'LineWigth',16,'StarSize',24);end
+% elseif iscorr==1
+%     p_values = [p_1_vs_2_1 p_1_vs_3_1 p_1_vs_4_1 p_2_vs_3_1 p_2_vs_4_1 p_3_vs_4_1];
+%     [h_1, crit_p_1, adj_ci_cvrg_1, adj_p] = fdr_bh(p_values);
+%     %phase2
+%     if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(2)<0.05; sigstar_MC({[1 3]},adj_p(2),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(3)<0.05; sigstar_MC({[1 4]},adj_p(3),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(4)<0.05; sigstar_MC({[2 3]},adj_p(4),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(5)<0.05; sigstar_MC({[2 4]},adj_p(5),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(6)<0.05; sigstar_MC({[3 4]},adj_p(6),0,'LineWigth',16,'StarSize',24);end
+% else
+% end
+%     
     
 subplot(4,6,[6],'align') %WAKE percentage phase3
 MakeSpreadAndBoxPlot2_MC({nanmean(data_perc_WAKE_end_1,2), nanmean(data_perc_WAKE_end_2,2), nanmean(data_perc_WAKE_end_3,2), nanmean(data_perc_WAKE_end_4,2)},...
@@ -286,56 +278,56 @@ else
 end
     
 
-
-subplot(4,6,[11],'align') %NREM percentage phase2
-MakeSpreadAndBoxPlot2_MC({...
-    nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_2,2), nanmean(data_perc_SWS_interPeriod_3,2), nanmean(data_perc_SWS_interPeriod_4,2)},...
-    {col_1,col_2,col_3,col_4},[1:4],legend,'paired',0,'showsigstar','none') 
-set(gca,'xticklabels',[])
-ylabel('NREM percentage')
-% makepretty
-% ylim([0 100])
-
-if isparam==0 %%version ranksum (non param)
-    %phase2
-    [p_1_vs_2_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_2,2));
-    [p_1_vs_3_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_3,2));
-    [p_1_vs_4_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_4,2));
-    [p_2_vs_3_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_2,2), nanmean(data_perc_SWS_interPeriod_3,2));
-    [p_2_vs_4_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_2,2), nanmean(data_perc_SWS_interPeriod_4,2));
-    [p_3_vs_4_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_3,2), nanmean(data_perc_SWS_interPeriod_4,2));
-elseif isparam==1 %%version ttest
-    %phase2
-    [h_1,p_1_vs_2_1] = ttest2(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_2,2));
-    [h_1,p_1_vs_3_1] = ttest2(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_3,2));
-    [h_1,p_1_vs_4_1] = ttest2(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_4,2));
-    [h_1,p_2_vs_3_1] = ttest2(nanmean(data_perc_SWS_interPeriod_2,2), nanmean(data_perc_SWS_interPeriod_3,2));
-    [h_1,p_2_vs_4_1] = ttest2(nanmean(data_perc_SWS_interPeriod_2,2), nanmean(data_perc_SWS_interPeriod_4,2));
-    [h_1,p_3_vs_4_1] = ttest2(nanmean(data_perc_SWS_interPeriod_3,2), nanmean(data_perc_SWS_interPeriod_4,2));
-    else
-end
-%%add corrections for multiple comparisons
-if iscorr==0
-    %phase2
-    if p_1_vs_2_2<0.05; sigstar_MC({[1 2]},p_1_vs_2_2,0,'LineWigth',16,'StarSize',24);end
-    if p_1_vs_3_2<0.05; sigstar_MC({[1 3]},p_1_vs_3_2,0,'LineWigth',16,'StarSize',24);end
-    if p_1_vs_4_2<0.05; sigstar_MC({[1 4]},p_1_vs_4_2,0,'LineWigth',16,'StarSize',24);end
-    if p_2_vs_3_2<0.05; sigstar_MC({[2 3]},p_2_vs_3_2,0,'LineWigth',16,'StarSize',24);end
-    if p_2_vs_4_2<0.05; sigstar_MC({[2 4]},p_2_vs_4_2,0,'LineWigth',16,'StarSize',24);end
-    if p_3_vs_4_2<0.05; sigstar_MC({[3 4]},p_3_vs_4_2,0,'LineWigth',16,'StarSize',24);end
-elseif iscorr==1
-    p_values = [p_1_vs_2_1 p_1_vs_3_1 p_1_vs_4_1 p_2_vs_3_1 p_2_vs_4_1 p_3_vs_4_1];
-    [h_1, crit_p_1, adj_ci_cvrg_1, adj_p] = fdr_bh(p_values);
-    %phase2
-    if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(2)<0.05; sigstar_MC({[1 3]},adj_p(2),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(3)<0.05; sigstar_MC({[1 4]},adj_p(3),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(4)<0.05; sigstar_MC({[2 3]},adj_p(4),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(5)<0.05; sigstar_MC({[2 4]},adj_p(5),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(6)<0.05; sigstar_MC({[3 4]},adj_p(6),0,'LineWigth',16,'StarSize',24);end
-else
-end
-
+% 
+% subplot(4,6,[11],'align') %NREM percentage phase2
+% MakeSpreadAndBoxPlot2_MC({...
+%     nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_2,2), nanmean(data_perc_SWS_interPeriod_3,2), nanmean(data_perc_SWS_interPeriod_4,2)},...
+%     {col_1,col_2,col_3,col_4},[1:4],legend,'paired',0,'showsigstar','none') 
+% set(gca,'xticklabels',[])
+% ylabel('NREM percentage')
+% % makepretty
+% % ylim([0 100])
+% 
+% if isparam==0 %%version ranksum (non param)
+%     %phase2
+%     [p_1_vs_2_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_2,2));
+%     [p_1_vs_3_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_3,2));
+%     [p_1_vs_4_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_4,2));
+%     [p_2_vs_3_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_2,2), nanmean(data_perc_SWS_interPeriod_3,2));
+%     [p_2_vs_4_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_2,2), nanmean(data_perc_SWS_interPeriod_4,2));
+%     [p_3_vs_4_1, h_1] = ranksum(nanmean(data_perc_SWS_interPeriod_3,2), nanmean(data_perc_SWS_interPeriod_4,2));
+% elseif isparam==1 %%version ttest
+%     %phase2
+%     [h_1,p_1_vs_2_1] = ttest2(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_2,2));
+%     [h_1,p_1_vs_3_1] = ttest2(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_3,2));
+%     [h_1,p_1_vs_4_1] = ttest2(nanmean(data_perc_SWS_interPeriod_1,2), nanmean(data_perc_SWS_interPeriod_4,2));
+%     [h_1,p_2_vs_3_1] = ttest2(nanmean(data_perc_SWS_interPeriod_2,2), nanmean(data_perc_SWS_interPeriod_3,2));
+%     [h_1,p_2_vs_4_1] = ttest2(nanmean(data_perc_SWS_interPeriod_2,2), nanmean(data_perc_SWS_interPeriod_4,2));
+%     [h_1,p_3_vs_4_1] = ttest2(nanmean(data_perc_SWS_interPeriod_3,2), nanmean(data_perc_SWS_interPeriod_4,2));
+%     else
+% end
+% %%add corrections for multiple comparisons
+% if iscorr==0
+%     %phase2
+%     if p_1_vs_2_2<0.05; sigstar_MC({[1 2]},p_1_vs_2_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_1_vs_3_2<0.05; sigstar_MC({[1 3]},p_1_vs_3_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_1_vs_4_2<0.05; sigstar_MC({[1 4]},p_1_vs_4_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_2_vs_3_2<0.05; sigstar_MC({[2 3]},p_2_vs_3_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_2_vs_4_2<0.05; sigstar_MC({[2 4]},p_2_vs_4_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_3_vs_4_2<0.05; sigstar_MC({[3 4]},p_3_vs_4_2,0,'LineWigth',16,'StarSize',24);end
+% elseif iscorr==1
+%     p_values = [p_1_vs_2_1 p_1_vs_3_1 p_1_vs_4_1 p_2_vs_3_1 p_2_vs_4_1 p_3_vs_4_1];
+%     [h_1, crit_p_1, adj_ci_cvrg_1, adj_p] = fdr_bh(p_values);
+%     %phase2
+%     if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(2)<0.05; sigstar_MC({[1 3]},adj_p(2),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(3)<0.05; sigstar_MC({[1 4]},adj_p(3),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(4)<0.05; sigstar_MC({[2 3]},adj_p(4),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(5)<0.05; sigstar_MC({[2 4]},adj_p(5),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(6)<0.05; sigstar_MC({[3 4]},adj_p(6),0,'LineWigth',16,'StarSize',24);end
+% else
+% end
+% 
 
 
 
@@ -438,56 +430,56 @@ elseif iscorr==1
     if adj_p(6)<0.05; sigstar_MC({[3 4]},adj_p(6),0,'LineWigth',16,'StarSize',24);end
 else
 end
-    
-subplot(4,6,[17],'align') %REM percentage phase2
-MakeSpreadAndBoxPlot2_MC({...
-    nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_2,2), nanmean(data_perc_REM_interPeriod_3,2), nanmean(data_perc_REM_interPeriod_4,2)},...
-    {col_1,col_2,col_3,col_4},[1:4],legend,'paired',0,'showsigstar','none') 
-% set(gca,'xticklabels',[])
-ylabel('REM percentage')
-% makepretty
-% ylim([0 10])
-
-if isparam==0 %%version ranksum (non param)
-    %phase2
-    [p_1_vs_2_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_2,2));
-    [p_1_vs_3_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_3,2));
-    [p_1_vs_4_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_4,2));
-    [p_2_vs_3_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_2,2), nanmean(data_perc_REM_interPeriod_3,2));
-    [p_2_vs_4_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_2,2), nanmean(data_perc_REM_interPeriod_4,2));
-    [p_3_vs_4_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_3,2), nanmean(data_perc_REM_interPeriod_4,2));
-elseif isparam==1 %%version ttest
-    %phase2
-    [h_1,p_1_vs_2_1] = ttest2(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_2,2));
-    [h_1,p_1_vs_3_1] = ttest2(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_3,2));
-    [h_1,p_1_vs_4_1] = ttest2(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_4,2));
-    [h_1,p_2_vs_3_1] = ttest2(nanmean(data_perc_REM_interPeriod_2,2), nanmean(data_perc_REM_interPeriod_3,2));
-    [h_1,p_2_vs_4_1] = ttest2(nanmean(data_perc_REM_interPeriod_2,2), nanmean(data_perc_REM_interPeriod_4,2));
-    [h_1,p_3_vs_4_1] = ttest2(nanmean(data_perc_REM_interPeriod_3,2), nanmean(data_perc_REM_interPeriod_4,2));
-    else
-end
-%%add corrections for multiple comparisons
-if iscorr==0
-    %phase2
-    if p_1_vs_2_2<0.05; sigstar_MC({[1 2]},p_1_vs_2_2,0,'LineWigth',16,'StarSize',24);end
-    if p_1_vs_3_2<0.05; sigstar_MC({[1 3]},p_1_vs_3_2,0,'LineWigth',16,'StarSize',24);end
-    if p_1_vs_4_2<0.05; sigstar_MC({[1 4]},p_1_vs_4_2,0,'LineWigth',16,'StarSize',24);end
-    if p_2_vs_3_2<0.05; sigstar_MC({[2 3]},p_2_vs_3_2,0,'LineWigth',16,'StarSize',24);end
-    if p_2_vs_4_2<0.05; sigstar_MC({[2 4]},p_2_vs_4_2,0,'LineWigth',16,'StarSize',24);end
-    if p_3_vs_4_2<0.05; sigstar_MC({[3 4]},p_3_vs_4_2,0,'LineWigth',16,'StarSize',24);end
-elseif iscorr==1
-    p_values = [p_1_vs_2_1 p_1_vs_3_1 p_1_vs_4_1 p_2_vs_3_1 p_2_vs_4_1 p_3_vs_4_1];
-    [h_1, crit_p_1, adj_ci_cvrg_1, adj_p] = fdr_bh(p_values);
-    %phase2
-    if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(2)<0.05; sigstar_MC({[1 3]},adj_p(2),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(3)<0.05; sigstar_MC({[1 4]},adj_p(3),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(4)<0.05; sigstar_MC({[2 3]},adj_p(4),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(5)<0.05; sigstar_MC({[2 4]},adj_p(5),0,'LineWigth',16,'StarSize',24);end
-    if adj_p(6)<0.05; sigstar_MC({[3 4]},adj_p(6),0,'LineWigth',16,'StarSize',24);end
-else
-end
-    
+%     
+% subplot(4,6,[17],'align') %REM percentage phase2
+% MakeSpreadAndBoxPlot2_MC({...
+%     nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_2,2), nanmean(data_perc_REM_interPeriod_3,2), nanmean(data_perc_REM_interPeriod_4,2)},...
+%     {col_1,col_2,col_3,col_4},[1:4],legend,'paired',0,'showsigstar','none') 
+% % set(gca,'xticklabels',[])
+% ylabel('REM percentage')
+% % makepretty
+% % ylim([0 10])
+% 
+% if isparam==0 %%version ranksum (non param)
+%     %phase2
+%     [p_1_vs_2_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_2,2));
+%     [p_1_vs_3_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_3,2));
+%     [p_1_vs_4_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_4,2));
+%     [p_2_vs_3_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_2,2), nanmean(data_perc_REM_interPeriod_3,2));
+%     [p_2_vs_4_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_2,2), nanmean(data_perc_REM_interPeriod_4,2));
+%     [p_3_vs_4_1, h_1] = ranksum(nanmean(data_perc_REM_interPeriod_3,2), nanmean(data_perc_REM_interPeriod_4,2));
+% elseif isparam==1 %%version ttest
+%     %phase2
+%     [h_1,p_1_vs_2_1] = ttest2(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_2,2));
+%     [h_1,p_1_vs_3_1] = ttest2(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_3,2));
+%     [h_1,p_1_vs_4_1] = ttest2(nanmean(data_perc_REM_interPeriod_1,2), nanmean(data_perc_REM_interPeriod_4,2));
+%     [h_1,p_2_vs_3_1] = ttest2(nanmean(data_perc_REM_interPeriod_2,2), nanmean(data_perc_REM_interPeriod_3,2));
+%     [h_1,p_2_vs_4_1] = ttest2(nanmean(data_perc_REM_interPeriod_2,2), nanmean(data_perc_REM_interPeriod_4,2));
+%     [h_1,p_3_vs_4_1] = ttest2(nanmean(data_perc_REM_interPeriod_3,2), nanmean(data_perc_REM_interPeriod_4,2));
+%     else
+% end
+% %%add corrections for multiple comparisons
+% if iscorr==0
+%     %phase2
+%     if p_1_vs_2_2<0.05; sigstar_MC({[1 2]},p_1_vs_2_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_1_vs_3_2<0.05; sigstar_MC({[1 3]},p_1_vs_3_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_1_vs_4_2<0.05; sigstar_MC({[1 4]},p_1_vs_4_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_2_vs_3_2<0.05; sigstar_MC({[2 3]},p_2_vs_3_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_2_vs_4_2<0.05; sigstar_MC({[2 4]},p_2_vs_4_2,0,'LineWigth',16,'StarSize',24);end
+%     if p_3_vs_4_2<0.05; sigstar_MC({[3 4]},p_3_vs_4_2,0,'LineWigth',16,'StarSize',24);end
+% elseif iscorr==1
+%     p_values = [p_1_vs_2_1 p_1_vs_3_1 p_1_vs_4_1 p_2_vs_3_1 p_2_vs_4_1 p_3_vs_4_1];
+%     [h_1, crit_p_1, adj_ci_cvrg_1, adj_p] = fdr_bh(p_values);
+%     %phase2
+%     if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(2)<0.05; sigstar_MC({[1 3]},adj_p(2),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(3)<0.05; sigstar_MC({[1 4]},adj_p(3),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(4)<0.05; sigstar_MC({[2 3]},adj_p(4),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(5)<0.05; sigstar_MC({[2 4]},adj_p(5),0,'LineWigth',16,'StarSize',24);end
+%     if adj_p(6)<0.05; sigstar_MC({[3 4]},adj_p(6),0,'LineWigth',16,'StarSize',24);end
+% else
+% end
+%     
 
 subplot(4,6,[18],'align') %REM percentage phase3
 MakeSpreadAndBoxPlot2_MC({nanmean(data_perc_REM_end_1,2), nanmean(data_perc_REM_end_2,2), nanmean(data_perc_REM_end_3,2), nanmean(data_perc_REM_end_4,2)},...

@@ -1,19 +1,31 @@
 %% input dir
 %%1
-% Dir_1 = PathForExperiments_DREADD_AD('inhibDREADD_CRH_VLPO_SalineInjection_10am');
-Dir_1 = PathForExperiments_DREADD_AD('mCherry_CRH_VLPO_SalineInjection_10am');
+% % Dir_1 = PathForExperiments_DREADD_AD('inhibDREADD_CRH_VLPO_SalineInjection_10am');
+% Dir_1 = PathForExperiments_DREADD_AD('mCherry_CRH_VLPO_SalineInjection_10am');
+% 
+% %%2
+% % Dir_2 = PathForExperiments_DREADD_AD('inhibDREADD_CRH_VLPO_CNOInjection_10am');
+% Dir_2 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_SalineInjection_10am');
+% 
+% %%3
+% % Dir_3 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
+% Dir_3 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_CNOInjection_10am');
+% 
+% %%4
+% Dir_4 = PathForExperiments_SleepPostSD_AD('SleepPostSD_inhibDREADD_CRH_VLPO_CNOInjection_10am');
 
+%1
+Dir_1 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_SalineInjection_10am');
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1488 1489 1510 1511 1512]);
 %%2
-% Dir_2 = PathForExperiments_DREADD_AD('inhibDREADD_CRH_VLPO_CNOInjection_10am');
-Dir_2 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_SalineInjection_10am');
-
+Dir_2 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_CNOInjection_10am');
+% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1488 1489 1510 1511 1512]);
 %%3
-% Dir_3 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
-Dir_3 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_CNOInjection_10am');
-
+Dir_3 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_mCherry_CRH_VLPO_CNOInjection_10am');
+% Dir_3 = RestrictPathForExperiment (Dir_3, 'nMice', [1578 1579]);
 %%4
-Dir_4 = PathForExperiments_SleepPostSD_AD('SleepPostSD_inhibDREADD_CRH_VLPO_CNOInjection_10am');
-
+Dir_4 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_inhibDREADD_CRH_VLPO_CNOInjection_10am');
+% Dir_4 = RestrictPathForExperiment (Dir_4, 'nMice', [1488 1489 1510 1511 1512]);
 %% parameters
 tempbin = 3600;
 time_end=3*1e8;
@@ -941,11 +953,12 @@ end
 %%
 col_1 = [.2 .6 1]; %bleu clair %saline 10H sur DREADD-
 col_2 = [.2 .2 .8]; %bleu foncé %CNO 10H sur DREADD-
-col_3 = [.2 .6 .6]; %émeraude clair %saline après SD sur DREADD-
+% col_3 = [.2 .6 .6]; %émeraude clair %saline après SD sur DREADD-
+col_3 = [1 0 0]; %émeraude clair %saline après SD sur DREADD-
 col_4 = [0 .4 .4]; %émeraude foncé %CNO après SD sur DREADD-
 
 
-figure, hold on
+figure('color',[1 1 1]), hold on
 subplot(4,6,[1,2]) % wake percentage overtime
 plot(nanmean(data_perc_WAKE_ctrl),'linestyle','-','marker','square','markersize',8,'markerfacecolor',col_1,'color',col_1), hold on
 errorbar(nanmean(data_perc_WAKE_ctrl), stdError(data_perc_WAKE_ctrl),'color',col_1)

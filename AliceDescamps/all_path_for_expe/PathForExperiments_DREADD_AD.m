@@ -101,8 +101,8 @@ elseif strcmp(experiment,'mCherry_CRH_VLPO_CNOInjection_10am')
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1580/20240430/Sleep_CNOInjection/mCherry_CRH_1580_CNOInj_10h_240430_100221/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     %Mouse 1581 %%big insomnia during the day : to suppress ?? same as in saline
-    a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1581/20240430/Sleep_CNOInjection/mCherry_CRH_1581_CNOInj_10h_240430_100221/';
-    load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
+%     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1581/20240430/Sleep_CNOInjection/mCherry_CRH_1581_CNOInj_10h_240430_100221/';
+%     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
 
     %3rd batch
     %Mouse 1634
