@@ -58,8 +58,8 @@ if strcmp(experiment,'mCherry_CRH_VLPO_SalineInjection_10am')
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1580/20240507/Sleep_SalineInjection/mCherry_CRH_1580_Salinj_240507_100127/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     %Mouse 1581 %%big insomnia until 3 hours after start of recording : got tanggled a lot, to suppress ??
-    a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1581/20240507/Sleep_SalineInjection/mCherry_CRH_1581_Salinj_240507_100127/';
-    load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
+%     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1581/20240507/Sleep_SalineInjection/mCherry_CRH_1581_Salinj_240507_100127/';
+%     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     
     %3rd batch
 %     %Mouse 1634    %%really bad theta

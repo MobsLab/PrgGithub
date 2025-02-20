@@ -20,7 +20,8 @@ col_3 = [0 .4 .4];
 % legend = {'Sal mCherry (n=3)','SD + Sal mCherry (n=3)','CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
 % legend = {'Sal mCherry (n=11)','SD1 + Sal mCherry (n=3)','SD2 + Sal mCherry (n=4)'};
 % legend = {'Sal mCherry (n=11)','SD + Sal mCherry homo (n=3)','SD + Sal DREADD+ hétéro (n=4)'};
-legend = {'CNO mCherry (n=6)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
+% legend = {'CNO mCherry (n=6)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
+legend = {'CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
 
 
 figure('color',[1 1 1])

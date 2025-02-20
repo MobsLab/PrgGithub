@@ -14,22 +14,22 @@
 % Dir_5 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_SalineInjection_10am');
 %% input dir
 %1
-% % Dir_1= PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_SalineInjection_10am');
-% Dir_1= PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_10am');
-% % Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1566 1581 1635]);
-% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1578 1579 1636 1637]);
-% % Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1636 1637]);
-% %%2
-% % Dir_2 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_SalineInjection_10am');
-% Dir_2 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_CNOInjection_10am');
-% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1578 1579 1636 1637]);
-% % Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1636 1637]);
-% %%3
-% Dir_3 = PathForExperiments_SleepPostSD_AD('SleepPostSD_inhibDREADD_CRH_VLPO_CNOInjection_10am');
-% %%4
-% Dir_4 = PathForExperiments_SleepPostSD_AD('SleepPostSD_inhibDREADD_CRH_VLPO_CNOInjection_10am');
-% %%5
-% Dir_5 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_SalineInjection_10am');
+% Dir_1= PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_SalineInjection_10am');
+Dir_1= PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_10am');
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1566 1581 1635]);
+Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1578 1579 1636 1637]);
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1636 1637]);
+%%2
+% Dir_2 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_SalineInjection_10am');
+Dir_2 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_CNOInjection_10am');
+Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1578 1579 1636 1637]);
+% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1636 1637]);
+%%3
+Dir_3 = PathForExperiments_SleepPostSD_AD('SleepPostSD_inhibDREADD_CRH_VLPO_CNOInjection_10am');
+%%4
+Dir_4 = PathForExperiments_SleepPostSD_AD('SleepPostSD_inhibDREADD_CRH_VLPO_CNOInjection_10am');
+%%5
+Dir_5 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_SalineInjection_10am');
 
 %1
 % Dir_1= PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_SalineInjection_10am');
@@ -203,16 +203,16 @@
 % %%5
 % Dir_5 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
 %% input dir effet CNO
-% %1
-Dir_1 = PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_SalineInjection_10am');
-%%2
-Dir_2 = PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_10am');
-%%3
-Dir_3 = PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_1mgkg_10am');
-%%4
-Dir_4 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_mCherry_CRH_VLPO_SalineInjection_10am');
-%%5
-Dir_5 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
+% % %1
+% Dir_1 = PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_SalineInjection_10am');
+% %%2
+% Dir_2 = PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_10am');
+% %%3
+% Dir_3 = PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_1mgkg_10am');
+% %%4
+% Dir_4 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_mCherry_CRH_VLPO_SalineInjection_10am');
+% %%5
+% Dir_5 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
 
 %% parameters
 

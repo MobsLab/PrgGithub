@@ -16,12 +16,18 @@ col_1 = [.2 .2 .2];
 col_2 = [1 0 0];
 col_3 = [0 .4 .4];
 
+%classic
+% col_1 = [.7 .7 .7];
+% col_2 = [.2 .2 .2];
+% col_3 = [.2 .4 .8];
+
 % legend = {'1','2','3'};
 % legend = {'Sal mCherry (n=3)','SD + Sal mCherry (n=3)','CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
 % legend = {'Sal mCherry (n=11)','SD1 + Sal mCherry (n=3)','SD2 + Sal mCherry (n=4)'};
 % legend = {'Sal mCherry (n=11)','SD + Sal mCherry homo (n=3)','SD + Sal DREADD+ hétéro (n=4)'};
 % legend = {'CNO mCherry (n=6)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
-legend = {'Sal mCherry (n=10)','CNO mCherry 2.5mg/kg (n=9)','CNO mCherry 1mg/kg (n=4)'};
+legend = {'CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
+% legend = {'Sal mCherry (n=10)','CNO mCherry 2.5mg/kg (n=10)','CNO mCherry 1mg/kg (n=4)'};
 
 
 figure('color',[1 1 1])

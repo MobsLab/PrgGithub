@@ -7,11 +7,11 @@ isparam=0;
 iscorr=1;
 
 %homo
-% col_1 = [.7 .7 .7];
-% col_2 = [0 .8 .4];
+col_1 = [.7 .7 .7];
+col_2 = [0 .8 .4];
 %hétéro
-col_1 = [.4 .4 .4];
-col_2 = [0 .6 .2];
+% col_1 = [.4 .4 .4];
+% col_2 = [0 .6 .2];
 
 
 figure('color',[1 1 1]), hold on
