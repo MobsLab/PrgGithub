@@ -46,18 +46,20 @@ from perform_statistical_tests import (
     compare_r2_wilcoxon_all,
     compare_all_pairs_wilcoxon
     )
-from save_plots import save_plot_as_svg
+# from save_plots import save_plot_as_svg
+from joblib import dump
 
 # %% Load data
 
 load_path = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/'
+# load_path = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/wrong_noise/'
 figures_directory = r'/media/DataMOBsRAIDN/ProjectEmbReact/Data_ella/figures/linear_model'
 
 maze_denoised_data = load_results(load_path + 'maze_denoised_data.pkl')
 maze_spike_times_data = load_results(load_path + 'maze_spike_times_data.pkl')
 
 # Rebin data
-new_bin_size = 0.6
+new_bin_size = 1
 maze_rebinned_data = rebin_mice_data(maze_denoised_data, ['BreathFreq', 'Heartrate', 'Accelero', 'Speed', 'LinPos'], new_bin_size)
 
 
@@ -120,6 +122,14 @@ results_four_pred = cross_validate_neurons_per_mouse_permutation(spike_counts, m
 results_five_pred = cross_validate_neurons_per_mouse_permutation(spike_counts, maze_rebinned_data, 
                                                      ['Mouse507', 'Mouse508', 'Mouse509', 'Mouse510'], 
                                                      ['Heartrate', 'BreathFreq', 'LinPos', 'Speed', 'Accelero'], k=5)
+
+# %%% Save results
+
+models_all_results = [results_HR, results_LP, results_BF,
+                     results_SP, results_AC, results_three_pred,
+                     results_four_pred, results_five_pred]
+
+dump(models_all_results, load_path+'results_linear_model_1s.joblib')
 
 
 # %%% Heart rate
@@ -211,21 +221,17 @@ model_labels = ['Heartrate', 'LinPos', 'BreathFreq', 'Speed', 'Accelero',
                 'LP + SP + AC', 'BF + LP + SP + AC', 'Full model']
 model_comparison = plot_model_comparison_r2(models_r2_results, model_labels)
 
-save_plot_as_svg(figures_directory, 'mean_R2_linear_model_all_neurons_v2', fig=model_comparison)
+# save_plot_as_svg(figures_directory, 'mean_R2_linear_model_all_neurons_v2', fig=model_comparison)
 
 
 # %% Run statistical tests to compare the results between models
-
-models_all_results = [results_HR, results_LP, results_BF,
-                     results_SP, results_AC, results_three_pred,
-                     results_four_pred, results_five_pred]
 
 compare_r2_wilcoxon_all(results_HR, results_LP, showplot=True)
 
 
 significant_pairs = compare_all_pairs_wilcoxon(models_all_results, model_labels, 
                                                alpha=0.05, correction=True, 
-                                               correction_method='fdr_bh')
+                                               correction_method='bonferroni')
 
 
 # %% Count the significant neurons for each model
@@ -240,7 +246,7 @@ neurons_proportion = plot_significant_neurons_proportion(models_all_results, mod
                                                          correction=True, correction_method='bonferroni')
 
 
-save_plot_as_svg(figures_directory, 'proportion_significant_neurons_bonferroni_v2', fig=neurons_proportion)
+# save_plot_as_svg(figures_directory, 'proportion_significant_neurons_bonferroni_v2', fig=neurons_proportion)
 
 
 
