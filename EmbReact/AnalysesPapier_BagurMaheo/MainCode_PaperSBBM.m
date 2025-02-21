@@ -55,8 +55,8 @@ PlaceCells_Replay_Subsampling_FreezingSafe_BM_SB_VFin.m
 
 %% Figure 3 - ripple inhib effect on stress score
 
-
-
+ResidualCorrStressScore_Umaze_DZPGroup
+ResidualCorrStressScore_Umaze_RipGroup
 
 %% Figure supp
 % Mouvement vs other parameters
