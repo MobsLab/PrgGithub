@@ -3,6 +3,7 @@ function run_zeta_test_AG(directory, sessName)
 disp(['running session ' sessName])
 dblUseMaxDur = 3.5; % Ignore spikes beyond 3.5s after onset
 subsampling_value = 0.5; % 0.5 = 50% of all trials
+intResampNum = 1000; % number of resampling
 
 % load spikes
 [spikes, metadata] = load_wave_clus(directory);
@@ -30,15 +31,15 @@ sigs = nan(1,size(spikes, 2));
 
 for s_count = 1:size(spikes, 2)
     vecSpikeTimes1 = spikes(:, s_count)/1e3; %in seconds
-    [dblZetaP] = zetatest(vecSpikeTimes1, matEventTimes, dblUseMaxDur);
+    [dblZetaP] = zetatest(vecSpikeTimes1, matEventTimes, dblUseMaxDur, intResampNum);
     sigs(s_count) = dblZetaP;
     i = metadata(s_count,:);
     fprintf('Channel #%d, Cluster #%d, p-value = %d\n', i(1), i(2), sigs(s_count))
 end
 
 signif_idx = find(sigs <= 0.05);
-list_signif_trials_50 = [metadata(signif_idx, :), sigs(signif_idx)'];
-list_all_trials_50 = [metadata, sigs'];
+list_signif_trials_1000 = [metadata(signif_idx, :), sigs(signif_idx)'];
+list_all_trials_1000 = [metadata, sigs'];
 non_signif_idx = find(sigs > 0.05);
 
 %% plot fig
@@ -64,9 +65,10 @@ ylabel('ZETA P val')
 ylim([0 0.05])
 
 %% save stuff
-saveas(fh, [directory '/wave_clus/raster_figures/zeta_test_50'], 'png');
+saveas(fh, [directory '/wave_clus/raster_figures/zeta_test_1000'], 'png');
 
-save([directory '/wave_clus/spike_analysis_' sessName], 'list_all_trials_50', 'list_signif_trials_50', '-append')
+% save([directory '/wave_clus/spike_analysis_' sessName], 'list_all_trials_50', 'list_signif_trials_50', '-append')
+save([directory '/wave_clus/spike_analysis_' sessName], 'list_all_trials_1000', 'list_signif_trials_1000')
 
 close(fh);
 

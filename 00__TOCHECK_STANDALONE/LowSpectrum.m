@@ -5,7 +5,7 @@ params.Fs=1250;
 params.trialave=0;
 params.err=[1 0.0500];
 params.pad=2;
-params.fpass=[0 20];
+params.fpass=[0 40];
 movingwin=[3 0.2];
 params.tapers=[3 5];
 load(strcat('LFPData/LFP',num2str(ch),'.mat'));

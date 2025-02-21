@@ -358,7 +358,7 @@ function Correct_Subsampling_BM(comp_name)
 sessions = PathForExperimentsOB('Shropshire');
 sess = sessions.path;
 
-for p=2:length(sess)
+for p=64:length(sess)
     disp(['Calculating ' sess{p} ' ' num2str(length(sess)-p) '/' num2str(length(sess)) ' is left...'])
     
     % basal informations regarding session
