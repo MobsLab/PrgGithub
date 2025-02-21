@@ -1,13 +1,20 @@
 function WriteExpeInfoToXml(ExpeInfo)
 
 %% read the model file to be completed
-dr = dropbox;
-copyfile([dr '/Kteam/PrgMatlab/PreProcessing/NomenclatureCodes/ModelXmlPreProcessing.xml'],'amplifier.xml')
+% dr = dropbox;
+dr = GitHubLocation;
+
+copyfile([dr '/PrgGithub/PreProcessing/NomenclatureCodes/ModelXmlPreProcessing.xml'],'amplifier.xml')
 XmlStructure = xml2struct_SB('amplifier.xml');
 
 %% General Information
 XmlStructure.parameters.generalInfo.date.Text = [ExpeInfo.date(1:4) '-' ExpeInfo.date(5:6) '-' ExpeInfo.date(7:8)];
 XmlStructure.parameters.generalInfo.experimenters.Text = ExpeInfo.Experimenter;
+
+%% Added by SB to account for not everyone using 20kHz anymore - 21/02/2025
+if isfield(ExpeInfo.PreProcessingInfo,'SR')
+XmlStructure.parameters.acquisitionSystem.samplingRate = ['' num2str(ExpeInfo.PreProcessingInfo.SR) ''];
+end
 % Generate description of this mouse
 TextForDescription = ['MouseNum: ' num2str(ExpeInfo.nmouse) newline,...
     'MouseStrain: ' num2str(ExpeInfo.MouseStrain) newline,...

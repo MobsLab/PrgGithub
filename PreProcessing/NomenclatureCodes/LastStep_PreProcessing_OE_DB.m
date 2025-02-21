@@ -2,6 +2,15 @@
 %% File by file preparation for concatenation
 clear all
 load('ExpeInfo.mat')
+
+%% Add the correct sampling rate
+out_ind = regexp(ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{1}, 'continuous');
+oebin = fileread([ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{1}(1:out_ind-1) '/structure.oebin']);
+[~, sr_id] = regexp(oebin,'"sample_rate": ');
+ExpeInfo.PreProcessingInfo.SR = str2double(oebin(sr_id(1)+1:sr_id(1)+5));
+save('ExpeInfo.mat')
+
+
 BaseFileName = ['M' num2str(ExpeInfo.nmouse) '_' ExpeInfo.date '_' ExpeInfo.SessionType];
 FinalFolder = cd;
 
@@ -53,6 +62,9 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
                     ExpeInfo);
 
 
+                cd(ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{f})
+
+
                 %% here is the place where we check if the ephys is the right length comapred to the behav resources - to do
                 
                 %% copy ephys files that are ref subtracted and merged
@@ -88,7 +100,7 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
                         ChanToSub(ChanToSub==ExpeInfo.ChannelToAnalyse.Respi) = [];
                     end
                     ChanToSave = [0 :ExpeInfo.PreProcessingInfo.TotalChannels-1];
-                    ChanToSave(ChanToSub+1) = [];
+                    % ChanToSave(ChanToSub+1) = [];
                     % Do the subtraction
                     RefSubtraction_multi('continuous.dat',ExpeInfo.PreProcessingInfo.TotalChannels,1,...
                         ['M' num2str(ExpeInfo.nmouse)],ChanToSub,RefChannel,ChanToSave);
@@ -231,6 +243,7 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
         end
         
         %% run the makeData scripts
+        global DATA
         SetCurrentSession([BaseFileName '.xml'])
         SessLength = MakeData_LFP_PluggedOnly(FinalFolder,ExpeInfo);
         

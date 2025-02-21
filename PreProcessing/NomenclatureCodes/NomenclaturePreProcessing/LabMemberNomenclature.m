@@ -7,4 +7,4 @@
 
 %Brain regions
 LabMemberName = ...
-    {'SB','KE','DB','SL','TG','MC','TB','CS','KB','GdL','ML','JL','BM','AB','MO', 'AG','AD','CH'};
+    {'AD','CH','EC','TdeC','SB', 'AG','NK','KE','DB','SL','TG','MC','TB','CS','KB','GdL','ML','JL','BM','AB','MO'};
