@@ -15,13 +15,13 @@
 %1
 Dir_1 = PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_10am');
 % Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1578 1579 1636 1637]);
-Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1636 1637]);
-% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1637]);
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1636 1637]);
+Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1578]);
 %%2
 Dir_2 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_mCherry_CRH_VLPO_CNOInjection_10am');
 % Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1578 1579 1636 1637]);
-Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1636 1637]);
-% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1637]);
+% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1636 1637]);
+Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1578]);
 
 %% parameters
 

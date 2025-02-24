@@ -1,5 +1,5 @@
 
-%% input dir
+%% input dir homo exci
 %1
 Dir_1 = PathForExperiments_DREADD_AD ('exciDREADD_CRH_VLPO_SalineInjection_1pm');
 %%2
@@ -11,7 +11,7 @@ Dir_4 = PathForExperiments_DREADD_AD ('exciDREADD_hetero_CRH_VLPO_CNOInjection_1
 %%5
 Dir_5 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
 
-%% input dir
+%% input dir hetero exci
 %1
 % Dir_1 = PathForExperiments_DREADD_AD ('exciDREADD_hetero_CRH_VLPO_SalineInjection_1pm');
 % %%2
@@ -24,6 +24,17 @@ Dir_5 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH
 % Dir_5 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
 
 
+%% input dir homo inhib
+% %1
+% Dir_1 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_SalineInjection_1pm');
+% %%2
+% Dir_2 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_CNOInjection_1pm');
+% %%3
+% Dir_3 = PathForExperiments_DREADD_AD ('exciDREADD_hetero_CRH_VLPO_SalineInjection_1pm');
+% %%4
+% Dir_4 = PathForExperiments_DREADD_AD ('exciDREADD_hetero_CRH_VLPO_CNOInjection_1pm');
+% %%5
+% Dir_5 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
 %% parameters
 
 tempbin = 3600; %bin size to plot variables overtime

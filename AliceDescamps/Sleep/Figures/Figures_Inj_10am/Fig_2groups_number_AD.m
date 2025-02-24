@@ -6,32 +6,28 @@ txt_size = 15;
 isparam=0;
 iscorr=1;
 
-%homo exci
-col_1 = [.7 .7 .7];
-col_2 = [0 .8 .4];
-%hétéro
-% col_1 = [.4 .4 .4];
-% col_2 = [0 .6 .2];
+
 %homo inhib
-% col_1 = [.7 .7 .7];
-% col_2 = [.6 0 .6];
+col_1 = [.7 .7 .7];
+col_2 = [.6 0 .6];
+
+% legend = {'1','2'};
+% legend = {'Sal mCherry (n=4)','SD + Sal mCherry (n=4)'};
+legend = {'Sal DREADD- (n=8)','CNO DREADD- (n=8)'};
+% legend = {'CNO mCherry (n=6)','SD + CNO mCherry (n=6)'};
 
 
-% legend = {'1','2','3'};
-legend = {'Sal DREADD+ (n=13)','CNO DREADD+ (n=13)'};
-% legend = {'Sal DREADD- (n=5)','CNO DREADD- (n=5)'};
-
-figure('color',[1 1 1]), hold on
+figure('color',[1 1 1])
 % suptitle ('xxxxxxxxxxxxx')
-% suptitle ('Comparison between SD1 and SD2 saline')
-suptitle ('Activation of CRH neurons')
-% suptitle ('Inhibition of CRH neurons')
-
+% suptitle ('Effect of Social defeat');
+suptitle ('Inhibition of CRH neurons');
 
 subplot(4,6,[4],'align') %WAKE number phase1
-hold on, title('Pre')
+hold on, title('0-1h30')
+subplot(4,6,[5],'align') %WAKE number phase2
+hold on, title('1h30-3h30')
 subplot(4,6,[6],'align') %WAKE number phase3
-hold on, title('Post')
+hold on, title('3h30-8h')
 
 
 
@@ -40,15 +36,14 @@ plot(nanmean(data_num_WAKE_1),'linestyle','-','LineWidth',2,'marker','square','m
 errorbar(nanmean(data_num_WAKE_1), stdError(data_num_WAKE_1),'LineWidth',2,'color',col_1)
 plot(nanmean(data_num_WAKE_2,1),'linestyle','-','LineWidth',2,'marker','^','markerfacecolor',col_2,'markersize',8,'color',col_2)
 errorbar(nanmean(data_num_WAKE_2,1), stdError(data_num_WAKE_2),'linestyle','-','LineWidth',2,'color',col_2)
-xlim([0 9.5])
+xlim([0 8.5])
 xticks([1 3 5 7 9]); xticklabels({'1','3','5','7','9'})
 ylabel('Wake number')
 makepretty
 ylim([0 100])
 
-%%stats wake perc overtime
 if isparam ==0
-    [p_1,h_1,stats] = ranksum(data_num_WAKE_1(:,1), data_num_WAKE_2(:,1));
+    [p_1,h_1, stats] = ranksum(data_num_WAKE_1(:,1), data_num_WAKE_2(:,1));
     [p_2,h_2, stats] = ranksum(data_num_WAKE_1(:,2), data_num_WAKE_2(:,2));
     [p_3,h_3, stats] = ranksum(data_num_WAKE_1(:,3), data_num_WAKE_2(:,3));
     [p_4,h_4, stats] = ranksum(data_num_WAKE_1(:,4), data_num_WAKE_2(:,4));
@@ -56,7 +51,6 @@ if isparam ==0
     [p_6,h_6, stats] = ranksum(data_num_WAKE_1(:,6), data_num_WAKE_2(:,6));
     [p_7,h_7, stats] = ranksum(data_num_WAKE_1(:,7), data_num_WAKE_2(:,7));
     [p_8,h_8, stats] = ranksum(data_num_WAKE_1(:,8), data_num_WAKE_2(:,8));
-    [p_9,h_9, stats] = ranksum(data_num_WAKE_1(:,9), data_num_WAKE_2(:,9));
 elseif isparam ==1
     [h_1,p_1] = ttest2(data_num_WAKE_1(:,1), data_num_WAKE_2(:,1));
     [h_2,p_2] = ttest2(data_num_WAKE_1(:,2), data_num_WAKE_2(:,2));
@@ -66,7 +60,6 @@ elseif isparam ==1
     [h_6,p_6] = ttest2(data_num_WAKE_1(:,6), data_num_WAKE_2(:,6));
     [h_7,p_7] = ttest2(data_num_WAKE_1(:,7), data_num_WAKE_2(:,7));
     [h_8,p_8] = ttest2(data_num_WAKE_1(:,8), data_num_WAKE_2(:,8));
-    [h_9,p_9] = ttest2(data_num_WAKE_1(:,9), data_num_WAKE_2(:,9));
 else
 end
 if iscorr ==0
@@ -79,10 +72,9 @@ if iscorr ==0
     if p_6<0.05; sigstar_MC({[5.8 6.2]},p_6,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if p_7<0.05; sigstar_MC({[6.8 7.2]},p_7,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if p_8<0.05; sigstar_MC({[7.8 8.2]},p_8,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
-    if p_9<0.05; sigstar_MC({[8.8 9.2]},p_9,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
 elseif iscorr ==1
     %%comparaisons multiples corrigées
-    p_values = [p_1 p_2 p_3 p_4 p_5 p_6 p_7 p_8 p_9];
+    p_values = [p_1 p_2 p_3 p_4 p_5 p_6 p_7 p_8];
     [h, crit_p, adj_ci_cvrg, adj_p] = fdr_bh(p_values);
     if adj_p(1)<0.05; sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if adj_p(2)<0.05; sigstar_MC({[1.8 2.2]},adj_p(2),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
@@ -92,18 +84,15 @@ elseif iscorr ==1
     if adj_p(6)<0.05; sigstar_MC({[5.8 6.2]},adj_p(6),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if adj_p(7)<0.05; sigstar_MC({[6.8 7.2]},adj_p(7),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if adj_p(8)<0.05; sigstar_MC({[7.8 8.2]},adj_p(8),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
-    if adj_p(9)<0.05; sigstar_MC({[8.8 9.2]},adj_p(9),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
 else
 end
-
-
 
 subplot(4,6,[7,8]), hold on % SWS number overtime
 plot(nanmean(data_num_SWS_1),'linestyle','-','LineWidth',2,'marker','square','markersize',8,'markerfacecolor',col_1,'color',col_1), hold on
 errorbar(nanmean(data_num_SWS_1), stdError(data_num_SWS_1),'LineWidth',2,'color',col_1)
 plot(nanmean(data_num_SWS_2,1),'linestyle','-','LineWidth',2,'marker','^','markerfacecolor',col_2,'markersize',8,'color',col_2)
 errorbar(nanmean(data_num_SWS_2,1), stdError(data_num_SWS_2),'linestyle','-','LineWidth',2,'color',col_2)
-xlim([0 9.5])
+xlim([0 8.5])
 xticks([1 3 5 7 9]); xticklabels({'1','3','5','7','9'}) 
 ylim([0 100])
 makepretty
@@ -119,7 +108,6 @@ if isparam ==0
     [p_6,h_6, stats] = ranksum(data_num_SWS_1(:,6), data_num_SWS_2(:,6));
     [p_7,h_7, stats] = ranksum(data_num_SWS_1(:,7), data_num_SWS_2(:,7));
     [p_8,h_8, stats] = ranksum(data_num_SWS_1(:,8), data_num_SWS_2(:,8));
-    [p_9,h_9, stats] = ranksum(data_num_SWS_1(:,9), data_num_SWS_2(:,9));
 elseif isparam ==1
     [h_1,p_1] = ttest2(data_num_SWS_1(:,1), data_num_SWS_2(:,1));
     [h_2,p_2] = ttest2(data_num_SWS_1(:,2), data_num_SWS_2(:,2));
@@ -129,7 +117,6 @@ elseif isparam ==1
     [h_6,p_6] = ttest2(data_num_SWS_1(:,6), data_num_SWS_2(:,6));
     [h_7,p_7] = ttest2(data_num_SWS_1(:,7), data_num_SWS_2(:,7));
     [h_8,p_8] = ttest2(data_num_SWS_1(:,8), data_num_SWS_2(:,8));
-    [h_9,p_9] = ttest2(data_num_SWS_1(:,9), data_num_SWS_2(:,9));
 else
 end
 if iscorr ==0
@@ -142,10 +129,9 @@ if iscorr ==0
     if p_6<0.05; sigstar_MC({[5.8 6.2]},p_6,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if p_7<0.05; sigstar_MC({[6.8 7.2]},p_7,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if p_8<0.05; sigstar_MC({[7.8 8.2]},p_8,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
-    if p_9<0.05; sigstar_MC({[8.8 9.2]},p_9,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
 elseif iscorr ==1
     %%comparaisons multiples corrigées
-    p_values = [p_1 p_2 p_3 p_4 p_5 p_6 p_7 p_8 p_9];
+    p_values = [p_1 p_2 p_3 p_4 p_5 p_6 p_7 p_8];
     [h, crit_p, adj_ci_cvrg, adj_p] = fdr_bh(p_values);
     if adj_p(1)<0.05; sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if adj_p(2)<0.05; sigstar_MC({[1.8 2.2]},adj_p(2),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
@@ -155,21 +141,20 @@ elseif iscorr ==1
     if adj_p(6)<0.05; sigstar_MC({[5.8 6.2]},adj_p(6),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if adj_p(7)<0.05; sigstar_MC({[6.8 7.2]},adj_p(7),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if adj_p(8)<0.05; sigstar_MC({[7.8 8.2]},adj_p(8),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
-    if adj_p(9)<0.05; sigstar_MC({[8.8 9.2]},adj_p(9),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
 else
 end
-
 
 subplot(4,6,[13,14]) %REM number overtime
 plot(nanmean(data_num_REM_1),'linestyle','-','LineWidth',2,'marker','square','markersize',8,'markerfacecolor',col_1,'color',col_1), hold on
 errorbar(nanmean(data_num_REM_1), stdError(data_num_REM_1),'LineWidth',2,'color',col_1)
 plot(nanmean(data_num_REM_2,1),'linestyle','-','LineWidth',2,'marker','^','markerfacecolor',col_2,'markersize',8,'color',col_2)
 errorbar(nanmean(data_num_REM_2,1), stdError(data_num_REM_2),'linestyle','-','LineWidth',2,'color',col_2)
-xlim([0 9.5])
+xlim([0 8.5])
 xticks([1 3 5 7 9]); xticklabels({'1','3','5','7','9'}) 
 makepretty
 ylabel('REM number')
 xlabel('Time after stress (h)')
+
 
 %%stats all REM perc overtime
 if isparam ==0
@@ -181,7 +166,6 @@ if isparam ==0
     [p_6,h_6, stats] = ranksum(data_num_REM_1(:,6), data_num_REM_2(:,6));
     [p_7,h_7, stats] = ranksum(data_num_REM_1(:,7), data_num_REM_2(:,7));
     [p_8,h_8, stats] = ranksum(data_num_REM_1(:,8), data_num_REM_2(:,8));
-    [p_9,h_9, stats] = ranksum(data_num_REM_1(:,9), data_num_REM_2(:,9));
 elseif isparam ==1
     [h_1,p_1] = ttest2(data_num_REM_1(:,1), data_num_REM_2(:,1));
     [h_2,p_2] = ttest2(data_num_REM_1(:,2), data_num_REM_2(:,2));
@@ -191,7 +175,6 @@ elseif isparam ==1
     [h_6,p_6] = ttest2(data_num_REM_1(:,6), data_num_REM_2(:,6));
     [h_7,p_7] = ttest2(data_num_REM_1(:,7), data_num_REM_2(:,7));
     [h_8,p_8] = ttest2(data_num_REM_1(:,8), data_num_REM_2(:,8));
-    [h_9,p_9] = ttest2(data_num_REM_1(:,9), data_num_REM_2(:,9));
 else
 end
 if iscorr ==0
@@ -204,10 +187,9 @@ if iscorr ==0
     if p_6<0.05; sigstar_MC({[5.8 6.2]},p_6,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if p_7<0.05; sigstar_MC({[6.8 7.2]},p_7,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if p_8<0.05; sigstar_MC({[7.8 8.2]},p_8,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
-    if p_9<0.05; sigstar_MC({[8.8 9.2]},p_9,0,'LineWigth',16,'StarSize',24,'plotbar',0);end
 elseif iscorr ==1
     %%comparaisons multiples corrigées
-    p_values = [p_1 p_2 p_3 p_4 p_5 p_6 p_7 p_8 p_9];
+    p_values = [p_1 p_2 p_3 p_4 p_5 p_6 p_7 p_8];
     [h, crit_p, adj_ci_cvrg, adj_p] = fdr_bh(p_values);
     if adj_p(1)<0.05; sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if adj_p(2)<0.05; sigstar_MC({[1.8 2.2]},adj_p(2),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
@@ -217,7 +199,6 @@ elseif iscorr ==1
     if adj_p(6)<0.05; sigstar_MC({[5.8 6.2]},adj_p(6),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if adj_p(7)<0.05; sigstar_MC({[6.8 7.2]},adj_p(7),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
     if adj_p(8)<0.05; sigstar_MC({[7.8 8.2]},adj_p(8),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
-    if adj_p(9)<0.05; sigstar_MC({[8.8 9.2]},adj_p(9),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
 else
 end
 
@@ -249,6 +230,36 @@ elseif iscorr==1
     p_values = [p_1_vs_2_1];
     [h_1, crit_p_1, adj_ci_cvrg_1, adj_p] = fdr_bh(p_values);
     %phase1
+    if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
+else
+end
+    
+
+subplot(4,6,[5],'align') %WAKE number phase2
+MakeSpreadAndBoxPlot2_MC({...
+    nanmean(data_num_WAKE_interPeriod_1,2), nanmean(data_num_WAKE_interPeriod_2,2)},...
+    {col_1,col_2},[1:2],legend,'paired',1,'showsigstar','none') 
+set(gca,'xticklabels',[])
+ylabel('Wake number')
+% makepretty
+% ylim([0 100])
+
+if isparam==0 %%version ranksum (non param)
+    %phase2
+    [p_1_vs_2_1, h_1] = ranksum(nanmean(data_num_WAKE_interPeriod_1,2), nanmean(data_num_WAKE_interPeriod_2,2));
+elseif isparam==1 %%version ttest
+    %phase2
+    [h_1,p_1_vs_2_1] = ttest2(nanmean(data_num_WAKE_interPeriod_1,2), nanmean(data_num_WAKE_interPeriod_2,2));
+    else
+end
+%%add corrections for multiple comparisons
+if iscorr==0
+    %phase2
+    if p_1_vs_2_2<0.05; sigstar_MC({[1 2]},p_1_vs_2_2,0,'LineWigth',16,'StarSize',24);end
+elseif iscorr==1
+    p_values = [p_1_vs_2_1];
+    [h_1, crit_p_1, adj_ci_cvrg_1, adj_p] = fdr_bh(p_values);
+    %phase2
     if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
 else
 end
@@ -314,6 +325,40 @@ elseif iscorr==1
 else
 end
     
+
+
+subplot(4,6,[11],'align') %NREM number phase2
+MakeSpreadAndBoxPlot2_MC({...
+    nanmean(data_num_SWS_interPeriod_1,2), nanmean(data_num_SWS_interPeriod_2,2)},...
+    {col_1,col_2},[1:2],legend,'paired',1,'showsigstar','none') 
+set(gca,'xticklabels',[])
+ylabel('NREM number')
+% makepretty
+% ylim([0 100])
+
+if isparam==0 %%version ranksum (non param)
+    %phase2
+    [p_1_vs_2_1, h_1] = ranksum(nanmean(data_num_SWS_interPeriod_1,2), nanmean(data_num_SWS_interPeriod_2,2));
+elseif isparam==1 %%version ttest
+    %phase2
+    [h_1,p_1_vs_2_1] = ttest2(nanmean(data_num_SWS_interPeriod_1,2), nanmean(data_num_SWS_interPeriod_2,2));
+    else
+end
+%%add corrections for multiple comparisons
+if iscorr==0
+    %phase2
+    if p_1_vs_2_2<0.05; sigstar_MC({[1 2]},p_1_vs_2_2,0,'LineWigth',16,'StarSize',24);end
+elseif iscorr==1
+    p_values = [p_1_vs_2_1];
+    [h_1, crit_p_1, adj_ci_cvrg_1, adj_p] = fdr_bh(p_values);
+    %phase2
+    if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
+else
+end
+
+
+
+
 subplot(4,6,[12],'align') %NREM number phase3
 
 MakeSpreadAndBoxPlot2_MC({nanmean(data_num_SWS_end_1,2), nanmean(data_num_SWS_end_2,2)},...
@@ -373,6 +418,36 @@ elseif iscorr==1
     if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
 else
 end
+    
+subplot(4,6,[17],'align') %REM number phase2
+MakeSpreadAndBoxPlot2_MC({...
+    nanmean(data_num_REM_interPeriod_1,2), nanmean(data_num_REM_interPeriod_2,2)},...
+    {col_1,col_2},[1:2],legend,'paired',1,'showsigstar','none') 
+% set(gca,'xticklabels',[])
+ylabel('REM number')
+% makepretty
+% ylim([0 10])
+
+if isparam==0 %%version ranksum (non param)
+    %phase2
+    [p_1_vs_2_1, h_1] = ranksum(nanmean(data_num_REM_interPeriod_1,2), nanmean(data_num_REM_interPeriod_2,2));
+elseif isparam==1 %%version ttest
+    %phase2
+    [h_1,p_1_vs_2_1] = ttest2(nanmean(data_num_REM_interPeriod_1,2), nanmean(data_num_REM_interPeriod_2,2));
+    else
+end
+%%add corrections for multiple comparisons
+if iscorr==0
+    %phase2
+    if p_1_vs_2_2<0.05; sigstar_MC({[1 2]},p_1_vs_2_2,0,'LineWigth',16,'StarSize',24);end
+elseif iscorr==1
+    p_values = [p_1_vs_2_1];
+    [h_1, crit_p_1, adj_ci_cvrg_1, adj_p] = fdr_bh(p_values);
+    %phase2
+    if adj_p(1)<0.05; sigstar_MC({[1 2]},adj_p(1),0,'LineWigth',16,'StarSize',24);end
+else
+end
+    
 
 subplot(4,6,[18],'align') %REM number phase3
 MakeSpreadAndBoxPlot2_MC({nanmean(data_num_REM_end_1,2), nanmean(data_num_REM_end_2,2)},...

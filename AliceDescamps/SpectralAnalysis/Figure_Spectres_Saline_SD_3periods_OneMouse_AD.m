@@ -10,24 +10,24 @@ figure('color',[1 1 1]),
 
 %colors
 %saline
-col_1 = [.7 .7 .7];
-col_2 = [1 .4 0];
+% col_1 = [.7 .7 .7];
+% col_2 = [1 .4 0];
 %cno
-% col_1 = [.2 .2 .2];
-% col_2 = [1 0 0];
+col_1 = [.2 .2 .2];
+col_2 = [1 0 0];
 
-% suptitle ('PFC low Sal/SD1+Sal for 1635 (OB scoring)')
-% suptitle ('PFC low Sal/SD1+Sal for 1635')
-% suptitle ('HPC low Sal/SD+Sal for 1635 (OB scoring)')
-% suptitle ('HPC low Sal/SD+Sal for 1635')
-suptitle ('OB low Sal/SD+Sal for 1635 (OB scoring)')
-% suptitle ('OB low Sal/SD+Sal for 1635')
-% suptitle ('OB high Sal/SD+Sal for 1635 (OB scoring)')
-% suptitle ('OB high Sal/SD+Sal for 1635')
-% suptitle ('PFC high Sal/SD+Sal for 1635 (OB scoring)')
-% suptitle ('PFC high Sal/SD+Sal for 1635')
-% label = {'CNO','SD1 + CNO'}
-label = {'Sal','SD1 + Sal'}
+% suptitle ('PFC low Sal/SD1+Sal for 1578 (OB scoring)')
+% suptitle ('PFC low Sal/SD1+Sal for 1578')
+% suptitle ('HPC low Sal/SD+Sal for 1578 (OB scoring)')
+% suptitle ('HPC low Sal/SD+Sal for 1578')
+% suptitle ('OB low Sal/SD+Sal for 1578 (OB scoring)')
+% suptitle ('OB low Sal/SD+Sal for 1578')
+% suptitle ('OB high Sal/SD+Sal for 1578 (OB scoring)')
+suptitle ('OB high Sal/SD+Sal for 1578')
+% suptitle ('PFC high Sal/SD+Sal for 1578 (OB scoring)')
+% suptitle ('PFC high Sal/SD+Sal for 1578')
+label = {'CNO','SD1 + CNO'}
+% label = {'Sal','SD1 + Sal'}
 
 subplot(3,6,1),
 plot(freq_1{1},  Spectre_Wake_1_mean,'color',col_1); hold on
@@ -108,20 +108,26 @@ makepretty
 figure('color',[1 1 1]),
 
 %colors
-col_1 = [.7 .7 .7];
-col_2 = [1 .4 0];
+%saline
+% col_1 = [.7 .7 .7];
+% col_2 = [1 .4 0];
+%cno
+col_1 = [.2 .2 .2];
+col_2 = [1 0 0];
 
-% suptitle ('PFC low Sal/SD1 for 1566 (OB scoring) (1/f)')
-% suptitle ('PFC low Sal/SD1 for 1566 (1/f)')
-% suptitle ('HPC low Sal/SD+Sal for 1566 (OB scoring) (1/f)')
-suptitle ('HPC low Sal/SD+Sal for 1566 (1/f)')
-% suptitle ('OB low Sal/SD+Sal for 1566 (OB scoring) (1/f)')
-% suptitle ('OB low Sal/SD+Sal for 1566 (1/f)')
-% suptitle ('OB high Sal/SD+Sal for 1566 (OB scoring) (1/f)')
-% suptitle ('OB high Sal/SD+Sal for 1566 (1/f)')
-% suptitle ('PFC high Sal/SD+Sal for 1566 (OB scoring) (1/f)')
-% suptitle ('PFC high Sal/SD+Sal for 1566 (1/f)')
-label = {'Sal','SD1 + Saline'}
+% suptitle ('PFC low Sal/SD1+Sal for 1578 (1/f) (OB scoring)')
+% suptitle ('PFC low Sal/SD1+Sal for 1578 (1/f)')
+% suptitle ('HPC low Sal/SD+Sal for 1578 (1/f) (OB scoring)')
+% suptitle ('HPC low Sal/SD+Sal for 1578 (1/f)')
+% suptitle ('OB low Sal/SD+Sal for 1578 (1/f) (OB scoring)')
+% suptitle ('OB low Sal/SD+Sal for 1578 (1/f)')
+% suptitle ('OB high Sal/SD+Sal for 1578 (1/f) (OB scoring)')
+suptitle ('OB high Sal/SD+Sal for 1578 (1/f)')
+% suptitle ('PFC high Sal/SD+Sal for 1578 (1/f) (OB scoring)')
+% suptitle ('PFC high Sal/SD+Sal for 1578 (1/f)')
+label = {'CNO','SD1 + CNO'}
+% label = {'Sal','SD1 + Sal'}
+
 
 subplot(3,6,1),
 plot(freq_1{1}, freq_1{1}.* Spectre_Wake_1_mean,'color',col_1); hold on
@@ -203,20 +209,27 @@ makepretty
 figure('color',[1 1 1]),
 
 %colors
-col_1 = [.7 .7 .7];
-col_2 = [1 .4 0];
+%saline
+% col_1 = [.7 .7 .7];
+% col_2 = [1 .4 0];
+%cno
+col_1 = [.2 .2 .2];
+col_2 = [1 0 0];
 
-% suptitle ('PFC low Sal/SD1 for 1566 (OB scoring) (log)')
-% suptitle ('PFC low Sal/SD1 for 1566 (log)')
-% suptitle ('HPC low Sal/SD+Sal for 1566 (OB scoring) (log)')
-suptitle ('HPC low Sal/SD+Sal for 1566 (log)')
-% suptitle ('OB low Sal/SD+Sal for 1566 (OB scoring) (log)')
-% suptitle ('OB low Sal/SD+Sal for 1566 (log)')
-% suptitle ('OB high Sal/SD+Sal for 1566 (OB scoring) (log)')
-% suptitle ('OB high Sal/SD+Sal for 1566 (log)')
-% suptitle ('PFC high Sal/SD+Sal for 1566 (OB scoring) (log)')
-% suptitle ('PFC high Sal/SD+Sal for 1566 (log)')
-label = {'Sal','SD1 + Saline'}
+% suptitle ('PFC low Sal/SD1+Sal for 1578 (log) (OB scoring)')
+% suptitle ('PFC low Sal/SD1+Sal for 1578 (log)')
+% suptitle ('HPC low Sal/SD+Sal for 1578 (log) (OB scoring)')
+% suptitle ('HPC low Sal/SD+Sal for 1578 (log)')
+% suptitle ('OB low Sal/SD+Sal for 1578 (log) (OB scoring)')
+% suptitle ('OB low Sal/SD+Sal for 1578 (log)')
+% suptitle ('OB high Sal/SD+Sal for 1578 (log) (OB scoring)')
+suptitle ('OB high Sal/SD+Sal for 1578 (log)')
+% suptitle ('PFC high Sal/SD+Sal for 1578 (log) (OB scoring)')
+% suptitle ('PFC high Sal/SD+Sal for 1578 (log)')
+label = {'CNO','SD1 + CNO'}
+% label = {'Sal','SD1 + Sal'}
+
+
 
 subplot(3,6,1),
 plot(freq_1{1}, log10(Spectre_Wake_1_mean),'color',col_1); hold on
