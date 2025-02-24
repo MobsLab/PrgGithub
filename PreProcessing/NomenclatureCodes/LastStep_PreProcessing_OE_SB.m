@@ -140,11 +140,7 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
                 %% Make TTLInfo
                 TTLInfo_sess{f} = GetTTLTimesInd_Intan(ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{f},...
                     ExpeInfo);
-                if not(exist('behavResources.mat'))
-                save('behavResources.mat','TTLInfo')
-                else
-                save('behavResources.mat','TTLInfo','-append')
-                end
+                
                 %% copy ephys files that are ref subtracted and merged
                 if  ExpeInfo.PreProcessingInfo.RefDone{f} && ExpeInfo.PreProcessingInfo.MergeDone{f}==0
                     
@@ -187,8 +183,7 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
                     ChanToSaveWithoutChange = 0 :ExpeInfo.PreProcessingInfo.NumWideband-1;
                     ChanToSaveWithoutChange(ChanToSub+1) = [];
                     % Do the subtraction
-                    RefSubtraction_multi('continuous.dat',ExpeInfo.PreProcessingInfo.TotalChannels,1,...
-                        ['M' num2str(ExpeInfo.nmouse)],ChanToSub,RefChannel,ChanToSaveWithoutChange,'frequency',ExpeInfo.PreProcessingInfo.SR);
+                    RefSubtraction_multi('amplifier.dat',ExpeInfo.PreProcessingInfo.NumWideband,1,['M' num2str(ExpeInfo.nmouse)],ChanToSub,RefChannel,ChanToSaveWithoutChange);
                     
                     disp('file is ref subtracted - merging...')
                     % Merge
@@ -286,7 +281,6 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
         duration = duration*1e4;
         
         % Concatenation of single session TTLs
-        if isfield(TTLInfo_sess{1},'StopSession')
         if isempty(TTLInfo_sess{1}.StopSession) % add by BM on 01/05/2022 when we don't have TTL
             if length(TTLInfo_sess) == 1
                 TTLInfo = TTLInfo_sess{1};
@@ -314,7 +308,6 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
             if exist('StimEpoch')>0
                 save('behavResources.mat','StimEpoch','-append')
             end
-        end
         end
 
         %% if there are spikes

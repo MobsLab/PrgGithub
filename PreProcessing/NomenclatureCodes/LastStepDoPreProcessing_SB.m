@@ -68,10 +68,10 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
                 if isfield(ExpeInfo.ChannelToAnalyse,'Respi')
                     ChanToSub(ChanToSub==ExpeInfo.ChannelToAnalyse.Respi) = [];
                 end
-                ChanToSave = [0 :ExpeInfo.PreProcessingInfo.TotalChannels-1];
-                ChanToSave(ChanToSub+1) = [];
+                ChanToSaveWithoutChange = [0 :ExpeInfo.PreProcessingInfo.TotalChannels-1];
+                ChanToSaveWithoutChange(ChanToSub+1) = [];
                 % Do the subtraction
-                RefSubtraction_multi('amplifier.dat',ExpeInfo.PreProcessingInfo.TotalChannels,1,['M' num2str(ExpeInfo.nmouse)],ChanToSub,RefChannel,ChanToSave);
+                RefSubtraction_multi('amplifier.dat',ExpeInfo.PreProcessingInfo.TotalChannels,1,['M' num2str(ExpeInfo.nmouse)],ChanToSub,RefChannel,ChanToSaveWithoutChange);
                 
                 disp(['file is merged and ref subtracted - copying ...'])
                 % copy the file
@@ -129,10 +129,10 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
                 if isfield(ExpeInfo.ChannelToAnalyse,'Respi')
                     ChanToSub(ChanToSub==ExpeInfo.ChannelToAnalyse.Respi) = [];
                 end
-                ChanToSave = 0 :ExpeInfo.PreProcessingInfo.NumWideband-1;
-                ChanToSave(ChanToSub+1) = [];
+                ChanToSaveWithoutChange = 0 :ExpeInfo.PreProcessingInfo.NumWideband-1;
+                ChanToSaveWithoutChange(ChanToSub+1) = [];
                 % Do the subtraction
-                RefSubtraction_multi('amplifier.dat',ExpeInfo.PreProcessingInfo.NumWideband,1,['M' num2str(ExpeInfo.nmouse)],ChanToSub,RefChannel,ChanToSave);
+                RefSubtraction_multi('amplifier.dat',ExpeInfo.PreProcessingInfo.NumWideband,1,['M' num2str(ExpeInfo.nmouse)],ChanToSub,RefChannel,ChanToSaveWithoutChange);
                 
                 disp('file is ref subtracted - merging...')
                 % Merge
