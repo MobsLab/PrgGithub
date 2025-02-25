@@ -93,6 +93,10 @@ if figure_flag == 1
     figure;
     hold on;
     
+    p1 = plot(x_data(in_inner_zone), y_data(in_inner_zone), '.g');
+    p2 = plot(x_data(in_outer_zone), y_data(in_outer_zone), '.m');
+    %     p3 = plot(x_data(in_specific_zone), y_data(in_specific_zone), '.b');
+
     if strcmp(arena_type, 'OF')
     
         theta = linspace(0, 2*pi, 100);
@@ -106,31 +110,11 @@ if figure_flag == 1
         rectangle('Position', [cage_width * (1 - specific_inner_limit)/2, cage_height * (1 - specific_inner_limit)/2, cage_width * specific_inner_limit, cage_height * specific_inner_limit], 'EdgeColor', 'b', 'LineStyle', '--', 'LineWidth', 2);
         rectangle('Position', [cage_width * (1 - specific_outer_limit)/2, cage_height * (1 - specific_outer_limit)/2, cage_width * specific_outer_limit, cage_height * specific_outer_limit], 'EdgeColor', 'b', 'LineWidth', 2);
     end
-%     
-%     theta = linspace(0, 2*pi, 100);
-%     outer_circle_x = center(1) + radius * cos(theta);
-%     outer_circle_y = center(2) + radius * sin(theta);
-%     inner_circle_x = center(1) + inner_radius * cos(theta);
-%     inner_circle_y = center(2) + inner_radius * sin(theta);
-%     specific_inner_circle_x = center(1) + specific_inner_radius * cos(theta);
-%     specific_inner_circle_y = center(2) + specific_inner_radius * sin(theta);
-%     specific_outer_circle_x = center(1) + specific_outer_radius * cos(theta);
-%     specific_outer_circle_y = center(2) + specific_outer_radius * sin(theta);
-%     
-    
-%     plot(outer_circle_x, outer_circle_y, 'k-', 'LineWidth', 2);
-%     plot(inner_circle_x, inner_circle_y, 'k--', 'LineWidth', 2);
-%     plot(specific_inner_circle_x, specific_inner_circle_y, 'b--', 'LineWidth', 2);
-%     plot(specific_outer_circle_x, specific_outer_circle_y, 'b-', 'LineWidth', 2);
-%     
-    p1 = plot(x_data(in_inner_zone), y_data(in_inner_zone), '.g');
-    p2 = plot(x_data(in_outer_zone), y_data(in_outer_zone), '.m');
-    p3 = plot(x_data(in_specific_zone), y_data(in_specific_zone), '.b');
-    
+        
     axis equal;
     xlabel('X'); ylabel('Y');
     title('Thigmotaxis - Zones spécifiques');
-    legend([p1 p2 p3],'Inner Zone','Outer Zone','Specific Zone', 'Location', 'Best');
+    legend([p1 p2],'Inner Zone','Outer Zone', 'Location', 'Best');
 
     hold off;
 end
