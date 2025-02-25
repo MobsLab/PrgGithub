@@ -7,7 +7,7 @@ figure
 for sess = 1:length(Sess.(Mouse_names{1}))
     cd(Sess.(Mouse_names{1}){sess})
     disp(Sess.(Mouse_names{1}){sess})
-    clearvars -except sess n AllDat th_immob thtps_immob smoofact_Acc smoofact th_immob_Acc DoSave GlobalFigure DoPosition FolderName Mouse_names Sess
+    clearvars -except sess n AllDat th_immob thtps_immob smoofact_Acc smoofact th_immob_Acc DoSave GlobalFigure DoPosition FolderName Mouse_names Sess MouseToDo
     load('ExpeInfo.mat')
     
     tempvar=who('-file','behavResources.mat');

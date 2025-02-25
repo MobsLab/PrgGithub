@@ -1,7 +1,7 @@
 
 Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline'};
 Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear'};
-
+group = 7;
 
 
 %% BEHAVIOUR
@@ -14,40 +14,40 @@ X=[1:2];
 Legends={'Shock','Safe'};
 
 subplot(241)
-MakeSpreadAndBoxPlot3_SB({PropShockZone.(Name{group}).TestPre PropSafeZone.(Name{group}).TestPre},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-ylim([0 0.7]);
+MakeSpreadAndBoxPlot3_SB({PropShockZone.(Name{group}).TestPre PropSafeZone.(Name{group}).TestPre},Cols,X,Legends,'showpoints',1,'paired',1);
+ylim([0 1]);
 ylabel('Prop of time');
 title('Test Pre')
 makepretty_CH
 subplot(242)
-MakeSpreadAndBoxPlot3_SB({PropShockZone.(Name{group}).TestPostPre PropSafeZone.(Name{group}).TestPostPre},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-ylim([0 0.7]);
+MakeSpreadAndBoxPlot3_SB({PropShockZone.(Name{group}).TestPostPre PropSafeZone.(Name{group}).TestPostPre},Cols,X,Legends,'showpoints',1,'paired',1);
+ylim([0 1]);
 title('Test PostPre')
 makepretty_CH
 subplot(243)
-MakeSpreadAndBoxPlot3_SB({PropShockZone.(Name{group}).TestPostPost PropSafeZone.(Name{group}).TestPostPost },Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-ylim([0 0.7]);
+MakeSpreadAndBoxPlot3_SB({PropShockZone.(Name{group}).TestPostPost PropSafeZone.(Name{group}).TestPostPost },Cols,X,Legends,'showpoints',1,'paired',1);
+ylim([0 1]);
 title('Test PostPost')
 makepretty_CH
 subplot(245)
-MakeSpreadAndBoxPlot3_SB({ShockZoneEntries.(Name{group}).TestPre SafeZoneEntries.(Name{group}).TestPre},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-ylim([0 40]);
+MakeSpreadAndBoxPlot3_SB({ShockZoneEntries.(Name{group}).TestPre SafeZoneEntries.(Name{group}).TestPre},Cols,X,Legends,'showpoints',1,'paired',1);
+ylim([0 50]);
 title('Test Pre')
 ylabel('# of entries');
 makepretty_CH
 subplot(246)
-MakeSpreadAndBoxPlot3_SB({ShockZoneEntries.(Name{group}).TestPostPre SafeZoneEntries.(Name{group}).TestPostPre},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-ylim([0 40]);
+MakeSpreadAndBoxPlot3_SB({ShockZoneEntries.(Name{group}).TestPostPre SafeZoneEntries.(Name{group}).TestPostPre},Cols,X,Legends,'showpoints',1,'paired',1);
+ylim([0 50]);
 title('Test PostPre')
 makepretty_CH
 subplot(247)
-MakeSpreadAndBoxPlot3_SB({ShockZoneEntries.(Name{group}).TestPostPost SafeZoneEntries.(Name{group}).TestPostPost},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-ylim([0 40]);
+MakeSpreadAndBoxPlot3_SB({ShockZoneEntries.(Name{group}).TestPostPost SafeZoneEntries.(Name{group}).TestPostPost},Cols,X,Legends,'showpoints',1,'paired',1);
+ylim([0 50]);
 title('Test PostPost')
 makepretty_CH
 
 subplot(244)
-MakeSpreadAndBoxPlot3_SB({FreezeShock_Prop.(Name{group}).Cond FreezeSafe_Prop.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
+MakeSpreadAndBoxPlot3_SB({FreezeShock_Prop.(Name{group}).Cond FreezeSafe_Prop.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1);
 ylim([0 0.2]);
 title('Freezing prop')
 makepretty_CH
@@ -57,7 +57,7 @@ X=[1:3];
 Legends={'TestPre','TestPostPre','TestPostPost'};
   
 subplot(248)
-MakeSpreadAndBoxPlot3_SB({Thigmo_Active.(Name{group}).TestPre Thigmo_Active.(Name{group}).TestPostPre Thigmo_Active.(Name{group}).TestPostPost},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
+MakeSpreadAndBoxPlot3_SB({Thigmo_Active.(Name{group}).TestPre Thigmo_Active.(Name{group}).TestPostPre Thigmo_Active.(Name{group}).TestPostPost},Cols,X,Legends,'showpoints',1,'paired',1);
 title('Thigmotaxis')
 makepretty_CH
 
@@ -133,39 +133,23 @@ mtitle('Unblocked - Eyelid stims (red) - Freezing (green)')
 %%
 
 figure('color',[1 1 1])
-
+Sessions = {'TestPre','CondPre','TestPostPre','CondPost','TestPostPost'};
 n = 1;
 Mouse=Drugs_Groups_UMaze_CH(group);
-i = 1;
-subplot(1,5,i)
-imagesc(OccupMap_squeeze.Active_Unblocked.TestPre{n}), axis xy, caxis([0 0.001]);
+figure
+for i = 1:5
+    subplot(1,5,i)
+    a = movmean(OccupMap_squeeze.Unblocked.(Sessions{i}){1},[0 2],2);
+    b = movmean(OccupMap_squeeze.Unblocked.(Sessions{i}){1},[2 0],1);
+    
+    imagesc(movmean(a,[1 0],1)), axis xy, caxis([0 0.0002]);
+    colormap pink
+    title(Sessions{i})
+    makepretty
+end
 
-title('TestPre')
 
-i = i+1;
-caxis([0 2e-4])
-subplot(1,5,i)
-imagesc(OccupMap_squeeze.Active_Unblocked.CondPre{n}), axis xy, caxis([0 0.001]);
-title('CondPre')
-i = i+1;
-caxis([0 2e-4])
-subplot(1,5,i)
-imagesc(OccupMap_squeeze.Active_Unblocked.TestPostPre{n}), axis xy, caxis([0 0.001]);
-title('TestPostPre')
-i = i+1;
-caxis([0 2e-4])
-subplot(1,5,i)
-imagesc(OccupMap_squeeze.Active_Unblocked.CondPost{n}), axis xy, caxis([0 0.001]);
-title('CondPost')
-i = i+1;
-caxis([0 2e-4])
-subplot(1,5,i)
-imagesc(OccupMap_squeeze.Active_Unblocked.TestPostPost{n}), axis xy, caxis([0 0.001]);
-title('TestPostPost')
-n = n+1;
-caxis([0 2e-4])
-colormap pink
-mtitle('Active unblocked')
+
 %%
 
 % Cols={[1 .5 .5],[.5 .5 1]};
@@ -174,12 +158,12 @@ mtitle('Active unblocked')
 % 
 % figure
 % subplot(121)
-% MakeSpreadAndBoxPlot3_SB({GammaPower_Shock_mean.(Name{group}).Cond GammaPower_Safe_mean.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest',);
+% MakeSpreadAndBoxPlot3_SB({GammaPower_Shock_mean.(Name{group}).Cond GammaPower_Safe_mean.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1,);
 % title('Gamma Power')
 % makepretty_CH
 % 
 % subplot(122)
-% MakeSpreadAndBoxPlot3_SB({ThetaPower_Shock_mean.(Name{group}).Cond ThetaPower_Safe_mean.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest',);
+% MakeSpreadAndBoxPlot3_SB({ThetaPower_Shock_mean.(Name{group}).Cond ThetaPower_Safe_mean.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1,);
 % title('Theta Power')
 % makepretty_CH
 % 
@@ -190,68 +174,48 @@ mtitle('Active unblocked')
 % Legends={'TestPre','CondPre','PostPre','ExtPre','CondPost','PostPost','ExtPost'};
 % 
 % subplot(131)
-% MakeSpreadAndBoxPlot3_SB({SleepyProp.(Name{group}).TestPre SleepyProp.(Name{group}).CondPre SleepyProp.(Name{group}).TestPostPre SleepyProp.(Name{group}).ExtPre SleepyProp.(Name{group}).CondPost SleepyProp.(Name{group}).TestPostPost SleepyProp.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
+% MakeSpreadAndBoxPlot3_SB({SleepyProp.(Name{group}).TestPre SleepyProp.(Name{group}).CondPre SleepyProp.(Name{group}).TestPostPre SleepyProp.(Name{group}).ExtPre SleepyProp.(Name{group}).CondPost SleepyProp.(Name{group}).TestPostPost SleepyProp.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1);
 % makepretty_CH
 % title('sleepy prop')
 % 
 % subplot(132)
-% MakeSpreadAndBoxPlot3_SB({SleepyTime.(Name{group}).TestPre SleepyTime.(Name{group}).CondPre SleepyTime.(Name{group}).TestPostPre SleepyTime.(Name{group}).ExtPre SleepyTime.(Name{group}).CondPost SleepyTime.(Name{group}).TestPostPost SleepyTime.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
+% MakeSpreadAndBoxPlot3_SB({SleepyTime.(Name{group}).TestPre SleepyTime.(Name{group}).CondPre SleepyTime.(Name{group}).TestPostPre SleepyTime.(Name{group}).ExtPre SleepyTime.(Name{group}).CondPost SleepyTime.(Name{group}).TestPostPost SleepyTime.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1);
 % makepretty_CH
 % title('sleepy time')
 % 
 % subplot(133)
-% MakeSpreadAndBoxPlot3_SB({GammaPower_mean.(Name{group}).TestPre GammaPower_mean.(Name{group}).CondPre GammaPower_mean.(Name{group}).TestPostPre GammaPower_mean.(Name{group}).ExtPre GammaPower_mean.(Name{group}).CondPost GammaPower_mean.(Name{group}).TestPostPost GammaPower_mean.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
+% MakeSpreadAndBoxPlot3_SB({GammaPower_mean.(Name{group}).TestPre GammaPower_mean.(Name{group}).CondPre GammaPower_mean.(Name{group}).TestPostPre GammaPower_mean.(Name{group}).ExtPre GammaPower_mean.(Name{group}).CondPost GammaPower_mean.(Name{group}).TestPostPost GammaPower_mean.(Name{group}).ExtPost},Cols,X,Legends,'showpoints',1,'paired',1);
 % makepretty_CH
 % title('mean gamma power')
 
 %% PHYSIOLOGY
 % We do find the difference between shock and safe freezing, either by
-% looking at the respi or the mean spectrums
-
+% looking at the breathing or the mean spectrums
 figure('color',[1 1 1])
-
-Cols = {[1 .5 .5],[.5 .5 1]};
-X=[1:2];
-Legends={'Shock','Safe'};
-n = 1;
-i = 1;
+Sessions = {'Fear','CondPre','ExtPre','CondPost','ExtPost'}
 Mouse=Drugs_Groups_UMaze_CH(group);
-subplot(1,5,i)
-MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).Fear RespiFzSafe_mean.(Name{group}).Fear},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-title('Fear')
-ylim([1.5 5.5])
-makepretty_CH
-i = i+1;
-subplot(1,5,i)
-MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).CondPre RespiFzSafe_mean.(Name{group}).CondPre},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-title('CondPre')
-% ylim([1.5 5.5])
-makepretty_CH
-i = i+1;
-subplot(1,5,i)
-MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).ExtPre RespiFzSafe_mean.(Name{group}).ExtPre},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-title('ExtPre')
-ylim([1.5 5.5])
-makepretty_CH
-i = i+1;
-subplot(1,5,i)
-MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).CondPost RespiFzSafe_mean.(Name{group}).CondPost},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-title('CondPost')
-ylim([1.5 5.5])
-makepretty_CH
-i = i+1;
-subplot(1,5,i)
-MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).ExtPost RespiFzSafe_mean.(Name{group}).ExtPost },Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-title('ExtPost')
-ylim([1.5 5.5])
-i = i+1;
-n = n+1;
-makepretty_CH
+figure
+for i = 1:5
+    subplot(1,5,i)
+    
+    Cols = {[1 .5 .5],[.5 .5 1]};
+    X=[1:2];
+    Legends={'Shock','Safe'};
+    
+    MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).(Sessions{i}) RespiFzSafe_mean.(Name{group}).(Sessions{i})},Cols,X,Legends,'showpoints',1,'paired',1);
+    title('Fear')
+    ylim([1.5 6.5])
+    makepretty_CH
+    title(Sessions{i})
+    makepretty_CH
+end
+
 mtitle('freezing breathing frequency')
 
 
 
 %%
+Sessions = {'Fear','CondPre','ExtPre','CondPost','ExtPost'};
 
 figure('color',[1 1 1])
 
@@ -259,47 +223,18 @@ Col1 = [1 .5 .5];
 Col2 =[.5 .5 1];
 x = 0;
 Mouse=Drugs_Groups_UMaze_CH(group);
-
-subplot(141)
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).Fear,'color',Col1);
+for i = 1:5
+subplot(1,5,i)
+a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).(Sessions{i}),'color',Col1);
 a.mainLine.LineWidth = 2;
 hold on
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).Fear,'color',Col2);
+a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).(Sessions{i}),'color',Col2);
 xlim([0 10])
 ylim([0 1.1])
-title('Fear')
+title(Sessions{i})
 a.mainLine.LineWidth = 2;
 makepretty_CH
-subplot(142)
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).CondPre,'color',Col1);
-a.mainLine.LineWidth = 2;
-hold on
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).CondPre,'color',Col2);
-a.mainLine.LineWidth = 2;
-xlim([0 10])
-ylim([0 1.1])
-title('CondPre')
-makepretty_CH
-subplot(143)
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).CondPost,'color',Col1);
-a.mainLine.LineWidth = 2;
-hold on
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).CondPost,'color',Col2);
-a.mainLine.LineWidth = 2;
-xlim([0 10])
-ylim([0 1.1])
-title('CondPost')
-makepretty_CH
-subplot(144)
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).Cond,'color',Col1);
-a.mainLine.LineWidth = 2;
-hold on
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).Cond,'color',Col2);
-a.mainLine.LineWidth = 2;
-xlim([0 10])
-ylim([0 1.1])
-title('Cond')
-makepretty_CH
+end
 
 %% SLEEP FEATURES
 

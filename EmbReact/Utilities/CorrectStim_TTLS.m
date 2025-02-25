@@ -1,4 +1,4 @@
-clearvars -except Mouse_names SessNames
+clearvars -except Mouse_names MouseToDo SessNames
 disp('getting stims into shape')
 
 cd('/media/nas6/ProjetEmbReact/transfer')

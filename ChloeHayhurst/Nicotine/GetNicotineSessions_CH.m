@@ -8,7 +8,7 @@ NicotineOF.OFPre{5}='/media/nas7/Nicotine/Mouse1687/NicotineOF/OF_Pre';
 NicotineOF.OFPre{6}='/media/nas7/Nicotine/Mouse1685/NicotineOF/OFPre';
 
 NicotineOF.OFPost{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_OFPost';
-NicotineOF.OFPost{2}='/media/nas7/Nicotine/Mouse1529/1529_NicotineOF_OF.Post';
+% NicotineOF.OFPost{2}='/media/nas7/Nicotine/Mouse1529/1529_NicotineOF_OFPost';
 NicotineOF.OFPost{2}='/media/nas7/Nicotine/Mouse1531/1531_NicotineOF_OFPost';
 NicotineOF.OFPost{3}='/media/nas7/Nicotine/Mouse1532/1532_NicotineOF_OFPost';
 NicotineOF.OFPost{4}='/media/nas7/Nicotine/Mouse1686/NicotineOF/OF_Post';
@@ -82,6 +82,17 @@ AtropineOF.OFPost{1} = '/media/nas7/Atropine/Mouse1500/30012024/OF_Post';
 AtropineOF.OFPost{2} = '/media/nas7/Atropine/Mouse1531/OF_Post';
 AtropineOF.OFPost{3} = '/media/nas7/Atropine/Mouse1533/OF_Post';
 
+
+DiazepamHC{1}='/media/nas6/ProjetEmbReact/Mouse1207/20210730/';
+DiazepamHC{2}='/media/nas6/ProjetEmbReact/Mouse1224/20210730/';
+DiazepamHC{3}='/media/nas6/ProjetEmbReact/Mouse1225/20210730/';
+DiazepamHC{4}='/media/nas6/ProjetEmbReact/Mouse1226/20210730/';
+DiazepamHC{5}='/media/nas6/ProjetEmbReact/Mouse1227/20210730/';
+DiazepamHC{6}='/media/nas6/ProjetEmbReact/Mouse1199/20211027';
+DiazepamHC{7}='/media/nas6/ProjetEmbReact/Mouse1203/20211027/';
+DiazepamHC{8}='/media/nas6/ProjetEmbReact/Mouse1251/20220103/';
+DiazepamHC{9}='/media/nas6/ProjetEmbReact/Mouse1252/20220103/';
+% DiazepamHC{11}='/media/nas6/ProjetEmbReact/Mouse1254/20220106/';
 
 
 

@@ -111,8 +111,12 @@ if conf_bound
     Y2=f(2).YData;
     close
     
-    plot(X1,Y1,':k' , 'LineWidth',2)
-    plot(X2,Y2,':k', 'LineWidth',2)
+   
+    temp1 = plot(X1,Y1,':k' , 'LineWidth',2);
+    temp2 = plot(X2,Y2,':k', 'LineWidth',2);
+    
+    temp1.Color = colortouse;
+    temp2.Color = colortouse;
     
     f=get(gca,'Children'); legend([f(3)],['R = ' num2str(R) '     P = ' num2str(P)]);
 end
