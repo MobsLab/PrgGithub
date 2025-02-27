@@ -15,6 +15,10 @@ You will find them here :
 
 This is our repository for Matlab and Python codes.
 
+## Current state
+
+It would be nice to put a list of general-use codes/functions and their usecase in the [GeneralUseCodes](./GeneralUseCodes.md) file.
+
 ## Future
 
 For now it's a full copy of the Dropbox PrgMatlab folder (30/01/2025, 13.00).

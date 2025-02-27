@@ -18,113 +18,6 @@ sizeMap = 100;
 sizeMap2 = 1000;
 % 
 % for group = 4:5
-%     if group == 2
-%         Mouse_names = Mouse_names_Nic;
-%     elseif group == 1
-%         Mouse_names = Mouse_names_Sal;
-%     elseif group == 3
-%         Mouse_names = Mouse_names_NicLow;
-%     elseif group == 4
-%         Mouse_names = Mouse_names_SalHC;
-%     elseif group == 5
-%         Mouse_names = Mouse_names_NicHC;
-%     end
-%     for sess=1:2
-%         for mouse=1:length(Mouse_names)
-%                 path = sprintf('%s.%s{%d}', Name{group}, Session_type{sess}, mouse);
-%             folder_path = eval(path);
-%             cd(folder_path);
-%             disp(folder_path);
-%             clear AlignedXtsd AlignedYtsd Xtsd Ytsd
-%             load('behavResources.mat')
-%             
-% %             if not(exist('B_Low_Spectrum.mat'))
-% %                 load('ChannelsToAnalyse/Bulb_deep.mat')
-% %                 channel;
-% %                 LowSpectrumSB([cd filesep],channel,'B')
-% %             end
-% %             if not(exist('StateEpochSB.mat'))
-% %                 load('ChannelsToAnalyse/Bulb_deep.mat')
-% %                 channel;
-% %                 FindNoiseEpoch_BM([cd filesep],channel,0);
-% %                 
-% %                 load('StateEpochSB.mat')
-% %                 
-% %                 SleepyEpoch = intervalSet([],[]);
-% %                 SWSEpoch =  intervalSet([],[]);
-% %                 Wake = Epoch;
-% %                 save('StateEpochSB','SleepyEpoch','SWSEpoch','Wake','-append')
-% %                 %                 load('ExpeInfo.mat')
-% %                 %                 CreateRipplesSleep('stim',0,'restrict',0,'sleep',0,'plotavg',0)
-% %             end
-% %             if not(exist('AlignedXtsd','var'))
-%                 while satisfied ==0
-%                     
-%                     X=Data(Xtsd);Y=Data(Ytsd);
-%                         Position.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})(:,1) = X;
-%                         Position.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})(:,2)  = Y;
-%                     figure
-%                     imagesc(double(ref)), colormap jet, hold on
-%                     plot(X,Y)
-%                     title('give 3 corners : bottom left, bottom right and top left')
-%                     [x,y] = ginput(3);
-%                     
-%                     close all
-%                     
-%                         AlignedXtsd = tsd(Range(Xtsd),(X-x(1))./(x(2)-x(1)));
-%                         AlignedYtsd = tsd(Range(Ytsd),(Y-y(1))./(y(3)-y(1)));
-%                     
-%                     figure, hold on
-%                     plot(Data(AlignedXtsd),Data(AlignedYtsd))
-
-%                     
-%                     satisfied = input('Satisfied?')
-%                 end
-%                 %                 thtps_immob=2;
-%                 %                 smoofact_Acc = 30;
-%                 %                 th_immob_Acc = 1.7e7;
-%                 
-%                 %                 NewMovAcctsd=tsd(Range(MovAcctsd),runmean(Data(MovAcctsd),smoofact_Acc));
-%                 %                 FreezeAccEpoch=thresholdIntervals(NewMovAcctsd,th_immob_Acc,'Direction','Below');
-%                 %                 FreezeAccEpoch=mergeCloseIntervals(FreezeAccEpoch,0.3*1e4);
-%                 %                 FreezeAccEpoch=dropShortIntervals(FreezeAccEpoch,thtps_immob*1e4);
-%                 %
-%                 %                 save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd', 'FreezeAccEpoch','-append');
-%                 save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd','-append');
-%                 
-%                 clear channel
-% %             end
-% %             if not(exist('HeartBeatInfo.mat'))
-% %                 try
-% %                     clear EKG channel
-% %                     Options.TemplateThreshStd=3;
-% %                     Options.BeatThreshStd=0.05;
-% %                     load('ChannelsToAnalyse/EKG.mat')
-% %                     load(['LFPData/LFP',num2str(channel),'.mat'])
-% %                     load('StateEpochSB.mat','TotalNoiseEpoch')
-% %                     load('ExpeInfo.mat')
-% %                     load('behavResources.mat')
-% %                     NoiseEpoch=TotalNoiseEpoch;
-% %                     [Times,Template,HeartRate,GoodEpoch]=DetectHeartBeats_EmbReact_SB(LFP,NoiseEpoch,Options,1);
-% %                     EKG.HBTimes=ts(Times);
-% %                     EKG.HBShape=Template;
-% %                     EKG.DetectionOptions=Options;
-% %                     EKG.HBRate=HeartRate;
-% %                     EKG.GoodEpoch=GoodEpoch;
-% %                     
-% %                     save('HeartBeatInfo.mat','EKG')
-% %                     saveas(1,'EKGCheck.fig'),
-% %                     saveas(1,'EKGCheck.png')
-% %                     close all
-% %                     clear EKG NoiseEpoch TotalNoiseEpoch TTLInfo LFP EKG HearRate Template Times
-% %                 end
-%         end
-%     end
-% end
-
-% 
-% figure
-% for group = 4:5
 %     if group == 4
 %         Mouse_names = Mouse_names_SalHC;
 %     elseif group == 5
@@ -138,45 +31,74 @@ sizeMap2 = 1000;
 %         disp(folder_path);
 %         clear AlignedXtsd AlignedYtsd Xtsd Ytsd x y
 %         load('behavResources.mat')
-%         
-%         satisfied = 0;
-%         while satisfied ==0
-%             
-%             polygon = GetCageEdgesWithoutVideo(Data(Ytsd),Data(Xtsd));
-%             x = polygon.Position(:,2);
-%             y = polygon.Position(:,1);
-%             turn = input('cage vertical? (0/1)');
-%             if turn == 1
-%             Coord1 = [x(1)-x(2),y(1)-y(2)];
-%             Coord2 = [x(3)-x(2),y(3)-y(2)];
-%             elseif turn ==0
-%                 Coord2 = [x(1)-x(2),y(1)-y(2)];
-%                 Coord1 = [x(3)-x(2),y(3)-y(2)];
-%             end
-%             TranssMat = [Coord1',Coord2'];
-%             XInit = Data(Xtsd)-x(2);
-%             YInit = Data(Ytsd)-y(2);
-%             
-%             % The Xtsd and Ytsd in new coordinates
-%             A = ((pinv(TranssMat)*[XInit,YInit]')');
-%             AlignedXtsd = tsd(Range(Xtsd),40*A(:,1));
-%             AlignedYtsd = tsd(Range(Ytsd),20*A(:,2));
-%             clf
-%             %
-%             plot(Data(AlignedXtsd),Data(AlignedYtsd))
-%             xlim([0 40])
-%             ylim([0 40])
-%             
-%             satisfied = input('happy?');
-%             clf
+%         try
+%         load('SleepScoring_OBGamma.mat','Sleep')
+%         catch
+%         load('SleepScoringAcceleroOBGamma.mat','Sleep')
 %         end
-%         close all
-%         save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd','-append');
 %         
+%         if not(exist('B_Low_Spectrum.mat'))
+%             load('ChannelsToAnalyse/Bulb_deep.mat')
+%             channel;
+%             LowSpectrumSB([cd filesep],channel,'B')
+%         end
+%         if not(exist('StateEpochSB.mat'))
+%             load('ChannelsToAnalyse/Bulb_deep.mat')
+%             channel;
+%             FindNoiseEpoch_BM([cd filesep],channel,0);
+%             
+%             load('StateEpochSB.mat')
+%             load('SleepScoring_OBGamma.mat','SWSEpoch','Wake')
+%             
+%             SleepyEpoch = intervalSet([],[]);
+%             save('StateEpochSB','SleepyEpoch','SWSEpoch','Wake','-append')
+%             %                 load('ExpeInfo.mat')
+%             %                 CreateRipplesSleep('stim',0,'restrict',0,'sleep',0,'plotavg',0)
+%         end
+%         
+%         thtps_immob=2;
+%         smoofact_Acc = 30;
+%         th_immob_Acc = 1.7e7;
+%         
+%         NewMovAcctsd=tsd(Range(MovAcctsd),runmean(Data(MovAcctsd),smoofact_Acc));
+%         FreezeAccEpoch=thresholdIntervals(NewMovAcctsd,th_immob_Acc,'Direction','Below');
+%         FreezeAccEpoch=mergeCloseIntervals(FreezeAccEpoch,0.3*1e4);
+%         FreezeAccEpoch=dropShortIntervals(FreezeAccEpoch,thtps_immob*1e4);
+%         FreezeAccEpoch = FreezeAccEpoch - Sleep;
+%         
+%         save('behavResources.mat', 'FreezeAccEpoch','-append');
+%         
+%         %             clear channel
+%         %             end
+%         %             if not(exist('HeartBeatInfo.mat'))
+%         %                 try
+%         %                     clear EKG channel
+%         %                     Options.TemplateThreshStd=3;
+%         %                     Options.BeatThreshStd=0.05;
+%         %                     load('ChannelsToAnalyse/EKG.mat')
+%         %                     load(['LFPData/LFP',num2str(channel),'.mat'])
+%         %                     load('StateEpochSB.mat','TotalNoiseEpoch')
+%         %                     load('ExpeInfo.mat')
+%         %                     load('behavResources.mat')
+%         %                     NoiseEpoch=TotalNoiseEpoch;
+%         %                     [Times,Template,HeartRate,GoodEpoch]=DetectHeartBeats_EmbReact_SB(LFP,NoiseEpoch,Options,1);
+%         %                     EKG.HBTimes=ts(Times);
+%         %                     EKG.HBShape=Template;
+%         %                     EKG.DetectionOptions=Options;
+%         %                     EKG.HBRate=HeartRate;
+%         %                     EKG.GoodEpoch=GoodEpoch;
+%         %
+%         %                     save('HeartBeatInfo.mat','EKG')
+%         %                     saveas(1,'EKGCheck.fig'),
+%         %                     saveas(1,'EKGCheck.png')
+%         %                     close all
+%         %                     clear EKG NoiseEpoch TotalNoiseEpoch TTLInfo LFP EKG HearRate Template Times
+%         %                 end
 %     end
 % end
 
-               
+
+          disp('Making thigmotaxis')     
 for group = 1:3
     if group == 2
         Mouse_names = Mouse_names_Nic;
@@ -201,8 +123,8 @@ for group = 1:3
             AlignedXtsd_active = Restrict(AlignedXtsd, ActiveEpoch);
             AlignedYtsd_active = Restrict(AlignedYtsd, ActiveEpoch);
             
-            [Thigmotaxis,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsd_Epoch, AlignedYtsd_Epoch,'figure',0,'percent_inner',0.7);
-            [Thigmotaxis2,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsd_active, AlignedYtsd_active,'figure',0,'percent_inner',0.7);
+            [Thigmotaxis,~,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsd_Epoch, AlignedYtsd_Epoch,'OF','figure',0,'percent_inner',0.8);
+            [Thigmotaxis2,~,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsd_active, AlignedYtsd_active,'OF','figure',0,'percent_inner',0.8);
             
             Thigmo.(Name{group}).(Session_type{sess})(mouse) = Thigmotaxis;
             Thigmo2.(Name{group}).(Session_type{sess})(mouse) = Thigmotaxis2;
@@ -212,7 +134,7 @@ for group = 1:3
 end
 
 
-
+disp('Making Distance to Center')
 for group = 1:3
     if group == 2
         Mouse_names = Mouse_names_Nic;
@@ -230,7 +152,7 @@ for group = 1:3
             load('behavResources.mat')
             load('StateEpochSB.mat')
             
-            [~,Distance,~,~] = Thigmotaxis_OF_CH(AlignedXtsd, AlignedYtsd,'figure',0,'percent_inner',0.7);
+            [~,Distance,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsd, AlignedYtsd,'OF','figure',0,'percent_inner',0.7);
             
             DistanceToCenterTemp.(Name{group}).(Session_type{sess}){mouse} = Distance';
             DistanceToCenter2.(Name{group}).(Session_type{sess})(mouse,:) = interp1(linspace(0,1000,length(DistanceToCenterTemp.(Name{group}).(Session_type{sess}){mouse})),DistanceToCenterTemp.(Name{group}).(Session_type{sess}){mouse}, linspace(0,1000,1000));
@@ -240,7 +162,7 @@ for group = 1:3
 end
 
 
-
+disp('Making Thigmo along Time')
 for group = 1:3
      if group == 2
         Mouse_names = Mouse_names_Nic;
@@ -265,7 +187,7 @@ for group = 1:3
                     AlignedXtsd_Epoch = Restrict(AlignedXtsd, Epoch);
                     AlignedYtsd_Epoch = Restrict(AlignedYtsd, Epoch);
                     
-                    [ThigmotaxisTemp,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsd_Epoch, AlignedYtsd_Epoch,'figure',0,'figure',0,'percent_inner',0.7);
+                    [ThigmotaxisTemp,~,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsd_Epoch, AlignedYtsd_Epoch,'OF','figure',0,'figure',0,'percent_inner',0.7);
                     
                     ThigmoTemp.(Name{group}).(Session_type{sess})(mouse,i) = ThigmotaxisTemp;
                     a = a+60e4;
@@ -280,6 +202,7 @@ end
 
 clear ActiveEpoch
 
+disp('Making (basically) everything else')
 for group = 1:3
     if group == 2
         Mouse_names = Mouse_names_Nic;
@@ -370,9 +293,17 @@ for group = 1:3
                 Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConvertSpectrum_in_Frequencies_BM(Spectro{3} , Spectro{2}*1e4 , Spectro{1});
                 RespiFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
                 MeanRespiFz.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(RespiFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-                 SpectroBulbActive.(Name{group}).(Session_type{sess}){mouse} = Restrict(OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse},ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+                SpectroBulbActive.(Name{group}).(Session_type{sess}){mouse} = Restrict(OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse},ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
                 MeanSpectroActive.(Name{group}).(Session_type{sess})(mouse,:) = nanmean(Data(SpectroBulbActive.(Name{group}).(Session_type{sess}){mouse}));
-               
+                NewRespiFz = tsd(Range(RespiFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),runmean_BM(Data(RespiFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),5));
+                Over3Breathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = thresholdIntervals(NewRespiFz,3,'Direction','Above');
+                Over3Breathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = mergeCloseIntervals(Over3Breathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),0.3*1e4);
+                TimeOver3.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(Over3Breathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+                Under3Breathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Epoch-Over3Breathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse});
+                TimeUnder3.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(Under3Breathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+                RatioUnderOver.(Name{group}).(Session_type{sess})(mouse)=TimeOver3.(Name{group}).(Session_type{sess})(mouse)/TimeUnder3.(Name{group}).(Session_type{sess})(mouse);
+                clear NewRespiFz
+                
             end
             try
                 load('HeartBeatInfo.mat')
@@ -381,19 +312,29 @@ for group = 1:3
                 MeanHRFz.(Name{group}).(Session_type{sess})(k) = nanmean(Data(HRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
                 k = k+1;
             end
+            try
+                load('SWR.mat', 'RipplesEpoch','tRipples')
+                Rg_Acc = Range(MovAcctsd);
+                i=1; bin_length = ceil(2/median(diff(Range(MovAcctsd,'s')))); % in 2s
+                for bin=1:bin_length:length(Rg_Acc)-bin_length
+                    SmallEpoch=intervalSet(Rg_Acc(bin),Rg_Acc(bin+bin_length));
+                    RipDensity_temp(i) = length(Start(and(RipplesEpoch , SmallEpoch)));
+                    TimeRange(i) = Rg_Acc(bin);
+                    i=i+1;
+                end
+                Ripts.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = tRipples;
+                RipDensity_tsd.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = tsd(TimeRange' , RipDensity_temp');
+                RipDensity_Fz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(RipDensity_tsd.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+            end
+            clear RipplesEpoch tRipples
         end
     end
     close all
 end
 
 
-Per = [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1];
-Num = [5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100];
-Num1 = [05 510 1015 1520 2025 2530 3035 3540 4045 4550 5055 5560 6065 6570 7075 7580 8085 8590 9095 95100];
-
-
 for group = 1:3
-    if group == 2
+     if group == 2
         Mouse_names = Mouse_names_Nic;
     elseif group == 1
         Mouse_names = Mouse_names_Sal;
@@ -402,183 +343,146 @@ for group = 1:3
     end
     for sess=1:2
         for mouse=1:length(Mouse_names)
-            path = sprintf('%s.%s{%d}', Name{group}, Session_type{sess}, mouse);
-            folder_path = eval(path);
-            cd(folder_path);
-            disp(folder_path);
-            NumA = 0;
-            
-            clear AlignedXtsd AlignedYtsd Spectro
-            load('behavResources.mat')
-            TotalEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = intervalSet(0, max(Range(MovAcctsd)));
-            FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FreezeAccEpoch;
-            FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-            FreezeProp.(Name{group}).(Session_type{sess})(mouse) = FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse) ./ sum(DurationEpoch(TotalEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-            
-            try
-                load('B_Low_Spectrum.mat')
-            end
-            
-            for i = 1:length(Num)
-                [~,~, ZoneEpoch_Inner, ZoneEpoch_Outer, ZoneEpoch_Specific] = Thigmotaxis_OF_CH(AlignedXtsd, AlignedYtsd, 'percent_inner', Per(i),'ring', [NumA NumA+0.05]);
-                
-                fieldname = strcat('FreezeEpoch', num2str(Num(i)));
-                fieldname2 = strcat('FreezeEpoch', num2str(Num1(i)));
-                ZoneEpochInner.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse}) = ZoneEpoch_Inner;
-                ZoneEpochOuter.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse}) = ZoneEpoch_Outer;
-                ZoneEpochSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}) = ZoneEpoch_Specific;
-                
-                FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse}) = and(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), ZoneEpoch_Inner);
-                FreezeEpochsSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}) = and(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), ZoneEpoch_Specific);
-                FreezeEpochsOuter.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse}) = FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})- FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse});
-                
-                FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse})));
-                
-                NumA = NumA+0.05;
-                
-            end
-            
-            try
-                OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse} = tsd(Spectro{2}*1e4 , Spectro{1});
-                SpectroBulbFz.(Name{group}).(Session_type{sess}){mouse} = Restrict(OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse},FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-                MeanSpectroFz.(Name{group}).(Session_type{sess})(mouse,:) = nanmean(Data(SpectroBulbFz.(Name{group}).(Session_type{sess}){mouse}));
-            end
-            
-            for i = 1:length(Num)
-                fieldname1 = strcat('FreezeEpoch', num2str(Num(i)));
-                
-                XtsdAlignedInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ZoneEpochInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                YtsdAlignedInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ZoneEpochInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                XtsdAlignedOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ZoneEpochOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                YtsdAlignedOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ZoneEpochOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                
+            a = 0;
+            clear riptemp riptemp2
+            for i = 1:30
                 try
-                    FreezeTimeInner.(Name{group}).(Session_type{sess}).(fieldname1)(mouse) = sum(DurationEpoch(FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse})));
-                    FreezePropInner.(Name{group}).(Session_type{sess}).(fieldname1)(mouse) = FreezeTimeInner.(Name{group}).(Session_type{sess}).(fieldname1)(mouse)./FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse);
-                 
-                    SpectroBulbInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse},FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                    MeanSpectroBulbInner.(Name{group}).(Session_type{sess}).(fieldname1)(mouse,:) = nanmean(Data(SpectroBulbInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse})));
-                    MeanSpectroBulbInner_Corrected.(Name{group}).(Session_type{sess}).(fieldname1)(mouse,:) = nanmean(Data(SpectroBulbInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}))).*RangeLow;
+                    Epoch = intervalSet(a,a+60e4);
                     
-                    SpectroBulbOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse},FreezeEpochsOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                    MeanSpectroBulbOuter.(Name{group}).(Session_type{sess}).(fieldname1)(mouse,:) = nanmean(Data(SpectroBulbOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse})));
-                    MeanSpectroBulbOuter_Corrected.(Name{group}).(Session_type{sess}).(fieldname1)(mouse,:) = nanmean(Data(SpectroBulbOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}))).*RangeLow;
+                    riptemp = Data(Restrict(RipDensity_Fz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch));
                     
-                    XtsdAlignedFzInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                    YtsdAlignedFzInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                    XtsdAlignedFzOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                    YtsdAlignedFzOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                    RespiFzInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                    RespiFzOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
-                    MeanRespiFzInner.(Name{group}).(Session_type{sess}).(fieldname1)(mouse) = nanmean(Data(RespiFzInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse})));
-                    MeanRespiFzOuter.(Name{group}).(Session_type{sess}).(fieldname1)(mouse) = nanmean(Data(RespiFzOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse})));
+                    RipDensTemp.(Name{group}).(Session_type{sess})(mouse,i) = nanmean(riptemp);
                     
+                    riptemp2 = Restrict(Ripts.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch);
+                    RipDensTemp2.(Name{group}).(Session_type{sess})(mouse,i) = length(riptemp2);
+                    
+                    a = a+60e4;
+                catch
+                    RipDensTemp.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
+                    RipDensTemp2.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
+
+                    a = a+60e4;
                 end
-            end
-            
-            for i = 1:length(Num1)
-                try
-                    fieldname2 = strcat('FreezeEpoch', num2str(Num1(i)));
-                    FreezeTimeSpe.(Name{group}).(Session_type{sess}).(fieldname2)(mouse) = sum(DurationEpoch(FreezeEpochsSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse})));
-                    FreezePropSpe.(Name{group}).(Session_type{sess}).(fieldname2)(mouse) = FreezeTimeSpe.(Name{group}).(Session_type{sess}).(fieldname2)(mouse)./FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse);
-                    SpectroBulbSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}) = Restrict(OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse},FreezeEpochsSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}));
-                    MeanSpectroBulbSpe.(Name{group}).(Session_type{sess}).(fieldname2)(mouse,:) = nanmean(Data(SpectroBulbSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse})));
-                    RespiFzSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}));
-                    MeanRespiFzSpe.(Name{group}).(Session_type{sess}).(fieldname2)(mouse) = nanmean(Data(RespiFzSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse})));
-                    
-                end
+%                 keyboard
             end
         end
     end
 end
 
-%% HC Analysis
 
+
+
+
+
+
+ 
 % 
-% GetNicotineSessions_CH
+% Per = [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1];
+% Num = [5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100];
+% Num1 = [05 510 1015 1520 2025 2530 3035 3540 4045 4550 5055 5560 6065 6570 7075 7580 8085 8590 9095 95100];
 % 
-% Name = {'SalineOF','NicotineOF','NicotineLowOF','SalineHC','NicotineHC'};
-% EpochName = {'HCPre','HCPost'};
-% Session_type = {'OFPre','OFPost'};
 % 
-% Mouse_names_Nic = {'M1500','M1531','M1532','M1686','M1687','M1685'};
-% Mouse_names_Sal = {'M1685','M1686','M1612','M1641','M1644','M1687'};
-% Mouse_names_NicLow = {'M1614','M1644','M1688','M1641'};
-% Mouse_names_SalHC = {'M1411','M1412','M1414','M1416','M1417','M1418','M1207','M1224','M1225','M1227','M1252','M1253','M1254'};
-% Mouse_names_NicHC = {'M1411','M1412','M1613','M1414','M1415','M1416','M1417','M1418','M1385','M1391','M1393'};
-% 
-% smootime = 1;
-% interp_value = 100;
-% 
-% for group = 4:5
+% for group = 1:3
 %     if group == 2
 %         Mouse_names = Mouse_names_Nic;
 %     elseif group == 1
 %         Mouse_names = Mouse_names_Sal;
 %     elseif group == 3
 %         Mouse_names = Mouse_names_NicLow;
-%     elseif group == 4
-%         Mouse_names = Mouse_names_SalHC;
-%     elseif group == 5
-%         Mouse_names = Mouse_names_NicHC;
 %     end
-%     for mouse = 1:length(Mouse_names)
-%         path = sprintf('%s{%d}', Name{group}, mouse);
-%         folder_path = eval(path);
-%         cd(folder_path);
-%         disp(folder_path);
-%         
-%         load('behavResources.mat')
-%         
-%         load('SleepScoring_OBGamma.mat', 'Epoch_Drugs', 'SmoothGamma', 'Sleep','Wake')
-%         %         load('ChannelsToAnalyse/Bulb_deep.mat'); load(['LFPData/LFP' num2str(channel) '.mat'])
-%         %         FilGamma=FilterLFP(LFP,[50 70],1024);
-%         %         HilGamma=abs(hilbert(Data(FilGamma)));
-%         %         smooth_ghi=tsd(Range(FilGamma),runmean_BM(HilGamma,ceil(smootime/median(diff(Range(FilGamma,'s'))))));
-%         load('B_Low_Spectrum.mat')
-%         OBtsd = tsd(Spectro{2}*1e4 , Spectro{1});
-%         
-%         %         thtps_immob=2;
-%         %         smoofact_Acc = 30;
-%         %         th_immob_Acc = 1.7e7;
-%         %
-%         %         NewMovAcctsd=tsd(Range(MovAcctsd),runmean(Data(MovAcctsd),smoofact_Acc));
-%         %         FreezeAccEpoch=thresholdIntervals(NewMovAcctsd,th_immob_Acc,'Direction','Below');
-%         %         FreezeAccEpoch=mergeCloseIntervals(FreezeAccEpoch,0.3*1e4);
-%         %         FreezeAccEpoch=dropShortIntervals(FreezeAccEpoch,thtps_immob*1e4);
-%         %         FreezeAccEpoch = and(FreezeAccEpoch,Wake);
-%         %         save('behavResources.mat', 'FreezeAccEpoch','-append');
-%         
-%         Thirty_Bef_Inj = intervalSet(Stop(Epoch_Drugs{1})-1800e4 , Stop(Epoch_Drugs{1}));
-%         Thirty_Aft_Inj = intervalSet(Start(Epoch_Drugs{2}) , Start(Epoch_Drugs{2})+1800e4);
-%         
-%         
-%         for epoch = 1:length(EpochName)
+%     for sess=1:2
+%         for mouse=1:length(Mouse_names)
+%             path = sprintf('%s.%s{%d}', Name{group}, Session_type{sess}, mouse);
+%             folder_path = eval(path);
+%             cd(folder_path);
+%             disp(folder_path);
+%             NumA = 0;
 %             
-%             if epoch==1; Epoch_to_use = Thirty_Bef_Inj;
-%             elseif epoch==2; Epoch_to_use = Thirty_Aft_Inj;
+%             clear AlignedXtsd AlignedYtsd Spectro
+%             load('behavResources.mat')
+%             TotalEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = intervalSet(0, max(Range(MovAcctsd)));
+%             FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FreezeAccEpoch;
+%             FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+%             FreezeProp.(Name{group}).(Session_type{sess})(mouse) = FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse) ./ sum(DurationEpoch(TotalEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+%             
+%             try
+%                 load('B_Low_Spectrum.mat')
 %             end
 %             
-%             Accelero.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}) = Restrict(MovAcctsd,Epoch_to_use);
-%             Speed.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}) = Restrict(Vtsd,Epoch_to_use);
-%             % TotalEpoch.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}) = intervalSet(0,max(Range(MovAcctsd)));
-%             FreezeEpochAcc.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}) = and(FreezeAccEpoch,Epoch_to_use);
-%             FreezeTimeAcc.(Name{group}).(EpochName{epoch})(mouse) = sum(DurationEpoch(FreezeEpochAcc.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse})));
-%             % FreezeProp.(Name{group}).(EpochName{epoch})(mouse) = FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse)./sum(DurationEpoch(TotalEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+%             for i = 1:length(Num)
+%                 [~,~, ZoneEpoch_Inner, ZoneEpoch_Outer, ZoneEpoch_Specific] = Thigmotaxis_OF_CH(AlignedXtsd, AlignedYtsd, 'percent_inner', Per(i),'ring', [NumA NumA+0.05]);
+%                 
+%                 fieldname = strcat('FreezeEpoch', num2str(Num(i)));
+%                 fieldname2 = strcat('FreezeEpoch', num2str(Num1(i)));
+%                 ZoneEpochInner.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse}) = ZoneEpoch_Inner;
+%                 ZoneEpochOuter.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse}) = ZoneEpoch_Outer;
+%                 ZoneEpochSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}) = ZoneEpoch_Specific;
+%                 
+%                 FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse}) = and(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), ZoneEpoch_Inner);
+%                 FreezeEpochsSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}) = and(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), ZoneEpoch_Specific);
+%                 FreezeEpochsOuter.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse}) = FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})- FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse});
+%                 
+%                 FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname).(Mouse_names{mouse})));
+%                 
+%                 NumA = NumA+0.05;
+%                 
+%             end
 %             
-%             OB_Sp_tsd.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}) = Restrict(OBtsd,Epoch_to_use);
-%             SpectroBulbFz.(Name{group}).(EpochName{epoch}){mouse} = Restrict(OB_Sp_tsd.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}), FreezeEpochAcc.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}));
-%             MeanSpectroFz.(Name{group}).(EpochName{epoch})(mouse,:) = nanmean(Data(SpectroBulbFz.(Name{group}).(EpochName{epoch}){mouse}));
-% %             MeanSpectro.(Name{group}).(EpochName{epoch})(mouse,:) = nanmean(Data(OB_Sp_tsd.(Name{group}).(EpochName{epoch}){mouse}));
-% %             Respi.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}) = ConvertSpectrum_in_Frequencies_BM(Spectro{3} , Spectro{2}*1e4 , Spectro{1});
-% %             RespiFz.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}),FreezeEpochAcc.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse}));
-% %             MeanRespiFz.(Name{group}).(EpochName{epoch})(mouse) = nanmean(Data(RespiFz.(Name{group}).(EpochName{epoch}).(Mouse_names{mouse})));
-% %             
-%         end 
-%         clear Thirty_Bef_Inj Thirty_Aft_Inj OBtsd Epoch_Drugs Sleep Wake FreezeAccEpoch
+%             try
+%                 OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse} = tsd(Spectro{2}*1e4 , Spectro{1});
+%                 SpectroBulbFz.(Name{group}).(Session_type{sess}){mouse} = Restrict(OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse},FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%                 MeanSpectroFz.(Name{group}).(Session_type{sess})(mouse,:) = nanmean(Data(SpectroBulbFz.(Name{group}).(Session_type{sess}){mouse}));
+%             end
+%             
+%             for i = 1:length(Num)
+%                 fieldname1 = strcat('FreezeEpoch', num2str(Num(i)));
+%                 
+%                 XtsdAlignedInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ZoneEpochInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                 YtsdAlignedInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ZoneEpochInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                 XtsdAlignedOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ZoneEpochOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                 YtsdAlignedOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ZoneEpochOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                 
+%                 try
+%                     FreezeTimeInner.(Name{group}).(Session_type{sess}).(fieldname1)(mouse) = sum(DurationEpoch(FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse})));
+%                     FreezePropInner.(Name{group}).(Session_type{sess}).(fieldname1)(mouse) = FreezeTimeInner.(Name{group}).(Session_type{sess}).(fieldname1)(mouse)./FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse);
+%                  
+%                     SpectroBulbInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse},FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                     MeanSpectroBulbInner.(Name{group}).(Session_type{sess}).(fieldname1)(mouse,:) = nanmean(Data(SpectroBulbInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse})));
+%                     MeanSpectroBulbInner_Corrected.(Name{group}).(Session_type{sess}).(fieldname1)(mouse,:) = nanmean(Data(SpectroBulbInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}))).*RangeLow;
+%                     
+%                     SpectroBulbOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse},FreezeEpochsOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                     MeanSpectroBulbOuter.(Name{group}).(Session_type{sess}).(fieldname1)(mouse,:) = nanmean(Data(SpectroBulbOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse})));
+%                     MeanSpectroBulbOuter_Corrected.(Name{group}).(Session_type{sess}).(fieldname1)(mouse,:) = nanmean(Data(SpectroBulbOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}))).*RangeLow;
+%                     
+%                     XtsdAlignedFzInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                     YtsdAlignedFzInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                     XtsdAlignedFzOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                     YtsdAlignedFzOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                     RespiFzInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                     RespiFzOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse}));
+%                     MeanRespiFzInner.(Name{group}).(Session_type{sess}).(fieldname1)(mouse) = nanmean(Data(RespiFzInner.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse})));
+%                     MeanRespiFzOuter.(Name{group}).(Session_type{sess}).(fieldname1)(mouse) = nanmean(Data(RespiFzOuter.(Name{group}).(Session_type{sess}).(fieldname1).(Mouse_names{mouse})));
+%                     
+%                 end
+%             end
+%             
+%             for i = 1:length(Num1)
+%                 try
+%                     fieldname2 = strcat('FreezeEpoch', num2str(Num1(i)));
+%                     FreezeTimeSpe.(Name{group}).(Session_type{sess}).(fieldname2)(mouse) = sum(DurationEpoch(FreezeEpochsSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse})));
+%                     FreezePropSpe.(Name{group}).(Session_type{sess}).(fieldname2)(mouse) = FreezeTimeSpe.(Name{group}).(Session_type{sess}).(fieldname2)(mouse)./FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse);
+%                     SpectroBulbSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}) = Restrict(OB_Sp_tsd.(Name{group}).(Session_type{sess}){mouse},FreezeEpochsSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}));
+%                     MeanSpectroBulbSpe.(Name{group}).(Session_type{sess}).(fieldname2)(mouse,:) = nanmean(Data(SpectroBulbSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse})));
+%                     RespiFzSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochsSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse}));
+%                     MeanRespiFzSpe.(Name{group}).(Session_type{sess}).(fieldname2)(mouse) = nanmean(Data(RespiFzSpe.(Name{group}).(Session_type{sess}).(fieldname2).(Mouse_names{mouse})));
+%                     
+%                 end
+%             end
+%         end
 %     end
-%     close all
 % end
+
+    
 
 %%
 %
@@ -615,6 +519,17 @@ MakeSpreadAndBoxPlot3_SB({Thigmo.SalineOF.OFPre Thigmo.SalineOF.OFPost Thigmo.Ni
 ylabel('Thigmotaxis');
 makepretty_CH
 
+x = time(:,1:15); 
+y1 = m(:,1:15);
+y2 = ThigmoTemp.NicotineOF.OFPost(:,1:15); 
+y3 = RipDensTemp2.NicotineOF.OFPost(:,1:15);
+
+label{1}={'Breathing frequency'};
+label{2}={'Thigmotaxis'};
+label{3}={'Number of ripples in 1 minute'};
+multiploty_Shaded_CH({x, y1}, {x, y2}, {x, y3},'time',label);
+
+mtitle('OF');
 
 % 
 % figure
@@ -791,92 +706,92 @@ legend([a1.mainLine a2.mainLine a3.mainLine],'Pre','Post Active','Post Freezing'
 % end
 
 %%
-
-RangeLow = linspace(0.1526,20,261);
-
-diameter = 1;
-radius = diameter / 2;
-center = [0.5, 0.5];
-theta = linspace(0, 2*pi, 100);
-outer_circle_x = center(1) + radius * cos(theta);
-outer_circle_y = center(2) + radius * sin(theta);
-
-Col1 = [1 0 0];
-Col2 = [0 0 1];
-Mouse_names = Mouse_names_Nic;
-
-Index = [17 18 19];
-for i = Index
-    figure('color',[1 1 1]), hold on
-    fieldname = strcat('FreezeEpoch', num2str(Num(i)));
-    for mouse = 1:length(Mouse_names)
-        subplot(222), hold on
-        plot(RangeLow,MeanSpectroBulbInner.NicotineOF.OFPost.(fieldname)(mouse,:),'r');
-        plot(RangeLow,MeanSpectroBulbOuter.NicotineOF.OFPost.(fieldname)(mouse,:),'b');
-        a = plot(RangeLow,nanmean(MeanSpectroBulbInner.NicotineOF.OFPost.(fieldname)),'r');
-        [~,y] = max(nanmean(MeanSpectroBulbInner.NicotineOF.OFPost.(fieldname)));
-        ybis = RangeLow(y);
-        vline(ybis,'--r')
-        a.LineWidth = 2;
-        a = plot(RangeLow,nanmean(MeanSpectroBulbOuter.NicotineOF.OFPost.(fieldname)),'b');
-        [~,y] = max(nanmean(MeanSpectroBulbOuter.NicotineOF.OFPost.(fieldname)));
-        ybis = RangeLow(y);
-        vline(ybis,'--b')
-        a.LineWidth = 2;
-        xlim([0 10]);
-        makepretty_CH
-        
-    end
-    
-    subplot(224), hold on
-    a1 = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbInner.NicotineOF.OFPost.(fieldname),'color',Col1);
-    a1.mainLine.LineWidth = 2;
-    a2 = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbOuter.NicotineOF.OFPost.(fieldname),'color',Col2);
-    a2.mainLine.LineWidth = 2;
-    xlim([0 10]);
-    makepretty_CH
-    legend([a1.mainLine a2.mainLine],'Int','Ext')
-    
-    subplot(221), hold on
-    for mouse = 1:length(Mouse_names)
-        plot(Data(XtsdAlignedFzInner.NicotineOF.OFPost.(fieldname).(Mouse_names{mouse})),Data(YtsdAlignedFzInner.NicotineOF.OFPost.(fieldname).(Mouse_names{mouse})),'.r');
-        plot(Data(XtsdAlignedFzOuter.NicotineOF.OFPost.(fieldname).(Mouse_names{mouse})),Data(YtsdAlignedFzOuter.NicotineOF.OFPost.(fieldname).(Mouse_names{mouse})),'.b');
-        plot(outer_circle_x,outer_circle_y,'k-', 'LineWidth', 2)
-    end
-    makepretty_CH
-    
-    subplot(245), hold on
-    Cols={[0 0 1],[1 0 0]};
-    X=[1:2];
-    Legends={'Ext','Int'};
-    
-    MakeSpreadAndBoxPlot3_SB({1-FreezePropInner.NicotineOF.OFPost.(fieldname) FreezePropInner.NicotineOF.OFPost.(fieldname)},Cols,X,Legends,'showpoints',1,'paired',1);
-    ylabel('Freeze Prop');
-    makepretty_CH
-    
-    
-    subplot(246), hold on
-    Cols={[0 0 1],[1 0 0]};
-    X=[1:2];
-    Legends={'Ext','Int'};
-    
-    MakeSpreadAndBoxPlot3_SB({MeanRespiFzOuter.NicotineOF.OFPost.(fieldname) MeanRespiFzInner.NicotineOF.OFPost.(fieldname)},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
-    ylabel('Respi freezing');
-    makepretty_CH
-    
-    mtitle(num2str(Num(i)));
-end
-
-%%
+% 
+% RangeLow = linspace(0.1526,20,261);
+% 
+% diameter = 1;
+% radius = diameter / 2;
+% center = [0.5, 0.5];
+% theta = linspace(0, 2*pi, 100);
+% outer_circle_x = center(1) + radius * cos(theta);
+% outer_circle_y = center(2) + radius * sin(theta);
+% 
+% Col1 = [1 0 0];
+% Col2 = [0 0 1];
+% Mouse_names = Mouse_names_Nic;
+% 
+% Index = [17 18 19];
+% for i = Index
+%     figure('color',[1 1 1]), hold on
+%     fieldname = strcat('FreezeEpoch', num2str(Num(i)));
+%     for mouse = 1:length(Mouse_names)
+%         subplot(222), hold on
+%         plot(RangeLow,MeanSpectroBulbInner.NicotineOF.OFPost.(fieldname)(mouse,:),'r');
+%         plot(RangeLow,MeanSpectroBulbOuter.NicotineOF.OFPost.(fieldname)(mouse,:),'b');
+%         a = plot(RangeLow,nanmean(MeanSpectroBulbInner.NicotineOF.OFPost.(fieldname)),'r');
+%         [~,y] = max(nanmean(MeanSpectroBulbInner.NicotineOF.OFPost.(fieldname)));
+%         ybis = RangeLow(y);
+%         vline(ybis,'--r')
+%         a.LineWidth = 2;
+%         a = plot(RangeLow,nanmean(MeanSpectroBulbOuter.NicotineOF.OFPost.(fieldname)),'b');
+%         [~,y] = max(nanmean(MeanSpectroBulbOuter.NicotineOF.OFPost.(fieldname)));
+%         ybis = RangeLow(y);
+%         vline(ybis,'--b')
+%         a.LineWidth = 2;
+%         xlim([0 10]);
+%         makepretty_CH
+%         
+%     end
+%     
+%     subplot(224), hold on
+%     a1 = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbInner.NicotineOF.OFPost.(fieldname),'color',Col1);
+%     a1.mainLine.LineWidth = 2;
+%     a2 = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbOuter.NicotineOF.OFPost.(fieldname),'color',Col2);
+%     a2.mainLine.LineWidth = 2;
+%     xlim([0 10]);
+%     makepretty_CH
+%     legend([a1.mainLine a2.mainLine],'Int','Ext')
+%     
+%     subplot(221), hold on
+%     for mouse = 1:length(Mouse_names)
+%         plot(Data(XtsdAlignedFzInner.NicotineOF.OFPost.(fieldname).(Mouse_names{mouse})),Data(YtsdAlignedFzInner.NicotineOF.OFPost.(fieldname).(Mouse_names{mouse})),'.r');
+%         plot(Data(XtsdAlignedFzOuter.NicotineOF.OFPost.(fieldname).(Mouse_names{mouse})),Data(YtsdAlignedFzOuter.NicotineOF.OFPost.(fieldname).(Mouse_names{mouse})),'.b');
+%         plot(outer_circle_x,outer_circle_y,'k-', 'LineWidth', 2)
+%     end
+%     makepretty_CH
+%     
+%     subplot(245), hold on
+%     Cols={[0 0 1],[1 0 0]};
+%     X=[1:2];
+%     Legends={'Ext','Int'};
+%     
+%     MakeSpreadAndBoxPlot3_SB({1-FreezePropInner.NicotineOF.OFPost.(fieldname) FreezePropInner.NicotineOF.OFPost.(fieldname)},Cols,X,Legends,'showpoints',1,'paired',1);
+%     ylabel('Freeze Prop');
+%     makepretty_CH
+%     
+%     
+%     subplot(246), hold on
+%     Cols={[0 0 1],[1 0 0]};
+%     X=[1:2];
+%     Legends={'Ext','Int'};
+%     
+%     MakeSpreadAndBoxPlot3_SB({MeanRespiFzOuter.NicotineOF.OFPost.(fieldname) MeanRespiFzInner.NicotineOF.OFPost.(fieldname)},Cols,X,Legends,'showpoints',1,'paired',1,'optiontest','ttest');
+%     ylabel('Respi freezing');
+%     makepretty_CH
+%     
+%     mtitle(num2str(Num(i)));
+% end
+% 
+% %%
 
 RangeLow = linspace(0.1526,20,261);
 for mouse = 1:6
     j = 0;
-    for i = 1:15
+    for i = 1:30
         Epoch = intervalSet(0+j, 60e4+j);
         clear mtemp
         try
-            SpectroTemp{i,mouse} = Restrict(SpectroBulbFz.Nicotine.OFPost{mouse},Epoch);
+            SpectroTemp{i,mouse} = Restrict(SpectroBulbFz.NicotineOF.OFPost{mouse},Epoch);
             MeanSpectroTemp{i}(mouse,:) = nanmean(Data(SpectroTemp{i,mouse}));
             [~,mtemp]= max(MeanSpectroTemp{i}(mouse,:));
             mtemp = RangeLow(mtemp);
@@ -901,6 +816,7 @@ Cols_cell = mat2cell(Cols, ones(1, n_colors), 3);
 RangeLow = linspace(0.1526,20,261);
 
 figure, hold on
+clear a
 for i = 1:15
     a(i) = plot(RangeLow,nanmean(MeanSpectroTemp{1,i}));
     a(i).Color = Cols_cell{i,1};

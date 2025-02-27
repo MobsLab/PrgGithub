@@ -46,17 +46,17 @@ if strcmp(arena_type, 'OF')
     distances = sqrt((x_data - center(1)).^2 + (y_data - center(2)).^2);
     
     % Calcul des rayons pour les zones
-    inner_radius = radius * sqrt(percent_inner);  % Zone intérieure
+    inner_limit = radius * sqrt(percent_inner);  % Zone intérieure
     
     % Définir les limites pour la zone spécifique entre les deux pourcentages
-    specific_inner_radius = radius * sqrt(ring(1));
-    specific_outer_radius = radius * sqrt(ring(2));
+    specific_inner_limit = radius * sqrt(ring(1));
+    specific_outer_limit = radius * sqrt(ring(2));
     
     % Détection des points dans les zones
-    in_inner_zone = distances <= inner_radius;
-    % in_outer_zone = distances > inner_radius & distances <= radius;
-    in_outer_zone = distances > inner_radius;
-    in_specific_zone = distances > specific_inner_radius & distances <= specific_outer_radius;  % Zone spécifique (entre 25% et 30%)
+    in_inner_zone = distances <= inner_limit;
+    % in_outer_zone = distances > inner_limit & distances <= radius;
+    in_outer_zone = distances > inner_limit;
+    in_specific_zone = distances > specific_inner_limit & distances <= specific_outer_limit;  % Zone spécifique (entre 25% et 30%)
     
 elseif strcmp(arena_type, 'HC')
     % HomeCage : AlignedXtsd is comprised between 0 and 40 and Aligned
@@ -93,44 +93,28 @@ if figure_flag == 1
     figure;
     hold on;
     
+    p1 = plot(x_data(in_inner_zone), y_data(in_inner_zone), '.g');
+    p2 = plot(x_data(in_outer_zone), y_data(in_outer_zone), '.m');
+    %     p3 = plot(x_data(in_specific_zone), y_data(in_specific_zone), '.b');
+
     if strcmp(arena_type, 'OF')
     
         theta = linspace(0, 2*pi, 100);
         plot(center(1) + radius * cos(theta), center(2) + radius * sin(theta), 'k-', 'LineWidth', 2);
-        plot(center(1) + inner_radius * cos(theta), center(2) + inner_radius * sin(theta), 'k--', 'LineWidth', 2);
-        plot(center(1) + specific_inner_radius * cos(theta), center(2) + specific_inner_radius * sin(theta), 'b--', 'LineWidth', 2);
-        plot(center(1) + specific_outer_radius * cos(theta), center(2) + specific_outer_radius * sin(theta), 'b-', 'LineWidth', 2);
+        plot(center(1) + inner_limit * cos(theta), center(2) + inner_limit * sin(theta), 'k--', 'LineWidth', 2);
+        plot(center(1) + specific_inner_limit * cos(theta), center(2) + specific_inner_limit * sin(theta), 'b--', 'LineWidth', 2);
+        plot(center(1) + specific_outer_limit * cos(theta), center(2) + specific_outer_limit * sin(theta), 'b-', 'LineWidth', 2);
     else
        rectangle('Position', [0, 0, cage_width, cage_height], 'EdgeColor', 'k', 'LineWidth', 2);
         rectangle('Position', [cage_width * (1 - inner_limit)/2, cage_height * (1 - inner_limit)/2, cage_width * inner_limit, cage_height * inner_limit], 'EdgeColor', 'k', 'LineStyle', '--', 'LineWidth', 2);
         rectangle('Position', [cage_width * (1 - specific_inner_limit)/2, cage_height * (1 - specific_inner_limit)/2, cage_width * specific_inner_limit, cage_height * specific_inner_limit], 'EdgeColor', 'b', 'LineStyle', '--', 'LineWidth', 2);
         rectangle('Position', [cage_width * (1 - specific_outer_limit)/2, cage_height * (1 - specific_outer_limit)/2, cage_width * specific_outer_limit, cage_height * specific_outer_limit], 'EdgeColor', 'b', 'LineWidth', 2);
     end
-%     
-%     theta = linspace(0, 2*pi, 100);
-%     outer_circle_x = center(1) + radius * cos(theta);
-%     outer_circle_y = center(2) + radius * sin(theta);
-%     inner_circle_x = center(1) + inner_radius * cos(theta);
-%     inner_circle_y = center(2) + inner_radius * sin(theta);
-%     specific_inner_circle_x = center(1) + specific_inner_radius * cos(theta);
-%     specific_inner_circle_y = center(2) + specific_inner_radius * sin(theta);
-%     specific_outer_circle_x = center(1) + specific_outer_radius * cos(theta);
-%     specific_outer_circle_y = center(2) + specific_outer_radius * sin(theta);
-%     
-    
-%     plot(outer_circle_x, outer_circle_y, 'k-', 'LineWidth', 2);
-%     plot(inner_circle_x, inner_circle_y, 'k--', 'LineWidth', 2);
-%     plot(specific_inner_circle_x, specific_inner_circle_y, 'b--', 'LineWidth', 2);
-%     plot(specific_outer_circle_x, specific_outer_circle_y, 'b-', 'LineWidth', 2);
-%     
-    p1 = plot(x_data(in_inner_zone), y_data(in_inner_zone), '.g');
-    p2 = plot(x_data(in_outer_zone), y_data(in_outer_zone), '.m');
-    p3 = plot(x_data(in_specific_zone), y_data(in_specific_zone), '.b');
-    
+        
     axis equal;
     xlabel('X'); ylabel('Y');
     title('Thigmotaxis - Zones spécifiques');
-    legend([p1 p2 p3],'Inner Zone','Outer Zone','Specific Zone', 'Location', 'Best');
+    legend([p1 p2],'Inner Zone','Outer Zone', 'Location', 'Best');
 
     hold off;
 end

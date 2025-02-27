@@ -70,11 +70,16 @@ for imouse = 1:length(Dir.path)
 
     elseif ~isfield(a{imouse}.behavResources, "CleanAlignedXtsd") && ~isfield(a{imouse}.behavResources, "AlignedXtsd")
         % warning(strcat("No Clean nor Aligned Xtsd found for ", Dir.name{imouse}, "! Using Xtsd..."))
-        warning(strcat("No Clean nor Aligned Xtsd found for ", Dir.name{imouse}, "! using Xtsd but should skip."))
+        warning(strcat("No Clean nor Aligned Xtsd found for ", Dir.name{imouse}, "! skipping."))
         to_skip = [to_skip, Dir.name{imouse}];
         for j = 1:numel(a{imouse}.behavResources)
             a{imouse}.behavResources(j).CleanAlignedXtsd = a{imouse}.behavResources(j).Xtsd;
             a{imouse}.behavResources(j).CleanAlignedYtsd = a{imouse}.behavResources(j).Ytsd;
+        end
+    else 
+        for j = 1:numel(a{imouse}.behavResources)
+            a{imouse}.behavResources(j).CleanAlignedXtsd = a{imouse}.behavResources(j).AlignedXtsd;
+            a{imouse}.behavResources(j).CleanAlignedYtsd = a{imouse}.behavResources(j).AlignedYtsd;
         end
     end
 end
@@ -109,7 +114,11 @@ end
 %% Plot
 fh = figure('units', 'normalized', 'outerposition', [0 0 0.85 0.5]);
 % tabs = arrayfun(@(x) uitab('Title', Dir.name{x}), 1:length(Dir.path));
-valid_indices = find(~ismember(Dir.name, to_skip));
+if ~isempty(to_skip)
+    valid_indices = find(~ismember(Dir.name, to_skip));
+else
+    valid_indices = length(Dir.name);
+end
 tabs = arrayfun(@(x) uitab('Title', Dir.name{x}), valid_indices);
 for itab = 1:length(tabs)
     curtab = tabs(itab);
@@ -136,9 +145,9 @@ for itab = 1:length(tabs)
     axes(ax(2));
     hold on
     if gradual
-        colors = linspace(0.2, 0.8, numtest); % Generate shades of grey
+        colors = linspace(0.2, 0.8, length(id_Cond{itab})); % Generate shades of grey
     else 
-        colors = 0.2*ones(1, numtest);
+        colors = 0.2*ones(1, length(id_Cond{itab}));
     end
     for itest = length(id_Cond{itab}):-1:1
         plot(Data(a{itab}.behavResources(id_Cond{itab}(itest)).CleanAlignedXtsd),Data(a{itab}.behavResources(id_Cond{itab}(itest)).CleanAlignedYtsd),...

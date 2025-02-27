@@ -5,7 +5,7 @@ load('/media/nas8-2/ProjetEmbReact/transfer/AllSessions.mat')
 % GetEmbReactMiceFolderList_BM
 Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear','LastCondPre'};
 
-Mouse_names = 'M1713';
+Mouse_names = 'M1714';
 
 RangeLow = linspace(0.1526,20,261);
 RangeHigh = linspace(22,98,32);
@@ -38,8 +38,8 @@ for sess=1:length(Session_type)
     TotEpoch.(Session_type{sess}) = intervalSet(0,max(Range(Speed.(Session_type{sess}))));
     FreezeEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freezeepoch');
     FreezeEpoch.(Session_type{sess}) = mergeCloseIntervals(FreezeEpoch.(Session_type{sess}),1);
-
-        FreezeEpoch_camera.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freeze_epoch_camera');
+    
+    FreezeEpoch_camera.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch' , 'epochname' , 'freeze_epoch_camera');
     
     ActiveEpoch.(Session_type{sess}) = TotEpoch.(Session_type{sess})-FreezeEpoch.(Session_type{sess});
     ActiveEpoch.(Session_type{sess}) = mergeCloseIntervals(ActiveEpoch.(Session_type{sess}),1);
@@ -58,8 +58,12 @@ for sess=1:length(Session_type)
     YtsdUnblocked.(Session_type{sess}) = Restrict(Ytsd.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
     XtsdFreezing.(Session_type{sess}) = Restrict(Xtsd.(Session_type{sess}),FreezeEpoch.(Session_type{sess}));
     YtsdFreezing.(Session_type{sess}) = Restrict(Ytsd.(Session_type{sess}),FreezeEpoch.(Session_type{sess}));
+    XtsdFreezingCamera.(Session_type{sess}) = Restrict(Xtsd.(Session_type{sess}),FreezeEpoch_camera.(Session_type{sess}));
+    YtsdFreezingCamera.(Session_type{sess}) = Restrict(Ytsd.(Session_type{sess}),FreezeEpoch_camera.(Session_type{sess}));
     XtsdFreezing_Unblocked.(Session_type{sess}) = Restrict(XtsdFreezing.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
     YtsdFreezing_Unblocked.(Session_type{sess}) = Restrict(YtsdFreezing.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
+    XtsdFreezing_UnblockedCamera.(Session_type{sess}) = Restrict(XtsdFreezingCamera.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
+    YtsdFreezing_UnblockedCamera.(Session_type{sess}) = Restrict(YtsdFreezingCamera.(Session_type{sess}),UnblockedEpoch.(Session_type{sess}));
     XtsdStimUnblocked.(Session_type{sess}) = Restrict(XtsdUnblocked.(Session_type{sess}), Start(StimEpochUnblocked.(Session_type{sess})));
     YtsdStimUnblocked.(Session_type{sess}) = Restrict(YtsdUnblocked.(Session_type{sess}), Start(StimEpochUnblocked.(Session_type{sess})));
     XtsdStim.(Session_type{sess}) = Restrict(Xtsd.(Session_type{sess}), Start(StimEpoch.(Session_type{sess})));
@@ -89,7 +93,7 @@ for sess=1:length(Session_type)
     FreezeShockCornerEpoch.(Session_type{sess}) = and(FreezeEpoch.(Session_type{sess}) , ShockCornerEpoch.(Session_type{sess}));
     
     FreezeShockEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
-    FreezeSafeEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , SafeZoneEpoch.(Session_type{sess}));
+    FreezeSafeEpoch_camera.(Session_type{sess}) = and(FreezeEpoch_camera.(Session_type{sess}) , SafeZoneEpoch_freezing.(Session_type{sess}));
     
     ActiveShockEpoch.(Session_type{sess}) = and(ActiveEpoch.(Session_type{sess}) , ShockZoneEpoch.(Session_type{sess}));
     ActiveSafeEpoch.(Session_type{sess}) = and(ActiveEpoch.(Session_type{sess}) , SafeZoneEpoch_freezing.(Session_type{sess}));
@@ -121,6 +125,10 @@ for sess=1:length(Session_type)
     RespiFzSafeCorner.(Session_type{sess}) = Restrict(Respi.(Session_type{sess}), FreezeSafeCornerEpoch.(Session_type{sess}));
     RespiFzShockCorner.(Session_type{sess}) = Restrict(Respi.(Session_type{sess}), FreezeShockCornerEpoch.(Session_type{sess}));
     
+     RespiFzShockCamera.(Session_type{sess}) = Restrict(Respi.(Session_type{sess}), FreezeShockEpoch_camera.(Session_type{sess}));
+    RespiFzSafeCamera.(Session_type{sess}) = Restrict(Respi.(Session_type{sess}), FreezeSafeEpoch_camera.(Session_type{sess}));
+  
+    
     RespiFzShock_mean(sess) = nanmean(Data(RespiFzShock.(Session_type{sess})));
     RespiFzSafe_mean(sess) = nanmean(Data(RespiFzSafe.(Session_type{sess})));
     RespiFzSafe2_mean(sess) = nanmean(Data(RespiFzSafe2.(Session_type{sess})));
@@ -128,10 +136,17 @@ for sess=1:length(Session_type)
     RespiFzSafeCorner_mean(sess) = nanmean(Data(RespiFzSafeCorner.(Session_type{sess})));
     RespiFzShockCorner_mean(sess) = nanmean(Data(RespiFzShockCorner.(Session_type{sess})));
    
-    
+      RespiFzShock_meanCamera(sess) = nanmean(Data(RespiFzShockCamera.(Session_type{sess})));
+    RespiFzSafe_meanCamera(sess) = nanmean(Data(RespiFzSafeCamera.(Session_type{sess})));
+  
     SpectroBulbFz.(Session_type{sess})= Restrict(SpectroBulb.(Session_type{sess}),FreezeEpoch.(Session_type{sess}));
     SpectroBulbFzShock.(Session_type{sess})= Restrict(SpectroBulb.(Session_type{sess}),FreezeShockEpoch.(Session_type{sess}));
     SpectroBulbFzSafe.(Session_type{sess})= Restrict(SpectroBulb.(Session_type{sess}),FreezeSafeEpoch.(Session_type{sess}));
+    
+    SpectroBulbFzCamera.(Session_type{sess})= Restrict(SpectroBulb.(Session_type{sess}),FreezeEpoch_camera.(Session_type{sess}));
+    SpectroBulbFzShockCamera.(Session_type{sess})= Restrict(SpectroBulb.(Session_type{sess}),FreezeShockEpoch_camera.(Session_type{sess}));
+    SpectroBulbFzSafeCamera.(Session_type{sess})= Restrict(SpectroBulb.(Session_type{sess}),FreezeSafeEpoch_camera.(Session_type{sess}));
+    
     
     MeanSpectroBulb.(Session_type{sess})=nanmean(Data(SpectroBulb.(Session_type{sess})));
     MeanSpectroBulbCorr.(Session_type{sess})=nanmean(Data(SpectroBulb.(Session_type{sess}))).* RangeLow;
@@ -139,6 +154,14 @@ for sess=1:length(Session_type)
     MeanSpectroBulbFzSafe.(Session_type{sess})=nanmean(Data(SpectroBulbFzSafe.(Session_type{sess})));
     MeanSpectroBulbFzShockCorr.(Session_type{sess})=nanmean(Data(SpectroBulbFzShock.(Session_type{sess}))).* RangeLow;
     MeanSpectroBulbFzSafeCorr.(Session_type{sess})=nanmean(Data(SpectroBulbFzSafe.(Session_type{sess}))).* RangeLow;
+    
+    
+      MeanSpectroBulbFzShockCamera.(Session_type{sess})=nanmean(Data(SpectroBulbFzShockCamera.(Session_type{sess})));
+    MeanSpectroBulbFzSafeCamera.(Session_type{sess})=nanmean(Data(SpectroBulbFzSafeCamera.(Session_type{sess})));
+    MeanSpectroBulbFzShockCorrCamera.(Session_type{sess})=nanmean(Data(SpectroBulbFzShockCamera.(Session_type{sess}))).* RangeLow;
+    MeanSpectroBulbFzSafeCorrCamera.(Session_type{sess})=nanmean(Data(SpectroBulbFzSafeCamera.(Session_type{sess}))).* RangeLow;
+    
+    
     
     TimeShockZone(sess)= sum(DurationEpoch(ShockZoneEpoch.(Session_type{sess}),'s'));
     TimeSafeZone(sess)= sum(DurationEpoch(SafeZoneEpoch.(Session_type{sess}),'s'));
@@ -175,8 +198,14 @@ for sess=1:length(Session_type)
     ActiveTime_Safe(sess)= sum(DurationEpoch(ActiveSafeEpoch.(Session_type{sess}),'s'));
     
     Freeze_Prop(sess)= FreezeTime(sess)/ TimeSession(sess);
+    Freeze_PropCamera(sess)= FreezeTime_camera(sess)/ TimeSession(sess);
+    
     FreezeShock_Prop(sess)= FreezeTime_Shock(sess)/ TimeSession(sess);
     FreezeSafe_Prop(sess)= FreezeTime_Safe2(sess)/ TimeSession(sess);
+    
+    FreezeShock_PropCamera(sess)= FreezeTime_Shock_camera(sess)/ TimeSession(sess);
+    FreezeSafe_PropCamera(sess)= FreezeTime_Safe_camera(sess)/ TimeSession(sess);
+    
     Active_Prop(sess)= ActiveTime(sess)/ TimeSession(sess);
     
     PropShockZone(sess)= TimeShockZone(sess)/ TimeSession(sess);
