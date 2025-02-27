@@ -1,24 +1,24 @@
 %% Section 1 : Load data
 %get the EMG channel
-res = pwd;
-nam = 'EMG';
-eval(['tempchEMG=load([res,''/ChannelsToAnalyse/',nam,'''],''channel'');'])
-chEMG = tempchEMG.channel;
-eval(['load(''',res,'','/LFPData/LFP',num2str(chEMG),'.mat'');'])
-LFP_emg = LFP;
-% resample + square signal
-SqurdEMG = ResampleTSD(tsd(Range(LFP_emg), Data(LFP_emg).^2),10);
+% res = pwd;
+% nam = 'EMG';
+% eval(['tempchEMG=load([res,''/ChannelsToAnalyse/',nam,'''],''channel'');'])
+% chEMG = tempchEMG.channel;
+% eval(['load(''',res,'','/LFPData/LFP',num2str(chEMG),'.mat'');'])
+% LFP_emg = LFP;
+% % resample + square signal
+% SqurdEMG = ResampleTSD(tsd(Range(LFP_emg), Data(LFP_emg).^2),10);
 
 %%get sleep scoring
-% load('SleepScoring_Accelero.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info');
+load('SleepScoring_Accelero.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info');
 % load('SleepScoring_Accelero_KB_corrections.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info','tsdMovement');
 % load('SleepScoring_OBGamma.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info');
-load('SleepScoring_OBGamma_newgamma.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info');
+% load('SleepScoring_OBGamma_newgamma.mat','Wake','SWSEpoch','REMEpoch','SmoothTheta','Info');
 
 load('behavResources.mat','Vtsd','MovAcctsd')
 
-% load('SleepScoring_OBGamma.mat','SmoothGamma')
-load('SleepScoring_OBGamma_newgamma.mat','SmoothGamma')
+load('SleepScoring_OBGamma.mat','SmoothGamma')
+% load('SleepScoring_OBGamma_newgamma.mat','SmoothGamma')
 
 %%get spectro
 SpectroOBhi = load('B_High_Spectrum','Spectro');
@@ -68,13 +68,13 @@ set(gca,'xticklabel',[])
 subplot(815), 
 plot(Range(MovAcctsd)/1E4, (Data(MovAcctsd))),ylim([0 7e8]),ylabel('Accelero'),colorbar
 % plot(Range(tsdMovement)/1E4, (Data(tsdMovement))),ylim([0 7e8]),ylabel('Accelero'),colorbar
-% line([0 3.3E4],[Info.mov_threshold Info.mov_threshold],'color','r')
+line([0 3.3E4],[Info.mov_threshold Info.mov_threshold],'color','r')
 SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[1e8 1e8]);
 set(gca,'xticklabel',[])
 %EMG
 subplot(816),
-plot(Range(SqurdEMG)/1E4, 10*log10(Data(SqurdEMG))),ylim([0 120]),colorbar
-SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[80 4]);
+% plot(Range(SqurdEMG)/1E4, 10*log10(Data(SqurdEMG))),ylim([0 120]),colorbar
+% SleepStages=PlotSleepStage(Wake,SWSEpoch,REMEpoch,0,[80 4]);
 set(gca,'xticklabel',[])
 %smooth theta
 subplot(817),plot(Range(SmoothTheta)/1E4,Data(SmoothTheta)),ylim([0 6]), ylabel('Smooth theta'),colorbar
@@ -103,7 +103,7 @@ SWSEpoch2=SWSEpoch;
 Wake2=Wake;
 
 %% Section 6 : Parameters
-st = Start(REMEpoch)/1E4;
+st = Start(SWSEpoch)/1E4;
 k=0;
 len=300;
 

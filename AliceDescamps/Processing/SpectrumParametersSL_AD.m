@@ -7,8 +7,8 @@ function [params,movingwin,suffix]=SpectrumParametersSL_AD(option,askcheck,Displ
 %
 % outputs:
 % params = structure containing pad/err/tralave/fpass/tapers/Fs...
-% movingwin = 
-% 
+% movingwin =
+%
 % example :
 % [params,movingwin]=SpectrumParametersML('low',0);
 % [params,movingwin]=SpectrumParametersML('high',0);
@@ -23,7 +23,7 @@ params.pad=2;
 params.normsize=50; % nbr of timepoints used for normalization
 
 if exist('option','var') && strcmp(option,'high')
-%     params.fpass=[20 200];
+    %     params.fpass=[20 200];
     params.fpass=[20 100];
     params.tapers=[2 3];
     movingwin=[0.1 0.005];
@@ -46,8 +46,8 @@ elseif exist('option','var') && strcmp(option,'GammaSO')
     
 elseif ((exist('option','var') && strcmp(option,'low')) || ~exist('option','var'))
     params.fpass=[1 20];
-%     params.fpass=[1 30];
-
+    %     params.fpass=[1 30];
+    
     %A numeric vector [TW K] where TW is the
     %   time-bandwidth product and K is the number of
     %   tapers to be used (less than or equal to
@@ -55,7 +55,7 @@ elseif ((exist('option','var') && strcmp(option,'low')) || ~exist('option','var'
     params.tapers=[3 5];
     movingwin=[3 0.2];
     params.Fs=1250;
-    suffix='L'; 
+    suffix='L';
     
     
 elseif ((exist('option','var') && strcmp(option,'newlow')) || ~exist('option','var'))
@@ -65,12 +65,21 @@ elseif ((exist('option','var') && strcmp(option,'newlow')) || ~exist('option','v
     params.Fs=1250;
     suffix='L';
     
-    elseif ((exist('option','var') && strcmp(option,'lowkb')) || ~exist('option','var'))
+elseif ((exist('option','var') && strcmp(option,'lowkb')) || ~exist('option','var'))
     params.fpass=[0.1 20];
     params.tapers=[3 5];
     movingwin=[3 0.2];
     params.Fs=1250;
     suffix='L';
+    
+    
+    % Part add from BM 02/2025
+elseif ((exist('option','var') && strcmp(option,'middle')) || ~exist('option','var'))
+    params.fpass=[5 100];
+    params.tapers=[1 2];
+    movingwin=[0.2 0.005]; %4
+    params.Fs=1250;
+    suffix='M';
     
 end
 
@@ -79,7 +88,7 @@ if  ~exist('option','var'), disp('Using default parameters... ');end
 if  ~exist('askcheck','var'), askcheck=0;end
 
 if  ~exist('Displ','var'), Displ=0;end
-        
+
 %% ckecking
 if Displ
     disp(['movingwin ',option,' = [',num2str(movingwin),']']);

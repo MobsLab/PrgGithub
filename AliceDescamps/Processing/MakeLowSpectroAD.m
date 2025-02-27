@@ -1,4 +1,4 @@
-    function MakeLowSpectroAD
+function MakeLowSpectroAD
 % adapted from MakeLowSpectroMC
 
 clear all

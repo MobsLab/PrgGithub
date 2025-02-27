@@ -50,11 +50,12 @@ mindurSWS = 60;
 mindurREM = 25;
 
 %%
-% load('B_High_Spectrum.mat');
-% load('PFCx_deep_Low_Spectrum.mat');
-% load('Bulb_deep_Low_Spectrum.mat');
 % load('H_Low_Spectrum.mat');
+% load('PFCx_deep_Low_Spectrum.mat');
 % load('PFCx_deep_High_Spectrum.mat');
+% load('Bulb_deep_Low_Spectrum.mat');
+% load('B_Middle_Spectrum.mat');
+% load('B_High_Spectrum.mat');
 spectro = 'B_High_Spectrum.mat';
 
 %% GET DATA - 1st group
