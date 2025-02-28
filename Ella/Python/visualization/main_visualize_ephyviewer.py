@@ -11,13 +11,16 @@ import ephyviewer
 
 # Define parameters
 file_path = "file_path.dat"
-num_channels = 24  # Adjust based on your setup
+num_channels = 24 # Adjust based on your setup
 sampling_rate = 30000  # Adjust to match your experiment
 dtype = np.int16  # Change if necessary
 t_start = 0
 
 # Load the binary file
-data = np.fromfile(file_path, dtype=dtype)
+# data = np.fromfile(file_path, dtype=dtype)
+
+# Use memory-mapped array instead of loading the full file
+data = np.memmap(file_path, dtype=dtype, mode='r')
 
 # Reshape data into (time, num_channels) format
 data = data.reshape(-1, num_channels)  
