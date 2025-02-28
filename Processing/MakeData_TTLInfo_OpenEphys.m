@@ -29,8 +29,27 @@ oebin = fileread([sync_folder '/structure.oebin']);
 [~, sr_id] = regexp(oebin,'"sample_rate": ');
 samplingrate = str2double(oebin(sr_id(1)+1:sr_id(1)+5));
 
-% Start time - modification SB 12/02/2024
-cd([sync_folder 'continuous/OE_FPGA_Acquisition_Board-109.Rhythm Data-B/'])
+% cd([sync_folder 'continuous/OE_FPGA_Acquisition_Board-109.Rhythm Data-B/'])
+
+% Modification EC 28/02/25 to match all folder names
+oebinData = jsondecode(oebin);  % Convert JSON to MATLAB structure
+% Extract the correct folder name from 'continuous' section
+if isfield(oebinData, 'continuous') && ~isempty(oebinData.continuous)
+    continuous_folder = strtrim(oebinData.continuous(1).folder_name);
+else
+    error('No valid "continuous" folder found in structure.oebin');
+end
+% Construct the full directory path
+continuous_path = fullfile(sync_folder, 'continuous', continuous_folder);
+% Verify that the folder exists before changing directory
+if exist(continuous_path, 'dir')
+    cd(continuous_path);
+    disp(['Changed directory to: ', continuous_path]);
+else
+    error(['Continuous folder does not exist: ', continuous_path]);
+end
+
+% Start time - modification SB 12/02/24
 sync = readNPY('timestamps.npy');
 starttime = sync(1);
 
@@ -54,7 +73,22 @@ starttime = sync(1);
 
 
 %% load file  - modification SB 12/02/2024
-cd([sync_folder 'events/OE_FPGA_Acquisition_Board-109.Rhythm Data-B/TTL'])
+% cd([sync_folder 'events/OE_FPGA_Acquisition_Board-109.Rhythm Data-B/TTL'])
+
+% Modification EC 28/02/25 to match all folder names
+if isfield(oebinData, 'events') && ~isempty(oebinData.events) && iscell(oebinData.events)
+    event_folder = strtrim(oebinData.events{1,1}.folder_name);  % Extract from cell array
+else
+    error('No valid "events" folder found in structure.oebin');
+end
+event_path = fullfile(sync_folder, 'events', event_folder);
+if exist(event_path, 'dir')
+    cd(event_path);
+    disp(['Changed directory to: ', event_path]);
+else
+    error(['Event folder does not exist: ', event_path]);
+end
+
 channel_states = readNPY('states.npy');
 full_words = readNPY('full_words.npy');
 timestamps = readNPY('timestamps.npy');
