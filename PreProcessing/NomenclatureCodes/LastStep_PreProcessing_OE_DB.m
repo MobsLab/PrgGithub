@@ -60,7 +60,12 @@ switch ExpeInfo.PreProcessingInfo.IsThereEphys
                 
                    TTLInfo_sess{f} = MakeData_TTLInfo_OpenEphys(ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{f}(1:out_ind-1),...
                     ExpeInfo);
-
+                   TTLInfo = TTLInfo_sess{f};
+                   if not(exist([FinalFolder filesep 'behavResources.mat']))
+                       save([FinalFolder filesep 'behavResources.mat'],'TTLInfo')
+                   else
+                       save([FinalFolder filesep 'behavResources.mat'],'TTLInfo','-append')
+                   end
 
                 cd(ExpeInfo.PreProcessingInfo.FolderForConcatenation_Ephys{f})
 

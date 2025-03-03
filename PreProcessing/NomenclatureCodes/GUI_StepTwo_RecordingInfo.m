@@ -54,6 +54,9 @@ function GUI_StepTwo_RecordingInfo_OpeningFcn(hObject, eventdata, handles, varar
 
 % Choose default command line output for GUI_StepTwo_RecordingInfo
 handles.output = hObject;
+handles.figure1.WindowStyle = 'normal';
+handles.figure1.DockControls = 'off';
+
 load('ExpeInfo.mat')
 handles.ExpeInfo = ExpeInfo;
 if isfield(ExpeInfo,'PreProcessingInfo')

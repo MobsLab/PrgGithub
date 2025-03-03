@@ -44,6 +44,7 @@ else
     gui_mainfcn(gui_State, varargin{:});
 end
 
+
 % End initialization code - DO NOT EDIT
 
 
@@ -57,6 +58,8 @@ function GUI_StepOne_ExperimentInfo_OpeningFcn(hObject, eventdata, handles, vara
 
 % Choose default command line output for GUI_StepOne_ExperimentInfo
 handles.output = hObject;
+handles.figure1.WindowStyle = 'normal';
+handles.figure1.DockControls = 'off';
 
 % set buttons to on and off
 set(handles.Mouse_Strain_List,'Enable','Off')
@@ -831,6 +834,11 @@ if isfield(handles.ExpeInfo,'CameraType')
     set(handles.CameraType,'Value',find(strcmp(CameraType,handles.ExpeInfo.CameraType)))
 end
 
+% HardDrive
+if isfield(handles.ExpeInfo,'harddrive')
+    set(handles.HardDrive_Edit,'BackgroundColor',[0.8 0.4 0.2])
+    set(handles.HardDrive_Edit,'String', handles.ExpeInfo.harddrive)
+end
 
 %% check if we can activate the I'm done button
 if (isfield(handles.ExpeInfo,'CameraType') & isfield(handles.ExpeInfo,'RecordingBox') & isfield(handles.ExpeInfo,'RecordingRoom') ...

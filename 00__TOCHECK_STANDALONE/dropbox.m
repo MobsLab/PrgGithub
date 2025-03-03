@@ -71,8 +71,6 @@ switch strtrim(evalc('system(''hostname'');'))
         p = fullfile('/home/hobbes/Dropbox',varargin{:});
     case 'ratatouille'
         p = fullfile('/home/ratatouille/Dropbox',varargin{:});
-    case 'MobsEcolo'
-        p = fullfile('/media/nas7/ProjetEmbReact/Mouse1562',varargin{:});
     case 'pinky'
         p = fullfile('/home/pinky/Dropbox',varargin{:});
     case 'mouse'

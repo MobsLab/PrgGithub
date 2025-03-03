@@ -17,12 +17,14 @@
 % Dir_1= PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_SalineInjection_10am');
 Dir_1= PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_10am');
 % Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1566 1581 1635]);
-Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1578 1579 1636 1637]);
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1578 1579 1636 1637]);
+Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1579 1636 1637]);
 % Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1636 1637]);
 %%2
 % Dir_2 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_SalineInjection_10am');
 Dir_2 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_CNOInjection_10am');
-Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1578 1579 1636 1637]);
+% Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1578 1579 1636 1637]);
+Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1579 1636 1637]);
 % Dir_2 = RestrictPathForExperiment (Dir_2, 'nMice', [1568 1569 1636 1637]);
 %%3
 Dir_3 = PathForExperiments_SleepPostSD_AD('SleepPostSD_inhibDREADD_CRH_VLPO_CNOInjection_10am');
@@ -108,7 +110,7 @@ Dir_5 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_SalineInjection_10am
 % Dir_5 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
 
 
-% %1
+%1
 % Dir_1 = PathForExperiments_DREADD_MC ('mCherry_retroCre_PFC_VLPO_SalineInjection_10am');
 % %%2
 % Dir_2 = PathForExperiments_DREADD_MC ('mCherry_retroCre_PFC_VLPO_CNOInjection_10am');
@@ -214,6 +216,44 @@ Dir_5 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_SalineInjection_10am
 % %%5
 % Dir_5 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
 
+%% input dir effet CNO
+% % %1
+% Dir_1 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_SalineInjection_10am');
+% %%2
+% Dir_2 = PathForExperiments_DREADD_AD ('inhibDREADD_CRH_VLPO_CNOInjection_10am');
+% %%3
+% Dir_3 = PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_1mgkg_10am');
+% %%4
+% Dir_4 = PathForExperiments_SleepPostSD_AD ('SleepPostSD_mCherry_CRH_VLPO_SalineInjection_10am');
+% %%5
+% Dir_5 = PathForExperiments_SleepPostSD_AD('SleepPostSD_SecondRun_inhibDREADD_CRH_VLPO_SalineInjection_10am');
+
+%% input dir my C57
+% %1
+% Dir_1 = PathForExperiments_DREADD_MC ('mCherry_retroCre_PFC_VLPO_SalineInjection_10am');
+% %2
+% DirSocialDefeat_classic1 = PathForExperiments_SD_MC('SleepPostSD');
+% DirSocialDefeat_mCherry_saline1 = PathForExperiments_SD_MC('SleepPostSD_mCherry_retroCre_PFC_VLPO_SalineInjection');
+% DirSocialDefeat_BM_saline1 = PathForExperiments_SD_MC('SleepPostSD_noDREADD_BM_mice_SalineInjection');
+% DirSocialDefeat_mCherry_saline = MergePathForExperiment(DirSocialDefeat_mCherry_saline1,DirSocialDefeat_BM_saline1);
+% Dir_2 = MergePathForExperiment(DirSocialDefeat_classic1,DirSocialDefeat_mCherry_saline);
+% %3
+% DirSocialDefeat_classic1 = PathForExperiments_SD_MC('SleepPostSD');
+% DirSocialDefeat_mCherry_saline1 = PathForExperiments_SD_MC('SleepPostSD_mCherry_retroCre_PFC_VLPO_SalineInjection');
+% DirSocialDefeat_BM_saline1 = PathForExperiments_SD_MC('SleepPostSD_noDREADD_BM_mice_SalineInjection');
+% DirSocialDefeat_mCherry_saline = MergePathForExperiment(DirSocialDefeat_mCherry_saline1,DirSocialDefeat_BM_saline1);
+% Dir_3 = MergePathForExperiment(DirSocialDefeat_classic1,DirSocialDefeat_mCherry_saline);
+% Dir_3 = RestrictPathForExperiment (Dir_3, 'nMice', [1449 1450]);
+% %%4
+% DirSocialDefeat_totSleepPost_mCherry_cno1 = PathForExperiments_SD_MC('SleepPostSD_mCherry_retroCre_PFC_VLPO_CNOInjection');
+% DirSocialDefeat_totSleepPost_BM_cno1 = PathForExperiments_SD_MC('SleepPostSD_noDREADD_BM_mice_CNOInjection');
+% Dir_4 = MergePathForExperiment(DirSocialDefeat_totSleepPost_mCherry_cno1,DirSocialDefeat_totSleepPost_BM_cno1);
+% %%5
+% DirSocialDefeat_totSleepPost_mCherry_cno1 = PathForExperiments_SD_MC('SleepPostSD_mCherry_retroCre_PFC_VLPO_CNOInjection');
+% DirSocialDefeat_totSleepPost_BM_cno1 = PathForExperiments_SD_MC('SleepPostSD_noDREADD_BM_mice_CNOInjection');
+% Dir_5 = MergePathForExperiment(DirSocialDefeat_totSleepPost_mCherry_cno1,DirSocialDefeat_totSleepPost_BM_cno1);
+% Dir_5 = RestrictPathForExperiment (Dir_5, 'nMice', [1423 1424 1426]);
+
 %% parameters
 
 tempbin = 3600; %bin size to plot variables overtime
@@ -227,9 +267,11 @@ time_end=3*1e8;  %end of the sleep session
 time_mid_end_first_period = 1.5*3600*1e4;
 % time_mid_end_first_period = 2.5*3600*1e4;
 % time_mid_end_first_period = 8*3600*1e4;
-time_mid_end_snd_period = 3.3*3600*1e4;
+
+% time_mid_end_snd_period = 3.3*3600*1e4;
 % time_mid_end_snd_period = 5*3600*1e4;
-% time_mid_end_snd_period = 5.5*3605,[20]0*1e4;
+% time_mid_end_snd_period = 5.5*3600*1e4;
+time_mid_end_snd_period = 6*3600*1e4;
 % time_mid_end_snd_period = 8.1*3600*1e4;
 
 lim_short_rem_1 = 25; %25 take all rem bouts shorter than limit

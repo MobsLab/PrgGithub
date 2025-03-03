@@ -21,7 +21,8 @@ col_3 = [0 .4 .4];
 % legend = {'Sal mCherry (n=11)','SD1 + Sal mCherry (n=3)','SD2 + Sal mCherry (n=4)'};
 % legend = {'Sal mCherry (n=11)','SD + Sal mCherry homo (n=3)','SD + Sal DREADD+ hétéro (n=4)'};
 % legend = {'CNO mCherry (n=6)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
-legend = {'CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
+% legend = {'CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
+legend = {'CNO mCherry (n=5)','SD + CNO mCherry (n=5)','SD + CNO DREADD- (n=7)'};
 
 
 figure('color',[1 1 1])
@@ -31,12 +32,15 @@ figure('color',[1 1 1])
 suptitle ('Effect of CRH inhibition after SD and CNO injection')
 
 
-subplot(4,6,[4],'align') %WAKE duration phase1
+subplot(4,6,[4],'align') %WAKE percentage phase1
 hold on, title('0-1h30')
-subplot(4,6,[5],'align') %WAKE duration phase2
-hold on, title('1h30-3h30')
-subplot(4,6,[6],'align') %WAKE duration phase3
-hold on, title('3h30-8h')
+subplot(4,6,[5],'align') %WAKE percentage phase2
+% hold on, title('1h30-3h30')
+hold on, title('1h30-6h')
+subplot(4,6,[6],'align') %WAKE percentage phase3
+% hold on, title('3h30-8h')
+hold on, title('6h-8h')
+
 
 
 

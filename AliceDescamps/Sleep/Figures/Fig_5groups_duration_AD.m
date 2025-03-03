@@ -7,26 +7,43 @@ isparam=0;
 iscorr=1;
 
 %classic
-% col_1 = [.7 .7 .7];
-% col_2 = [1 .4 0];
-% col_3 = [0 .4 .6];
-% col_4 = [1 .2 0];
-% col_5 = [0 .2 .6];
-%classic
 col_1 = [.7 .7 .7];
 col_2 = [1 .4 0];
-col_3 = [.2 .2 .2];
-col_4 = [1 0 0];
-col_5 = [0 .4 .4];
+col_3 = [0 .4 .6];
+col_4 = [1 .2 0];
+col_5 = [0 .2 .6];
+%classic
+% col_1 = [.7 .7 .7];
+% col_2 = [.2 .2 .2];
+% col_3 = [1 .4 0];
+% col_4 = [1 0 0];
+% col_5 = [0 .4 .4];
+
+%classic
+% col_1 = [.7 .7 .7];
+% col_2 = [1 .4 0];
+% col_3 = [.2 .2 .2];
+% col_4 = [1 0 0];
+% col_5 = [0 .4 .4];
+%classic
+% col_1 = [.2 .2 .2];
+% col_2 = [1 0 0];
+% col_3 = [1 .2 .2];
+% col_4 = [0 .4 .4];
+% col_5 = [0 .6 .4];%SD2  DREADD
 
 % legend = {'1','2','3','4','5'};
 % legend = {'Sal mCherry (n=3)','SD + Sal mCherry (n=3)','CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
-legend = {'Sal mCherry (n=3)','SD + Sal mCherry (n=3)','CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
+% legend = {'Sal mCherry (n=3)','SD + Sal mCherry (n=3)','CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
+% legend = {'Sal mCherry (n=10)','CNO mCherry (n=9)','SD + Sal mCherry (n=6)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
+% legend = {'CNO mCherry (n=11)','SD1 + CNO mCherry (n=4)','SD2 + CNO mCherry (n=3)','SD1 + CNO DREADD- (n=7)','SD2 + CNO DREADD- (n=3)'};
+legend = {'Sal (n=13)','SD + Sal mCherry (n=11)','SD + Sal mCherry Alice (n=2)','SD + CNO mCherry (n=11)','SD + CNO mCherry Alice (n=3)'};
 
 
 figure('color',[1 1 1])
 % suptitle ('xxxxxxxxxxxxx')
-suptitle ('Inhibition of CRH after SD')
+% suptitle ('Inhibition of CRH after SD')
+suptitle ('Social defeat on C57 mice')
 
 subplot(4,6,[4],'align') %WAKE duration phase1
 hold on, title('0-1h30')

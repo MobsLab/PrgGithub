@@ -54,6 +54,9 @@ function GUI_StepThree_FolderInfo_OpeningFcn(hObject, eventdata, handles, vararg
 
 % Choose default command line output for GUI_StepThree_FolderInfo
 handles.output = hObject;
+handles.figure1.WindowStyle = 'normal';
+handles.figure1.DockControls = 'off';
+
 load('ExpeInfo')
 handles.ExpeInfo = ExpeInfo;
 handles.ExpeInfo.PreProcessingInfo.MergeDone{1} = 0;
