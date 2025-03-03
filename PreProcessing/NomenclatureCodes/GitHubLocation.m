@@ -22,7 +22,9 @@ switch strtrim(evalc('system(''hostname'');'))
     % Start hostname cases
     case 'gruffalo'
         p = fullfile('/home/gruffalo/',varargin{:});
-  
+    case 'MobsEcolo'
+        p = fullfile('/home/greta',varargin{:});
+%##%
         % End hostname cases
     otherwise
         dbdr = uigetdir(pwd,'Please locate your Dropbox folder.');

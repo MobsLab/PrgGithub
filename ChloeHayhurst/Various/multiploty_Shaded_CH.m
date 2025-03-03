@@ -20,6 +20,8 @@ for i = 1:2:length(varargin)
     switch lower(varargin{i})
         case 'smooth'
             smooth = varargin{i+1}; % smoothing factor for runmean
+        case 'fig'
+            fig = varargin{i+1}; % smoothing factor for runmean
     end
 end
 
@@ -28,12 +30,13 @@ if ~exist('smooth','var')
     smooth = 0;
 end
 
+if ~exist('fig','var')
+    fig = figure('units','normalized','Color',[1 1 1]);
+end
 
 validateattributes(set1,{'cell'},{})
 validateattributes(set2,{'cell'},{})
 validateattributes(set3,{'cell'},{})
-
-fig = figure('units','normalized','Color',[1 1 1]);
 
 % Plot the first set of lines
 ax(1) = axes('Parent',fig);
@@ -110,7 +113,7 @@ Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 Mean_All_Sp = nanmean(Data_to_use);
 hlines{3} = shadedErrorBar(set3{1,1} , runmean_BM(Mean_All_Sp,smooth) , runmean(Conf_Inter,smooth),'-g',1);
 hlines{3}.mainLine.LineWidth = 2;
-ax(3).YColor = 'b';
+ax(3).YColor = 'g';
 ax(3).LineWidth = 2;
 ax(3).FontSize = 15;
 
