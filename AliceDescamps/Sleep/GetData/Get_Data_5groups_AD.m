@@ -17,8 +17,10 @@
 % Dir_1= PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_SalineInjection_10am');
 Dir_1= PathForExperiments_DREADD_AD ('mCherry_CRH_VLPO_CNOInjection_10am');
 % Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1566 1581 1635]);
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1566 1567 1568 1569 1578 1579 1580 1581 1634 1635 1636 1637]);%cno
+Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1566 1568 1569 1578 1579 1580 1581 1634 1635 1637]);
 % Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1578 1579 1636 1637]);
-Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1579 1636 1637]);
+% Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1579 1636 1637]);
 % Dir_1 = RestrictPathForExperiment (Dir_1, 'nMice', [1568 1569 1636 1637]);
 %%2
 % Dir_2 = PathForExperiments_SleepPostSD_AD('SleepPostSD_mCherry_CRH_VLPO_SalineInjection_10am');
@@ -268,10 +270,11 @@ time_mid_end_first_period = 1.5*3600*1e4;
 % time_mid_end_first_period = 2.5*3600*1e4;
 % time_mid_end_first_period = 8*3600*1e4;
 
-% time_mid_end_snd_period = 3.3*3600*1e4;
+time_mid_end_snd_period = 3.3*3600*1e4;
 % time_mid_end_snd_period = 5*3600*1e4;
 % time_mid_end_snd_period = 5.5*3600*1e4;
-time_mid_end_snd_period = 6*3600*1e4;
+% time_mid_end_snd_period = 6*3600*1e4;
+% time_mid_end_snd_period = 6.3*3600*1e4;
 % time_mid_end_snd_period = 8.1*3600*1e4;
 
 lim_short_rem_1 = 25; %25 take all rem bouts shorter than limit
@@ -288,9 +291,10 @@ mindurREM = 25;
 for i=1:length(Dir_1.path)
     cd(Dir_1.path{i}{1});
     %%Load sleep scoring
-    if exist('SleepScoring_OBGamma_newgamma.mat')
-        stages_1{i} = load('SleepScoring_OBGamma_newgamma', 'REMEpoch', 'SWSEpoch', 'Wake');
-    elseif exist('SleepScoring_Accelero.mat')
+%     if exist('SleepScoring_OBGamma_newgamma.mat')
+%         stages_1{i} = load('SleepScoring_OBGamma_newgamma', 'REMEpoch', 'SWSEpoch', 'Wake');
+%     elseif exist('SleepScoring_Accelero.mat')
+    if exist('SleepScoring_Accelero.mat')
         stages_1{i} = load('SleepScoring_Accelero', 'REMEpoch', 'SWSEpoch', 'Wake');
     elseif exist('SleepScoring_OBGamma.mat')
         stages_1{i} = load('SleepScoring_OBGamma', 'REMEpoch', 'SWSEpoch', 'Wake');
@@ -647,9 +651,10 @@ end
 for k=1:length(Dir_2.path)
     cd(Dir_2.path{k}{1});
     %%Load sleep scoring
-    if exist('SleepScoring_OBGamma_newgamma.mat')
-        stages_2{k} = load('SleepScoring_OBGamma_newgamma', 'REMEpoch', 'SWSEpoch', 'Wake');
-    elseif exist('SleepScoring_Accelero.mat')
+%     if exist('SleepScoring_OBGamma_newgamma.mat')
+%         stages_2{k} = load('SleepScoring_OBGamma_newgamma', 'REMEpoch', 'SWSEpoch', 'Wake');
+%     elseif exist('SleepScoring_Accelero.mat')
+    if exist('SleepScoring_Accelero.mat')
         stages_2{k} = load('SleepScoring_Accelero', 'REMEpoch', 'SWSEpoch', 'Wake');
     elseif exist('SleepScoring_OBGamma.mat')
         stages_2{k} = load('SleepScoring_OBGamma', 'REMEpoch', 'SWSEpoch', 'Wake');
@@ -994,9 +999,10 @@ end
 for j=1:length(Dir_3.path)
     cd(Dir_3.path{j}{1});
     %%Load sleep scoring
-    if exist('SleepScoring_OBGamma_newgamma.mat')
-        stages_3{j} = load('SleepScoring_OBGamma_newgamma', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
-    elseif exist('SleepScoring_Accelero.mat')
+%     if exist('SleepScoring_OBGamma_newgamma.mat')
+%         stages_3{j} = load('SleepScoring_OBGamma_newgamma', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
+%     elseif exist('SleepScoring_Accelero.mat')
+    if exist('SleepScoring_Accelero.mat')
         stages_3{j} = load('SleepScoring_Accelero', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
     elseif exist('SleepScoring_OBGamma.mat')
         stages_3{j} = load('SleepScoring_OBGamma', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
@@ -1315,9 +1321,10 @@ end
 for m=1:length(Dir_4.path)
     cd(Dir_4.path{m}{1});
     %%Load sleep scoring
-    if exist('SleepScoring_OBGamma_newgamma.mat')
-        stages_4{m} = load('SleepScoring_OBGamma_newgamma', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
-    elseif exist('SleepScoring_Accelero.mat')
+%     if exist('SleepScoring_OBGamma_newgamma.mat')
+%         stages_4{m} = load('SleepScoring_OBGamma_newgamma', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
+%     elseif exist('SleepScoring_Accelero.mat')
+    if exist('SleepScoring_Accelero.mat')
         stages_4{m} = load('SleepScoring_Accelero', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
     elseif exist('SleepScoring_OBGamma.mat')
         stages_4{m} = load('SleepScoring_OBGamma', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
@@ -1676,9 +1683,10 @@ end
 for n=1:length(Dir_5.path)
     cd(Dir_5.path{n}{1});
     %%Load sleep scoring
-    if exist('SleepScoring_OBGamma_newgamma.mat')
-        stages_5{n} = load('SleepScoring_OBGamma_newgamma', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
-    elseif exist('SleepScoring_Accelero.mat')
+%     if exist('SleepScoring_OBGamma_newgamma.mat')
+%         stages_5{n} = load('SleepScoring_OBGamma_newgamma', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
+%     elseif exist('SleepScoring_Accelero.mat')
+    if exist('SleepScoring_Accelero.mat')
         stages_5{n} = load('SleepScoring_Accelero', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');
     elseif exist('SleepScoring_OBGamma.mat')
         stages_5{n} = load('SleepScoring_OBGamma', 'REMEpoch', 'SWSEpoch', 'Wake','Sleep');

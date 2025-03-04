@@ -27,7 +27,9 @@ col_3 = [0 .4 .4];
 % legend = {'Sal mCherry (n=11)','SD + Sal mCherry homo (n=3)','SD + Sal DREADD+ hétéro (n=4)'};
 % legend = {'CNO mCherry (n=6)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
 % legend = {'CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
-legend = {'CNO mCherry (n=5)','SD + CNO mCherry (n=5)','SD + CNO DREADD- (n=7)'};
+% legend = {'CNO mCherry (n=10)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
+% legend = {'CNO mCherry (n=10)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
+legend = {'CNO mCherry (n=10)','SD + CNO mCherry (n=5)','SD + CNO DREADD- (n=7)'};
 % legend = {'Sal mCherry (n=10)','CNO mCherry 2.5mg/kg (n=10)','CNO mCherry 1mg/kg (n=4)'};
 
 
@@ -40,11 +42,11 @@ suptitle ('Effect of CRH inhibition after SD and CNO injection')
 subplot(4,6,[4],'align') %WAKE percentage phase1
 hold on, title('0-1h30')
 subplot(4,6,[5],'align') %WAKE percentage phase2
-% hold on, title('1h30-3h30')
-hold on, title('1h30-6h')
+hold on, title('1h30-3h30')
+% hold on, title('1h30-6h30')
 subplot(4,6,[6],'align') %WAKE percentage phase3
-% hold on, title('3h30-8h')
-hold on, title('6h-8h')
+hold on, title('3h30-8h')
+% hold on, title('6h30-8h')
 
 
 
@@ -97,7 +99,7 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none')
 set(gca,'xticklabels',[])
 ylabel('Wake percentage')
-% makepretty
+makepretty_BM2
 ylim([0 100])
 
 if isparam==0 %%version ranksum (non param)
@@ -135,8 +137,8 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 set(gca,'xticklabels',[])
 ylabel('Wake percentage')
-% makepretty
-% ylim([0 100])
+makepretty_BM2
+ylim([0 100])
 
 if isparam==0 %%version ranksum (non param)
     %phase2
@@ -172,8 +174,8 @@ MakeSpreadAndBoxPlot2_MC({nanmean(data_perc_WAKE_end_1,2), nanmean(data_perc_WAK
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 set(gca,'xticklabels',[])
 ylabel('Wake percentage')
-% makepretty
-% ylim([0 50])
+makepretty_BM2
+ylim([0 100])
 
 if isparam==0 %%version ranksum (non param)
     %phase3
@@ -213,8 +215,8 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none')
 set(gca,'xticklabels',[])
 ylabel('NREM percentage')
-% makepretty
-% ylim([0 100])
+makepretty_BM2
+ylim([0 100])
 if isparam==0 %%version ranksum (non param)
     %phase1
     [p_1_vs_2_1, h_1] = ranksum(nanmean(data_perc_SWS_begin_1,2), nanmean(data_perc_SWS_begin_2,2));
@@ -251,8 +253,8 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 set(gca,'xticklabels',[])
 ylabel('NREM percentage')
-% makepretty
-% ylim([0 100])
+makepretty_BM2
+ylim([0 100])
 
 if isparam==0 %%version ranksum (non param)
     %phase2
@@ -291,8 +293,8 @@ MakeSpreadAndBoxPlot2_MC({nanmean(data_perc_SWS_end_1,2), nanmean(data_perc_SWS_
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 set(gca,'xticklabels',[])
 ylabel('NREM percentage')
-% makepretty
-% ylim([0 80])
+makepretty_BM2
+ylim([0 100])
 
 if isparam==0 %%version ranksum (non param)
     %phase3
@@ -330,8 +332,8 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 % set(gca,'xticklabels',[])
 ylabel('REM percentage')
-% makepretty
-% ylim([0 10])
+makepretty_BM2
+ylim([0 15])
 
 if isparam==0 %%version ranksum (non param)
     %phase1
@@ -367,8 +369,8 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 % set(gca,'xticklabels',[])
 ylabel('REM percentage')
-% makepretty
-% ylim([0 10])
+makepretty_BM2
+ylim([0 15])
 
 if isparam==0 %%version ranksum (non param)
     %phase2
@@ -404,8 +406,8 @@ MakeSpreadAndBoxPlot2_MC({nanmean(data_perc_REM_end_1,2), nanmean(data_perc_REM_
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 % set(gca,'xticklabels',[])
 ylabel('REM percentage')
-% makepretty
-% ylim([0 15])
+makepretty_BM2
+ylim([0 15])
 
 if isparam==0 %%version ranksum (non param)
     %phase3

@@ -4,7 +4,7 @@ Get_Data_5groups_AD.m
 %% FIGURE 2 groups across time stat
 txt_size = 15;
 isparam=0;
-iscorr=1;
+iscorr=0;
 
 %classic
 % col_1 = [.7 .7 .7];
@@ -35,8 +35,10 @@ suptitle ('Effect of Social defeat');
 subplot(4,7,[8,9],'align') % wake percentage overtime
 plot(nanmean(data_perc_WAKE_1),'linestyle','-','marker','o','markersize',8,'markerfacecolor',col_1,'color',col_1), hold on
 errorbar(nanmean(data_perc_WAKE_1), stdError(data_perc_WAKE_1),'color',col_1)
-plot(nanmean(data_perc_WAKE_2),'linestyle','-','marker','o','markerfacecolor',col_2,'markersize',8,'color',col_2)
-errorbar(nanmean(data_perc_WAKE_2), stdError(data_perc_WAKE_2),'linestyle','-','color',col_2)
+for k=1:length(Dir_2.path)
+% plot((perc_WAKE_2{k}),'linestyle','-','marker','o','markerfacecolor',col_2,'markersize',8,'color',col_2)
+plot((perc_WAKE_2{k}),'linestyle','-','marker','o','markersize',8)
+end% errorbar(nanmean(data_perc_WAKE_2), stdError(data_perc_WAKE_2),'linestyle','-','color',col_2)
 xlim([0 8.5])
 ylim([0 100])
 xticks([2 4 6 8]); xticklabels({'2','4','6','8'})
@@ -79,13 +81,13 @@ elseif iscorr ==1
     p_values = [p_1 p_2 p_3 p_4 p_5 p_6 p_7 p_8];
     [h, crit_p, adj_ci_cvrg, adj_p] = fdr_bh(p_values);
     if adj_p(1)<0.05; sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
-    if adj_p(2)<0.05; sigstar_MC({[1.8 2.2]},adj_p(2),0,'LineWigth',16,'StarSize',24,'plotbar',0);elseif adj_p(1)<0.1;sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0); end
-    if adj_p(3)<0.05; sigstar_MC({[2.8 3.2]},adj_p(3),0,'LineWigth',16,'StarSize',24,'plotbar',0);elseif adj_p(1)<0.1;sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0); end
-    if adj_p(4)<0.05; sigstar_MC({[3.8 4.2]},adj_p(4),0,'LineWigth',16,'StarSize',24,'plotbar',0);elseif adj_p(1)<0.1;sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0); end
-    if adj_p(5)<0.05; sigstar_MC({[4.8 5.2]},adj_p(5),0,'LineWigth',16,'StarSize',24,'plotbar',0);elseif adj_p(1)<0.1;sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0); end
-    if adj_p(6)<0.05; sigstar_MC({[5.8 6.2]},adj_p(6),0,'LineWigth',16,'StarSize',24,'plotbar',0);elseif adj_p(1)<0.1;sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0); end
-    if adj_p(7)<0.05; sigstar_MC({[6.8 7.2]},adj_p(7),0,'LineWigth',16,'StarSize',24,'plotbar',0);elseif adj_p(1)<0.1;sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0); end
-    if adj_p(8)<0.05; sigstar_MC({[7.8 8.2]},adj_p(8),0,'LineWigth',16,'StarSize',24,'plotbar',0);elseif adj_p(1)<0.1;sigstar_MC({[0.8 1.2]},adj_p(1),0,'LineWigth',16,'StarSize',24,'plotbar',0); end
+    if adj_p(2)<0.05; sigstar_MC({[1.8 2.2]},adj_p(2),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
+    if adj_p(3)<0.05; sigstar_MC({[2.8 3.2]},adj_p(3),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
+    if adj_p(4)<0.05; sigstar_MC({[3.8 4.2]},adj_p(4),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
+    if adj_p(5)<0.05; sigstar_MC({[4.8 5.2]},adj_p(5),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
+    if adj_p(6)<0.05; sigstar_MC({[5.8 6.2]},adj_p(6),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
+    if adj_p(7)<0.05; sigstar_MC({[6.8 7.2]},adj_p(7),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
+    if adj_p(8)<0.05; sigstar_MC({[7.8 8.2]},adj_p(8),0,'LineWigth',16,'StarSize',24,'plotbar',0);end
 else
 end
 
@@ -93,8 +95,9 @@ end
 subplot(4,7,[10,11],'align'), hold on
 plot(nanmean(data_perc_SWS_1),'linestyle','-','marker','o','markersize',8,'markerfacecolor',col_1,'color',col_1), hold on
 errorbar(nanmean(data_perc_SWS_1), stdError(data_perc_SWS_1),'color',col_1)
-plot(nanmean(data_perc_SWS_2),'linestyle','-','marker','o','markerfacecolor',col_2,'markersize',8,'color',col_2)
-errorbar(nanmean(data_perc_SWS_2), stdError(data_perc_SWS_2),'linestyle','-','color',col_2)
+for k=1:length(Dir_2.path)
+plot((perc_SWS_2{k}),'linestyle','-','marker','o','markersize',8)
+end% errorbar(nanmean(data_perc_SWS_2), stdError(data_perc_SWS_2),'linestyle','-','color',col_2)
 xlim([0 8.5])
 ylim([0 100])
 xticks([2 4 6 8]); xticklabels({'2','4','6','8'}) 
@@ -152,10 +155,11 @@ end
 subplot(4,7,[12,13],'align') %REM percentage overtime
 plot(nanmean(data_perc_REM_1),'linestyle','-','marker','o','markersize',8,'markerfacecolor',col_1,'color',col_1), hold on
 errorbar(nanmean(data_perc_REM_1), stdError(data_perc_REM_1),'color',col_1)
-plot(nanmean(data_perc_REM_2),'linestyle','-','marker','o','markerfacecolor',col_2,'markersize',8,'color',col_2)
-errorbar(nanmean(data_perc_REM_2), stdError(data_perc_REM_2),'linestyle','-','color',col_2)
+for k=1:length(Dir_2.path)
+plot((perc_REM_2{k}),'linestyle','-','marker','o','markersize',8)
+end% errorbar(nanmean(data_perc_REM_2), stdError(data_perc_REM_2),'linestyle','-','color',col_2)
 xlim([0 8.5])
-ylim([0 15])
+ylim([0 25])
 
 xticks([2 4 6 8]); xticklabels({'2','4','6','8'}) 
 makepretty
@@ -213,8 +217,9 @@ end
 subplot(4,7,[15,16],'align') %REM num overtime
 plot(nanmean(data_num_REM_1),'linestyle','-','marker','o','markersize',8,'markerfacecolor',col_1,'color',col_1), hold on
 errorbar(nanmean(data_num_REM_1), stdError(data_num_REM_1),'color',col_1)
-plot(nanmean(data_num_REM_2),'linestyle','-','marker','o','markerfacecolor',col_2,'markersize',8,'color',col_2)
-errorbar(nanmean(data_num_REM_2), stdError(data_num_REM_2),'linestyle','-','color',col_2)
+for k=1:length(Dir_2.path)
+plot((num_REM_2{k}),'linestyle','-','marker','o','markersize',8)
+end% errorbar(nanmean(data_num_REM_2), stdError(data_num_REM_2),'linestyle','-','color',col_2)
 xlim([0 8.5])
 ylim([0 10])
 xticks([2 4 6 8]); xticklabels({'2','4','6','8'}) 
@@ -273,10 +278,11 @@ end
 subplot(4,7,[17,18],'align') %REM durentage overtime
 plot(nanmean(data_dur_REM_1),'linestyle','-','marker','o','markersize',8,'markerfacecolor',col_1,'color',col_1), hold on
 errorbar(nanmean(data_dur_REM_1), stdError(data_dur_REM_1),'color',col_1)
-plot(nanmean(data_dur_REM_2),'linestyle','-','marker','o','markerfacecolor',col_2,'markersize',8,'color',col_2)
-errorbar(nanmean(data_dur_REM_2), stdError(data_dur_REM_2),'linestyle','-','color',col_2)
+for k=1:length(Dir_2.path)
+plot((dur_REM_2{k}),'linestyle','-','marker','o','markersize',8)
+end% errorbar(nanmean(data_dur_REM_2), stdError(data_dur_REM_2),'linestyle','-','color',col_2)
 xlim([0 8.5])
-ylim([0 150])
+ylim([0 300])
 
 xticks([2 4 6 8]); xticklabels({'2','4','6','8'}) 
 makepretty
