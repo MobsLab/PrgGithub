@@ -6,25 +6,35 @@ Created on Tue Feb  4 12:04:42 2025
 @author: gruffalo
 """
 
-def filter_columns(mice_data, columns_to_keep):
+def filter_columns(mice_data, columns_to_keep, drop_na=True):
     """
     Filters each mouse dataframe in the dictionary to retain only the specified columns.
+    Optionally drops rows containing at least one NaN value.
 
     Parameters:
     - mice_data (dict): Dictionary containing dataframes for each mouse.
     - columns_to_keep (list): List of column names to retain in each dataframe.
+    - drop_na (bool, optional): If True, drop rows that contain at least one NaN in the selected columns.
 
     Returns:
     - filtered_data (dict): Dictionary with the same structure as mice_data,
-      but with only the specified columns retained.
+      but with only the specified columns retained and optionally cleaned of NaN rows.
     """
     filtered_data = {}
 
     for mouse_id, mouse_df in mice_data.items():
-        # Ensure only the columns that exist in the dataframe are selected
-        filtered_data[mouse_id] = mouse_df.loc[:, mouse_df.columns.intersection(columns_to_keep)].copy()
+        # Select only the specified columns that exist in the dataframe
+        filtered_df = mouse_df.loc[:, mouse_df.columns.intersection(columns_to_keep)].copy()
+
+        # Drop rows containing NaN values if drop_na is True
+        if drop_na:
+            filtered_df = filtered_df.dropna()
+
+        # Store the filtered dataframe in the dictionary
+        filtered_data[mouse_id] = filtered_df
 
     return filtered_data
+
 
 
 def zscore_columns(df, columns_to_zscore):

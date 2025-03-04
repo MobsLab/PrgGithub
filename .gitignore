@@ -14,3 +14,6 @@ tmp*
 *tmp.m
 *test.m
 test*
+
+# Spyder configuration
+.spyproject

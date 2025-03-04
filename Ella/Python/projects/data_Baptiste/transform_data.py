@@ -51,8 +51,8 @@ def apply_sigmoid(mice_data, mouse_id, column_name, slope=1, op_point=0):
     return transformed_data
 
 
-# # Apply sigmoid transformation to the 'HeartRate' column of all mice
-# transformed_mice_data = apply_sigmoid(mice_data, mouse_id='all', column_name='HeartRate', slope=1, op_point=70)
+# # Apply sigmoid transformation to the 'Position' column of all mice
+# transformed_mice_data = apply_sigmoid(mice_data, mouse_id='all', column_name='Position', slope=1, op_point=70)
 
 # # Apply sigmoid transformation to only mouse 'M561' for the 'BreathFreq' column
 # transformed_m561 = apply_sigmoid(mice_data, mouse_id='M561', column_name='BreathFreq', slope=2, op_point=30)
@@ -118,8 +118,8 @@ def apply_exponential(mice_data, mouse_id, column_name, tau=1):
     return transformed_data
 
 
-# # Apply negative exponential transformation to the 'HeartRate' column for all mice
-# transformed_mice_data = apply_exponential(mice_data, mouse_id='all', column_name='HeartRate', tau=50)
+# # Apply negative exponential transformation to the 'Position' column for all mice
+# transformed_mice_data = apply_exponential(mice_data, mouse_id='all', column_name='Position', tau=50)
 
 # # Apply negative exponential transformation to only mouse 'M561' for the 'BreathFreq' column
 # transformed_m561 = apply_exponential(mice_data, mouse_id='M561', column_name='BreathFreq', tau=20)
@@ -140,43 +140,4 @@ def apply_exponential(mice_data, mouse_id, column_name, tau=1):
 # plt.xlabel("z") 
 # plt.ylabel("exp(z)")
 
-
-# def sigmoid_transform(df, column_name, slope, op_point):
-#     """Applies a sigmoid transformation to a given column."""
-#     return 1 / (1 + np.exp(-slope * (df[column_name] - op_point)))
-
-# def exponential_transform(df, column_name, tau):
-#     """Applies a negative exponential transformation to a given column."""
-#     return np.exp(-df[column_name] / tau)
-
-
-# def transform_features(df, slope, op_point, tau):
-#     """
-#     Transforms the input dataframe by computing the required features.
-
-#     Parameters:
-#         df (pd.DataFrame): Original dataframe with raw features.
-#         slope (float): Parameter for the sigmoid transformation.
-#         op_point (float): Parameter for the sigmoid transformation.
-#         tau (float): Parameter for the exponential transformation.
-
-#     Returns:
-#         pd.DataFrame: Transformed dataframe with the selected features.
-#     """
-#     df_transformed = df.copy()
-
-#     # Compute sig(Global Time)
-#     df_transformed["sig_Global_Time"] = sigmoid_transform(df_transformed, "Global Time", slope, op_point)
-
-#     # Compute Position * sig(Global Time)
-#     df_transformed["Position_sig_Global_Time"] = df_transformed["Position"] * df_transformed["sig_Global_Time"]
-
-#     # Compute -exp(Time since last shock)
-#     df_transformed["neg_exp_Time_since_last_shock"] = -exponential_transform(df_transformed, "Time since last shock", tau)
-
-#     # Select the required features
-#     X = df_transformed[["Position", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]]
-#     y = df_transformed["OB frequency"]
-
-#     return X, y
 
