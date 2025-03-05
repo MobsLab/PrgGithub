@@ -1,4 +1,55 @@
 
+clear all
+Session_type={'Cond','sleep_pre'};
+Mouse=Drugs_Groups_UMaze_BM(23);
+for sess=1:length(Session_type)
+    [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
+        MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'emg_pect','emg_neck');
+end
+
+
+%% figures
+Cols = {[1 .5 .5],[.5 .5 1]};
+X = 1:2;
+Legends = {'Shock','Safe'};
+
+
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({log10(OutPutData.Cond.emg_pect.mean(:,5)) log10(OutPutData.Cond.emg_pect.mean(:,6))},...
+    Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('EMG pect (log scale)')
+makepretty_BM2
+
+subplot(122)
+MakeSpreadAndBoxPlot3_SB({log10(OutPutData.Cond.emg_neck.mean(:,5)) log10(OutPutData.Cond.emg_neck.mean(:,6))},...
+    Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('EMG neck (log scale)')
+makepretty_BM2
+
+
+Cols = {[1 .5 .5],[.5 .5 1],[.5 .5 .5]};
+X = 1:3;
+Legends = {'Shock','Safe','Sleep'};
+
+
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({log10(OutPutData.Cond.emg_pect.mean(:,5)) log10(OutPutData.Cond.emg_pect.mean(:,6)) log10(OutPutData.sleep_pre.emg_pect.mean(:,3))},...
+    Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('EMG pect (log scale)')
+makepretty_BM2
+
+subplot(122)
+MakeSpreadAndBoxPlot3_SB({log10(OutPutData.Cond.emg_neck.mean(:,5)) log10(OutPutData.Cond.emg_neck.mean(:,6)) log10(OutPutData.sleep_pre.emg_neck.mean(:,3))},...
+    Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('EMG neck (log scale)')
+makepretty_BM2
+
+
+
+%% old ?
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Generating data
 clear all
 

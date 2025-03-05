@@ -64,7 +64,7 @@ end
 
 disp(' ');
 disp('... Creating 0.1-0.5 Epochs ');
-Fil_01_05=FilterLFP(LFP,[.1 .5],1024);
+Fil_01_05=FilterLFP(LFP,[.5 4],1024); % changed by BM on 02/03/2025 to focus on OB delta
 hilbert_01_05=abs(hilbert(Data(Fil_01_05)));
 tot_01_05=Restrict(tsd(Range(LFP), hilbert_01_05), Epoch);
 

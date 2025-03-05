@@ -15,7 +15,7 @@ m(5)=percentile(Data(temp),92);
 m(6)=percentile(Data(temp),90);
 m(7)=percentile(Data(temp),85);
 m(8)=percentile(Data(temp),80);
-m(9)=percentile(Data(temp),50);
+m(9)=percentile(Data(temp),25);
 
 
 % 

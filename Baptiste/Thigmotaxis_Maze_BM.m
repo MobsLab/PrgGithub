@@ -1,4 +1,63 @@
 
+
+GetEmbReactMiceFolderList_BM
+Mouse = Drugs_Groups_UMaze_BM(22);
+for mouse=1:length(Mouse)
+    Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+    
+    AlignedPosition = ConcatenateDataFromFolders_SB(CondSess.(Mouse_names{mouse}) , 'alignedposition');
+    Zone = ConcatenateDataFromFolders_SB(CondSess.(Mouse_names{mouse}) , 'epoch','epochname' , 'zoneepoch_behav');
+    Speed = ConcatenateDataFromFolders_SB(CondSess.(Mouse_names{mouse}) , 'speed');
+    Smooth_Speed = tsd(Range(Speed) , movmean(Data(Speed),10));
+    Moving = thresholdIntervals(Smooth_Speed , 5 , 'Direction' , 'Above');
+    Moving = mergeCloseIntervals(Moving , 1e4);
+    Moving = dropShortIntervals(Moving , 1e4);
+    [Thigmo_score_moving(mouse), OccupMap] = Thigmo_From_Position_BM(Restrict(AlignedPosition , Moving));
+    [Thigmo_score(mouse), OccupMap] = Thigmo_From_Position_BM(AlignedPosition);
+    
+    [Thigmo_score_moving_shock(mouse), OccupMap] = Thigmo_From_Position_BM(Restrict(Restrict(AlignedPosition , Zone{1}) , Moving));
+    [Thigmo_score_shock(mouse), OccupMap] = Thigmo_From_Position_BM(Restrict(AlignedPosition , Zone{1}));
+    
+    [Thigmo_score_moving_safe(mouse), OccupMap] = Thigmo_From_Position_BM(Restrict(Restrict(AlignedPosition , or(Zone{2},Zone{5})) , Moving));
+    [Thigmo_score_safe(mouse), OccupMap] = Thigmo_From_Position_BM(Restrict(AlignedPosition , or(Zone{2},Zone{5})));
+    
+    disp(mouse)
+end
+
+
+
+figure
+subplot(121)
+PlotCorrelations_BM(Thigmo_score_moving_shock , PCVal)
+subplot(122)
+PlotCorrelations_BM(Thigmo_score_shock , PCVal)
+
+figure
+subplot(121)
+PlotCorrelations_BM(Thigmo_score_moving_shock , HR_Bef_end_Act-HR_Wake_FirstHour_SleepPre)
+subplot(122)
+PlotCorrelations_BM(Thigmo_score_shock , HR_Bef_end_Act-HR_Wake_FirstHour_SleepPre)
+
+
+Cols = {[1 .5 .5],[.5 .5 1]};
+X = [1 2.5];
+Legends = {'Shock','Safe'};
+
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({Thigmo_score_moving_shock Thigmo_score_moving_safe},Cols,X,Legends,'showpoints',0,'paired',1);
+
+subplot(122)
+MakeSpreadAndBoxPlot3_SB({Thigmo_score_shock Thigmo_score_safe},Cols,X,Legends,'showpoints',0,'paired',1);
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all
 
 GetEmbReactMiceFolderList_BM

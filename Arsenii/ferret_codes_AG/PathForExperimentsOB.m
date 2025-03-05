@@ -71,7 +71,7 @@ data = {
     'Brynza', 'head-fixed', 'domitor', 'none', '/media/nas7/React_Passive_AG/OBG/Brynza/head-fixed', {'20240312_domitor', '20240410_domitor'};
     
     % Brynza freely-moving
-    'Brynza', 'freely-moving', 'none', 'none', '/media/nas7/React_Passive_AG/OBG/Brynza/freely-moving', {'20240122', '20240123_long', '20240123_short', '20240124', '20240125', '20240205'};
+    'Brynza', 'freely-moving', 'none', 'none', '/media/nas7/React_Passive_AG/OBG/Brynza/freely-moving', {'20240123_long', '20240124', '20240125', '20240205'}; % 20240123_short % 20240122 not long enough
     'Brynza', 'freely-moving', 'atropine', 'none', '/media/nas7/React_Passive_AG/OBG/Brynza/freely-moving', {'20240130_atropine', '20240201_atropine', '20240306_atropine'};
     'Brynza', 'freely-moving', 'saline', 'none', '/media/nas7/React_Passive_AG/OBG/Brynza/freely-moving', {'20240202_saline'};
     

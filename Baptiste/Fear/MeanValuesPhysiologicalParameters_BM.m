@@ -20,7 +20,6 @@ function [OutPutData , Epoch , NameEpoch , OutPutTSD] = MeanValuesPhysiologicalP
 % - speed
 % - imdff
 % - trackingnans
-% - edi
 % - lfp ('lfp',num_chan)
 % - linearposition
 % - masktemperature
@@ -32,8 +31,7 @@ function [OutPutData , Epoch , NameEpoch , OutPutTSD] = MeanValuesPhysiologicalP
 % - heartrate
 % - heartratevar
 % - instfreq
-% - sleep_ripples
-% - wake_ripples
+% - ripples_density
 % - respi_meanwaveform
 % - ripples_meanwaveform
 % - h_vhigh_extended
@@ -50,7 +48,7 @@ function [OutPutData , Epoch , NameEpoch , OutPutTSD] = MeanValuesPhysiologicalP
 % - respivar
 % - ob_pfc_coherence
 % - hpc_pfc_coherence'
-%  - added by Sb :'respi_freq_BM_sametps','heartrate_sametps','heartratevar_sametps','ob_high_power_sametps','ripples_density_sametps','ob_high_freq_sametps
+% - added by Sb :'respi_freq_BM_sametps','heartrate_sametps','heartratevar_sametps','ob_high_power_sametps','ripples_density_sametps','ob_high_freq_sametps
 % - hpc_theta_freq, hpc_theta_power
 % - pfc_delta_power
 % - ob_gamma_power
@@ -89,7 +87,7 @@ elseif convertCharsToStrings(List_Type) == 'sound_test'
     %     SoundCondSess = SoundCondSess_Maze;
 elseif convertCharsToStrings(List_Type) == 'sound_test_umze'
     SoundCondSess = SoundCondSess_Maze;
-
+    
 elseif convertCharsToStrings(List_Type) == 'fear_ctxt'
     FearContextSess = FearContextSess2;
 end
@@ -166,9 +164,9 @@ switch(lower(Session_Type))
         fear=0; sleep=0; FolderList=HeadRestraintSess;
     case 'sound_test'
         fear=2; sleep=0; FolderList=SoundCondSess;
-            case 'sound_test_umze'
+    case 'sound_test_umze'
         fear=1; sleep=0; FolderList=SoundCondSess;
-
+        
     case 'fear_ctxt'
         fear=3; sleep=0; FolderList=FearContextSess;
 end
@@ -344,7 +342,7 @@ for i = 1:length(varargin)
                         OutPutVar.(Mouse_names{mouse})=tsd([],[]);
                     end
                 end
-               
+                
                 
             case 'imdiff'
                 for mouse=1:length(Mouse_names)
@@ -451,9 +449,9 @@ for i = 1:length(varargin)
                 
             case 'ob_gamma_freq'
                 for mouse=1:length(Mouse_names)
-%                     try
-                        OutPutVar.(Mouse_names{mouse})=ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'ob_gamma_freq');
-%                     end
+                    %                     try
+                    OutPutVar.(Mouse_names{mouse})=ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'ob_gamma_freq');
+                    %                     end
                 end
                 
             case 'ob_gamma_power'
@@ -915,7 +913,11 @@ for i = 1:length(varargin)
                             
                             OutPutData.(varargin{1, i}).max_freq(mouse,states) = RANGE(OutPutData.(varargin{1, i}).max_freq(mouse,states) + noise_thr-1);
                             OutPutData.(varargin{1, i}).mean(mouse,states,:) = nanmean(Data(Restrict(OutPutVar.(Mouse_names{mouse}) , Epoch{mouse,states})));
-                            %                               OutPutData.(varargin{1, i}).spectrogram{mouse,states} = Restrict(OutPutVar.(Mouse_names{mouse}) , Epoch{mouse,states});
+                            %      OutPutData.(varargin{1, i}).spectrogram{mouse,states} = Restrict(OutPutVar.(Mouse_names{mouse}) , Epoch{mouse,states});
+                            
+                            R = Range(OutPutVar.(Mouse_names{mouse})); D = Data(OutPutVar.(Mouse_names{mouse}));
+                            OutPutData.(varargin{1, i}).spectrogram{mouse,states} = Restrict(tsd(R(1:10:end) , D(1:10:end,:)) , Epoch{mouse,states});
+                            
                             
                         catch
                             try

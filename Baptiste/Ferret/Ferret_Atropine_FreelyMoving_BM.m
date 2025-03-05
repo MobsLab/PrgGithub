@@ -9,12 +9,19 @@ Dir{2} = PathForExperimentsOB({'Shropshire'}, 'freely-moving', 'atropine');
 for drug=1:2
     for sess=1:length(Dir{drug}.path)
         
+        clear inj_time
         load([Dir{drug}.path{sess} filesep 'SleepScoring_OBGamma.mat'], 'SmoothGamma')
-        load([Dir{drug}.path{sess} filesep 'SleepScoring_Accelero.mat'], 'Wake','Sleep','REMEpoch','TotalNoiseEpoch')
+        load([Dir{drug}.path{sess} filesep 'SleepScoring_Accelero.mat'], 'Wake','Sleep','REMEpoch','TotalNoiseEpoch','Epoch')
         load([Dir{drug}.path{sess} filesep 'SleepScoring_OBGamma.mat'], 'inj_time')
         load([Dir{drug}.path{sess} filesep 'B_Middle_Spectrum.mat'])
         load([Dir{drug}.path{sess} filesep 'behavResources.mat'], 'MovAcctsd')
         Smooth_Acc = tsd(Range(MovAcctsd) , movmean(log10(Data(MovAcctsd)),30,'omitnan'));
+        
+        try
+            inj_time;
+        catch
+            inj_time = max(Range(SmoothGamma))/2;
+        end
         
         % spectro
         B_Sptsd = tsd(Spectro{2}*1e4 , Spectro{1});
@@ -23,11 +30,11 @@ for drug=1:2
         % epochs
         Before_Injection = intervalSet(inj_time-2.2*3600e4 , -600e4+inj_time);
         After_Injection = intervalSet(inj_time+600e4 , inj_time+2.2*3600e4);
-        Bef_inj_time{drug}(sess) = max(Range(Restrict(Smooth_Acc , Before_Injection)))./3600e4;
-        Aft_inj_time{drug}(sess) = (max(Range(Restrict(Smooth_Acc , After_Injection)))-max(Range(Restrict(Smooth_Acc , Before_Injection))))./3600e4;
+        
         Moving = thresholdIntervals(Smooth_Acc , 6.7 , 'Direction' , 'Above');
         Moving = mergeCloseIntervals(Moving , 1e4);
         Moving = dropShortIntervals(Moving , 2e4);
+        NonMoving = or(Epoch,TotalNoiseEpoch)-Moving;
         
         % cleaning
         OB_Sp_Bef = Restrict(B_Sptsd,and(Before_Injection , Moving));
@@ -66,11 +73,14 @@ for drug=1:2
         
         % states prop
         Wake = or(Wake , TotalNoiseEpoch);
-        Wake_prop_Bef_Inj{drug}(sess) = sum(DurationEpoch(and(Wake , Before_Injection)))./sum(DurationEpoch(Before_Injection));
-        Wake_prop_Aft_Inj{drug}(sess) = sum(DurationEpoch(and(Wake , After_Injection)))./sum(DurationEpoch(After_Injection));
+        Wake_prop_Bef_Inj{drug}(sess) = sum(DurationEpoch(and(Moving , Before_Injection)))./sum(DurationEpoch(Before_Injection));
+        Wake_prop_Aft_Inj{drug}(sess) = sum(DurationEpoch(and(Moving , After_Injection)))./sum(DurationEpoch(After_Injection));
         
-        MeanAcc_Sleep_Bef_Inj{drug}(sess) = nanmean(Data(Restrict(MovAcctsd , and(Sleep , Before_Injection))));
-        MeanAcc_Sleep_Aft_Inj{drug}(sess) = nanmean(Data(Restrict(MovAcctsd , and(Sleep , After_Injection))));
+        MeanAcc_Sleep_Bef_Inj{drug}(sess) = nanmean(Data(Restrict(MovAcctsd , and(NonMoving , Before_Injection))));
+        MeanAcc_Sleep_Aft_Inj{drug}(sess) = nanmean(Data(Restrict(MovAcctsd , and(NonMoving , After_Injection))));
+        
+        MeanAcc_Wake_Bef_Inj{drug}(sess) = nanmean(Data(Restrict(MovAcctsd , and(Moving , Before_Injection))));
+        MeanAcc_Wake_Aft_Inj{drug}(sess) = nanmean(Data(Restrict(MovAcctsd , and(Moving , After_Injection))));
         
         disp([num2str(drug) ' ' num2str(sess)])
     end
@@ -86,19 +96,19 @@ X = 1:2;
 Legends = {'Saline','Atropine'};
 
 figure
-[~,MaxPowerValues1] = Plot_MeanSpectrumForMice_BM(Spectro{3}.*OB_MeanSp_Bef{1} , 'color' , 'k');
-[~,MaxPowerValues2] = Plot_MeanSpectrumForMice_BM(Spectro{3}.*OB_MeanSp_Bef{2} , 'color' , 'k');
+[~,MaxPowerValues1,f] = Plot_MeanSpectrumForMice_BM(Spectro{3}.*OB_MeanSp_Bef{1} , 'color' , 'k');
+[~,MaxPowerValues2,f] = Plot_MeanSpectrumForMice_BM(Spectro{3}.*OB_MeanSp_Bef{2} , 'color' , 'k');
 [~,MaxPowerValues3,Freq_Max1] = Plot_MeanSpectrumForMice_BM((Spectro{3}.*OB_MeanSp_Aft{1})./MaxPowerValues1');
 [~,MaxPowerValues4,Freq_Max2] = Plot_MeanSpectrumForMice_BM((Spectro{3}.*OB_MeanSp_Aft{2})./MaxPowerValues2');
 clf
 subplot(1,4,1:2)
 Plot_MeanSpectrumForMice_BM(Spectro{3}.*OB_MeanSp_Aft{1} , 'color' , 'k' , 'power_norm_value' , MaxPowerValues1);
 Plot_MeanSpectrumForMice_BM(Spectro{3}.*OB_MeanSp_Aft{2} , 'color' , 'g' , 'power_norm_value' , MaxPowerValues2);
-xlim([20 100]), ylim([0 1.2])
+xlim([20 100]), ylim([0 2])
 makepretty, axis square
 f=get(gca,'Children'); legend([f(5),f(1)],'Saline','Atropine');
 
-MaxPowerValues3(3) = NaN;
+% MaxPowerValues3(3) = NaN;
 subplot(143)
 MakeSpreadAndBoxPlot3_SB({MaxPowerValues3 MaxPowerValues4},Cols,X,Legends,'showpoints',1,'paired',0);
 ylabel('OB gamma power (norm)')
@@ -139,6 +149,11 @@ title('Atropine')
 
 
 
+
+%% other ferret
+
+Dir{1} = PathForExperimentsOB({'Brynza'}, 'freely-moving','none');
+Dir{2} = PathForExperimentsOB({'Brynza'}, 'freely-moving', 'atropine');
 
 
 %% tools
