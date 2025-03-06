@@ -36,6 +36,20 @@ def filter_columns(mice_data, columns_to_keep, drop_na=True):
     return filtered_data
 
 
+def filter_mice(mice_data, n):
+    """
+    Filters out mice with fewer than n datapoints.
+    
+    Parameters:
+    mice_data (dict): Dictionary where keys are mouse IDs and values are DataFrames.
+    n (int): Minimum number of datapoints required for a mouse to be included.
+    
+    Returns:
+    dict: Filtered dictionary containing only mice with at least n datapoints.
+    """
+    return {mouse: df for mouse, df in mice_data.items() if len(df) >= n}
+
+
 
 def zscore_columns(df, columns_to_zscore):
     """
@@ -109,28 +123,19 @@ def normalize_data(mice_data, columns_to_normalize, drop_na=True):
 
 
 
-# def normalize_data(mice_data, columns_to_normalize):
-#     """
-#     Normalize specified columns for each mouse.
-
-#     Parameters:
-#     - mice_data (dict): Dictionary containing data for each mouse.
-#     - columns_to_normalize (list): List of column names to normalize.
-
-#     Returns:
-#     - normalized_data (dict): Dictionary with the same structure as mice_data,
-#       but with normalized specified columns.
-#     """
-#     normalized_data = {}
-
-#     for mouse_id, mouse_df in mice_data.items():
-#         # Make a copy to avoid modifying the original data
-#         mouse_df_copy = mouse_df.copy()
-        
-#         # Apply zscore normalization to the specified columns
-#         mouse_df_copy = zscore_columns(mouse_df_copy, columns_to_normalize)
-        
-#         # Store the normalized DataFrame in the new dictionary
-#         normalized_data[mouse_id] = mouse_df_copy
-
-#     return normalized_data
+def add_interaction_term(mouse_data, col1, col2, new_col_name):
+    """
+    Adds an interaction term to each dataframe in the mouse_data dictionary.
+    
+    Parameters:
+    mouse_data (dict): Dictionary where keys are mouse IDs and values are dataframes.
+    col1 (str): Name of the first column.
+    col2 (str): Name of the second column.
+    new_col_name (str): Name of the new interaction column.
+    
+    Returns:
+    dict: Updated dictionary with interaction terms added.
+    """
+    for mouse, df in mouse_data.items():
+        df[new_col_name] = df[col1] * df[col2]
+    return mouse_data
