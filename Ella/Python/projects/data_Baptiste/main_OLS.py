@@ -17,7 +17,7 @@ from fit_ols_model import (
     linear_regression_cross_val,
     fit_models_for_all_mice
     )
-from plot_results import plot_r2_boxplot
+from plot_OLS_results import plot_r2_boxplot
 
 # %% Load data
 

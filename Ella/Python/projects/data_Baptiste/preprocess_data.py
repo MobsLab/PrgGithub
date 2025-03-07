@@ -38,16 +38,25 @@ def filter_columns(mice_data, columns_to_keep, drop_na=True):
 
 def filter_mice(mice_data, n):
     """
-    Filters out mice with fewer than n datapoints.
-    
+    Filters out mice with fewer than n datapoints and prints excluded mice.
+
     Parameters:
     mice_data (dict): Dictionary where keys are mouse IDs and values are DataFrames.
     n (int): Minimum number of datapoints required for a mouse to be included.
-    
+
     Returns:
     dict: Filtered dictionary containing only mice with at least n datapoints.
     """
+    excluded_mice = [mouse for mouse, df in mice_data.items() if len(df) < n]
+
+    # Print excluded mice
+    if excluded_mice:
+        print("Excluded mice (fewer than {} datapoints):".format(n), ", ".join(excluded_mice))
+    else:
+        print("No mice were excluded.")
+
     return {mouse: df for mouse, df in mice_data.items() if len(df) >= n}
+
 
 
 

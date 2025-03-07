@@ -56,16 +56,16 @@ param_grid = {
     "feature_transform__op_point": np.arange(0, 1.1, 0.1),
     "feature_transform__tau": [0.5, 1, 2, 3, 4, 5, 10, 15, 20, 30, 50, 75, 100, 125, 150]  # Values for exp tau
 }
-param_grid = {}
 
-plot_mouse_column(transformed_mice_data, 'M1225', 'Time since last shock')
+plot_mouse_column(transformed_mice_data, 'M1225', 'Global Time')
 
 # %% Fit the different models
 
-df = transformed_mice_data['M1225']
+df = transformed_mice_data['M1171']
 
 # Full model
-best_results = find_best_linear_model(df, param_grid)
+independent_vars = ["Position", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]
+best_results = find_best_linear_model(df, param_grid, independent_vars)
 
 # Display results
 print("Best Hyperparameters:", best_results["best_params"])
