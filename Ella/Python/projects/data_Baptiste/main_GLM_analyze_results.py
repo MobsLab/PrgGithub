@@ -19,9 +19,11 @@ from plot_GLM_results import (
     plot_full_vs_all_predictors_boxplot, 
     plot_r2_single_predictor_models,
     plot_r2_leave_one_out_models,
-    plot_model_parameters
+    plot_model_parameters,
+    prop_explained_variance,
+    plot_explained_variance
     )
-from save_load_data import save_variable_to_json, load_variable_from_json
+from save_load_data import save_variable_to_json
 
 # %% Load data
 
@@ -58,21 +60,22 @@ excluded_mice = [mouse for mouse, df in mice_data.items() if len(df) < 100]
 
 plot_full_vs_all_predictors_boxplot(results)
 
-plot_r2_single_predictor_models(results, excluded_mice=['M669', 'M1147', 'M1171', 'M1205', 'M1251', 'M779', 'M9205'])
+plot_r2_single_predictor_models(results, excluded_mice=excluded_mice)
 
-plot_r2_leave_one_out_models(results, excluded_mice=['M669', 'M1147', 'M1171', 'M1205', 'M1251', 'M779', 'M9205'])
+plot_r2_leave_one_out_models(results, excluded_mice=excluded_mice)
 
-plot_model_parameters(parameters)
+plot_model_parameters(parameters, name=["op_point"])
 
 # %% Save
 
-save_variable_to_json(results, mat_folder + '/results_SigPos_GTxSigPos_expTLS_GT_df.json')
+save_variable_to_json(results, mat_folder + '/results_TF_GTxSigPos_expTLS_GT_df.json')
 
-save_variable_to_json(parameters, mat_folder + '/parameters_SigPos_GTxSigPos_expTLS_GT_dict.json')
+save_variable_to_json(parameters, mat_folder + '/parameters_TF_GTxSigPos_expTLS_GT_dict.json')
 
+# %% Compute gain
 
+gain = prop_explained_variance(results, exclude_mice=['M1184', 'M1147', 'M1171', 'M1205', 'M1251', 'M779', 'M9205'])
 
-
-
+plot_explained_variance(gain, connect_mice=False)
 
 

@@ -10,7 +10,7 @@ Created on Tue Feb  4 11:02:29 2025
 
 import numpy as np
 from load_data import load_mat_data
-from preprocess_data import filter_columns, normalize_data
+from preprocess_data import filter_columns
 from transform_data import apply_sigmoid
 from visualize_data import plot_exp_transform, plot_sigmoid_transform, plot_mouse_column
 from fit_linear_model_r2 import ( 
@@ -65,6 +65,9 @@ df = transformed_mice_data['M1171']
 
 # Full model
 independent_vars = ["Position", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]
+independent_vars = ["Time spent freezing", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]
+
+
 best_results = find_best_linear_model(df, param_grid, independent_vars)
 
 # Display results
@@ -72,12 +75,11 @@ print("Best Hyperparameters:", best_results["best_params"])
 print("Best R² Score:", best_results["best_score"])
 # print("Mean MAE:", best_results["best_score"])
 
-all_results = fit_all_predictors_model(df, best_results["best_params"])
+all_results = fit_all_predictors_model(df, best_results["best_params"], independent_vars)
 print("Best R² Score:", all_results["mean_r2"])
 
-
 # Fit single-predictor models
-single_predictor_results = fit_single_predictor_models(df, best_results["best_params"])
+single_predictor_results = fit_single_predictor_models(df, best_results["best_params"], independent_vars)
 
 # Display results
 for predictor, metrics in single_predictor_results.items():
@@ -91,7 +93,7 @@ for predictor, metrics in single_predictor_results.items():
 #     print(f"  Mae: {metrics['mean_mae']:.4f}\n")
     
 # Leave-one-out models
-leave_one_out_results = fit_leave_one_out_models(df, best_results["best_params"])
+leave_one_out_results = fit_leave_one_out_models(df, best_results["best_params"], independent_vars)
 
 # Display results
 for omitted_predictor, metrics in leave_one_out_results.items():
