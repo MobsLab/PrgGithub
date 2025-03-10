@@ -12,6 +12,129 @@ import seaborn as sns
 import pandas as pd
 
 
+def plot_full_model_r2(results_df, exclude_mice=None, color_excluded=True, ylim=(-0.5, 0.8)):
+    """
+    Plots a box plot of the R² scores obtained by the Full Model.
+    Includes error bars for SEM and overlays individual data points.
+    Excluded mice can optionally be shown in light red.
+
+    Parameters:
+    - results_df (pd.DataFrame): DataFrame containing model results with columns:
+        - 'Mouse': Mouse ID
+        - 'Model': Model type ('Full Model')
+        - 'R²': R² score of the full model
+    - exclude_mice (list, optional): List of mouse IDs to exclude from the main analysis.
+                                      Their points will still be plotted but optionally colored differently.
+    - color_excluded (bool, optional): Whether to color excluded mice differently (default: True).
+    - ylim (tuple, optional): Limits for the y-axis. Default is (-0.5, 0.8).
+
+    Returns:
+    - None (Displays the plot)
+    """
+    # Filter for full model R² scores
+    full_model_df = results_df[results_df["Model"] == "Full Model"].copy()
+
+    # Compute mean and SEM using only the included mice
+    full_model_df[~full_model_df["Mouse"].isin(exclude_mice)] if exclude_mice else full_model_df
+
+    # Create figure
+    fig = plt.figure(figsize=(6, 6))
+
+    # Boxplot
+    sns.boxplot(data=full_model_df, y="R²", color="lightgray", width=0.1, showfliers=False)
+
+    # Generate jitter for each individual point
+    jitter = np.random.uniform(-0.1, 0.1, size=len(full_model_df))
+
+    # Plot individual points
+    for i, (index, row) in enumerate(full_model_df.iterrows()):
+        mouse = row["Mouse"]
+        y_value = row["R²"]
+        x_pos = jitter[i]  # Add slight jitter to x position
+
+        # Define color based on exclusion
+        if exclude_mice and mouse in exclude_mice and color_excluded:
+            color = "lightcoral"  # Different color for excluded mice
+        else:
+            color = "black"  # Standard color for all other mice
+
+        plt.scatter(x_pos, y_value, color=color, alpha=0.8, zorder=2)
+
+    # Customize plot
+    plt.xticks([])  # Remove x-axis ticks since we only have one category
+    plt.xlim((-0.5,0.5))
+    plt.ylim(ylim)
+    plt.ylabel("R² Score", fontsize=14)
+    plt.title("R² of the Full Model", fontsize=14)
+    plt.grid(axis="y", linestyle="--", alpha=0.6)
+
+    plt.show()
+    
+    return fig
+
+
+
+# def plot_full_model_r2(results_df, exclude_mice=None, color_excluded=True, ylim=(-0.5, 0.8)):
+#     """
+#     Plots a bar plot of the R² scores obtained by the Full Model.
+#     Includes error bars for SEM and overlays individual data points.
+#     Excluded mice can optionally be shown in light red.
+
+#     Parameters:
+#     - results_df (pd.DataFrame): DataFrame containing model results with columns:
+#         - 'Mouse': Mouse ID
+#         - 'Model': Model type ('Full Model')
+#         - 'R²': R² score of the full model
+#     - exclude_mice (list, optional): List of mouse IDs to exclude from the main analysis.
+#                                       Their points will still be plotted but optionally colored differently.
+#     - color_excluded (bool, optional): Whether to color excluded mice differently (default: True).
+#     - ylim (tuple, optional): Limits for the y-axis. Default is (-0.5, 0.8).
+
+#     Returns:
+#     - None (Displays the plot)
+#     """
+#     # Filter for full model R² scores
+#     full_model_df = results_df[results_df["Model"] == "Full Model"].copy()
+
+#     # Compute mean and SEM using only the included mice
+#     included_df = full_model_df[~full_model_df["Mouse"].isin(exclude_mice)] if exclude_mice else full_model_df
+#     mean_r2 = included_df["R²"].mean()
+#     sem_r2 = included_df["R²"].sem()
+
+#     # Extract mice for plotting
+#     mice = full_model_df["Mouse"].unique()
+    
+#     # Create figure
+#     plt.figure(figsize=(6, 6))
+
+#     # Plot bar for mean value
+#     plt.bar(["Full Model"], [mean_r2], yerr=[sem_r2], capsize=5, 
+#             color="lightgray", alpha=0.8, label="Mean ± SEM")
+
+#     # Add jitter to avoid overlapping points
+#     jitter = np.random.uniform(-0.05, 0.05, size=len(mice))
+
+#     # Plot individual points
+#     for i, mouse in enumerate(mice):
+#         y_value = full_model_df[full_model_df["Mouse"] == mouse]["R²"].values[0]
+#         if exclude_mice and mouse in exclude_mice and color_excluded:
+#             color = "lightcoral"  # Different color for excluded mice
+#         else:
+#             color = "black"  # Standard color for all other mice
+#         plt.scatter(0 + jitter[i], y_value, color=color, alpha=0.8)
+
+#     # Customize plot
+#     plt.xticks(fontsize=12)
+#     plt.ylim(ylim)
+#     plt.ylabel("R² Score", fontsize=14)
+#     plt.title("R² of the Full Model", fontsize=14)
+#     plt.grid(axis="y", linestyle="--", alpha=0.6)
+
+#     plt.show()
+
+
+
+
 def plot_full_vs_all_predictors_boxplot(r2_results_df):
     """
     Plots the R² scores of the Full Model vs. All Predictors Model for all mice using boxplots.
@@ -275,58 +398,6 @@ def plot_model_parameters(parameters_dict, name=None):
     plt.show()
 
 
-def prop_explained_variance(results_df, exclude_mice=None):
-    """
-    Computes the proportion of explained variance for each omitted predictor in the leave-one-out models.
-    
-    Formula:
-        gain_predictor = abs(R²_full - R²_leave_one_out) / R²_full
-
-    Parameters:
-    - results_df (pd.DataFrame): DataFrame containing R² scores for each mouse and model type.
-      The DataFrame must include:
-        - 'Mouse': Mouse ID
-        - 'Model': Model type ('Full Model' and 'Leave-One-Out')
-        - 'Omitted Predictor': Name of the omitted predictor (only for 'Leave-One-Out' models)
-        - 'R²': R² score of the model
-    - exclude_mice (list, optional): List of mouse IDs to exclude from the analysis. Default is None.
-
-    Returns:
-    - pd.DataFrame: A new dataframe containing:
-        - 'Mouse': Mouse ID
-        - 'Omitted Predictor': The predictor that was left out
-        - 'R² Full Model': R² score of the full model
-        - 'R² Leave-One-Out': R² score of the leave-one-out model
-        - 'Prop Explained Variance': Proportional gain of the predictor
-    """
-    results_filtered = results_df.copy()
-
-    # Exclude specified mice if provided
-    if exclude_mice:
-        results_filtered = results_filtered[~results_filtered["Mouse"].isin(exclude_mice)]
-
-    # Extract full model R² scores
-    full_model_r2 = results_filtered[results_filtered["Model"] == "Full Model"].set_index("Mouse")["R²"]
-
-    # Extract leave-one-out model R² scores
-    leave_one_out_r2 = results_filtered[results_filtered["Model"] == "Leave-One-Out"].copy()
-
-    # Merge with full model R² to compute the explained variance
-    leave_one_out_r2["R² Full Model"] = leave_one_out_r2["Mouse"].map(full_model_r2)
-    leave_one_out_r2["R² Leave-One-Out"] = leave_one_out_r2["R²"]
-
-    # Compute proportional explained variance with absolute numerator
-    leave_one_out_r2["Prop Explained Variance"] = (
-        abs(leave_one_out_r2["R² Full Model"] - leave_one_out_r2["R² Leave-One-Out"]) / leave_one_out_r2["R² Full Model"]
-    )
-
-    # Select relevant columns
-    explained_variance_df = leave_one_out_r2[
-        ["Mouse", "Omitted Predictor", "R² Full Model", "R² Leave-One-Out", "Prop Explained Variance"]
-    ]
-
-    return explained_variance_df
-
 
 def plot_explained_variance(explained_variance_df, connect_mice=True):
     """
@@ -390,8 +461,263 @@ def plot_explained_variance(explained_variance_df, connect_mice=True):
 
     # Show legend only if connect_mice is True
     if connect_mice:
-        handles = [plt.Line2D([0], [0], color=colors(i), marker="o", linestyle="", label=mouse) for i, mouse in enumerate(mice[:10])]
+        handles = [plt.Line2D([0], [0], color=colors(i), marker="o", linestyle="", label=mouse) for i, mouse in enumerate(mice)]
         plt.legend(handles=handles, title="Mice", bbox_to_anchor=(1.05, 1), loc="upper left")
 
     plt.grid(axis="y", linestyle="--", alpha=0.6)
     plt.show()
+    
+
+def plot_learning_gain(explained_variance_df):
+    """
+    Plots a bar plot of the proportional explained variance for the 'Without Learning Term' model.
+    Includes error bars for SEM and overlays individual data points (no connection between mice).
+
+    Parameters:
+    - explained_variance_df (pd.DataFrame): DataFrame containing:
+        - 'Mouse': Mouse ID
+        - 'Prop Explained Variance': Computed gain in explained variance
+        - 'R² Full Model': R² score of the full model
+        - 'R² Without Learning Term': R² score of the model without learning term
+
+    Returns:
+    - None (Displays the plot)
+    """
+    # Compute mean and SEM
+    mean_variance = explained_variance_df["Prop Explained Variance"].mean()
+    sem_variance = explained_variance_df["Prop Explained Variance"].sem()
+
+    # Extract mice for plotting
+    mice = explained_variance_df["Mouse"].unique()
+
+    # Create figure
+    plt.figure(figsize=(6, 6))
+
+    # Plot bar for mean value
+    plt.bar(["Without Learning Term"], [mean_variance], yerr=[sem_variance], capsize=5, 
+            color="lightgray", alpha=0.8, label="Mean ± SEM")
+
+    # Add jitter to avoid overlapping points
+    jitter = np.random.uniform(-0.05, 0.05, size=len(mice))
+
+    # Plot individual points
+    for i, mouse in enumerate(mice):
+        y_value = explained_variance_df[explained_variance_df["Mouse"] == mouse]["Prop Explained Variance"].values[0]
+        plt.scatter(0 + jitter[i], y_value, color="black", alpha=0.8)  # Uniform color
+
+    # Customize plot
+    plt.xticks(fontsize=12)
+    plt.ylabel("Proportional Explained Variance", fontsize=14)
+    plt.title("Explained Variance by Learning Term", fontsize=14)
+    plt.grid(axis="y", linestyle="--", alpha=0.6)
+
+    plt.show()
+
+
+
+import scipy.stats as stats
+import itertools
+
+
+# def plot_all_explained_variance(explained_variance_dfs):
+#     """
+#     Plots multiple bar plots comparing different explained variance models.
+#     Performs paired Wilcoxon signed-rank tests between all model comparisons 
+#     and prints statistical results with significance levels.
+
+#     Parameters:
+#     - explained_variance_dfs (dict): Dictionary where keys are model names, and values are DataFrames
+#                                      with 'Mouse' and 'Prop Explained Variance' columns.
+
+#     Returns:
+#     - pd.DataFrame: Wilcoxon test statistics with p-values and significance levels.
+#     """
+
+#     models = list(explained_variance_dfs.keys())
+#     num_models = len(models)
+
+#     # Extract all unique mice across models
+#     all_mice = set.intersection(*(set(df["Mouse"]) for df in explained_variance_dfs.values()))  # Find common mice
+
+#     # Create figure
+#     plt.figure(figsize=(12, 6))
+
+#     # Extract means and SEM for each model
+#     mean_variance = {model: explained_variance_dfs[model]["Prop Explained Variance"].mean() for model in models}
+#     sem_variance = {model: explained_variance_dfs[model]["Prop Explained Variance"].sem() for model in models}
+
+#     # Plot bars
+#     x_positions = np.arange(num_models)
+#     plt.bar(x_positions, mean_variance.values(), yerr=sem_variance.values(), capsize=5, color="lightgray", alpha=0.8)
+
+#     # Overlay individual points (scatter plot)
+#     for i, model in enumerate(models):
+#         df_filtered = explained_variance_dfs[model][explained_variance_dfs[model]["Mouse"].isin(all_mice)]
+#         x_jittered = np.full(len(df_filtered), x_positions[i]) + np.random.uniform(-0.05, 0.05, len(df_filtered))
+#         plt.scatter(x_jittered, df_filtered["Prop Explained Variance"], color="black", alpha=0.8)
+
+#     # Perform Wilcoxon signed-rank tests and store results
+#     stat_results = []
+#     comparisons = list(itertools.combinations(models, 2))  # All possible model pairs
+    
+#     for model1, model2 in comparisons:
+#         df1 = explained_variance_dfs[model1]
+#         df2 = explained_variance_dfs[model2]
+        
+#         # Keep only common mice for paired comparison
+#         common_mice = all_mice & set(df1["Mouse"]) & set(df2["Mouse"])
+#         data1 = df1[df1["Mouse"].isin(common_mice)]["Prop Explained Variance"].values
+#         data2 = df2[df2["Mouse"].isin(common_mice)]["Prop Explained Variance"].values
+
+#         if len(data1) != len(data2):
+#             print(f"Skipping comparison {model1} vs {model2} due to mismatched sample sizes.")
+#             continue
+
+#         # Wilcoxon test
+#         stat, p_value = stats.wilcoxon(data1, data2)
+
+#         # Determine significance level
+#         if p_value < 0.001:
+#             significance = "***"
+#         elif p_value < 0.01:
+#             significance = "**"
+#         elif p_value < 0.05:
+#             significance = "*"
+#         else:
+#             significance = ""
+
+
+#         # Store results
+#         stat_results.append({
+#             "Comparison": f"{model1} vs {model2}",
+#             "Statistic": stat,
+#             "p-value": p_value,
+#             "Significance Level": significance
+#         })
+
+#     # Labels and title
+#     plt.xticks(x_positions, models, rotation=15, fontsize=12)
+#     plt.ylabel("Proportional Explained Variance", fontsize=14)
+#     plt.title("Explained Variance Across Models", fontsize=14)
+#     plt.grid(axis="y", linestyle="--", alpha=0.6)
+
+#     plt.show()
+
+#     return pd.DataFrame(stat_results)
+
+
+def plot_all_explained_variance(explained_variance_dfs):
+    """
+    Plots multiple box plots comparing different explained variance models.
+    Performs paired Wilcoxon signed-rank tests between all model comparisons 
+    and prints statistical results with significance levels.
+
+    Parameters:
+    - explained_variance_dfs (dict): Dictionary where keys are model names, and values are DataFrames
+                                     with 'Mouse' and 'Prop Explained Variance' columns.
+
+    Returns:
+    - pd.DataFrame: Wilcoxon test statistics with p-values and significance levels.
+    """
+
+    models = list(explained_variance_dfs.keys())
+
+    # Combine data from all models into a single DataFrame
+    combined_df = pd.concat(
+        [df.assign(Model=model) for model, df in explained_variance_dfs.items()], ignore_index=True
+    )
+
+    # Create figure
+    fig = plt.figure(figsize=(12, 6))
+
+    # Boxplot
+    sns.boxplot(
+        data=combined_df,
+        x="Model",
+        y="Prop Explained Variance",
+        width=0.2,
+        boxprops={"facecolor": "lightgray"},  # Box color
+        flierprops={"marker": "o", "markersize": 5, "alpha": 0.6},  # Outliers style
+    )
+
+    # Overlay individual points with jitter
+    for i, model in enumerate(models):
+        model_data = combined_df[combined_df["Model"] == model]
+        x_jittered = np.full(len(model_data), i) + np.random.uniform(-0.05, 0.05, len(model_data))
+        plt.scatter(x_jittered, model_data["Prop Explained Variance"], color="black", alpha=0.8, zorder=2)
+
+    # Perform Wilcoxon signed-rank tests and store results
+    stat_results = []
+    comparisons = list(itertools.combinations(models, 2))  # All possible model pairs
+    
+    for model1, model2 in comparisons:
+        df1 = explained_variance_dfs[model1]
+        df2 = explained_variance_dfs[model2]
+
+        # Find common mice
+        common_mice = set(df1["Mouse"]).intersection(set(df2["Mouse"]))
+        data1 = df1[df1["Mouse"].isin(common_mice)]["Prop Explained Variance"].values
+        data2 = df2[df2["Mouse"].isin(common_mice)]["Prop Explained Variance"].values
+
+        if len(data1) != len(data2):
+            print(f"Skipping comparison {model1} vs {model2} due to mismatched sample sizes.")
+            continue
+
+        # Wilcoxon test
+        stat, p_value = stats.wilcoxon(data1, data2)
+
+        # Determine significance level
+        if p_value < 0.001:
+            significance = "***"
+        elif p_value < 0.01:
+            significance = "**"
+        elif p_value < 0.05:
+            significance = "*"
+        else:
+            significance = ""
+
+        # Store results
+        stat_results.append({
+            "Comparison": f"{model1} vs {model2}",
+            "Statistic": stat,
+            "p-value": p_value,
+            "Significance Level": significance
+        })
+
+    # Labels and title
+    plt.xticks(range(len(models)), models, rotation=15, fontsize=12)
+    plt.ylabel("GLM Gain", fontsize=14)
+    plt.title("Explained Variance Across Models", fontsize=14)
+    plt.grid(axis="y", linestyle="--", alpha=0.6)
+
+    plt.show()
+
+    return pd.DataFrame(stat_results), fig
+
+
+
+import os
+
+def save_plot_as_svg(fig, filename, save_dir, dpi=300):
+    """
+    Saves a specified matplotlib figure as an SVG file in a given directory.
+
+    Parameters:
+    - fig (matplotlib.figure.Figure): The figure object to save.
+    - filename (str): Name of the file (without extension).
+    - save_dir (str): Path to the directory where the plot should be saved.
+    - dpi (int, optional): Resolution of the saved figure (default: 300).
+
+    Returns:
+    - None (Saves the figure as an SVG file).
+    """
+    # Ensure the directory exists
+    os.makedirs(save_dir, exist_ok=True)
+
+    # Construct the full file path
+    file_path = os.path.join(save_dir, f"{filename}.svg")
+
+    # Save the specified figure
+    fig.savefig(file_path, format="svg", dpi=dpi, bbox_inches="tight")
+
+    print(f"Plot saved: {file_path}")

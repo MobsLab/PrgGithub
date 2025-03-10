@@ -15,15 +15,26 @@ from transform_data import apply_sigmoid
 from fit_linear_model_r2 import ( 
     fit_models_for_all_mice
     )
-from plot_GLM_results import ( 
+from plot_GLM_results import (
+    plot_full_model_r2,
     plot_full_vs_all_predictors_boxplot, 
     plot_r2_single_predictor_models,
     plot_r2_leave_one_out_models,
     plot_model_parameters,
-    prop_explained_variance,
-    plot_explained_variance
+    plot_explained_variance,
+    plot_learning_gain,
+    plot_all_explained_variance,
+    save_plot_as_svg
     )
-from save_load_data import save_variable_to_json
+from analyse_results import (
+    prop_explained_variance,
+    extract_explained_variance_per_predictor,
+    compare_without_learning_term
+    )
+from save_load_data import ( 
+    # save_variable_to_json, 
+    load_variable_from_json
+    )
 
 # %% Load data
 
@@ -31,6 +42,8 @@ mat_folder = r'/media/nas7/ProjetEmbReact/DataEmbReact/Data_Model_Ella'
 mat_filename = r'Data_Model_Ella.mat'
 
 mice_data_original = load_mat_data(mat_folder, mat_filename)
+
+figrues_path = '/home/gruffalo/Dropbox/Mobs_member/EllaCallas/Figures/2025_GLM_Maheo_Bagur'
 
 # %% Keep needed columns and z-score
 
@@ -56,7 +69,27 @@ independent_vars = ["Time spent freezing", "Position_sig_Global_Time", "neg_exp_
 
 results, parameters = fit_models_for_all_mice(transformed_mice_data, param_grid, independent_vars)
 
-excluded_mice = [mouse for mouse, df in mice_data.items() if len(df) < 100]
+# %% Save or load results
+
+# save_variable_to_json(results, mat_folder + '/results_TF_GTxSigPos_expTLS_GT_Posalone_df.json')
+
+# save_variable_to_json(parameters, mat_folder + '/parameters_TF_GTxSigPos_expTLS_GT_Posalone_dict.json')
+
+results = load_variable_from_json(mat_folder + '/results_TF_GTxSigPos_expTLS_GT_Posalone_df.json')
+
+parameters = load_variable_from_json(mat_folder + '/parameters_TF_GTxSigPos_expTLS_GT_Posalone_dict.json')
+
+
+# %% Plot results 
+
+excluded_mice_length = [mouse for mouse, df in mice_data.items() if len(df) < 100]
+excluded_mice_value = results[(results["Model"] == "Full Model") & (results["R²"] <= 0)]["Mouse"].tolist()
+excluded_mice = excluded_mice_length + excluded_mice_value
+
+plot_full_model_r2(results)
+fullr2_colored = plot_full_model_r2(results, exclude_mice=excluded_mice, color_excluded=True)
+
+save_plot_as_svg(fullr2_colored, 'r2_full_model_excluded_colored', figrues_path)
 
 plot_full_vs_all_predictors_boxplot(results)
 
@@ -66,16 +99,30 @@ plot_r2_leave_one_out_models(results, excluded_mice=excluded_mice)
 
 plot_model_parameters(parameters, name=["op_point"])
 
-# %% Save
-
-save_variable_to_json(results, mat_folder + '/results_TF_GTxSigPos_expTLS_GT_df.json')
-
-save_variable_to_json(parameters, mat_folder + '/parameters_TF_GTxSigPos_expTLS_GT_dict.json')
 
 # %% Compute gain
 
-gain = prop_explained_variance(results, exclude_mice=['M1184', 'M1147', 'M1171', 'M1205', 'M1251', 'M779', 'M9205'])
+gain = prop_explained_variance(results, exclude_mice=excluded_mice)
 
 plot_explained_variance(gain, connect_mice=False)
+
+
+# %% Add model in which sigposxsiggt is replaced by sigpos alone
+
+gain_siggt = compare_without_learning_term(results, exclude_mice=excluded_mice)
+
+plot_learning_gain(gain_siggt)
+
+
+# %% Final figure
+
+gain_dict = extract_explained_variance_per_predictor(gain)
+
+gain_dict["Learning Term"] = gain_siggt[["Mouse", "Prop Explained Variance"]]  
+
+stats, fig = plot_all_explained_variance(gain_dict)
+
+save_plot_as_svg(fig, 'r2_comparison_all_models', figrues_path)
+
 
 

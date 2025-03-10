@@ -64,7 +64,7 @@ plot_mouse_column(transformed_mice_data, 'M1225', 'Global Time')
 df = transformed_mice_data['M1171']
 
 # Full model
-independent_vars = ["Position", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]
+# independent_vars = ["Position", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]
 independent_vars = ["Time spent freezing", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]
 
 

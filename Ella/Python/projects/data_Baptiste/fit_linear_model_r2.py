@@ -420,12 +420,96 @@ def fit_leave_one_out_models(df, best_params, independent_vars, raw_predictors=N
     return results
 
 
+def fit_replace_sigGT(df, best_params, independent_vars, raw_predictors=None, k_folds=5):
+    """
+    Fits a multiple linear regression model while replacing 'Position_sig_Global_Time' 
+    with 'Position' if it is present in the list of independent variables.
+
+    Parameters:
+        df (pd.DataFrame): Dataframe containing the raw features and target variable.
+        best_params (dict): Dictionary of best hyperparameters obtained from grid search.
+        independent_vars (list): List of predictor variables to use in the model (raw or transformed).
+        raw_predictors (list, optional): List of raw predictors that are used directly in the model.
+        k_folds (int, optional): Number of folds for cross-validation (default: 5).
+
+    Returns:
+        dict: A dictionary containing:
+              - 'coefficients': Dictionary of beta coefficients.
+              - 'intercept': Intercept of the model.
+              - 'mean_r2': Mean R² score from cross-validation.
+              - 'mean_mae': Mean MAE score from cross-validation.
+    """
+
+    # Ensure raw_predictors is a list (avoid TypeError if None)
+    raw_predictors = raw_predictors if raw_predictors else []
+
+    # Clean best_params keys by removing "feature_transform__" prefix
+    cleaned_params = {key.replace("feature_transform__", ""): value for key, value in best_params.items()}
+
+    # Ensure the DataFrame contains all raw features (for transformation & model fitting)
+    required_raw_features = ["Position", "Global Time", "Time since last shock", "Time spent freezing"]
+    raw_features_needed = list(set(required_raw_features) & set(df.columns))  # Only keep available columns
+
+    # **Replace 'Position_sig_Global_Time' with 'Position' if present in independent_vars**
+    modified_vars = [
+        "Position" if var == "Position_sig_Global_Time" else var for var in independent_vars
+    ]
+
+    # Separate transformed features from raw predictors
+    transformed_vars = [var for var in modified_vars if var not in raw_predictors]
+    raw_vars = [var for var in modified_vars if var in raw_predictors]
+
+    # Apply feature transformation only if needed
+    feature_transformer = FeatureTransformer(**cleaned_params, selected_vars=transformed_vars)
+    df_transformed = feature_transformer.fit_transform(df[raw_features_needed]) if transformed_vars else pd.DataFrame()
+
+    # Include raw predictors
+    if raw_vars:
+        df_transformed[raw_vars] = df[raw_vars]
+
+    # Define cross-validation
+    kf = KFold(n_splits=k_folds, shuffle=True, random_state=42)
+
+    # Define pipeline
+    pipeline = Pipeline([
+        ("regressor", LinearRegression())  # Fit linear regression
+    ])
+
+    # Extract target variable
+    y = df["OB frequency"]
+
+    # Compute cross-validated scores BEFORE fitting on full data
+    r2_scores = cross_val_score(pipeline, df_transformed, y, cv=kf, scoring="r2")
+    mean_r2 = np.mean(r2_scores)
+
+    mae_scores = cross_val_score(pipeline, df_transformed, y, cv=kf, scoring="neg_mean_absolute_error")
+    mean_mae = -np.mean(mae_scores)  # Convert to positive MAE
+
+    # Fit the model using modified predictors
+    pipeline.fit(df_transformed, y)
+    fitted_model = pipeline.named_steps["regressor"]
+
+    # Store coefficients
+    coefficients = dict(zip(df_transformed.columns, fitted_model.coef_))
+    intercept = fitted_model.intercept_
+
+    # Return results
+    return {
+        "coefficients": coefficients,
+        "intercept": intercept,
+        "mean_r2": mean_r2,  # Now matches GridSearchCV
+        "mean_mae": mean_mae
+    }
+
+
+
 def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
     """
     Fits multiple linear regression models for each mouse in the dataset:
     - Full model (all predictors)
     - Single predictor models (one at a time)
     - Leave-one-out models (all but one predictor)
+    - Model replacing Position_sig_Global_Time with Position (stored as 'Without Learning Term')
 
     Parameters:
     - mice_data (dict): Dictionary containing mouse IDs as keys and their dataframes as values.
@@ -480,6 +564,16 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
                 "R²": metrics["mean_r2"]
             })
 
+        # Fit the model with Position instead of Position_sig_Global_Time
+        replace_sigGT_results = fit_replace_sigGT(df, best_results["best_params"], independent_vars)
+
+        results.append({
+            "Mouse": mouse_id,
+            "Model": "Modified Model",
+            "Predictor": "Without Learning Term",
+            "R²": replace_sigGT_results["mean_r2"]
+        })
+
         # Store the results for the full and all-predictor models
         results.append({
             "Mouse": mouse_id,
@@ -499,6 +593,87 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
     results_df = pd.DataFrame(results)
 
     return results_df, best_params_dict  # Return both results and best parameters
+
+
+# def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
+#     """
+#     Fits multiple linear regression models for each mouse in the dataset:
+#     - Full model (all predictors)
+#     - Single predictor models (one at a time)
+#     - Leave-one-out models (all but one predictor)
+
+#     Parameters:
+#     - mice_data (dict): Dictionary containing mouse IDs as keys and their dataframes as values.
+#     - param_grid (dict): Grid search parameters for hyperparameter tuning.
+#     - independent_vars (list): List of predictor variables to use in the model (raw or transformed).
+
+#     Returns:
+#     - pd.DataFrame: DataFrame containing R² scores for each mouse and model type.
+#     - dict: Dictionary containing the best parameters of the full model for each mouse.
+#     """
+
+#     results = []
+#     best_params_dict = {}  # Store best parameters for each mouse
+
+#     for mouse_id, df in mice_data.items():
+#         print(f"\nProcessing Mouse: {mouse_id}")
+
+#         if df.empty:
+#             print(f"  Warning: Mouse {mouse_id} has an empty dataframe. Skipping.")
+#             continue
+
+#         # Fit the full model
+#         best_results = find_best_linear_model(df, param_grid, independent_vars)
+#         best_r2 = best_results["best_score"]
+
+#         # Store best parameters
+#         best_params_dict[mouse_id] = best_results["best_params"]
+
+#         # Fit all predictors model
+#         all_results = fit_all_predictors_model(df, best_results["best_params"], independent_vars)
+#         all_r2 = all_results["mean_r2"]
+
+#         # Fit single predictor models
+#         single_predictor_results = fit_single_predictor_models(df, best_results["best_params"], independent_vars)
+
+#         for predictor, metrics in single_predictor_results.items():
+#             results.append({
+#                 "Mouse": mouse_id,
+#                 "Model": "Single Predictor",
+#                 "Predictor": predictor,
+#                 "R²": metrics["mean_r2"]
+#             })
+
+#         # Fit leave-one-out models
+#         leave_one_out_results = fit_leave_one_out_models(df, best_results["best_params"], independent_vars)
+
+#         for omitted_predictor, metrics in leave_one_out_results.items():
+#             results.append({
+#                 "Mouse": mouse_id,
+#                 "Model": "Leave-One-Out",
+#                 "Omitted Predictor": omitted_predictor,
+#                 "R²": metrics["mean_r2"]
+#             })
+
+#         # Store the results for the full and all-predictor models
+#         results.append({
+#             "Mouse": mouse_id,
+#             "Model": "Full Model",
+#             "Predictor": "All Predictors",
+#             "R²": best_r2
+#         })
+
+#         results.append({
+#             "Mouse": mouse_id,
+#             "Model": "All Predictors Model",
+#             "Predictor": "All Predictors",
+#             "R²": all_r2
+#         })
+
+#     # Convert results to a Pandas DataFrame
+#     results_df = pd.DataFrame(results)
+
+#     return results_df, best_params_dict  # Return both results and best parameters
 
 
 
