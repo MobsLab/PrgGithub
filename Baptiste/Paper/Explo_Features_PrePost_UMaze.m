@@ -1,9 +1,10 @@
-% After AllSalineAnalysis_Maze_Paper_SBM
-% or
+
+
 load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/ZoneAnalysis.mat')
 
-%
-GetAllSalineSessions_BM
+% or 
+
+GetEmbReactMiceFolderList_BM
 Mouse=Drugs_Groups_UMaze_BM(22);
 Session_type={'TestPre','TestPost'};
 for sess=1:2
@@ -18,74 +19,45 @@ for sess=1:2
         disp(mouse)
     end
 end
+Session_type={'Cond'}; sess=1;
 for mouse=1:length(Mouse)
     Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
     clear ZoneEpoch FreezeEpoch
     ZoneEpoch = ConcatenateDataFromFolders_SB(CondSess.(Mouse_names{mouse}) , 'epoch' , 'epochname' , 'zoneepoch_behav');
     FreezeEpoch = ConcatenateDataFromFolders_SB(CondSess.(Mouse_names{mouse}) , 'epoch' , 'epochname' , 'freezeepoch_withnoise');
-    FreezeShockDur(mouse) = sum(DurationEpoch(and(FreezeEpoch , ZoneEpoch{1})))/60e4;
-    FreezeSafeDur(mouse) = sum(DurationEpoch(and(FreezeEpoch , or(ZoneEpoch{2} , ZoneEpoch{5}))))/60e4;
-    FreezeShockDur_prop(mouse) = sum(DurationEpoch(and(FreezeEpoch , ZoneEpoch{1})))/sum(DurationEpoch(ZoneEpoch{1}));
-    FreezeSafeDur_prop(mouse) = sum(DurationEpoch(and(FreezeEpoch , or(ZoneEpoch{2} , ZoneEpoch{5}))))/sum(DurationEpoch(or(ZoneEpoch{2} , ZoneEpoch{5})));
+    FreezeDur.(Session_type{sess}){1}(mouse) = sum(DurationEpoch(and(FreezeEpoch , ZoneEpoch{1})))/60e4;
+    FreezeDur.(Session_type{sess}){2}(mouse) = sum(DurationEpoch(and(FreezeEpoch , or(ZoneEpoch{2} , ZoneEpoch{5}))))/60e4;
+    FreezeDur_prop.(Session_type{sess}){1}(mouse) = sum(DurationEpoch(and(FreezeEpoch , ZoneEpoch{1})))/sum(DurationEpoch(ZoneEpoch{1}));
+    FreezeDur_prop.(Session_type{sess}){2}(mouse) = sum(DurationEpoch(and(FreezeEpoch , or(ZoneEpoch{2} , ZoneEpoch{5}))))/sum(DurationEpoch(or(ZoneEpoch{2} , ZoneEpoch{5})));
     
     disp(mouse)
 end
 
+
 %% Explo
 figure
 subplot(121)
-A = PropTime_Shock.TestPre;
-B = PropTime_Safe.TestPre;
-ind=or(A>.7,B>.7); % remove mice that spent more than 70% of time in shock zone. 3/51 : 436   469   471.
-A(ind) = NaN;
-B(ind) = NaN;
-MakeSpreadAndBoxPlot3_SB({A B},Cols,X,Legends,'showpoints',0,'paired',1);
+MakeSpreadAndBoxPlot3_SB({ZoneEpochDur.TestPre{1} ZoneEpochDur.TestPre{2}},Cols,X,Legends,'showpoints',0,'paired',1);
 ylim([0 1.2]), ylabel('proportion of time')
-[h,p] = ttest(A , B)
-
-plot([1 2],[1.1 1.1],'-k','LineWidth',1.5,'Tag','sigstar_bar');
-text(1.5,1.15,'ns','HorizontalAlignment','Center','BackGroundColor','none','FontSize',15);
 makepretty_BM2
-
 
 subplot(122)
-A = PropTime_Shock.TestPost; A(isnan(A))=0;
-B = PropTime_Safe.TestPost;
-MakeSpreadAndBoxPlot3_SB({A B},Cols,X,Legends,'showpoints',0,'paired',1,'showsigstar','none');
-ylim([0 1.2])
-[h,p] = ttest(A , B)
-
-plot([1 2],[1.1 1.1],'-k','LineWidth',1.5,'Tag','sigstar_bar');
-text(1.5,1.12,'***','HorizontalAlignment','Center','BackGroundColor','none','Tag','sigstar_stars','FontSize',20);
+MakeSpreadAndBoxPlot3_SB({ZoneEpochDur.TestPost{1} ZoneEpochDur.TestPost{2}},Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 1.2]), ylabel('proportion of time')
 makepretty_BM2
-
-
-
 
 
 %% Fz
 figure
 subplot(121)
-A = FreezingShock_Dur.Fear{1}/60; 
-B = FreezingSafe_Dur.Fear{1}/60;
-MakeSpreadAndBoxPlot3_SB({A B},Cols,X,Legends,'showpoints',0,'paired',1);
-ylim([0 30]), ylabel('freezing duration (min)')
+MakeSpreadAndBoxPlot3_SB(FreezeDur.Cond,Cols,X,Legends,'showpoints',0,'paired',1);
+ylim([0 25]), ylabel('freezing duration (min)'), set(gca,'YScale','log')
 makepretty_BM2
-
 
 subplot(122)
-A = FreezingShock_prop.Fear{1}; 
-B = FreezingSafe_prop.Fear{1};
-MakeSpreadAndBoxPlot3_SB({A B},Cols,X,Legends,'showpoints',0,'paired',1,'showsigstar','none');
-ylim([0 1]), ylabel('freezing duration (min)')
-[h,p] = ttest(A , B)
-
-plot([1 2],[23 23],'-k','LineWidth',1.5,'Tag','sigstar_bar');
-text(1.5,24,'*','HorizontalAlignment','Center','BackGroundColor','none','Tag','sigstar_stars','FontSize',20);
+MakeSpreadAndBoxPlot3_SB(FreezeDur_prop.Cond,Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('freezing proportion')
 makepretty_BM2
-
-
-
 
 
 

@@ -9,7 +9,7 @@ function Mouse=Drugs_Groups_UMaze_BM(group)
 if group==1 % saline mice, long protocol, SB
     Mouse=[688 739 777 779 849 893]; % add 1096 ?
 elseif group==2 % chronic flx mice, long protocol
-    Mouse=[875 876 877 1001 1002 1095 1130];
+    Mouse=[875 876 877 1001 1002 1095]; % 1130
 elseif group==3 % Acute Flx, long protocol
     Mouse=[740 750 775 778 794];
 elseif group==4 % midazolam mice, long protocol
@@ -42,8 +42,8 @@ elseif group==15 % DZP  short all
     %     Mouse=[11189 11200 11204 11205 11206 11207 11251 11252 11253 11254];
 elseif group==16 % DZP  second maze
     Mouse=[11147 11184 11189 11204 11205];
-elseif group ==17 % Saline long BM & CH
-    Mouse = [1161,1184,1205,1223,1224,1225,1226,1227 1500 1501 1529 1530 1532];
+elseif group ==17 % Saline long all
+    Mouse = [688 739 777 779 849 893 1161,1184,1205,1223,1224,1225,1226,1227 1500 1501 1529 1530 1532];
 elseif group==18 % Atropine CH
     Mouse=[1561 1562 1563];
     
@@ -98,11 +98,6 @@ elseif group==23
     %     Mouse=[1184 1205 1224 1225 1226];
     % elseif group==13 % DZP long BM
     %     Mouse=[11225 11226 11203 1199 1230 1223];
-    
-    % all saline long SB, BM, CH
-     elseif group==25 % chronic BUS
-       Mouse = [688 739 777 779 849 893 1096 1161,1184,1205,1223,1224,1225,1226,1227 1500 1501 1529 1530 1532 1685,1686,1687,1688];
-
 end
 
 

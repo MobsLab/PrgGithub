@@ -69,6 +69,7 @@ SpeedLim = 1;
 %% data collection
 clear Prop_bin
 for group=1:length(Drug_Group)
+    Mouse = Drugs_Groups_UMaze_BM(Group(group));
     disp(Drug_Group{group})
     for mouse=1:length(Dir.(Drug_Group{group}))
         try

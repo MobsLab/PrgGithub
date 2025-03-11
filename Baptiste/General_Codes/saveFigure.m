@@ -30,7 +30,7 @@ try
     saveas(n,[Dossier filesep title '.svg'])
     eval(['print -f',num2str(n),' -painters',' -depsc2 ',Dossier filesep title,'.eps'])
 catch
-    % try was added to accomodate new Matlab version - SB
+%     try was added to accomodate new Matlab version - SB
     try
         eval(['print -f',num2str(n.Number),' -dpng ', Dossier filesep title,'.png'])
         saveas(n,[Dossier filesep title '.fig'])

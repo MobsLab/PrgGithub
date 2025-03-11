@@ -101,8 +101,8 @@ elseif strcmp(experiment,'mCherry_CRH_VLPO_CNOInjection_10am')
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1580/20240430/Sleep_CNOInjection/mCherry_CRH_1580_CNOInj_10h_240430_100221/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     %Mouse 1581 %%big insomnia during the day : to suppress ?? same as in saline
-%     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1581/20240430/Sleep_CNOInjection/mCherry_CRH_1581_CNOInj_10h_240430_100221/';
-%     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
+    a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1581/20240430/Sleep_CNOInjection/mCherry_CRH_1581_CNOInj_10h_240430_100221/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
 
     %3rd batch
     %Mouse 1634
@@ -112,8 +112,8 @@ elseif strcmp(experiment,'mCherry_CRH_VLPO_CNOInjection_10am')
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1635/20240807/Sleep_CNOInjection_10h/CRH_mCherry_1635_CNOInjection_240807_100002/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     %Mouse 1636 %weird gamma and accelero scoring with a lot of changes in the begining of the session, wake is not scored properly
-    a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1636/20240813/Sleep_CNOInjection_10h/CRH_mCherry_1636_CNOInj_240813_100854/';
-    load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
+%     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1636/20240813/Sleep_CNOInjection_10h/CRH_mCherry_1636_CNOInj_240813_100854/';
+%     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;
     %Mouse 1637
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1637/20240813/Sleep_CNOInjection_10h/CRH_mCherry_1637_CNOInj_240813_100854/';
     load([Dir.path{a}{1},'ExpeInfo.mat']); Dir.ExpeInfo{a}=ExpeInfo,Dir.nMice{a}=ExpeInfo.nmouse;

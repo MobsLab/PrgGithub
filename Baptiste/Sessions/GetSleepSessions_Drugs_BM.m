@@ -3,19 +3,19 @@ function SleepInfo = GetSleepSessions_Drugs_BM
 %% Sleep Saline
 m=1;
 
-SleepInfo.path{m}{1}='/media/nas7/Nicotine/Mouse1411/20230224/';
-SleepInfo.path{m}{2}='/media/nas7/Nicotine/Mouse1412/20230224/'; 
-SleepInfo.path{m}{3}='/media/nas7/Nicotine/Mouse1414/20230224/'; 
-SleepInfo.path{m}{4}='/media/nas7/Nicotine/Mouse1416/20230301/';
-SleepInfo.path{m}{5}='/media/nas7/Nicotine/Mouse1417/20230301/'; 
-SleepInfo.path{m}{6}='/media/nas7/Nicotine/Mouse1418/20230301/'; 
-SleepInfo.path{m}{7}='/media/nas6/ProjetEmbReact/Mouse1207/20210813/';
-SleepInfo.path{m}{8}='/media/nas6/ProjetEmbReact/Mouse1224/20210813/';
-SleepInfo.path{m}{9}='/media/nas6/ProjetEmbReact/Mouse1225/20210813/';
-SleepInfo.path{m}{10}='/media/nas6/ProjetEmbReact/Mouse1227/20210813/';
-SleepInfo.path{m}{11}='/media/nas6/ProjetEmbReact/Mouse1252/20220104/';
-SleepInfo.path{m}{12}='/media/nas6/ProjetEmbReact/Mouse1253/20220107/';
-SleepInfo.path{m}{13}='/media/nas6/ProjetEmbReact/Mouse1254/20220107/';
+a=1;
+SleepInfo.path{m}{a}='/media/nas7/Nicotine/Mouse1411/20230224/'; a=a+1;
+SleepInfo.path{m}{a}='/media/nas7/Nicotine/Mouse1412/20230224/'; a=a+1;
+SleepInfo.path{m}{a}='/media/nas7/Nicotine/Mouse1414/20230224/'; a=a+1; 
+SleepInfo.path{m}{a}='/media/nas7/Nicotine/Mouse1417/20230301/'; a=a+1; 
+SleepInfo.path{m}{a}='/media/nas7/Nicotine/Mouse1418/20230301/'; a=a+1; 
+SleepInfo.path{m}{a}='/media/nas6/ProjetEmbReact/Mouse1207/20210813/'; a=a+1;
+SleepInfo.path{m}{a}='/media/nas6/ProjetEmbReact/Mouse1224/20210813/'; a=a+1;
+SleepInfo.path{m}{a}='/media/nas6/ProjetEmbReact/Mouse1225/20210813/'; a=a+1;
+SleepInfo.path{m}{a}='/media/nas6/ProjetEmbReact/Mouse1227/20210813/'; a=a+1;
+SleepInfo.path{m}{a}='/media/nas6/ProjetEmbReact/Mouse1252/20220104/'; a=a+1;
+SleepInfo.path{m}{a}='/media/nas6/ProjetEmbReact/Mouse1253/20220107/'; a=a+1;
+SleepInfo.path{m}{a}='/media/nas6/ProjetEmbReact/Mouse1254/20220107/'; a=a+1;
 
 
 %% Sleep DZP

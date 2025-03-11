@@ -230,7 +230,7 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2},[1:2],legend,'paired',1,'showsigstar','none')
 set(gca,'xticklabels',[])
 ylabel('Wake number')
-% makepretty
+makepretty_BM2
 ylim([0 100])
 
 if isparam==0 %%version ranksum (non param)
@@ -259,7 +259,7 @@ MakeSpreadAndBoxPlot2_MC({nanmean(data_num_WAKE_end_1,2), nanmean(data_num_WAKE_
     {col_1,col_2},[1:2],legend,'paired',1,'showsigstar','none') 
 set(gca,'xticklabels',[])
 ylabel('Wake number')
-% makepretty
+makepretty_BM2
 % ylim([0 50])
 
 if isparam==0 %%version ranksum (non param)
@@ -292,7 +292,7 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2},[1:2],legend,'paired',1,'showsigstar','none')
 set(gca,'xticklabels',[])
 ylabel('NREM number')
-% makepretty
+makepretty_BM2
 % ylim([0 100])
 if isparam==0 %%version ranksum (non param)
     %phase1
@@ -320,7 +320,7 @@ MakeSpreadAndBoxPlot2_MC({nanmean(data_num_SWS_end_1,2), nanmean(data_num_SWS_en
     {col_1,col_2},[1:2],legend,'paired',1,'showsigstar','none') 
 set(gca,'xticklabels',[])
 ylabel('NREM number')
-% makepretty
+makepretty_BM2
 % ylim([0 80])
 
 if isparam==0 %%version ranksum (non param)
@@ -351,7 +351,7 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2},[1:2],legend,'paired',1,'showsigstar','none') 
 % set(gca,'xticklabels',[])
 ylabel('REM number')
-% makepretty
+makepretty_BM2
 % ylim([0 10])
 
 if isparam==0 %%version ranksum (non param)
@@ -379,7 +379,7 @@ MakeSpreadAndBoxPlot2_MC({nanmean(data_num_REM_end_1,2), nanmean(data_num_REM_en
     {col_1,col_2},[1:2],legend,'paired',1,'showsigstar','none') 
 % set(gca,'xticklabels',[])
 ylabel('REM number')
-% makepretty
+makepretty_BM2
 % ylim([0 15])
 
 if isparam==0 %%version ranksum (non param)

@@ -6,34 +6,32 @@ load('/media/nas7/ProjetEmbReact/DataEmbReact/Control_TemporalBiased.mat')
 
 %% generate data
 clear all
-
-GetAllSalineSessions_BM
 GetEmbReactMiceFolderList_BM
-Mouse = Drugs_Groups_UMaze_BM(11);
+Mouse = Drugs_Groups_UMaze_BM(22);
 Session_type = {'Habituation','sleep_pre','Cond','Ext'};
 
 for mouse=1:length(Mouse)
     Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
-    for sess=2%1:4
+    for sess=1:4
         Sessions_List_ForLoop_BM
         
         if sess~=2
             try
-                %                 Acc.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'accelero');
-                %                 FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'epoch','epochname','fz_epoch_withnoise');
-                %                 ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'epoch','epochname','zoneepoch_behav');
-                %                 ShockZone.(Session_type{sess}).(Mouse_names{mouse}) = ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}){1};
-                %                 SafeZone.(Session_type{sess}).(Mouse_names{mouse}) = or(ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}){2} , ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}){5});
-                %
-                %                 FreezingShock.(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) , ShockZone.(Session_type{sess}).(Mouse_names{mouse}));
-                %                 FreezingSafe.(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) , SafeZone.(Session_type{sess}).(Mouse_names{mouse}));
-                %                 TotDur.(Session_type{sess}).(Mouse_names{mouse}) = max(Range(Acc.(Session_type{sess}).(Mouse_names{mouse})));
+                Acc.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'accelero');
+                FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'epoch','epochname','freezeepoch_withnoise');
+                ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'epoch','epochname','zoneepoch_behav');
+                ShockZone.(Session_type{sess}).(Mouse_names{mouse}) = ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}){1};
+                SafeZone.(Session_type{sess}).(Mouse_names{mouse}) = or(ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}){2} , ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}){5});
+                
+                FreezingShock.(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) , ShockZone.(Session_type{sess}).(Mouse_names{mouse}));
+                FreezingSafe.(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) , SafeZone.(Session_type{sess}).(Mouse_names{mouse}));
+                TotDur.(Session_type{sess}).(Mouse_names{mouse}) = max(Range(Acc.(Session_type{sess}).(Mouse_names{mouse})));
                 FreezeAll_Prop{sess}(mouse) = sum(DurationEpoch(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse})))/TotDur.(Session_type{sess}).(Mouse_names{mouse});
-                FreezeShock_Prop{sess}(mouse) = sum(DurationEpoch(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse})))/TotDur.(Session_type{sess}).(Mouse_names{mouse});
+                FreezeShock_Prop{sess}(mouse) = sum(DurationEpoch(FreezingShock.(Session_type{sess}).(Mouse_names{mouse})))/TotDur.(Session_type{sess}).(Mouse_names{mouse});
                 FreezeSafe_Prop{sess}(mouse) = sum(DurationEpoch(FreezingSafe.(Session_type{sess}).(Mouse_names{mouse})))/TotDur.(Session_type{sess}).(Mouse_names{mouse});
-                %                 FreezeAll_Time{sess}{mouse} = DurationEpoch(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}))/1e4;
-                                FreezeShock_Time{sess}{mouse} = DurationEpoch(FreezingShock.(Session_type{sess}).(Mouse_names{mouse}))/1e4;
-                %                 FreezeSafe_Time{sess}{mouse} = DurationEpoch(FreezingSafe.(Session_type{sess}).(Mouse_names{mouse}))/1e4;
+                FreezeAll_Time{sess}{mouse} = DurationEpoch(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}))/1e4;
+                FreezeShock_Time{sess}{mouse} = DurationEpoch(FreezingShock.(Session_type{sess}).(Mouse_names{mouse}))/1e4;
+                FreezeSafe_Time{sess}{mouse} = DurationEpoch(FreezingSafe.(Session_type{sess}).(Mouse_names{mouse}))/1e4;
                 
                 for bin=1:20
                     SmallEp = intervalSet((TotDur.(Session_type{sess}).(Mouse_names{mouse})/20)*(bin-1) , (TotDur.(Session_type{sess}).(Mouse_names{mouse})/20)*bin);
@@ -44,7 +42,8 @@ for mouse=1:length(Mouse)
             end
         else
             try
-                NewMovAcctsd = tsd(Range(OutPutData.sleep_pre.accelero.tsd{mouse,2}) , runmean(Data(OutPutData.sleep_pre.accelero.tsd{mouse,2}),30));
+                Acctsd = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'accelero');
+                NewMovAcctsd = tsd(Range(Acctsd) , runmean(Data(Acctsd),30));
                 if mouse<36
                     FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) = thresholdIntervals(NewMovAcctsd,1e7,'Direction','Below');
                 else
@@ -54,19 +53,19 @@ for mouse=1:length(Mouse)
                 FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) = dropShortIntervals(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}),2*1E4);
                 WakeDur.(Session_type{sess}).(Mouse_names{mouse}) = sum(DurationEpoch(Epoch1.sleep_pre{mouse,2}));
                 TotDur.(Session_type{sess}).(Mouse_names{mouse}) = max(Range(OutPutData.sleep_pre.accelero.tsd{mouse,2}));
-
-                % if you want to consider only wake before first 30s sleep
-%                 Sleep1 = Epoch1.sleep_pre{mouse,3};
-%                 Sleep1 = dropShortIntervals(Sleep1,30e4);
-%                 Sleep_Beginning = Start(Sleep1) ;
-%                 Wake_Before_Sleep_Epoch{mouse} = intervalSet(0 , Sleep_Beginning(1));
-%                 Wake_Before_Sleep_dur.(Session_type{sess}).(Mouse_names{mouse}) = sum(DurationEpoch(Wake_Before_Sleep_Epoch{mouse}));
                 
-%                 Wake_Before_Sleep_dur.(Session_type{sess}).(Mouse_names{mouse}) = sum(DurationEpoch(Wake_Before_Sleep_Epoch{mouse}));
+                % if you want to consider only wake before first 30s sleep
+                Sleep1 = Epoch1.sleep_pre{mouse,3};
+                Sleep1 = dropShortIntervals(Sleep1,30e4);
+                Sleep_Beginning = Start(Sleep1) ;
+                Wake_Before_Sleep_Epoch{mouse} = intervalSet(0 , Sleep_Beginning(1));
+                Wake_Before_Sleep_dur.(Session_type{sess}).(Mouse_names{mouse}) = sum(DurationEpoch(Wake_Before_Sleep_Epoch{mouse}));
+                
+                Wake_Before_Sleep_dur.(Session_type{sess}).(Mouse_names{mouse}) = sum(DurationEpoch(Wake_Before_Sleep_Epoch{mouse}));
                 FreezeAll_Prop{sess}(mouse) = sum(DurationEpoch(and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) ,...
                     Epoch1.sleep_pre{mouse,2})))/TotDur.(Session_type{sess}).(Mouse_names{mouse});
-                %                 FreezeAll_Prop{sess}(mouse) = sum(DurationEpoch(and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) ,...
-                %                     Epoch1.sleep_pre{mouse,2})))/WakeDur.(Session_type{sess}).(Mouse_names{mouse});
+                FreezeAll_Prop{sess}(mouse) = sum(DurationEpoch(and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) ,...
+                    Epoch1.sleep_pre{mouse,2})))/WakeDur.(Session_type{sess}).(Mouse_names{mouse});
                 QW_HC_Time{sess}{mouse} = DurationEpoch(and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) ,...
                     Epoch1.sleep_pre{mouse,2}))/1e4;
                 
@@ -126,23 +125,23 @@ NoLegends2 = {'','',''};
 figure
 subplot(355)
 PlotErrorBarN_KJ(FreezeAll_Prop,'barcolors',{[.5 .5 .5]},'paired',0,'newfig',0)
-xticks([1:4]), xticklabels(Legends), xtickangle(45)
+xticks([1:4]), xticklabels(NoLegends2), xtickangle(45)
 % MakeSpreadAndBoxPlot3_SB(FreezeAll_Prop,Cols1,X,Legends,'showpoints',0,'paired',1);
-ylabel('freezing proportion'), ylim([0 .85])
+ylabel('freezing proportion'), ylim([0 .4])
 makepretty_BM2
 
 subplot(3,5,10)
 PlotErrorBarN_KJ(FreezeShock_Prop([1 3 4]),'barcolors',{[1 .5 .5]},'paired',0,'newfig',0)
 xticks([1:4]), xticklabels(NoLegends2), xtickangle(45)
 % MakeSpreadAndBoxPlot3_SB(FreezeShock_Prop([1 3 4]),Cols2,X2,NoLegends2,'showpoints',0,'paired',1);
-ylabel('freezing proportion'),ylim([0 .85])
+ylabel('freezing proportion'),ylim([0 .4])
 makepretty_BM2
 
 subplot(3,5,15)
 PlotErrorBarN_KJ(FreezeSafe_Prop([1 3 4]),'barcolors',{[.5 .5 1]},'paired',0,'newfig',0)
 xticks([1:4]), xticklabels(Legends2), xtickangle(45)
 % MakeSpreadAndBoxPlot3_SB(FreezeSafe_Prop([1 3 4]),Cols3,X2,Legends2,'showpoints',0,'paired',1);
-ylabel('freezing proportion'), ylim([0 .85])
+ylabel('freezing proportion'), ylim([0 .4])
 makepretty_BM2
 
 
@@ -157,7 +156,7 @@ box off
 ylabel('freezing proportion')
 makepretty_BM2
 vline([40.5 60.5],'--k'), line([20.5 20.5],[0 .3],'LineStyle','--','Color','k'), text(15,.35,'first aversive stimulation')
-text(6,.45,'Habituation','FontSize',15), text(26,.45,'Awake in homecage','FontSize',15), text(46,.45,'Conditioning','FontSize',15)
+text(6,.45,'Habituation','FontSize',15), text(26,.45,'Conditioning','FontSize',15), text(46,.45,'Recall','FontSize',15)
 text(66,.45,'Recall','FontSize',15)
 
 subplot(3,5,6:9)

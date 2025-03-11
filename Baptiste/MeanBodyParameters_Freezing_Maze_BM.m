@@ -50,26 +50,132 @@ makepretty_BM2
 
 
 %% mean spectrum
+clear all
 Session_type={'Cond'};
 Mouse=Drugs_Groups_UMaze_BM(22);
-[OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
-MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ob_low');
+for sess=1:length(Session_type)
+    [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
+        MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ob_low','ob_high','hpc_low','hpc_vhigh');
+end
 
+
+% display
+figure
+subplot(141)
+[~,Pow_ob_low_shock,Freq_ob_low_shock] = Plot_MeanSpectrumForMice_BM(squeeze(OutPutData.Cond.ob_low.mean(:,5,:)) , 'color' , [1 .5 .5]);
+[~,Pow_ob_low_safe,Freq_ob_low_safe] = Plot_MeanSpectrumForMice_BM(squeeze(OutPutData.Cond.ob_low.mean(:,6,:)) , 'color' , [.5 .5 1] , 'power_norm_value' , Pow_ob_low_shock);
+makepretty, xlim([0 10])
+f=get(gca,'Children'); legend([f(5),f(1)],'Shock','Safe');
+
+subplot(142)
+[~,MaxPowerValues1] = Plot_MeanSpectrumForMice_BM(squeeze(OutPutData.Cond.hpc_low.mean(:,5,:)) , 'color' , [1 .5 .5] , 'threshold' , 39 , 'dashed_line' , 0);
+Plot_MeanSpectrumForMice_BM(squeeze(OutPutData.Cond.hpc_low.mean(:,6,:)) , 'color' , [.5 .5 1] , 'threshold' , 39 , 'power_norm_value' , MaxPowerValues1 , 'dashed_line' , 0);
+makepretty, xlim([1 20]), ylim([0 1.5])
+
+subplot(143)
+[~,Pow_ob_high_shock,Freq_ob_high_shock] = Plot_MeanSpectrumForMice_BM(runmean(squeeze(OutPutData.Cond.ob_high.mean(:,5,:))',2)' , 'color' , [1 .5 .5] , 'dashed_line' , 0);
+[~,Pow_ob_high_safe,Freq_ob_high_safe] = Plot_MeanSpectrumForMice_BM(runmean(squeeze(OutPutData.Cond.ob_high.mean(:,6,:))',2)' , 'color' , [.5 .5 1] , 'power_norm_value' , Pow_ob_high_shock , 'dashed_line' , 0);
+makepretty, xlim([30 100]), ylim([.3 1.1])
+
+subplot(144)
+load('H_VHigh_Spectrum.mat')
+[~,MaxPowerValues1,f1] = Plot_MeanSpectrumForMice_BM(runmean((Spectro{3}.*squeeze(OutPutData.Cond.hpc_vhigh.mean(:,5,:)))',2)' , 'color' , [1 .5 .5]);
+[~,MaxPowerValues,f2] = Plot_MeanSpectrumForMice_BM(runmean((Spectro{3}.*squeeze(OutPutData.Cond.hpc_vhigh.mean(:,6,:)))',2)' , 'color' , [.5 .5 1] , 'power_norm_value' , MaxPowerValues1);
+makepretty, xlim([20 250])
+set(gca,'YScale','log')
+
+
+% mean values, box plot
+figure
+subplot(241)
+MakeSpreadAndBoxPlot3_SB({Pow_ob_low_shock Pow_ob_low_safe},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('OB low power (a.u.)')
+makepretty_BM2
+
+subplot(245)
+MakeSpreadAndBoxPlot3_SB({Freq_ob_low_shock Freq_ob_low_safe},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('OB low freq (Hz)')
+makepretty_BM2
+
+load('H_Low_Spectrum.mat')
+fthe = [find(Spectro{3}<5,1,'last'):find(Spectro{3}<8,1,'last')];
+fall = [find(Spectro{3}<1.5,1,'last'):find(Spectro{3}<5,1,'last')];
+
+subplot(142)
+MakeSpreadAndBoxPlot3_SB({squeeze(nanmean(OutPutData.Cond.hpc_low.mean(:,5,fthe),3))./squeeze(nanmean(OutPutData.Cond.hpc_low.mean(:,5,fall),3))...
+    squeeze(nanmean(OutPutData.Cond.hpc_low.mean(:,6,fthe),3))./squeeze(nanmean(OutPutData.Cond.hpc_low.mean(:,6,fall),3))},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('HPC theta/delta'), axis square
+makepretty_BM2
+
+subplot(243)
+MakeSpreadAndBoxPlot3_SB({Pow_ob_high_shock Pow_ob_high_safe},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('OB high power (a.u.)')
+makepretty_BM2
+
+subplot(247)
+MakeSpreadAndBoxPlot3_SB({Freq_ob_high_shock Freq_ob_high_safe},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('OB high freq (Hz)')
+makepretty_BM2
+
+load('H_VHigh_Spectrum.mat')
+fthe = [find(Spectro{3}<40,1,'last'):find(Spectro{3}<80,1,'last')];
+fall = [find(Spectro{3}<23,1,'last'):find(Spectro{3}<40,1,'last')];
+fthe2 = [find(Spectro{3}<150,1,'last'):find(Spectro{3}<250,1,'last')];
+fall2 = [find(Spectro{3}<23,1,'last'):find(Spectro{3}<150,1,'last')];
+
+subplot(244)
+MakeSpreadAndBoxPlot3_SB({squeeze(nanmean(OutPutData.Cond.hpc_vhigh.mean(:,5,fthe),3))./squeeze(nanmean(OutPutData.Cond.hpc_vhigh.mean(:,5,fall),3))...
+    squeeze(nanmean(OutPutData.Cond.hpc_vhigh.mean(:,6,fthe),3))./squeeze(nanmean(OutPutData.Cond.hpc_vhigh.mean(:,6,fall),3))},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('HPC 40-80Hz band power')
+makepretty_BM2
+
+subplot(248)
+MakeSpreadAndBoxPlot3_SB({squeeze(nanmean(OutPutData.Cond.hpc_vhigh.mean(:,5,fthe2),3))...
+    squeeze(nanmean(OutPutData.Cond.hpc_vhigh.mean(:,6,fthe2),3))},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('HPC 150-250Hz band power')
+makepretty_BM2
+
+
+
+%% ripples features
+
+clear all
+Session_type={'Cond'};
+Mouse=Drugs_Groups_UMaze_BM(22);
+for sess=1:length(Session_type)
+    [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
+        MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ripples_all');
+end
+
+for mouse=1:length(Mouse)
+    
+    Rip_shock(mouse,:) = nanmean(Data(OutPutData.Cond.ripples_all.tsd{mouse,5}));
+    Rip_safe(mouse,:) = nanmean(Data(OutPutData.Cond.ripples_all.tsd{mouse,6}));
+    
+end
+
+Cols = {[1 .5 .5],[.5 .5 1]};
+X = 1:2;
+Legends = {'Shock','Safe'};
 
 figure
-Data_to_use = squeeze(OutPutData.(Session_type{sess}).ob_low.mean(:,5,:));
-Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-Mean_All_Sp=nanmean(Data_to_use);
-h=shadedErrorBar(linspace(.15,20,261), nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
-color=[1 .5 .5]; h.mainLine.Color=color; h.patch.FaceColor=color; h.FaceAlpha=.5; h.edge(1).Color=color; h.edge(2).Color=color;
-Data_to_use = squeeze(OutPutData.(Session_type{sess}).ob_low.mean(:,6,:));
-Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-Mean_All_Sp=nanmean(Data_to_use);
-h=shadedErrorBar(linspace(.15,20,261), nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
-color=[.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.FaceAlpha=.5; h.edge(1).Color=color; h.edge(2).Color=color;
-makepretty
-xlim([0 10])
-xlabel('Frequency (Hz)'), ylabel('Power (a.u.)')
+subplot(131)
+MakeSpreadAndBoxPlot3_SB({Rip_shock(:,4) Rip_safe(:,4)},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('duration (ms)')
+makepretty_BM2
+
+subplot(132)
+MakeSpreadAndBoxPlot3_SB({Rip_shock(:,5) Rip_safe(:,5)},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('Frequency (Hz)')
+makepretty_BM2
+
+subplot(133)
+MakeSpreadAndBoxPlot3_SB({Rip_shock(:,6) Rip_safe(:,6)},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('Power (log)'), set(gca,'YScale','log'), ylim([800 5e3])
+makepretty_BM2
+
+
+
 
 
 %% old

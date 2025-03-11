@@ -1,55 +1,115 @@
 
 clear all
-path{1} = '/media/nas7/React_Passive_AG/OBG/Edel/head-fixed/20220520_n/';
-path{2} = '/media/nas7/React_Passive_AG/OBG/Edel/head-fixed/20220426_n/';
-path{3} = '/media/nas7/React_Passive_AG/OBG/Edel/head-fixed/20220421_m/';
 
-fUS_slice = {'V','G','E'};
-fUS_ind = [2 2 1];
+Dir = PathForExperimentsOB({'Edel'}, 'head-fixed');
 
-for p=1:3
-    
-    clear SmoothGamma fUS_ACx_tsd fUS_Hpc_tsd
-    load([path{p} 'fUS_data_' fUS_slice{p} '.mat'])
-    load([path{p} 'SleepScoring_OBGamma.mat'], 'SmoothGamma')
-    
-    load('LFPData/LFP37.mat')
-    fUS_trig = thresholdIntervals(LFP , -1e4 ,'Direction', 'Above');
-    St=Start(fUS_trig); fUS_Start = St(1);
-%     
-    fUS_ACx{p}=tsd(Range(fUS_ACx_tsd{fUS_ind(p)})+fUS_Start , Data(fUS_ACx_tsd{fUS_ind(p)}));
-    fUS_Hpc{p}=tsd(Range(fUS_Hpc_tsd{fUS_ind(p)})+fUS_Start , Data(fUS_Hpc_tsd{fUS_ind(p)}));
-    SmoothGamma_on_fUS{p} = Restrict(SmoothGamma , fUS_ACx{p});
-    SmoothGamma_all{p} = SmoothGamma;
-    
-    [r(p,:) , lags] = xcorr(-runmean(zscore(Data(SmoothGamma_on_fUS{p})),40) , runmean(zscore(Data(fUS_ACx{p})),1));
-    
-    % Sounds
-    load('LFPData/LFP36.mat')
-    SoundEpoch = thresholdIntervals(LFP , 2.8e4 ,'Direction', 'Above');
-    SoundEpoch = dropLongIntervals(SoundEpoch,2e4);
-    SoundEpoch = mergeCloseIntervals(SoundEpoch,2e4);
-    Sound_start{p} = Start(SoundEpoch)+5e4;
-    
+%%
+for sess=1:length(Dir.path)
+    clear fUS_ACx fUS_Hpc fUS_ACx_tsd fUS_Hpc_tsd SmoothGamma SmoothGamma_on_fUS
+    try
+        fileList = dir(fullfile(Dir.path{sess}, 'fUS*'));
+        load([Dir.path{sess} filesep fileList.name])
+        load([Dir.path{sess} filesep 'SleepScoring_OBGamma.mat'], 'SmoothGamma')
+        load([Dir.path{sess} filesep 'LFPData/LFP37.mat'])
+        fUS_trig = thresholdIntervals(LFP , -1e4 ,'Direction', 'Above');
+        St=Start(fUS_trig); fUS_Start = St(1);
+        
+        fUS_ACx=tsd(Range(fUS_ACx_tsd{1})+fUS_Start , Data(fUS_ACx_tsd{1}));
+        fUS_Hpc=tsd(Range(fUS_Hpc_tsd{1})+fUS_Start , Data(fUS_Hpc_tsd{1}));
+        SmoothGamma_on_fUS = Restrict(SmoothGamma , fUS_ACx);
+        
+        %         [r_ACx(sess,:) , lags] = xcorr(runmean(zscore(Data(fUS_ACx)),40) , 'coeff');
+        %         [r_HPC(sess,:) , lags] = xcorr(runmean(zscore(Data(fUS_Hpc)),40) , 'coeff');
+        %         [r_Gamma(sess,:) , lags] = xcorr(runmean(zscore(Data(SmoothGamma_on_fUS)),40) , 'coeff');
+        %         [r(sess,:) , lags] = xcorr(-runmean(zscore(Data(SmoothGamma_on_fUS)),40) , runmean(zscore(Data(fUS_ACx)),40) , 'coeff');
+        
+        [r_ACx(sess,:) , lags] = xcorr(zscore(Data(fUS_ACx)) , 'coeff');
+        [r_HPC(sess,:) , lags] = xcorr(zscore(Data(fUS_Hpc)) , 'coeff');
+        [r_Gamma(sess,:) , lags] = xcorr(zscore(Data(SmoothGamma_on_fUS)) , 'coeff');
+        [r(sess,:) , lags] = xcorr(zscore(Data(SmoothGamma_on_fUS)) , zscore(Data(fUS_ACx)) , 'coeff');
+        
+        disp(sess)
+    end
 end
+r_ACx(r_ACx==0) = NaN;
+r_HPC(r_HPC==0) = NaN;
+r_Gamma(r_Gamma==0) = NaN;
+r(r==0) = NaN;
+
+
+%%
+figure
+subplot(221)
+Data_to_use = r_ACx;
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+h=shadedErrorBar(lags*.4/60 , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+xlim([-60 60]), box off
+
+subplot(222)
+Data_to_use = r_HPC;
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+h=shadedErrorBar(lags*.4/60 , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+xlim([-60 60]), box off
+
+subplot(223)
+Data_to_use = r_Gamma;
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+h=shadedErrorBar(lags*.4/60 , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+xlim([-60 60]), box off
+
+subplot(224)
+Data_to_use = -r;
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+h=shadedErrorBar(lags*.4/60 , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+xlim([-60 60]), box off
+
+
 
 
 
 %% figures
 figure
-subplot(1,5,1:4)
-plot(Range(fUS_ACx{1},'s')/60 , runmean(zscore(Data(fUS_ACx{1})),20) , 'Color' , [.7 .5 .3])
+subplot(311)
+plot(Range(fUS_ACx{1},'s')/60 , runmean(zscore(Data(fUS_ACx{1})),40) , 'Color' , [.7 .5 .3])
 hold on
-plot(Range(fUS_Hpc{1},'s')/60 , runmean(zscore(Data(fUS_Hpc{1})),20) , 'Color' , [.5 .3 .1])
-plot(Range(SmoothGamma_on_fUS{1},'s')/60 , -runmean(zscore(Data(SmoothGamma_on_fUS{1})),40) , 'Color' , [0 0 1])
-ylabel('Power (zscore)'), xlabel('time (min)'), xlim([0 65]), ylim([-2 2.5])
+plot(Range(fUS_Hpc{1},'s')/60 , runmean(zscore(Data(fUS_Hpc{1})),40) , 'Color' , [.5 .3 .1])
+plot(Range(SmoothGamma_on_fUS{1},'s')/60 , -runmean(zscore(Data(SmoothGamma_on_fUS{1})),100) , 'Color' , [0 0 1])
+ylabel('Power (zscore)'), xlim([0 65]), ylim([-2 1.7])
 legend('AuCx fUS','HPC fUS','OB gamma power (inverted)')
 makepretty
 
-subplot(155)
-Data_to_use = zscore(r')';
-Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-shadedErrorBar((lags*.4)/60, nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+subplot(312)
+plot(Range(fUS_ACx{2},'s')/60 , runmean(zscore(Data(fUS_ACx{2})),40) , 'Color' , [.7 .5 .3])
+hold on
+plot(Range(fUS_Hpc{2},'s')/60 , runmean(zscore(Data(fUS_Hpc{2})),40) , 'Color' , [.5 .3 .1])
+plot(Range(SmoothGamma_on_fUS{2},'s')/60 , -runmean(zscore(Data(SmoothGamma_on_fUS{2})),100) , 'Color' , [0 0 1])
+ylabel('Power (zscore)'), xlim([0 65]), ylim([-2 2.5])
+makepretty
+
+subplot(313)
+plot(Range(fUS_ACx{3},'s')/60 , runmean(zscore(Data(fUS_ACx{3})),40) , 'Color' , [.7 .5 .3])
+hold on
+plot(Range(fUS_Hpc{3},'s')/60 , runmean(zscore(Data(fUS_Hpc{3})),40) , 'Color' , [.5 .3 .1])
+plot(Range(SmoothGamma_on_fUS{3},'s')/60 , -runmean(zscore(Data(SmoothGamma_on_fUS{3})),100) , 'Color' , [0 0 1])
+ylabel('Power (zscore)'), xlabel('time (min)'), xlim([0 65]), ylim([-2 2.5])
+makepretty
+
+
+figure
+subplot(131)
+plot(lags , zscore(r_ACx')');
+xlabel('time (min)'), ylabel('corr values (zscore)'), xlim([-40 40])
+vline(0,'--r')
+makepretty
+
+subplot(132)
+plot(lags , zscore(r_HPC')');
+xlabel('time (min)'), ylabel('corr values (zscore)'), xlim([-40 40])
+vline(0,'--r')
+makepretty
+
+subplot(133)
+plot(lags , zscore(r_Gamma')');
 xlabel('time (min)'), ylabel('corr values (zscore)'), xlim([-40 40])
 vline(0,'--r')
 makepretty
@@ -100,6 +160,14 @@ c=colorbar; c.Label.String='OB gamma power (a.u.)';  colormap jet
 
 
 %% trash ?
+load('LFPData/LFP36.mat')
+SoundEpoch = thresholdIntervals(LFP , 2.8e4 ,'Direction', 'Above');
+SoundEpoch = dropLongIntervals(SoundEpoch,2e4);
+SoundEpoch = mergeCloseIntervals(SoundEpoch,2e4);
+Sound_start{p} = Start(SoundEpoch)+5e4;
+
+
+
 
 % SoundPrez = intervalSet(1250e4 , 2500e4);
 % Before_SoundPrez = intervalSet(0 , 1250e4);
@@ -123,12 +191,6 @@ A = log10(Data(Restrict(SmoothGamma_on_fUS , After_SoundPrez))); B = Data(Restri
 PlotCorrelations_BM(A(1:30:end) , B(1:30:end))
 makepretty, axis square
 xlabel('OB gamma power'), ylabel('fUS data')
-
-
-
-
-
-
 
 
 

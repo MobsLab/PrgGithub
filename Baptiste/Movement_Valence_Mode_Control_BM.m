@@ -1,3 +1,4 @@
+
 clear all
 
 Dir_PAG=PathForExperimentsERC('UMazePAG');
@@ -5,7 +6,12 @@ Dir_MFB=PathForExperimentsERC('StimMFBWake');
 Dir_Novel=PathForExperimentsERC('Novel');
 Dir_Knwon=PathForExperimentsERC('Known');
 
+%%
+smoofact_Acc = 30;
+th_immob_Acc = 1.7e7;
+thtps_immob = 2;
 
+%%
 Par = {'Neg','Pos','Novel','Knwon'};
 for par = 1:length(Par)
     if par==1
@@ -19,39 +25,48 @@ for par = 1:length(Par)
     end
     
     for mouse=1:length(DIR.path)
-        
-        cd(DIR.path{mouse}{1})
-        load('behavResources.mat','MovAcctsd','Vtsd','SessionEpoch','FreezeEpoch','FreezeAccEpoch')
-        
-        CondEpoch{par}{mouse} =  or(or(SessionEpoch.Cond1, SessionEpoch.Cond2) , or(SessionEpoch.Cond3,SessionEpoch.Cond4));
         try
-            HabEpoch{par}{mouse} = or(SessionEpoch.Hab1, SessionEpoch.Hab2);
-        catch
+            clear MovAcctsd Vtsd FreezeAccEpoch SessionEpoch FreezeEpoch SafeZone
+            load([DIR.path{mouse}{1} 'behavResources.mat'],'MovAcctsd','Vtsd','SessionEpoch', 'ZoneEpoch')
+            
+            CondEpoch{par}{mouse} =  or(or(SessionEpoch.Cond1, SessionEpoch.Cond2) , or(SessionEpoch.Cond3,SessionEpoch.Cond4));
             try
-                HabEpoch{par}{mouse} = SessionEpoch.Hab;
+                HabEpoch{par}{mouse} = or(SessionEpoch.Hab1, SessionEpoch.Hab2);
             catch
-                HabEpoch{par}{mouse} = or(or(SessionEpoch.TestPre1, SessionEpoch.TestPre2) , or(SessionEpoch.TestPre3,SessionEpoch.TestPre4));
+                try
+                    HabEpoch{par}{mouse} = SessionEpoch.Hab;
+                catch
+                    HabEpoch{par}{mouse} = or(or(SessionEpoch.TestPre1, SessionEpoch.TestPre2) , or(SessionEpoch.TestPre3,SessionEpoch.TestPre4));
+                end
             end
-        end
-        
-        if par==3
-            Epoch_to_use = HabEpoch{par}{mouse};
-        else
+            
+            
             Epoch_to_use = CondEpoch{par}{mouse};
+            try
+                SafeZone = or(or(ZoneEpoch.FarNoShock , ZoneEpoch.CentreNoShock) , ZoneEpoch.NoShock);
+            catch
+                SafeZone = or(ZoneEpoch.CentreNoShock , ZoneEpoch.CentreNoShock);
+            end
+            Acc{par}{mouse} = Restrict(MovAcctsd , Epoch_to_use);
+            Speed{par}{mouse} = Restrict(Vtsd , Epoch_to_use);
+            R = Range(Speed{par}{mouse});
+            TotDur{par}(mouse) = R(end)-R(1);
+            
+            NewMovAcctsd=tsd(Range(MovAcctsd),runmean(Data(MovAcctsd),smoofact_Acc));
+            FreezeAccEpoch=thresholdIntervals(NewMovAcctsd,th_immob_Acc,'Direction','Below');
+            FreezeAccEpoch=mergeCloseIntervals(FreezeAccEpoch,0.3*1e4);
+            FreezeAccEpoch=dropShortIntervals(FreezeAccEpoch,thtps_immob*1e4);
+            FreezeSafe = and(SafeZone , FreezeAccEpoch);
+            
+            try
+                FreezeProp{par}(mouse)= sum(DurationEpoch(and(FreezeSafe , Epoch_to_use)))./TotDur{par}(mouse);
+                FreezeMedianDur{par}(mouse)= nanmedian(DurationEpoch(FreezeSafe))./1e4;
+                %         catch
+                %             FreezeProp{par}(mouse) = sum(DurationEpoch(and(FreezeEpoch , Epoch_to_use)))./TotDur{par}(mouse);
+                disp([par mouse])
+            end
+            
         end
-        
-        Acc{par}{mouse} = Restrict(MovAcctsd , Epoch_to_use);
-        Speed{par}{mouse} = Restrict(Vtsd , Epoch_to_use);
-        R = Range(Speed{par}{mouse});
-        TotDur{par}(mouse) = R(end)-R(1);
-        
-%         try
-%             FreezeProp{par}(mouse)= sum(DurationEpoch(FreezeAccEpoch))./TotDur{par}(mouse);
-%         catch
-            FreezeProp{par}(mouse) = sum(DurationEpoch(and(FreezeEpoch , Epoch_to_use)))./TotDur{par}(mouse);
-%         end
-        
-        disp([par mouse])
     end
 end
 

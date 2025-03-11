@@ -22,7 +22,9 @@ col_3 = [0 .4 .4];
 % legend = {'Sal mCherry (n=11)','SD + Sal mCherry homo (n=3)','SD + Sal DREADD+ hétéro (n=4)'};
 % legend = {'CNO mCherry (n=6)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
 % legend = {'CNO mCherry (n=4)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
-legend = {'CNO mCherry (n=5)','SD + CNO mCherry (n=5)','SD + CNO DREADD- (n=7)'};
+% legend = {'CNO mCherry (n=10)','SD + CNO mCherry (n=4)','SD + CNO DREADD- (n=7)'};
+% legend = {'CNO mCherry (n=10)','SD + CNO mCherry (n=6)','SD + CNO DREADD- (n=7)'};
+legend = {'CNO mCherry (n=10)','SD + CNO mCherry (n=5)','SD + CNO DREADD- (n=7)'};
 
 
 figure('color',[1 1 1])
@@ -35,11 +37,11 @@ suptitle ('Effect of CRH inhibition after SD and CNO injection')
 subplot(4,6,[4],'align') %WAKE percentage phase1
 hold on, title('0-1h30')
 subplot(4,6,[5],'align') %WAKE percentage phase2
-% hold on, title('1h30-3h30')
-hold on, title('1h30-6h')
+hold on, title('1h30-3h30')
+% hold on, title('1h30-6h30')
 subplot(4,6,[6],'align') %WAKE percentage phase3
-% hold on, title('3h30-8h')
-hold on, title('6h-8h')
+hold on, title('3h30-8h')
+% hold on, title('6h30-8h')
 
 
 
@@ -71,7 +73,7 @@ makepretty
 % xlim([0 8.5])
 % xticks([1 3 5 7 9]); xticklabels({'1','3','5','7','9'}) 
 % % ylim([0 100])
-% makepretty
+makepretty_BM2
 % ylabel('Sleep duration')
 
 subplot(4,6,[7,8]), hold on % SWS duration overtime
@@ -109,7 +111,7 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none')
 set(gca,'xticklabels',[])
 ylabel('Wake duration')
-% makepretty
+makepretty_BM2
 % ylim([0 100])
 
 if isparam==0 %%version ranksum (non param)
@@ -147,7 +149,7 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 set(gca,'xticklabels',[])
 ylabel('Wake duration')
-% makepretty
+makepretty_BM2
 % ylim([0 100])
 
 if isparam==0 %%version ranksum (non param)
@@ -184,7 +186,7 @@ MakeSpreadAndBoxPlot2_MC({nanmean(data_dur_WAKE_end_1,2), nanmean(data_dur_WAKE_
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 set(gca,'xticklabels',[])
 ylabel('Wake duration')
-% makepretty
+makepretty_BM2
 % ylim([0 50])
 
 if isparam==0 %%version ranksum (non param)
@@ -225,7 +227,7 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none')
 set(gca,'xticklabels',[])
 ylabel('NREM duration')
-% makepretty
+makepretty_BM2
 % ylim([0 100])
 
 if isparam==0 %%version ranksum (non param)
@@ -264,7 +266,7 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 set(gca,'xticklabels',[])
 ylabel('NREM duration')
-% makepretty
+makepretty_BM2
 % ylim([0 100])
 
 if isparam==0 %%version ranksum (non param)
@@ -304,7 +306,7 @@ MakeSpreadAndBoxPlot2_MC({nanmean(data_dur_SWS_end_1,2), nanmean(data_dur_SWS_en
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 set(gca,'xticklabels',[])
 ylabel('NREM duration')
-% makepretty
+makepretty_BM2
 % ylim([0 80])
 
 if isparam==0 %%version ranksum (non param)
@@ -343,7 +345,7 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 % set(gca,'xticklabels',[])
 ylabel('REM duration')
-% makepretty
+makepretty_BM2
 % ylim([0 10])
 
 if isparam==0 %%version ranksum (non param)
@@ -380,7 +382,7 @@ MakeSpreadAndBoxPlot2_MC({...
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 % set(gca,'xticklabels',[])
 ylabel('REM duration')
-% makepretty
+makepretty_BM2
 % ylim([0 10])
 
 if isparam==0 %%version ranksum (non param)
@@ -417,7 +419,7 @@ MakeSpreadAndBoxPlot2_MC({nanmean(data_dur_REM_end_1,2), nanmean(data_dur_REM_en
     {col_1,col_2,col_3},[1:3],legend,'paired',0,'showsigstar','none') 
 % set(gca,'xticklabels',[])
 ylabel('REM duration')
-% makepretty
+makepretty_BM2
 % ylim([0 15])
 
 if isparam==0 %%version ranksum (non param)

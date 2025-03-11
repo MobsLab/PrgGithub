@@ -1,4 +1,21 @@
 
+
+clear all
+GetEmbReactMiceFolderList_BM
+Group=22;
+
+Mouse=Drugs_Groups_UMaze_BM(Group);
+Session_type={'Cond','sleep_pre'};
+for sess=1:length(Session_type) % generate all data required for analyses
+        [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),...
+            'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_delta',...
+            'emg_neck','emg_pect','accelero','speed');
+end
+
+
+
+
+
 %% generate data
 GetAllSalineSessions_BM
 smoofact_Acc = 30;

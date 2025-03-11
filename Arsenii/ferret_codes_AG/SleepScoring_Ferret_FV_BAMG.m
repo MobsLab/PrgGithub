@@ -320,13 +320,14 @@ if doob
     disp('------------------------------------------------------------')
     disp(' ')
     disp('0.1-0.5 Hz Epochs')
-         
-        
-    [Epoch_01_05, smooth_01_05, Info_temp] = Find_01_05_Epoch(SleepOB, Epoch, channel_bulb, minduration,'foldername', foldername, 'smoothwindow', smootime, 'continuity', continuity);
+    
+    % changed by BM on 02/03/2025 SleepOB--> SleepOB-ThetaEpoch_OB, focus only on NREM to subdivise it
+    [Epoch_01_05, smooth_01_05, Info_temp] = Find_01_05_Epoch(SleepOB-ThetaEpoch_OB, Epoch, channel_bulb, minduration,...
+        'foldername', foldername, 'smoothwindow', smootime, 'continuity', continuity); 
     
     Info_OB=ConCatStruct(Info_OB,Info_temp); clear Info_temp;
     clear Info_temp;
-
+    
     disp(' ')
     disp('0.1-0.5 Hz: DONE')
     disp(' ')

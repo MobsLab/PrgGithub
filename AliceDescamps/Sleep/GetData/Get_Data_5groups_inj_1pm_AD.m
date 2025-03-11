@@ -47,7 +47,8 @@ time_end=3.25*1e8;  %end of the sleep session
 
 %Injection at 1pm
 time_mid_end_first_period = 1.4*1E8;
-time_mid_end_snd_period = 1.65*1E8;
+% time_mid_end_snd_period = 1.65*1E8;
+time_mid_end_snd_period = 1.9*1E8;
 
 lim_short_rem_1 = 25; %25 take all rem bouts shorter than limit
 lim_short_rem_2 = 15;

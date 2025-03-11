@@ -10,15 +10,17 @@ end
 sm_ghi(sm_ghi<=0)=[];
 [Y,X]=hist(log(sm_ghi),1000);
 Y=Y/sum(Y);
-% st_ = [1.07e-2 0 0.101 3.49e-3 1.5 0.21];
 [cf2,goodness2]=createFit2gauss(X,Y,[]);
 a= coeffvalues(cf2);
 b=intersect_gaussians(a(2), a(5), a(3), a(6));
-% modified by SB March 2018 to generalise to situations with more wake
-% than slee
-gamma_thresh=b(find(b>a(2)&b<a(5)));
-%     [~,ind]=max(Y);
-%     gamma_thresh=b(b>X(ind));
+
+% changed by BM on 21/02/2025
+gamma_thresh=b(find(b<a(2)&b>a(5)));
+if isempty(gamma_thresh)
+    gamma_thresh=b(find(b>a(2)&b<a(5)));
+    disp ('peak sleep smaller than wake')
+end
+
 if newPlo, figure ; end
 plot(X,Y)
 hold on

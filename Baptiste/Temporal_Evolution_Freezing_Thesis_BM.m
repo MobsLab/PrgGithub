@@ -427,8 +427,6 @@ hline(0,'--k')
 
 
 %% zoom on very first data
-
-
 figure, param=1; bin=20;
 Data_to_use = DATA_shock.(Params{param})(:,1:bin);
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));

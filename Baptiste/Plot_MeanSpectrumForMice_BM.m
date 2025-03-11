@@ -68,7 +68,7 @@ if ~exist('thr','var')
     elseif size(Data , 2) == 32
         thr = 13;
     elseif size(Data , 2) ==94
-        thr = 30;
+        thr = 50;
     elseif size(Data , 2) ==249
         thr = 1;
     else
@@ -82,13 +82,14 @@ if ~exist('PowerNormValue','var')
     Freq_Max = Range(Freq_Max+thr-1);
     Freq_Max(Freq_Max==Range(thr)) = NaN;
 else
-    MaxPowerValues = NaN;
-    Freq_Max = NaN;
     try
         Data_to_use = Data./PowerNormValue;
     catch
         Data_to_use = Data./PowerNormValue';
     end
+    [MaxPowerValues , Freq_Max] = max(Data(:,thr:end)');
+    Freq_Max = Range(Freq_Max+thr-1);
+    Freq_Max(Freq_Max==Range(thr)) = NaN;
 end
 
 Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
