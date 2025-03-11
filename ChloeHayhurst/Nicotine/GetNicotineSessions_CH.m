@@ -70,8 +70,8 @@ NicotineHC{6}='/media/nas7/Nicotine/Mouse1416/20230302/';
 NicotineHC{7}='/media/nas7/Nicotine/Mouse1417/20230302/';
 NicotineHC{8}='/media/nas7/Nicotine/Mouse1418/20230302/';
 NicotineHC{9}='/media/nas7/Nicotine/Mouse1385/20230203/';
-NicotineHC{10}='/media/nas7/Nicotine/Mouse1391/20230203/';
-NicotineHC{11}='/media/nas7/Nicotine/Mouse1393/20230203/';
+% NicotineHC{10}='/media/nas7/Nicotine/Mouse1391/20230203/';
+NicotineHC{10}='/media/nas7/Nicotine/Mouse1393/20230203/';
 
 
 AtropineOF.OFPre{1} = '/media/nas7/Atropine/Mouse1500/30012024/OF_Pre';

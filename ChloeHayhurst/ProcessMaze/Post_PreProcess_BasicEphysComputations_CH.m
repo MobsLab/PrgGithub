@@ -9,7 +9,7 @@ SessNames={'Habituation24HPre_PreDrug' 'Habituation_PreDrug' 'HabituationBlocked
     'SleepPost_PreDrug' ' TestPost_PreDrug' 'ExtinctionBlockedShock_PreDrug' 'ExtinctionBlockedSafe_PreDrug' 'UMazeCondExplo_PostDrug' 'UMazeCondBlockedShock_PostDrug' 'UMazeCondBlockedSafe_PostDrug',...
     'SleepPost_PostDrug' 'TestPost_PostDrug'  'ExtinctionBlockedShock_PostDrug' 'ExtinctionBlockedSafe_PostDrug'};
 
-MouseToDo = 1686;
+MouseToDo = 1715;
 Mouse_names{1}=['M' num2str(MouseToDo)];
 
 
@@ -43,7 +43,7 @@ Mouse_names{1}=['M' num2str(MouseToDo)];
 %     'ExtSafeSess','ExtSess', 'ExtShockSess','FearSess','FirstExtSess','ExtPreSess','ExtPostSess',...
 %     'HabSess','HabSess24','HabSessPre',...
 %     'SleepPostPostSess','SleepPostPreSess','SleepPostSess','SleepPreSess','SleepSess',...
-%     'TestPostPostSess','TestPostPreSess','TestPostSess','TestPreSess','TestSess')
+%     'TestPostPostSess','TestPostPreSess','TestPostSess','TestPreSess','TestSess','-append')
 
 
 %% Correct Tracking

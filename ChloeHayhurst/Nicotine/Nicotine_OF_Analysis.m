@@ -145,21 +145,51 @@ for group = 1:3
     end
     for sess=1:2
         for mouse=1:length(Mouse_names)
-            path = sprintf('%s.%s{%d}', Name{group}, Session_type{sess}, mouse);
-            folder_path = eval(path);
-            cd(folder_path);
-            disp(folder_path);
-            load('behavResources.mat')
-            load('StateEpochSB.mat')
+            Epoch = intervalSet(0,max(Range(Accelero.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))));
+            ActiveEpoch = Epoch - FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse});
+            AlignedXtsdActive_Epoch = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ActiveEpoch);
+            AlignedYtsdActive_Epoch = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ActiveEpoch);
             
-            [~,Distance,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsd, AlignedYtsd,'OF','figure',0,'percent_inner',0.7);
+            [~,Distance,~,~,~] = Thigmotaxis_OF_CH(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),'HC','figure',0,'percent_inner',0.7);
+            [~,DistanceAct,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsdActive_Epoch,AlignedYtsdActive_Epoch,'HC','figure',0,'percent_inner',0.7);
             
-            DistanceToCenterTemp.(Name{group}).(Session_type{sess}){mouse} = Distance';
-            DistanceToCenter2.(Name{group}).(Session_type{sess})(mouse,:) = interp1(linspace(0,1000,length(DistanceToCenterTemp.(Name{group}).(Session_type{sess}){mouse})),DistanceToCenterTemp.(Name{group}).(Session_type{sess}){mouse}, linspace(0,1000,1000));
-
+            clear AlignedXtsd_Epoch AlignedYtsd_Epoch AlignedXtsdActive_Epoch AlignedYtsdActive_Epoch ActiveEpoch
+            disp(Mouse_names(mouse));
+            a = 0;
+            for i = 1:60
+                SmallEpoch = intervalSet(a,a+30e4);
+                ActiveEpoch = SmallEpoch - FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse});
+                AlignedXtsd_Epoch = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),SmallEpoch);
+                AlignedYtsd_Epoch = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),SmallEpoch);
+                AlignedXtsdActive_Epoch = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ActiveEpoch);
+                AlignedYtsdActive_Epoch = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ActiveEpoch);
+                
+                
+                if length(AlignedXtsd_Epoch) > 1
+                    [~,Distance2,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsd_Epoch, AlignedYtsd_Epoch,'OF','figure',0,'percent_inner',0.7);
+                    DistanceToCenter2.(Name{group}).(Session_type{sess})(mouse,i) = nanmean(Distance2);
+                else
+                    DistanceToCenter2.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
+                end
+                
+                if length(AlignedXtsdActive_Epoch) > 1
+                    [~,Distance3,~,~,~] = Thigmotaxis_OF_CH(AlignedXtsdActive_Epoch, AlignedYtsdActive_Epoch,'OF','figure',0,'percent_inner',0.7);
+                    DistanceToCenterActive.(Name{group}).(Session_type{sess})(mouse,i) = nanmean(Distance3);
+                else
+                    DistanceToCenterActive.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
+                end
+                
+                a = a+30e4;
+                
+            end
+            DistanceToCenterTemp_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(DistanceToCenter2.(Name{group}).(Session_type{sess})(mouse,1:15));
+            DistanceToCenter_mean.(Name{group}).(Session_type{sess})(mouse)=nanmean(Distance);
+            DistanceToCenterTempActive_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(DistanceToCenterActive.(Name{group}).(Session_type{sess})(mouse,1:15));
+            DistanceToCenterActive_mean.(Name{group}).(Session_type{sess})(mouse)=nanmean(DistanceAct);
         end
     end
 end
+
 
 
 disp('Making Thigmo along Time')
@@ -180,8 +210,8 @@ for group = 1:3
             load('behavResources.mat')
             load('StateEpochSB.mat')
             a = 0;
-            for i = 1:30
-                Epoch = intervalSet(a,a+60e4);
+            for i = 1:60
+                Epoch = intervalSet(a,a+30e4);
                 try
                     
                     AlignedXtsd_Epoch = Restrict(AlignedXtsd, Epoch);
@@ -193,9 +223,10 @@ for group = 1:3
                     a = a+60e4;
                 catch
                     ThigmoTemp.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
-                    a = a+60e4;
+                    a = a+30e4;
                 end
             end
+            ThigmoTemp_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(ThigmoTemp.(Name{group}).(Session_type{sess})(mouse,1:15))
         end
     end
 end
@@ -336,8 +367,8 @@ end
 RangeLow = linspace(0.1526,20,261);
 for mouse = 1:6
     j = 0;
-    for i = 1:30
-        Epoch = intervalSet(0+j, 60e4+j);
+    for i = 1:60
+        Epoch = intervalSet(0+j, 30e4+j);
         clear mtemp
         try
             SpectroTemp{i,mouse} = Restrict(SpectroBulbFz.NicotineOF.OFPost{mouse},Epoch);
@@ -349,7 +380,7 @@ for mouse = 1:6
                 m(mouse,i) = NaN;
             end
         end
-        j = j+60e4;
+        j = j+30e4;
     end
 end
 
@@ -364,8 +395,8 @@ for group = 1:3
     for sess=1:2
         for mouse=1:length(Mouse_names)
             a = 0;
-            for i = 1:30
-                Epoch = intervalSet(a,a+60e4);
+            for i = 1:60
+                Epoch = intervalSet(a,a+30e4);
                 clear Fztemp riptemp riptemp2
                 
                 Fztemp = and(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch);
@@ -388,7 +419,7 @@ for group = 1:3
                     RipDensTemp2.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
                     
                 end
-                a = a+60e4;
+                a = a+30e4;
                 %                 keyboard
             end
         end
@@ -541,39 +572,37 @@ MakeSpreadAndBoxPlot3_SB({Thigmo.SalineOF.OFPre Thigmo.SalineOF.OFPost Thigmo.Ni
 ylabel('Thigmotaxis');
 makepretty_CH
 
-x = time(:,1:15); 
-y1 = m(:,1:15);
-y2 = ThigmoTemp.NicotineOF.OFPost(:,1:15); 
-y3 = RipDensTemp2.NicotineOF.OFPost(:,1:15);
+
+time = linspace(1,15,30);
+% time=[1:30];
+x = time(:,1:30); 
+y1 = m(:,1:30);
+y2 = DistanceToCenter2.NicotineOF.OFPost(:,1:30); 
+y3 = RipDensTemp2.NicotineOF.OFPost(:,1:30);
 
 label{1}={'Breathing frequency'};
 label{2}={'Thigmotaxis'};
 label{3}={'Number of ripples in 1 minute'};
-% fig = figure('units','normalized','Color',[1 1 1]); hold on
 
 [ax, hlines] = multiploty_Shaded_CH({x, y1}, {x, y2}, {x, y3},'time',label);
 
-% hold(ax(3), 'on'); 
+
 figure
-% Bar = bar(x, sum(FzOnOff.NicotineOF.OFPost(:,1:15)), 'FaceAlpha', 0.3, 'FaceColor', [0.5 0.5 0.5],'EdgeColor','none');
 Bar = bar(x, mean(Fztimetemp.NicotineOF.OFPost(:,1:15))/1e4, 'FaceAlpha', 0.3, 'FaceColor', [0.5 0.5 0.5],'EdgeColor','none');
 
 figure
 Bar = bar(x, median(Fztimetemp.NicotineOF.OFPost(:,1:15))/1e4, 'FaceAlpha', 0.3, 'FaceColor', [0.5 0.5 0.5],'EdgeColor','none');
 
 
+figure
 
+Cols={[0.7 0.7 0.7],[0.3 0.3 0.3],[0.7 0.7 0.7],[0.3 0.3 0.3],[0.7 0.7 0.7],[0.3 0.3 0.3]};
+X=[1:6];
+Legends={'OF Pre','OF Post','OF Pre','OF Post','OF Pre','OF Post'};
 
-% 
-% figure
-% 
-% Cols={[0.7 0.7 0.7],[0.3 0.3 0.3],[0.7 0.7 0.7],[0.3 0.3 0.3],[0.7 0.7 0.7],[0.3 0.3 0.3]};
-% X=[1:6];
-% Legends={'OF Pre','OF Post','OF Pre','OF Post','OF Pre','OF Post'};
-% 
-% MakeSpreadAndBoxPlot3_SB({MeanHRFz.SalineOF.OFPre MeanHRFz.SalineOF.OFPost MeanHRFz.NicotineLowOF.OFPre MeanHRFz.NicotineLowOF.OFPost MeanHRFz.NicotineOF.OFPre MeanHRFz.NicotineOF.OFPost},Cols,X,Legends,'showpoints',1,'paired',0)
-% ylabel('Heart Rate freezing');
-% makepretty_CH
+MakeSpreadAndBoxPlot3_SB({MeanHRFz.SalineOF.OFPre MeanHRFz.SalineOF.OFPost MeanHRFz.NicotineLowOF.OFPre MeanHRFz.NicotineLowOF.OFPost MeanHRFz.NicotineOF.OFPre MeanHRFz.NicotineOF.OFPost},Cols,X,Legends,'showpoints',1,'paired',0)
+ylabel('Heart Rate freezing');
+makepretty_CH
 
 % 
 % figure
@@ -849,7 +878,7 @@ makepretty_CH
 
 
 Col = [0 0 0];
-time = [1:15];
+time = [1:30];
 figure('color',[1 1 1]), hold on
 errorbar(time, nanmean(m),stdError(m),'color',Col);
 makepretty_CH
@@ -867,7 +896,6 @@ mtitle('Evolution of freezing breathing frequency along time');
 figure, hold on
 for i = 1:15
     a(i) = Plot_MeanSpectrumForMice_BM(MeanSpectroTemp{1,i},'color',Cols_cell{i,1});
-    
     makepretty_CH
     xlim([1 10])
 end
@@ -979,35 +1007,85 @@ mtitle('Distance to the center');
 
 Col1=[0.7 0.7 0.7];
 Col2=[0.3 0.3 0.3];
-b = 1;
+Col3=[1, 0.6, 0.6];
+Col4=[0.6, 0, 0];
+time = linspace(1,15,30);
 figure('color',[1 1 1])
-for group = 1:3
-    
-    subplot(3,4,b:b+2), hold on
-    Data_to_use = DistanceToCenter2.(Name{group}).OFPre;
-    Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
-    h=shadedErrorBar(linspace(0,length(Data_to_use),1000),runmean(nanmean(Data_to_use),5),Conf_Inter,'g',1);
-    h.mainLine.Color=Col1; h.patch.FaceColor=Col1; h.edge(1).Color=Col1; h.edge(2).Color=Col1; h.mainLine.LineWidth=2;
-    
-    Data_to_use = DistanceToCenter2.(Name{group}).OFPost;
-    Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
-    h=shadedErrorBar(linspace(0,length(Data_to_use),1000),runmean(nanmean(Data_to_use),5),Conf_Inter,'k',1);
-    h.mainLine.Color=Col2; h.patch.FaceColor=Col2; h.edge(1).Color=Col2; h.edge(2).Color=Col2; h.mainLine.LineWidth=2;
-    ylim([0.2 0.5])
-    title(strcat(Name{group}, ' n = ', num2str(length(Data_to_use(:,1)))))
-    makepretty_CH
-    
-    subplot(3,4,b+3)
-    Cols={[0.7 0.7 0.7],[0.3 0.3 0.3]};
-    X=[1:2];
-    Legends={'OF Pre','OF Post'};
-    MakeSpreadAndBoxPlot3_SB({MeanDistanceToCenter.(Name{group}).OFPre MeanDistanceToCenter.(Name{group}).OFPost},Cols,X,Legends,'showpoints',1,'paired',0)
-    makepretty_CH
-    ylim([0.3 0.55])
-    b = b+4;
-end
+subplot(1,4,1:3), hold on
+Data_to_use = DistanceToCenter2.SalineOF.OFPre(:,1:30);
+Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
+h=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
+h.mainLine.Color=Col1; h.patch.FaceColor=Col1; h.edge(1).Color=Col1; h.edge(2).Color=Col1; h.mainLine.LineWidth=2;
 
-mtitle('Distance to the center');
+Data_to_use = DistanceToCenter2.SalineOF.OFPost(:,1:30);
+Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
+h=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
+h.mainLine.Color=Col2; h.patch.FaceColor=Col2; h.edge(1).Color=Col2; h.edge(2).Color=Col2; h.mainLine.LineWidth=2;
+
+Data_to_use = DistanceToCenter2.NicotineOF.OFPre(:,1:30);
+Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
+h=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
+h.mainLine.Color=Col3; h.patch.FaceColor=Col3; h.edge(1).Color=Col3; h.edge(2).Color=Col3; h.mainLine.LineWidth=2;
+
+Data_to_use = DistanceToCenter2.NicotineOF.OFPost(:,1:30);
+Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
+h=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
+h.mainLine.Color=Col4; h.patch.FaceColor=Col4; h.edge(1).Color=Col4; h.edge(2).Color=Col4; h.mainLine.LineWidth=2;
+
+%     ylim([0.2 0.5])
+
+makepretty_CH
+subplot(144)
+
+Cols={[0.7 0.7 0.7],[0.3 0.3 0.3],[1, 0.6, 0.6],[0.6, 0, 0]};
+X=[1:4];
+Legends={'Saline Pre','Saline Post','Nicotine Pre','Nicotine Post'};
+MakeSpreadAndBoxPlot3_SB({DistanceToCenterTemp_mean.SalineOF.OFPre DistanceToCenterTemp_mean.SalineOF.OFPost DistanceToCenterTemp_mean.NicotineOF.OFPre DistanceToCenterTemp_mean.NicotineOF.OFPost},Cols,X,Legends,'showpoints',1,'paired',0)
+makepretty_CH
+
+mtitle('OF, Distance to the center');
+
+%%
+Col1=[0.7 0.7 0.7];
+Col2=[0.3 0.3 0.3];
+Col3=[1, 0.6, 0.6];
+Col4=[0.6, 0, 0];
+time = [1:30];
+figure('color',[1 1 1])
+subplot(1,4,1:3), hold on
+Data_to_use = ThigmoTemp.SalineOF.OFPre;
+Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
+h=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
+h.mainLine.Color=Col1; h.patch.FaceColor=Col1; h.edge(1).Color=Col1; h.edge(2).Color=Col1; h.mainLine.LineWidth=2;
+
+Data_to_use = ThigmoTemp.SalineOF.OFPost;
+Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
+h=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
+h.mainLine.Color=Col2; h.patch.FaceColor=Col2; h.edge(1).Color=Col2; h.edge(2).Color=Col2; h.mainLine.LineWidth=2;
+
+Data_to_use = ThigmoTemp.NicotineOF.OFPre;
+Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
+h=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
+h.mainLine.Color=Col3; h.patch.FaceColor=Col3; h.edge(1).Color=Col3; h.edge(2).Color=Col3; h.mainLine.LineWidth=2;
+
+Data_to_use = ThigmoTemp.NicotineOF.OFPost;
+Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
+h=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
+h.mainLine.Color=Col4; h.patch.FaceColor=Col4; h.edge(1).Color=Col4; h.edge(2).Color=Col4; h.mainLine.LineWidth=2;
+
+%     ylim([0.2 0.5])
+
+makepretty_CH
+subplot(144)
+
+Cols={[0.7 0.7 0.7],[0.3 0.3 0.3],[1, 0.6, 0.6],[0.6, 0, 0]};
+X=[1:4];
+Legends={'Saline Pre','Saline Post','Nicotine Pre','Nicotine Post'};
+MakeSpreadAndBoxPlot3_SB({ThigmoTemp_mean.SalineOF.OFPre ThigmoTemp_mean.SalineOF.OFPost ThigmoTemp_mean.NicotineOF.OFPre ThigmoTemp_mean.NicotineOF.OFPost},Cols,X,Legends,'showpoints',1,'paired',0)
+makepretty_CH
+
+mtitle('OF, Thigmotaxis');
+
 
 %%
 
@@ -1144,70 +1222,44 @@ for mouse=1:length(Mouse_names)
     
 end
 
+Threshold = [2.5 3 3.5 4 4.5 5];
 
-%% GLM analysis
-% 
-% GetNicotineSessions_CH
-% 
-% Mouse_names = {'M1500','M1531','M1532','M1686','M1687','M1685'};
-% 
-% figure('Color',[1 1 1])
-% for mouse=1:length(Mouse_names)
-%     path = sprintf('%s.%s{%d}', 'NicotineOF', 'OFPost', mouse);
-%     folder_path = eval(path);
-%     cd(folder_path);
-%     disp(folder_path);
-%     
-%     
-%     load('behavResources.mat')
-%     load('B_Low_Spectrum.mat')
-%     
-%     Epoch = intervalSet(0,12000000);
-%     
-%     Spectrum_Frequency=ConvertSpectrum_in_Frequencies_BM(Spectro{3} , Spectro{2}*1e4 , Spectro{1});
-%     Respi = tsd(Range(Spectrum_Frequency),runmean_BM(Data(Spectrum_Frequency),ceil(1/median(diff(Range(Spectrum_Frequency,'s'))))));
-%     Respi = Restrict(Respi, Epoch);
-%     FreezeAccEpochArray = [Start(FreezeAccEpoch), End(FreezeAccEpoch)];
-%     
-%     respiValues = Data(Respi);
-%     isFreeze = InIntervals(Range(Respi), FreezeAccEpochArray);
-%     respiValues(~isFreeze) = NaN;
-%     RespiNaN = tsd(Range(Respi), respiValues);
-%     
-%     [~,Distance,~,~] = Thigmotaxis_OF_CH(AlignedXtsd, AlignedYtsd,'figure',0,'percent_inner',0.7);
-%     DistanceToCenter = tsd(Range(AlignedXtsd),Distance);
-%     DistanceToCenter = Restrict(DistanceToCenter,Epoch);
-%     DistanceToCenterValues = Data(DistanceToCenter);
-%     isFreeze2 = InIntervals(Range(DistanceToCenter), FreezeAccEpochArray);
-%     DistanceToCenterValues(~isFreeze2) = NaN;
-%     DistanceToCenterNaNtemp = tsd(Range(DistanceToCenter),DistanceToCenterValues);
-%     DistanceToCenterNaN = Restrict(DistanceToCenterNaNtemp,RespiNaN);
-%     
-% %     inputData=[Range(RespiNaN)/1e4/60,Data(DistanceToCenterNaN)];
-% %     inputData=[Range(RespiNaN)/1e4/60,Data(DistanceToCenterNaN).*Range(RespiNaN)/1e4/60];
-% %     inputData=[Data(DistanceToCenterNaN),Data(DistanceToCenterNaN).*Range(RespiNaN)/1e4/60];
-%     inputData=[Data(DistanceToCenterNaN),Range(RespiNaN)/1e4/60,Data(DistanceToCenterNaN).*Range(RespiNaN)/1e4/60];
-%     outputData=Data(RespiNaN);
-%     
-%     inputData=inputData(1:2000,:);
-%     outputData=outputData(1:2000,:);
-%     
-%         glmModels = fitglm(inputData, outputData,'Distribution', 'normal', 'Link', 'reciprocal');
-%         predictions = predict(glmModels, inputData);
-%     
-%     subplot(2,3,mouse)
-%         plot(outputData,'k.'), hold on, plot(predictions,'r*'),
-%         glm_results.Coefficients_pvalue(:,mouse) = glmModels.Coefficients{:,'pValue'};
-%         glm_results.Coefficients_estimate(:,mouse) = glmModels.Coefficients{:,'Estimate'};
-%         makepretty_CH
-% %     subplot(2,3,mouse)
-% %     [r,p] = PlotCorrelations_BM(Range(RespiNaN)/1e4/60,Data(DistanceToCenterNaN));
-% %     xlabel('time (minutes)')
-% %     ylabel('Distance to center')
-% %         PlotCorrelations_BM(Data(DistanceToCenterNaN),Data(RespiNaN));
-% %     R(mouse) = r;
-% %     P(mouse) = p;
-% %     makepretty_CH
-%     title(Mouse_names{mouse});
-%     
-% end
+figure('Color',[1 1 1])
+for group = 2
+    if group == 2
+        Mouse_names = Mouse_names_Nic;
+    elseif group == 1
+        Mouse_names = Mouse_names_Sal;
+    elseif group == 3
+        Mouse_names = Mouse_names_NicLow;
+    end
+    for sess=2
+        for thresh = 1:length(Threshold)
+            for mouse=1:length(Mouse_names)
+                NewRespiFz = tsd(Range(RespiFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),runmean_BM(Data(RespiFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),5));
+                OverBreathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = thresholdIntervals(NewRespiFz,Threshold(thresh),'Direction','Above');
+                OverBreathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = mergeCloseIntervals(OverBreathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),0.3*1e4);
+                TimeOver.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(OverBreathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4;
+                UnderBreathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})-OverBreathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse});
+                TimeUnder.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(UnderBreathing.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4;
+                Ratio.(Name{group}).(Session_type{sess})(mouse) = TimeUnder.(Name{group}).(Session_type{sess})(mouse)/TimeOver.(Name{group}).(Session_type{sess})(mouse);
+            end
+            subplot(2,3,thresh)
+            %             PlotCorrelations_BM(Thigmo.(Name{group}).(Session_type{sess}),TimeOver.(Name{group}).(Session_type{sess}),'colortouse','r');
+%                         PlotCorrelations_BM(DistanceToCenter_mean.(Name{group}).(Session_type{sess}),TimeOver.(Name{group}).(Session_type{sess}),'colortouse','k');
+                        PlotCorrelations_BM(DistanceToCenterTempActive_mean.(Name{group}).(Session_type{sess}),TimeOver.(Name{group}).(Session_type{sess}),'colortouse','k');
+%                         PlotCorrelations_BM(FreezeTimeAcc.(Name{group}).(Session_type{sess})/1e4,TimeOver.(Name{group}).(Session_type{sess}),'colortouse','k');
+%             PlotCorrelations_BM(DistanceToCenter_mean.(Name{group}).(Session_type{sess}),Ratio.(Name{group}).(Session_type{sess}),'colortouse','k');
+            makepretty
+            xlabel('Distance to center')
+            ylabel(['Time Breathing over ',num2str(Threshold(thresh))])
+%             ylabel(['Ratio Under/Over ',num2str(Threshold(thresh))])
+            
+            title(num2str(Threshold(thresh)))
+        end
+    end
+end
+
+
+
+
