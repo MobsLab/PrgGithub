@@ -16,4 +16,5 @@ tmp*
 test*
 
 # Spyder configuration
-.spyproject
+.spyproject*
+
