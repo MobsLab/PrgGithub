@@ -1,4 +1,4 @@
-
+function composition_video_OB_DLC_ferret
 %% Parameters
 vid_name = 'Ferret_SS_01-05_Cortex_DLC_x4_v2';
 
@@ -32,13 +32,13 @@ arb_end = 42900; % this is the number of a frame starting from the time_1st_trig
 time(arb_begin)
 time(arb_end)
 
-%% Load data 
+%% Load data
 disp('load scoring')
 load('StateEpochSB.mat')
 load('StateEpochBM.mat')
 load('behavResources.mat')
 
-%% Defining Epochs 
+%% Defining Epochs
 TotalEpoch=intervalSet(0*1e4,max(Range(smooth_ghi)));
 
 smooth_ghi_new = Restrict(smooth_ghi,TotalEpoch);
@@ -57,7 +57,7 @@ endin=endin(end);
 
 % define the DLC time
 try
-%     file=dir('*frames.csv');
+    %     file=dir('*frames.csv');
 catch
     file=dir([pwd '/DLC/' '*frames.csv']);
 end
@@ -65,7 +65,7 @@ end
 data_csv = csvread(fullfile([pwd '/DLC/' ],file.name)); %loads the csv from line 3 to the end (to skip the Header)
 dateStr = regexp(file.name, '\d{8}', 'match');
 date = dateStr{1};
-% 
+%
 % time_trig = data_csv;
 % time_trig = time_trig - time_trig(1);
 try
@@ -75,7 +75,7 @@ catch
 end
 time = time_trig + time_1st_trig;
 
-%% Load spectrum 
+%% Load spectrum
 disp('loading middle spectrum...')
 load('B_Middle_Spectrum.mat')
 Spectro_B = Spectro;
@@ -126,7 +126,7 @@ sptsdRef=tsd(Spectro_ref{2}*1e4,Spectro_ref{1});
 sptsdRef = Restrict(sptsdRef, TotalEpoch);
 fRef=Spectro{3};
 
-%% Select the case 
+%% Select the case
 
 switch rec
     case 'Full_Rec'
@@ -155,7 +155,7 @@ switch rec
         end
     case 'Arb'
         begin_recording = arb_begin;
-        stop_recording = arb_end;  
+        stop_recording = arb_end;
 end
 
 switch SS_base
@@ -360,7 +360,7 @@ set(gcf,'CurrentAxes',ScatP_screw)
 
 %S2
 plot(log(Data(Restrict(smooth_ghi,SWSEpoch))),log(Data(Restrict(smooth_Theta,SWSEpoch))),'.','color',[1 0.6 0.6],'MarkerSize',3);
-hold on 
+hold on
 %S1
 plot(log(Data(Restrict(smooth_ghi,REMEpoch))),log(Data(Restrict(smooth_Theta,REMEpoch))),'.','color',[0.76 0.87 0.38],'MarkerSize',3);
 %Wake
@@ -374,7 +374,7 @@ set(gcf,'CurrentAxes',ScatP_0105)
 %S1
 %changed on 26/06 from S1 to S2
 plot(log(Data(Restrict(smooth_ghi_new,Selected_S2))),log(Data(Restrict(Selected_smooth,Selected_S2))),'.','color',[1 0.6 0.6],'MarkerSize',3);
-hold on 
+hold on
 %S2
 %changed on 26/06 from S2 to S1
 plot(log(Data(Restrict(smooth_ghi_new,Selected_S1))),log(Data(Restrict(Selected_smooth,Selected_S1))),'.','color',[0.76 0.87 0.38],'MarkerSize',3);
@@ -409,7 +409,7 @@ for i = 1:2
         set(icons(7),'MarkerSize',20)
         set(icons(9),'MarkerSize',20)
     end
-    xlabel('OB Gamma Power') 
+    xlabel('OB Gamma Power')
     if i == 1
         switch SS_base
             case '0.1-0.5'
@@ -427,7 +427,7 @@ end
 %% Plot LFP traces
 
 % Cortex LFP
-plot_cortex_lfp = subplot(8, 8, 5:8); 
+plot_cortex_lfp = subplot(8, 8, 5:8);
 plot(Range(LFP_screw,'s'),Data(LFP_screw),'k','color',[0 0.5 0.5])
 plot_cortex_lfp.Position = [0.52 0.93 0.43 0.07];
 Line_1 = line([1 1],ylim,'linewidth',2,'color',[0.6350 0.0780 0.1840]);
@@ -435,7 +435,7 @@ ylim([median(Data(LFP_screw))-800 median(Data(LFP_screw))+800])
 title('Screw LFP (1ch)')
 
 % OB (24th) LFP
-plot_OB_lfp = subplot(8, 8, 13:16); 
+plot_OB_lfp = subplot(8, 8, 13:16);
 plot(Range(LFPB2,'s'),Data(LFPB2),'k', 'color',[0 0.5 0.5])
 plot_OB_lfp.Position = [0.52 0.81 0.43 0.07];
 Line_2 = line([1 1],ylim,'linewidth',2,'color',[0.6350 0.0780 0.1840]);
@@ -443,7 +443,7 @@ ylim([median(Data(LFPB2))-4e3 median(Data(LFPB2))+4e3])
 title('OB LFP (24ch)')
 
 % EMG LFP (12th channel at the moment; to switch for the 19th channel use LFP_EMG_2)
-plot_EMG = subplot(8, 8, 21:24); 
+plot_EMG = subplot(8, 8, 21:24);
 plot(Range(LFP_EMG_1,'s'),Data(LFP_EMG_1),'k','color',[0.6 0 0])
 plot_EMG.Position = [0.52 0.69 0.43 0.07];
 Line_3 = line([1 1],ylim,'linewidth',2,'color',[0.6350 0.0780 0.1840]);
@@ -451,7 +451,7 @@ ylim([median(Data(LFP_EMG_1))-500 median(Data(LFP_EMG_1))+500])
 title('EMG LFP (12ch)')
 
 % Nostril velocity x
-plot_nostril_velocity_x = subplot(8, 8, 29:32); 
+plot_nostril_velocity_x = subplot(8, 8, 29:32);
 plot_nostril_velocity_x.Position = [0.52 0.57 0.43 0.07];
 clear temp; temp = runmean_BM(sqrt(zscore(velocity_nostril_center(:, 1))), 4);
 area(time, temp, 'FaceColor',[0.8 0.2 0], 'FaceAlpha', 0.3);
@@ -461,7 +461,7 @@ Line_4 = line([1 1],ylim,'linewidth',2,'color',[0.6350 0.0780 0.1840]);
 title('Nostril Velocity_x')
 
 % Pupil velocity x
-plot_pupil_velocity_x = subplot(8, 8, 37:40); 
+plot_pupil_velocity_x = subplot(8, 8, 37:40);
 plot_pupil_velocity_x.Position =  [0.52 0.45 0.43 0.07];
 clear temp; temp = runmean_BM(sqrt(zscore(velocity_pupil_center(:, 1))), 4);
 area(time, temp, 'FaceColor',[0.4 0.5 0], 'FaceAlpha', 0.3);
@@ -471,7 +471,7 @@ Line_5 = line([1 1],ylim,'linewidth',2,'color',[0.6350 0.0780 0.1840]);
 title('Pupil Velocity_x')
 
 % Pupil and eye areas
-plot_pupil_eye_area = subplot(8, 8, 45:48); 
+plot_pupil_eye_area = subplot(8, 8, 45:48);
 plot_pupil_eye_area.Position = [0.52 0.33 0.43 0.07];
 normalized_pupil_area = (areas_pupil - min(areas_pupil))/(max(areas_pupil)-min(areas_pupil));
 normalized_eye_area = (areas_eye - min(areas_eye))/(max(areas_eye)-min(areas_eye));
@@ -488,7 +488,7 @@ legend({'eye area';'pupil area'})
 % xlim([3800 4400])
 xlabel('time, sec')
 
-LFP_lines = [Line_1 Line_2 Line_3 Line_4 Line_5 Line_6]'; 
+LFP_lines = [Line_1 Line_2 Line_3 Line_4 Line_5 Line_6]';
 
 %% Plot DLC video
 
@@ -498,7 +498,7 @@ plot_DLC_video.Position = [0.012 0 0.5 0.5]; %0227
 
 %% Removed from the figure
 % % Pupil center x
-% plot_pupil_center_x = subplot(8, 6, 39:42); 
+% plot_pupil_center_x = subplot(8, 6, 39:42);
 % plot_pupil_center_x.Position = [0.44 0.15 0.51 0.075];
 % % plot(time, pupil_center(:, 1),'k','color',[0.6 0 0])
 % clear temp; temp = runmean_BM(zscore(pupil_center(:, 1)), 40);
@@ -508,10 +508,10 @@ plot_DLC_video.Position = [0.012 0 0.5 0.5]; %0227
 % Line_5 = line([1 1],ylim,'linewidth',2,'color','k');
 % title('Pupil Center_x')
 
-% % Accelero LFP 
-% plot_accelero = subplot(8, 6, 21:24); 
-% clear A, A=log(Data(MovAcctsd)); A(A==-Inf)=15; A = runmean_BM(A , ceil(.05/median(diff(Range(MovAcctsd,'s'))))); 
-% B=runmean_BM(A , ceil(3/median(diff(Range(MovAcctsd,'s'))))); 
+% % Accelero LFP
+% plot_accelero = subplot(8, 6, 21:24);
+% clear A, A=log(Data(MovAcctsd)); A(A==-Inf)=15; A = runmean_BM(A , ceil(.05/median(diff(Range(MovAcctsd,'s')))));
+% B=runmean_BM(A , ceil(3/median(diff(Range(MovAcctsd,'s')))));
 % A=(A-min(B)); A=A/max(B);
 % area(Range(MovAcctsd,'s'),A*8, 'FaceColor', [0.6 0 0])
 % u=hline((log(Immobility_thresh)-min(B))/max(B) , '--k'); u.LineWidth = 4;
@@ -520,7 +520,7 @@ plot_DLC_video.Position = [0.012 0 0.5 0.5]; %0227
 % plot(Range(LFP_vtrig, 's'), Data(LFP_vtrig))
 % hold on
 % LFPLine1 = line([1 1],ylim,'linewidth',2,'color','k');
-% 
+%
 % Line_8 = line([1 1],ylim,'linewidth',2,'color','k');
 
 %% Link axes
@@ -552,7 +552,7 @@ open(writerObj);
 State= {'S1','S2','Wake'};
 clear j k; j = 1;
 for k = begin_recording : stop_recording
-
+    
     CentreValue = time(k);
     
     %% worm in Scatter cortex
@@ -582,18 +582,18 @@ for k = begin_recording : stop_recording
     Wake_overlap = sum(Stop(and(LitEpoch,Wake))-Start(and(LitEpoch,Wake)));
     if isempty(Wake_overlap), Wake_overlap = 0; end
     [val,ind] = max([S1_overlap,S2_overlap,Wake_overlap]);
-  
+    
     %% Gamma Spectrogram
     set(gcf,'CurrentAxes',SpecP_g)
     xlim([CentreValue-300 CentreValue+300])
     set(Gamma_line,'XData',[CentreValue CentreValue])
     title(State{ind})
-   
+    
     %% 0105 Spectrogram
     set(gcf,'CurrentAxes',SpecP_0105)
     xlim([CentreValue-300 CentreValue+300])
     set(Line_0105,'XData',[CentreValue CentreValue])
-      
+    
     %% Screw Spectrogram
     set(gcf,'CurrentAxes',SpecP_screw)
     xlim([CentreValue-300 CentreValue+300])
@@ -607,28 +607,28 @@ for k = begin_recording : stop_recording
     %% DLCs
     set(gcf,'CurrentAxes',ax_dlc)
     xlim([CentreValue-45 CentreValue+45])
-%     xlim([CentreValue-5 CentreValue+5])
-
+    %     xlim([CentreValue-5 CentreValue+5])
+    
     set(LFP_lines,'XData',[CentreValue CentreValue])
     
     %% Video
     set(gcf, 'CurrentAxes', plot_DLC_video)
-    imshow(frame(:, :, :, video_time_line(j))); 
+    imshow(frame(:, :, :, video_time_line(j)));
     drawnow;
-
+    
     disp(['video frame ' num2str(arb_begin+video_time_line(j)-1)])
     disp(['dlc frame ' num2str(k)])
     disp(['video time ' num2str(video.CurrentTime)])
     disp(['dlc time ' num2str(time(k))])
     j = j + 1;
-
-%     disp(time(k)-time_1st_trig)
-%     disp(['mismatch between the video and the timer ' num2str(video.CurrentTime - (time(k)-time_1st_trig))])
-   
+    
+    %     disp(time(k)-time_1st_trig)
+    %     disp(['mismatch between the video and the timer ' num2str(video.CurrentTime - (time(k)-time_1st_trig))])
+    
     writeVideo(writerObj,getframe(gcf));
     
 end
- close(writerObj);
- 
+close(writerObj);
 
+end
 
