@@ -15,7 +15,7 @@ from transform_data import apply_sigmoid
 from visualize_data import plot_exp_transform, plot_sigmoid_transform, plot_mouse_column
 from fit_linear_model_r2 import ( 
     find_best_linear_model, 
-    fit_all_predictors_model,
+    # fit_all_predictors_model,
     fit_single_predictor_models, 
     fit_leave_one_out_models
     )
@@ -23,13 +23,14 @@ from fit_linear_model_r2 import (
 # %% Load data
 
 mat_folder = r'/media/nas7/ProjetEmbReact/DataEmbReact/Data_Model_Ella'
-mat_filename = r'Data_Model_Ella.mat'
+mat_filename = r'Data_Model_Ella_mvt.mat'
 
 mice_data_original = load_mat_data(mat_folder, mat_filename)
 
 # %% Keep needed columns and z-score
 
-columns_list = ['OB frequency', 'Position', 'Global Time', 'Time since last shock', 'Time spent freezing']
+columns_list = ['OB frequency', 'Position', 'Global Time', 
+                'Time since last shock', 'Time spent freezing', 'Movement quantity']
 
 mice_data = filter_columns(mice_data_original, columns_list, drop_na=True)
 
@@ -61,11 +62,12 @@ plot_mouse_column(transformed_mice_data, 'M1225', 'Global Time')
 
 # %% Fit the different models
 
-df = transformed_mice_data['M1171']
+df = transformed_mice_data['M1225']
 
 # Full model
 # independent_vars = ["Position", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]
-independent_vars = ["Time spent freezing", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]
+independent_vars = ["Time spent freezing", "Position_sig_Global_Time", 
+                    "neg_exp_Time_since_last_shock", "Global Time", "Movement quantity"]
 
 
 best_results = find_best_linear_model(df, param_grid, independent_vars)
@@ -75,8 +77,8 @@ print("Best Hyperparameters:", best_results["best_params"])
 print("Best R² Score:", best_results["best_score"])
 # print("Mean MAE:", best_results["best_score"])
 
-all_results = fit_all_predictors_model(df, best_results["best_params"], independent_vars)
-print("Best R² Score:", all_results["mean_r2"])
+# all_results = fit_all_predictors_model(df, best_results["best_params"], independent_vars)
+# print("Best R² Score:", all_results["mean_r2"])
 
 # Fit single-predictor models
 single_predictor_results = fit_single_predictor_models(df, best_results["best_params"], independent_vars)
