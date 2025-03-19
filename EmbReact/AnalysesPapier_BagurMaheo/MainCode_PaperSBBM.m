@@ -54,7 +54,6 @@ PlaceCells_Replay_Subsampling_FreezingSafe_BM_SB_VFin.m
 % Code for reactivation analysis
 
 %% Figure 3 - ripple inhib effect on stress score
-
 ResidualCorrStressScore_Umaze_DZPGroup
 ResidualCorrStressScore_Umaze_RipGroup
 
@@ -87,6 +86,7 @@ ROC_curves_BodyParametersFreezingUMaze_SB.m
 
 
 %% SDS
+AnalyseSocialDefeat_CompareUmaze_FigPaper.m
 
 
 % codes for figures, BM
@@ -96,3 +96,13 @@ edit Paper_2Freezing_SBM.m
 
 
 
+
+
+%%%%
+%Figure1
+
+
+
+% Figure 4
+%
+ResidualCorrStressScore_Umaze_RipGroup

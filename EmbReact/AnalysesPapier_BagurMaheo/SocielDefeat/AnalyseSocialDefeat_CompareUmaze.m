@@ -6,106 +6,107 @@ clear all
 AllDir = {Dir_CD1_CD1cage,Dir_CD1_C57cage,Dir_Sleep_CD1InCage,Dir_Sleep_CD1NOTInCage,Dir_Sleep_Ctrl};
 Allinfo = {Info_CD1_CD1cage,Info_C D1_C57cage,Info_Sleep_CD1InCage,Info_Sleep_CD1NOTInCage,Info_Sleep_Ctrl};
 GroupNames = {'CD1_Exp','C57_Exp','C57_Sleep','CD1_Sleep','Ctrl_Sleep'};
-
-%% Get data SDS mice
-for dirnum  = 1:length(AllDir)
-    mouse_num = 1;
-    for dd = 1:length(AllDir{dirnum})
-        for ddd = 1:length(AllDir{dirnum}{dd}.path)
-            ddd
-            % Get data
-            if not(isempty(findstr(GroupNames{dirnum},'Sleep')))
-                TempData = GetSVMDataFromDir_SDS_UmazeComp_SleepSession(AllDir{dirnum}{dd}.path{ddd}{1});
-            else
-                TempData = GetSVMDataFromDir_SDS_UmazeComp(AllDir{dirnum}{dd}.path{ddd}{1});
-            end
-            Fields = fieldnames(TempData);
-            % Reorganize
-            try
-                Data.(GroupNames{dirnum}).MouseId(mouse_num) = AllDir{dirnum}{dd}.nMice{ddd};
-            catch
-                Data.(GroupNames{dirnum}).MouseId(mouse_num) =  eval(Dir_Sleep_Ctrl{dd}.name{ddd}(6:end));
-            end
-            Data.(GroupNames{dirnum}).FileLoc{mouse_num} = AllDir{dirnum}{dd}.path{ddd}{1};
-            Data.(GroupNames{dirnum}).AllSpec_Lo(mouse_num,:) = TempData.OBSpec_Lo;
-            Data.(GroupNames{dirnum}).AllSpec_Hi(mouse_num,:) = TempData.OBSpec_Hi;
-            Data.(GroupNames{dirnum}).Params_SVM(mouse_num,:) = [NaN,TempData.OBGammaFreq,TempData.OBGammaPower,TempData.Rip_density];
-            Data.(GroupNames{dirnum}).FzTime(mouse_num) = TempData.FzTime;
-            Data.(GroupNames{dirnum}).FzProp(mouse_num) = TempData.FzProp;
-            Data.(GroupNames{dirnum}).BreathFreq{mouse_num} = TempData.AllInstFreqFz;
-            if (isempty(findstr(GroupNames{dirnum},'Sleep')))
-                Data.(GroupNames{dirnum}).SDSNumber(mouse_num) = Allinfo{dirnum}.FirstSecond(dd);
-            else
-                Data.(GroupNames{dirnum}).REMProp(mouse_num) = TempData.REMProp;
-                Data.(GroupNames{dirnum}).SleepProp(mouse_num) = TempData.SleepProp;
-            end
-            mouse_num = mouse_num+1;
-        end
-    end
-end
-
-
-% Get the OB peaks manually
-% fLow = [1+0.076:0.076:20-0.076];
+% 
+% %% Get data SDS mice
 % for dirnum  = 1:length(AllDir)
-%     
-%     for mouse_num = 1:size(Data.AllSpec_Lo.(GroupNames{dirnum}),1)
-%         if Data.FzTime.(GroupNames{dirnum})(mouse_num)>0
-%             plot(fLow,Data.AllSpec_Lo.(GroupNames{dirnum})(mouse_num,:)), title(num2str(Data.FzTime.(GroupNames{dirnum})(mouse_num)))
-%             xlim([0 20])
-%             hold on
-%             [Data.Params_SVM.(GroupNames{dirnum})(mouse_num,1),y] = ginput(1);
-%             if Data.Params_SVM.(GroupNames{dirnum})(mouse_num,1)<0.5
-%                 Data.Params_SVM.(GroupNames{dirnum})(mouse_num,1) = NaN;
+%     mouse_num = 1;
+%     for dd = 1:length(AllDir{dirnum})
+%         for ddd = 1:length(AllDir{dirnum}{dd}.path)
+%             ddd
+%             % Get data
+%             if not(isempty(findstr(GroupNames{dirnum},'Sleep')))
+%                 TempData = GetSVMDataFromDir_SDS_UmazeComp_SleepSession(AllDir{dirnum}{dd}.path{ddd}{1});
+%             else
+%                 TempData = GetSVMDataFromDir_SDS_UmazeComp(AllDir{dirnum}{dd}.path{ddd}{1});
 %             end
-%             clf
+%             Fields = fieldnames(TempData);
+%             % Reorganize
+%             try
+%                 Data.(GroupNames{dirnum}).MouseId(mouse_num) = AllDir{dirnum}{dd}.nMice{ddd};
+%             catch
+%                 Data.(GroupNames{dirnum}).MouseId(mouse_num) =  eval(Dir_Sleep_Ctrl{dd}.name{ddd}(6:end));
+%             end
+%             Data.(GroupNames{dirnum}).FileLoc{mouse_num} = AllDir{dirnum}{dd}.path{ddd}{1};
+%             Data.(GroupNames{dirnum}).AllSpec_Lo(mouse_num,:) = TempData.OBSpec_Lo;
+%             Data.(GroupNames{dirnum}).AllSpec_Hi(mouse_num,:) = TempData.OBSpec_Hi;
+%             Data.(GroupNames{dirnum}).Params_SVM(mouse_num,:) = [NaN,TempData.OBGammaFreq,TempData.OBGammaPower,TempData.Rip_density];
+%             Data.(GroupNames{dirnum}).FzTime(mouse_num) = TempData.FzTime;
+%             Data.(GroupNames{dirnum}).FzProp(mouse_num) = TempData.FzProp;
+%             Data.(GroupNames{dirnum}).BreathFreq{mouse_num} = TempData.AllInstFreqFz;
+%             if (isempty(findstr(GroupNames{dirnum},'Sleep')))
+%                 Data.(GroupNames{dirnum}).SDSNumber(mouse_num) = Allinfo{dirnum}.FirstSecond(dd);
+%             else
+%                 Data.(GroupNames{dirnum}).REMProp(mouse_num) = TempData.REMProp;
+%                 Data.(GroupNames{dirnum}).SleepProp(mouse_num) = TempData.SleepProp;
+%             end
+%             mouse_num = mouse_num+1;
 %         end
 %     end
 % end
-
-% Load manual info
-Temp = load('SDS_Data_CompUmaze_VOld.mat');
-for dirnum  = 1:length(GroupNames)
-    for mouse_num = 1:size(Data.(GroupNames{dirnum}).AllSpec_Lo,1)
-
-Data.(GroupNames{dirnum}).Params_SVM(mouse_num,1) = Temp.Data.Params_SVM.(GroupNames{dirnum})(mouse_num,1);
-    end
-end
-
-% Get rid of mice with LFP problems
-BadMice = [1197,1541,1489,1488];
-for dirnum  = 1:length(GroupNames)
-    AllFields = fieldnames(Data.(GroupNames{dirnum}));
-
-    MiceToElim = ismember(Data.(GroupNames{dirnum}).MouseId,BadMice);
-    for ff = 1:length(AllFields)
-        ff
-        if min(size(Data.(GroupNames{dirnum}).(AllFields{ff})))>1
-            Data.(GroupNames{dirnum}).(AllFields{ff})(MiceToElim,:) = [];
-        else
-            Data.(GroupNames{dirnum}).(AllFields{ff})(MiceToElim) = [];
-            
-        end
-    end
-end
-
-% Match the sleep and CD exposure sessions
-CD1_once = unique(Data.CD1_Exp.MouseId);
-for mm = 1:length(CD1_once)
-    MatchSess.CD1_Sess{mm} = find(Data.CD1_Exp.MouseId==CD1_once(mm) & Data.CD1_Exp.SDSNumber==1);
-    MatchSess.C57_Sess{mm} = find(Data.C57_Exp.MouseId ==CD1_once(mm)  & Data.C57_Exp.SDSNumber==1);
-    MatchSess.C57_SleepSess{mm} = find(Data.C57_Sleep.MouseId==CD1_once(mm));
-    MatchSess.CD1_SleepSess{mm} = find(Data.CD1_Sleep.MouseId==CD1_once(mm));
-    
-end
-
-cd /media/nas7/ProjetEmbReact/DataEmbReact/PaperData
-load('SDS_Data_CompUmaze_VF.mat',...
-    'Data','GroupNames','MatchSess')
-
+% 
+% 
+% % Get the OB peaks manually
+% % fLow = [1+0.076:0.076:20-0.076];
+% % for dirnum  = 1:length(AllDir)
+% %     
+% %     for mouse_num = 1:size(Data.AllSpec_Lo.(GroupNames{dirnum}),1)
+% %         if Data.FzTime.(GroupNames{dirnum})(mouse_num)>0
+% %             plot(fLow,Data.AllSpec_Lo.(GroupNames{dirnum})(mouse_num,:)), title(num2str(Data.FzTime.(GroupNames{dirnum})(mouse_num)))
+% %             xlim([0 20])
+% %             hold on
+% %             [Data.Params_SVM.(GroupNames{dirnum})(mouse_num,1),y] = ginput(1);
+% %             if Data.Params_SVM.(GroupNames{dirnum})(mouse_num,1)<0.5
+% %                 Data.Params_SVM.(GroupNames{dirnum})(mouse_num,1) = NaN;
+% %             end
+% %             clf
+% %         end
+% %     end
+% % end
+% 
+% % Load manual info
+% Temp = load('SDS_Data_CompUmaze_VOld.mat');
+% for dirnum  = 1:length(GroupNames)
+%     for mouse_num = 1:size(Data.(GroupNames{dirnum}).AllSpec_Lo,1)
+% 
+% Data.(GroupNames{dirnum}).Params_SVM(mouse_num,1) = Temp.Data.Params_SVM.(GroupNames{dirnum})(mouse_num,1);
+%     end
+% end
+% 
+% % Get rid of mice with LFP problems
+% BadMice = [1197,1541,1489,1488];
+% for dirnum  = 1:length(GroupNames)
+%     AllFields = fieldnames(Data.(GroupNames{dirnum}));
+% 
+%     MiceToElim = ismember(Data.(GroupNames{dirnum}).MouseId,BadMice);
+%     for ff = 1:length(AllFields)
+%         ff
+%         if min(size(Data.(GroupNames{dirnum}).(AllFields{ff})))>1
+%             Data.(GroupNames{dirnum}).(AllFields{ff})(MiceToElim,:) = [];
+%         else
+%             Data.(GroupNames{dirnum}).(AllFields{ff})(MiceToElim) = [];
+%             
+%         end
+%     end
+% end
+% 
+% % Match the sleep and CD exposure sessions
+% CD1_once = unique(Data.CD1_Exp.MouseId);
+% for mm = 1:length(CD1_once)
+%     MatchSess.CD1_Sess{mm} = find(Data.CD1_Exp.MouseId==CD1_once(mm) & Data.CD1_Exp.SDSNumber==1);
+%     MatchSess.C57_Sess{mm} = find(Data.C57_Exp.MouseId ==CD1_once(mm)  & Data.C57_Exp.SDSNumber==1);
+%     MatchSess.C57_SleepSess{mm} = find(Data.C57_Sleep.MouseId==CD1_once(mm));
+%     MatchSess.CD1_SleepSess{mm} = find(Data.CD1_Sleep.MouseId==CD1_once(mm));
+%     
+% end
+% 
+% cd /media/nas7/ProjetEmbReact/DataEmbReact/PaperData
+% load('SDS_Data_CompUmaze_VF.mat',...
+%     'Data','GroupNames','MatchSess')
+% 
 
 %% Clean things up
 % Mice with too much noise for a clear peak and mice with no freezing
+cd /media/nas7/ProjetEmbReact/DataEmbReact/PaperData
 load('SDS_Data_CompUmaze_VF.mat')
 
 Cols = {[1,0.4,0.4],[0.4,0,0.8],[0.4,0.4,1],[0.4,0.4,1],[0.4,0.4,0.4]};
@@ -274,7 +275,7 @@ ylabel('Power (AU)')
 
 %% Proportionn of time above and below 4Hz
 Sess = fieldnames(Data);
-Lim =  4;
+Lim =  4.5,
 for ss  = 1:length(Sess)
     for mm = 1:length(Data.(Sess{ss}).BreathFreq)
         ProSafeLike{ss}(mm) = nanmean(Data.(Sess{ss}).BreathFreq{mm}<Lim);

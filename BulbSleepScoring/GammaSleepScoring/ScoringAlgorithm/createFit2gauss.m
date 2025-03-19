@@ -68,6 +68,5 @@ if not(isempty(st_) )
 end
 end
 ft_ = fittype('gauss2');
-
 % Fit this model using new data
 [cf_,goodness]  = fit(X(ok_),Y(ok_),ft_,fo_);

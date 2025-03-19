@@ -90,7 +90,7 @@ Starttime  = Start(StartSound);
 
 % Below is a loop that draws PSTHs for each cluster, to quickly check data:
 Resp = [];  % store PSTH data if desired
-for ii = 1:size(spikes,2)
+for ii = [3 19]%1:size(spikes,2)
     fh = figure('Visible', 'off');
     [fh,sq,sweeps] = RasterPETH(ts(spikes(:,ii)*1e1), ts(Starttime), ...
         -10000, +50000, 'BinSize', 240);
@@ -101,8 +101,8 @@ for ii = 1:size(spikes,2)
     end
     % Save figure for quick access
     fName = sprintf('Raster_ch%d_cl%d.png', i(1), i(2));
-    saveas(fh, fullfile(rasterDir, fName));
-    close(fh); 
+%     saveas(fh, fullfile(rasterDir, fName));
+%     close(fh); 
 end
 
 %% Selecting “Good” Clusters (colIndex) Based on zeta test

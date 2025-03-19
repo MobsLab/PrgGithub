@@ -1,116 +1,130 @@
 function OB_face_analysis_DLC(datapath)
-% This script calculates the set of basic parameters (on raw data) and figures from the DLC tracking 
+% This script computes basic parameters and generates figures from DLC tracking data.
+% It uses synchronized DLC data (with the time column aligned to openephys triggers)
+% so that the ephys (OB/LFP) and video/DLC signals are on the same time base.
 
-%% Load data
-% cd(datapath)
+%% Initialization
+[~, Session_params.session_selection, ~] = fileparts(datapath);
 
-% Load DLC csv file
-% cd([datapath '/DLC'])
-dlc_file=dir(fullfile([datapath '/DLC/'], '*_filtered.csv')); % smoothed by DLC
-% file=dir('*900000.csv'); % not smoothed
+Session_params.fig_visibility = 'off';
 
-filename=dlc_file.name; disp(['DLC data: ' filename]) %don't forget to specify the csv if you have many
-data = csvread(fullfile([datapath '/DLC/'],filename),3); %loads the csv from line 3 to the end (to skip the Header)
-
-% Load video csv file
-% video_file=dir(fullfile([datapath '/DLC/'],'*frames.csv')); 
-% filename=video_file.name; disp(['Video frames: ' filename]) %don't forget to specify the csv if you have many
-% data_csv = csvread(fullfile([datapath '/DLC/'],filename)); %loads the csv from line 3 to the end (to skip the Header)
-
-load([datapath '/DLC/DLC_data.mat'], 'time_1st_trig', 'time_trig')
-
-%% Prepare data
-nframes = size(data,1);
-data = data(1:nframes, :);
-
-% Time
-% time = ts(linspace(time_1st_trig*1e4, (nframes/Session_params.fps)*1e4 + time_1st_trig*1e4, nframes));
-if length(time_trig) > length(data)
-   time_trig = time_trig(1:length(data));
-   disp(['Camera trigger signal is longer than DLC data by ' num2str(length(time_trig) - length(data)) ' frames. I am restricting it on DLC data length'])
-elseif length(time_trig) < length(data)
-    
-    disp(['Camera trigger signal is shorter than DLC data by ' num2str(length(time_trig) - length(data)) ' frames. I am interpolating it on DLC data length'])
+if contains(datapath, 'Shropshire')
+    Session_params.animal_name = 'Shropshire';
+elseif contains(datapath, 'Brynza')
+    Session_params.animal_name = 'Brynza';
+elseif contains(datapath, 'Labneh')
+    Session_params.animal_name = 'Labneh';
 end
 
-time = ts(time_trig);
+disp(['Processing session: '  Session_params.animal_name ' ' Session_params.session_selection]);
+
+%% Load DLC Synchronized Data
+dlc_file = dir(fullfile(datapath, 'DLC', 'synchronized_DLC_data.csv'));
+if isempty(dlc_file)
+    error('synchronized_DLC_data.csv not found in %s/DLC', datapath);
+end
+filename = dlc_file(1).name;
+disp(['DLC data: ' filename])
+
+% Read entire CSV
+% data = csvread(fullfile(datapath, 'DLC', filename), 0, 0);
+
+dataStruct = importdata(fullfile(datapath, 'DLC', filename));
+if isstruct(dataStruct)
+    data = dataStruct.data;
+else
+    data = dataStruct;
+end
+
+% Verify that the first column (time) is monotonic
+time_vals = data(:,1);
+if any(diff(time_vals) < 0)
+    warning('Time stamps in the first column are not strictly increasing. Fixing it...');
+    data(:, 1) = sort(time_vals);
+    csvwrite(fullfile(datapath, 'DLC', 'synchronized_DLC_data.csv'), data);
+    time_vals = data(:,1);    
+end
+
+% Get number of frames from the synchronized data
+nframes = size(data, 1);
+fprintf('Number of synchronized frames: %d\n', nframes);
+
+% Load frames.csv file
+    % video_file=dir(fullfile([datapath '/DLC/'],'*frames.csv')); 
+    % filename=video_file.name; disp(['Video frames: ' filename]) %don't forget to specify the csv if you have many
+    % data_csv = csvread(fullfile([datapath '/DLC/'],filename)); %loads the csv from line 3 to the end (to skip the Header)
+
+% Load time (already included to data file
+    % load([datapath '/DLC/DLC_data.mat'], 'time_1st_trig', 'time_trig')
+ 
+% Terminal command to check the real number of frames in the video
+    % ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of csv=p=0 /media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241206_TORCs/shropshire_20241206_hf_TORCs_fixed.avi
+
+%% Extract Tracking Coordinates
 
 % Pupil
-pupil_x = data(:, 2:3:23);
-pupil_y = data(:, 3:3:24);
+pupil_x = data(:, 3:3:24);
+pupil_y = data(:, 4:3:25);
 
 % Eyes
-eye_x = data(:, 26:3:48);
-eye_y = data(:, 27:3:49);
+eye_x = data(:, 27:3:49);
+eye_y = data(:, 28:3:50);
 
 % Nostrils
-nostril_x = data(:, 50:3:60);
-nostril_y = data(:, 51:3:61);
+nostril_x = data(:, 51:3:61);
+nostril_y = data(:, 52:3:62);
 
 % Whiskers
-whiskers_x = data(:, 62:3:72);
-whiskers_y = data(:, 63:3:73);
+whiskers_x = data(:, 63:3:73);
+whiskers_y = data(:, 64:3:74);
 
-%% Calculate derivatives
+%% Calculate Basic Metrics Per Frame
+% Preallocate arrays
 areas_pupil = zeros(nframes, 1);
 areas_eye = zeros(nframes, 1);
-pupil_center = zeros(nframes, 2);
+pupil_center = nan(nframes, 2);
 areas_nostril = zeros(nframes, 1);
-nostril_center = zeros(nframes, 2);
+nostril_center = nan(nframes, 2);
 
 for frame = 1:nframes
-    
-    % Calculate the area using the x and y coordinates
+    % Calculate the area using polyarea on the x and y coordinates
     areas_pupil(frame) = polyarea(pupil_x(frame, :), pupil_y(frame, :));
     areas_eye(frame)= polyarea(eye_x(frame, :), eye_y(frame, :));
     areas_nostril(frame) = polyarea(nostril_x(frame, :), nostril_y(frame, :));
     
-    % PUPIL
-    % Create a convex hull using the x and y coordinates
+    % Compute pupil centroid via convex hull (if points are valid)
     x_pupil = pupil_x(frame, :);
     y_pupil = pupil_y(frame, :);
-    if x_pupil ~= 0
-        k_pupil = convhull(x_pupil, y_pupil);
-        % Store the centroid coordinates
-        centroid_x_pupil = mean(x_pupil(k_pupil));
-        centroid_y_pupil = mean(y_pupil(k_pupil));
-        pupil_center(frame, :) = [centroid_x_pupil, centroid_y_pupil];
+    
+    if all(x_pupil == 0)
+        disp(['Frame ' num2str(frame) ': Pupil points all zero. Setting pupil center to NaN.'])
+        pupil_center(frame, :) = [NaN, NaN];
     else
-        disp(['frame ' num2str(frame) ' is 0. Cannot compute convex hull for pupil. Putting NaN instead'])
-        pupil_center(frame, :) = [nan, nan];
+        k_pupil = convhull(x_pupil, y_pupil);
+        pupil_center(frame, :) = [mean(x_pupil(k_pupil)), mean(y_pupil(k_pupil))];
     end
-    % NOSTRIL
-    % Create a convex hull using the x and y coordinates
+    
+    % Compute nostril centroid via convex hull (if points are valid)
     x_nostril = nostril_x(frame, :);
     y_nostril = nostril_y(frame, :);
-    if x_pupil ~= 0
-        k_nostril = convhull(x_nostril, y_nostril);
-        
-        % Store the centroid coordinates
-        centroid_x_nostril = mean(x_nostril(k_nostril));
-        centroid_y_nostril = mean(y_nostril(k_nostril));
-        nostril_center(frame, :) = [centroid_x_nostril, centroid_y_nostril];
+    if all(x_nostril == 0)
+        disp(['Frame ' num2str(frame) ': Nostrils points all zero. Setting nostril center to NaN.'])
+        nostril_center(frame, :) = [NaN, NaN];
     else
-        disp(['frame ' num2str(frame) ' is 0. Cannot compute convex hull for nostril. Putting NaN instead'])
-        nostril_center(frame, :) = [nan, nan];
+        k_nostril = convhull(x_nostril, y_nostril);
+        nostril_center(frame, :) = [mean(x_nostril(k_nostril)), mean(y_nostril(k_nostril))];
     end
-
 end
 
-% Pupil movement
-D = [0 0 ; diff(pupil_center)];
+%% Calculate Pupil Movement and Derivatives
+% Compute frame-to-frame displacement of pupil center (Euclidean distance)
+D = [0 0 ; diff(pupil_center)]; % prepend zero displacement for first frame
 pupil_mvt = sqrt(D(:,1).*D(:,1) + D(:,2).*D(:,2));
-pupil_mvt_tsd = tsd(Range(time), pupil_mvt);
+pupil_mvt = tsd(data(:, 1)*1e4, pupil_mvt);
+areas_pupil = tsd(data(:, 1)*1e4,  areas_pupil);
 
-% Pupil area
-areas_pupil_tsd = tsd(Range(time),  areas_pupil);
-
-% [pupil_size_thresh , mu1 , mu2 , std1 , std2 , AshD] = GetGammaThresh(exp(log10(Data(areas_pupil_tsd))));
-% [eye_thresh_sleep , mu1 , mu2 , std1 , std2 , AshD] = GetGammaThresh(exp(Data(pupil_mvt_tsd)));
-% close
-
-%% Velocity and acceleration
-% Initialize arrays to store velocity and acceleration
+%% Compute Velocity and Acceleration for Pupil and Nostrils
+% Preallocate arrays
 velocity_pupil_center = zeros(nframes, 2);
 acceleration_pupil_center = zeros(nframes, 2);
 velocity_nostril_center = zeros(nframes, 2);
@@ -135,60 +149,48 @@ end
 
 %% Convert to tsd
 
-% variables = {'pupil_x','pupil_y','areas_pupil','pupil_center',...
-%         'velocity_pupil_center','acceleration_pupil_center',...
-%         'eye_x','eye_y','areas_eye',...
-%         'nostril_x','nostril_y','areas_nostril','nostril_center','velocity_nostril_center', 'acceleration_nostril_center',...
-%         'whiskers_x','whiskers_y'};
-% 
-% % Iterate through each variable name, create a tsd object, and assign it to the workspace
-% for i = 1:length(variables)
-%     varName = variables{i};
-%     varValue = evalin('base', varName);  % Get the variable value from the base workspace
-%     tsdObject = tsd(Range(time, 's'), varValue);  % Create the tsd object
-%     assignin('base', [varName, '_tsd'], tsdObject);  % Assign the tsd object to a new variable in the base workspace
-% end
-
 % Pupil
-pupil_x = tsd(Range(time), pupil_x);
-pupil_y = tsd(Range(time), pupil_y);
-pupil_center = tsd(Range(time), pupil_center);
-velocity_pupil_center = tsd(Range(time), velocity_pupil_center);
-acceleration_pupil_center = tsd(Range(time), acceleration_pupil_center);
+pupil_x = tsd(data(:, 1)*1e4, pupil_x);
+pupil_y = tsd(data(:, 1)*1e4, pupil_y);
+pupil_center = tsd(data(:, 1)*1e4, pupil_center);
+velocity_pupil_center = tsd(data(:, 1)*1e4, velocity_pupil_center);
+acceleration_pupil_center = tsd(data(:, 1)*1e4, acceleration_pupil_center);
 
 % Eye
-eye_x = tsd(Range(time), eye_x);
-eye_y = tsd(Range(time), eye_y);
-areas_eye = tsd(Range(time), areas_eye);
+eye_x = tsd(data(:, 1)*1e4, eye_x);
+eye_y = tsd(data(:, 1)*1e4, eye_y);
+areas_eye = tsd(data(:, 1)*1e4, areas_eye);
 
 % Nostrils
-nostril_x = tsd(Range(time), nostril_x);
-nostril_y = tsd(Range(time), nostril_y);
-areas_nostril = tsd(Range(time), areas_nostril);
-nostril_center = tsd(Range(time), nostril_center);
-velocity_nostril_center = tsd(Range(time), velocity_nostril_center);
-acceleration_nostril_center = tsd(Range(time), acceleration_nostril_center);
+nostril_x = tsd(data(:, 1)*1e4, nostril_x);
+nostril_y = tsd(data(:, 1)*1e4, nostril_y);
+areas_nostril = tsd(data(:, 1)*1e4, areas_nostril);
+nostril_center = tsd(data(:, 1)*1e4, nostril_center);
+velocity_nostril_center = tsd(data(:, 1)*1e4, velocity_nostril_center);
+acceleration_nostril_center = tsd(data(:, 1)*1e4, acceleration_nostril_center);
 
 % Whiskers
-whiskers_x = tsd(Range(time), whiskers_x);
-whiskers_y = tsd(Range(time), whiskers_y);
+whiskers_x = tsd(data(:, 1)*1e4, whiskers_x);
+whiskers_y = tsd(data(:, 1)*1e4, whiskers_y);
 
-%% Save the data
-cd([datapath '/DLC/'])
-if ~exist('DLC_data.mat','file')
-    save('DLC_data.mat','pupil_x','pupil_y','areas_pupil_tsd','pupil_center',...
-        'pupil_mvt_tsd','velocity_pupil_center','acceleration_pupil_center',...
+%% Save Processed Data
+% Save the computed tsd objects to a MAT file in the DLC folder.
+savePath = fullfile(datapath, 'DLC');
+
+if ~exist(fullfile(savePath, 'DLC_data.mat'), 'file')
+    save(fullfile(savePath, 'DLC_data.mat'), 'pupil_x','pupil_y','areas_pupil','pupil_center',...
+        'pupil_mvt','velocity_pupil_center','acceleration_pupil_center',...
         'eye_x','eye_y','areas_eye',...
-        'nostril_x','nostril_y','areas_nostril','nostril_center','velocity_nostril_center', 'acceleration_nostril_center',...
-        'whiskers_x','whiskers_y',...
-        'time');
+        'nostril_x','nostril_y','areas_nostril','nostril_center',...
+        'velocity_nostril_center','acceleration_nostril_center',...
+        'whiskers_x','whiskers_y');
 else
-    save('DLC_data.mat','pupil_x','pupil_y','areas_pupil_tsd','pupil_center',...
-        'pupil_mvt_tsd','velocity_pupil_center','acceleration_pupil_center',...
+    save(fullfile(savePath, 'DLC_data.mat'), 'pupil_x','pupil_y','areas_pupil','pupil_center',...
+        'pupil_mvt','velocity_pupil_center','acceleration_pupil_center',...
         'eye_x','eye_y','areas_eye',...
-        'nostril_x','nostril_y','areas_nostril','nostril_center','velocity_nostril_center', 'acceleration_nostril_center',...
-        'whiskers_x','whiskers_y',...
-        'time', '-append');
+        'nostril_x','nostril_y','areas_nostril','nostril_center',...
+        'velocity_nostril_center','acceleration_nostril_center',...
+        'whiskers_x','whiskers_y','-append');
 end
  
 %% Plot figures
@@ -209,18 +211,19 @@ set(f5, 'Units', 'Normalized', 'Position', [0 0 1 1]);
 
 %% f1: Dynamics plots 
 set(0, 'CurrentFigure', f1)
+
 try
-    sgtitle([Session_params.animal_name{Session_params.animal_selection} '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
+    sgtitle([Session_params.animal_name '. Session: '  Session_params.session_selection], 'FontWeight', 'bold')
 catch
-        suptitle([Session_params.animal_name{Session_params.animal_selection} '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
+    suptitle([Session_params.animal_name '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
 end
 subplot(3,3,1)
-plot(Range(time, 's'), Data(pupil_x));
+plot(data(:, 1), Data(pupil_x));
 title('pupil_x')
 xlabel('Time (s)')
 
 subplot(3,3,2)
-plot(Range(time, 's'), Data(pupil_y));
+plot(data(:, 1), Data(pupil_y));
 title('pupil_y')
 xlabel('Time (s)')
 
@@ -233,12 +236,12 @@ xlabel('Time (s)')
 
 % eye
 subplot(3,3,4)
-plot(Range(time, 's'), Data(eye_x))
+plot(data(:, 1), Data(eye_x))
 title('eye_x')
 xlabel('Time (s)')
 
 subplot(3,3,5)
-plot(Range(time, 's'), Data(eye_y))
+plot(data(:, 1), Data(eye_y))
 title('eye_y')
 xlabel('Time (s)')
 
@@ -264,12 +267,12 @@ xlabel('Time (s)')
 
 % nostril 
 subplot(3,3,7)
-plot(Range(time, 's'), Data(nostril_x))
+plot(data(:, 1), Data(nostril_x))
 title('nostril_x')
 xlabel('Time (s)')
 
 subplot(3,3,8)
-plot(Range(time, 's'), Data(nostril_y))
+plot(data(:, 1), Data(nostril_y))
 title('nostril_y')
 xlabel('Time (s)')
 
@@ -289,53 +292,53 @@ xlabel('Time (s)')
 
 %% f2: Areas plots 
 set(0, 'CurrentFigure', f2)
-sgtitle([Session_params.animal_name{Session_params.animal_selection} '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
+sgtitle([Session_params.animal_name '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
 
 subplot(311)
-plot(Range(time, 's'), Data(areas_pupil_tsd))
+plot(data(:, 1), Data(areas_pupil))
 hold on
-plot(Range(time, 's'), Data(areas_eye))
+plot(data(:, 1), Data(areas_eye))
 title('pupil and eye areas evolution')
 xlabel('Time (s)')
 
 subplot(312)
-plot(Range(time, 's'), zscore(Data(areas_pupil_tsd)))
+plot(data(:, 1), zscore(Data(areas_pupil)))
 hold on
-plot(Range(time, 's'), zscore(Data(areas_eye)))
+plot(data(:, 1), zscore(Data(areas_eye)))
 title('pupil and eye areas evolution (zscored)')
 xlabel('Time (s)')
 
 %% f3: Velocity/Acceleration plots 
 set(0, 'CurrentFigure', f3)
-sgtitle([Session_params.animal_name{Session_params.animal_selection} '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
+sgtitle([Session_params.animal_name '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
 
 subplot(411)
-plot(Range(time, 's'), Data(velocity_pupil_center)); 
+plot(data(:, 1), Data(velocity_pupil_center)); 
 title('velocity of the pupil')
 legend({'velocity x', 'velocity y'})
 xlabel('Time (s)')
 
 subplot(412)
-plot(Range(time, 's'), Data(acceleration_pupil_center))
+plot(data(:, 1), Data(acceleration_pupil_center))
 title('Acceleration of the pupil')
 legend({'Acceleration x', 'Acceleration y'})
 xlabel('Time (s)')
 
 subplot(413)
-plot(Range(time, 's'), Data(velocity_nostril_center)); 
+plot(data(:, 1), Data(velocity_nostril_center)); 
 title('velocity of the nostril')
 legend({'velocity x', 'velocity y'})
 xlabel('Time (s)')
 
 subplot(414)
-plot(Range(time, 's'), Data(acceleration_nostril_center))
+plot(data(:, 1), Data(acceleration_nostril_center))
 title('Acceleration of the nostril')
 legend({'Acceleration x', 'Acceleration y'})
 xlabel('Time (s)')
 
 %% f4: put everything together (eye + pupil)
 set(0, 'CurrentFigure', f4)
-sgtitle([Session_params.animal_name{Session_params.animal_selection} '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
+sgtitle([Session_params.animal_name '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
 
 if exist('REMEpoch')
     observed_rem_start = Start(REMEpoch);
@@ -345,21 +348,21 @@ end
 % pupil center x
 axp1 = subplot(5, 1, 1);
 temp_data = Data(pupil_center);
-plot(Range(time, 's'), temp_data(:, 1))
+plot(data(:, 1), temp_data(:, 1))
 title('pupil center_x')
 xlabel('Time (s)')
 
 % pupil center y
 axp2 = subplot(5, 1, 2);
-plot(Range(time, 's'), temp_data(:, 2))
+plot(data(:, 1), temp_data(:, 2))
 title('pupil center_y')
 xlabel('Time (s)')
 
 % pupil and eye areas
 axp3 = subplot(5, 1, 3);
-plot(Range(time, 's'), zscore(Data(areas_pupil_tsd)))
+plot(data(:, 1), zscore(Data(areas_pupil)))
 hold on
-plot(Range(time, 's'), zscore(Data(areas_eye)))
+plot(data(:, 1), zscore(Data(areas_eye)))
 title('pupil and eye areas (zscored)')
 legend({'pupil', 'eye'})
 xlabel('Time (s)')
@@ -367,101 +370,101 @@ xlabel('Time (s)')
 % pupil velocity x
 axp4 = subplot(5, 1, 4);
 temp_data = Data(velocity_pupil_center);
-plot(Range(time, 's'), temp_data(:, 1))
+plot(data(:, 1), temp_data(:, 1))
 title('pupil velocity_x')
 xlabel('Time (s)')
 
 % pupil velocity y
 axp5 = subplot(5, 1, 5);
-plot(Range(time, 's'), temp_data(:, 2))
+plot(data(:, 1), temp_data(:, 2))
 title('pupil velocity_y')
 xlabel('Time (s)')
 
 subplot_list = [axp1 axp2 axp3 axp4 axp5];
 
-% plot REM episodes
-if exist('REMEpoch')
-    for i = 1:size(subplot_list, 2)
-        axes(subplot_list(i))
-        for j = 1:size(observed_rem_start, 1)
-            patch([observed_rem_start(j) observed_rem_end(j) observed_rem_end(j) observed_rem_start(j)], [-500 -500 500 500], 'red', 'FaceAlpha', 0.2);
-        end
-        clear j
-    end
-end
+% try 
+%     load(fullfile(datapath, 'SleepScoring_OBGamma.mat'), 'REMEpoch')
+%     rem_start = Start(REMEpoch)/1e4;
+%     rem_end = End(REMEpoch)/1e4;
+% catch
+%     disp('No REM epoch found')
+% end
+% % plot REM episodes
+% if exist('REMEpoch')
+%     for i = 1:size(subplot_list, 2)
+%         axes(subplot_list(i))
+%         for j = 1:length(rem_start)
+%             patch([rem_start(j) rem_end(j) rem_end(j) rem_start(j)], [-5 -5 5 5], 'red', 'FaceAlpha', 0.2);
+%         end
+%         clear j
+%     end
+% end
 
 %% f5: put everything together (nostril)
 set(0, 'CurrentFigure', f5)
-sgtitle([Session_params.animal_name{Session_params.animal_selection} '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
+sgtitle([Session_params.animal_name '. Session: ' Session_params.session_selection], 'FontWeight', 'bold')
 
 % nostril center x
 axn1 = subplot(5, 1, 1);
 temp_data = Data(nostril_center);
-plot(Range(time, 's'), temp_data(:, 1))
+plot(data(:, 1), temp_data(:, 1))
 title('nostril center_x')
 
 % nostril center y
 axn2 = subplot(5, 1, 2);
-plot(Range(time, 's'), temp_data(:, 2))
+plot(data(:, 1), temp_data(:, 2))
 title('nostril center_y')
 
 % nostril areas
 axn3 = subplot(5, 1, 3);
-plot(Range(time, 's'), Data(areas_nostril))
+plot(data(:, 1), Data(areas_nostril))
 title('nostril area')
 
 % nostril velocity x
 axn4 = subplot(5, 1, 4);
 temp_data = Data(velocity_nostril_center);
-plot(Range(time, 's'), temp_data(:, 1))
+plot(data(:, 1), temp_data(:, 1))
 title('nostril velocity_x')
 
 % nostril velocity y
 axn5 = subplot(5, 1, 5);
-plot(Range(time, 's'), temp_data(:, 2))
+plot(data(:, 1), temp_data(:, 2))
 title('nostril velocity_y')
 
 subplot_list = [axn1 axn2 axn3 axn4 axn5];
 
-% plot REM episodes
-if exist('REMEpoch')
-    for i = 1:size(subplot_list, 2)
-        axes(subplot_list(i))
-        for j = 1:size(observed_rem_start, 1)
-            patch([observed_rem_start(j) observed_rem_end(j) observed_rem_end(j) observed_rem_start(j)], [-500 -500 500 500], 'red', 'FaceAlpha', 0.2);
-        end
-        clear j
-    end
-end
+% % plot REM episodes
+% if exist('REMEpoch')
+%     for i = 1:size(subplot_list, 2)
+%         axes(subplot_list(i))
+%         for j = 1:length(rem_start)
+%             patch([rem_start(j) rem_end(j) rem_end(j) rem_start(j)], [-5 -5 5 5], 'red', 'FaceAlpha', 0.2);
+%         end
+%         clear j
+%     end
+% end
+
 
 %% Save figures
+figFolder = fullfile(datapath, 'DLC/Figures');
+if ~exist(figFolder, 'dir')
+    mkdir(figFolder);
+end
 
-saveas(f1, ['/media/nas7/React_Passive_AG/OBG/Figures/' Session_params.animal_name{Session_params.animal_selection} '/DLC/' 'eye_nostril_DLC' '_' Session_params.session_selection], 'svg') 
-saveas(f1, ['/media/nas7/React_Passive_AG/OBG/Figures/' Session_params.animal_name{Session_params.animal_selection} '/DLC/' 'eye_nostril_DLC' '_' Session_params.session_selection], 'png') 
-saveas(f1, [pwd '/Figures/' 'eye_nostril_DLC' '_' Session_params.session_selection], 'svg') 
-saveas(f1, [pwd '/Figures/' 'eye_nostril_DLC' '_' Session_params.session_selection], 'png') 
+saveas(f1, fullfile(figFolder, [Session_params.animal_name '_eye_nostril_' Session_params.session_selection]), 'svg') 
+saveas(f1, fullfile(figFolder, [Session_params.animal_name '_eye_nostril_' Session_params.session_selection]), 'png') 
 
-saveas(f2, ['/media/nas7/React_Passive_AG/OBG/Figures/' Session_params.animal_name{Session_params.animal_selection} '/DLC/' 'eye_nostril_areas_DLC' '_' Session_params.session_selection], 'svg') 
-saveas(f2, ['/media/nas7/React_Passive_AG/OBG/Figures/' Session_params.animal_name{Session_params.animal_selection} '/DLC/' 'eye_nostril_areas_DLC' '_' Session_params.session_selection], 'png') 
-saveas(f2, [pwd '/Figures/' 'eye_nostril_areas_DLC' '_' Session_params.session_selection], 'svg') 
-saveas(f2, [pwd '/Figures/' 'eye_nostril_areas_DLC' '_' Session_params.session_selection], 'png') 
+saveas(f2, fullfile(figFolder, [Session_params.animal_name 'eye_nostril_areas_' Session_params.session_selection]), 'svg') 
+saveas(f2, fullfile(figFolder, [Session_params.animal_name 'eye_nostril_areas_' Session_params.session_selection]), 'png') 
 
-saveas(f3, ['/media/nas7/React_Passive_AG/OBG/Figures/' Session_params.animal_name{Session_params.animal_selection} '/DLC/' 'eye_nostril_velocity_DLC' '_' Session_params.session_selection], 'svg') 
-saveas(f3, ['/media/nas7/React_Passive_AG/OBG/Figures/' Session_params.animal_name{Session_params.animal_selection} '/DLC/' 'eye_nostril_velocity_DLC' '_' Session_params.session_selection], 'png') 
-saveas(f3, [pwd '/Figures/' 'eye_nostril_velocity_DLC' '_' Session_params.session_selection], 'svg') 
-saveas(f3, [pwd '/Figures/' 'eye_nostril_velocity_DLC' '_' Session_params.session_selection], 'png') 
+saveas(f3, fullfile(figFolder, [Session_params.animal_name 'eye_nostril_velocity_' Session_params.session_selection]), 'svg') 
+saveas(f3, fullfile(figFolder, [Session_params.animal_name 'eye_nostril_velocity_' Session_params.session_selection]), 'png') 
 
-saveas(f4, ['/media/nas7/React_Passive_AG/OBG/Figures/' Session_params.animal_name{Session_params.animal_selection} '/DLC/' 'eye_pupil_all_DLC' '_' Session_params.session_selection], 'svg') 
-saveas(f4, ['/media/nas7/React_Passive_AG/OBG/Figures/' Session_params.animal_name{Session_params.animal_selection} '/DLC/' 'eye_pupil_all_DLC' '_' Session_params.session_selection], 'png') 
-saveas(f4, [pwd '/Figures/' 'eye_pupil_all_DLC' '_' Session_params.session_selection], 'svg') 
-saveas(f4, [pwd '/Figures/' 'eye_pupil_all_DLC' '_' Session_params.session_selection], 'png') 
+saveas(f4, fullfile(figFolder, [Session_params.animal_name 'eye_pupil_all_' Session_params.session_selection]), 'svg') 
+saveas(f4, fullfile(figFolder, [Session_params.animal_name 'eye_pupil_all_' Session_params.session_selection]), 'png') 
 
-saveas(f5, ['/media/nas7/React_Passive_AG/OBG/Figures/' Session_params.animal_name{Session_params.animal_selection} '/DLC/' 'nostril_all_DLC' '_' Session_params.session_selection], 'svg') 
-saveas(f5, ['/media/nas7/React_Passive_AG/OBG/Figures/' Session_params.animal_name{Session_params.animal_selection} '/DLC/' 'nostril_all_DLC' '_' Session_params.session_selection], 'png') 
-saveas(f5, [pwd '/Figures/' 'nostril_all_DLC' '_' Session_params.session_selection], 'svg') 
-saveas(f5, [pwd '/Figures/' 'nostril_all_DLC' '_' Session_params.session_selection], 'png') 
-
-% close all
+saveas(f5, fullfile(figFolder, [Session_params.animal_name 'nostril_all_' Session_params.session_selection]), 'svg') 
+saveas(f5, fullfile(figFolder, [Session_params.animal_name 'nostril_all_' Session_params.session_selection]), 'png') 
 
 end
 

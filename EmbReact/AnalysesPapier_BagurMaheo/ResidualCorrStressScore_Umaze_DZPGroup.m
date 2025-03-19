@@ -47,8 +47,8 @@ for group = 1:2
     end
 end
     
-GoodMice{1} = find( PropNan{1}<0.2);
-GoodMice{2} = find( PropNan{2}<0.2);
+GoodMice{1} = find( PropNan{1}<100);
+GoodMice{2} = find( PropNan{2}<100);
 Cols = {[0.6 0.6 0.6],[1 0.6 0.6]};
 
 clf
@@ -73,24 +73,34 @@ legend off
 title(['R= ' num2str(R) '  P= ' num2str(p)])
 
 
-% rediduals on ripple controls
+% rediduals on dzp controls
 mdl = fit(log(DurHighBreathFz{1})',log(DurLowBreathFz{1})','poly1');
+
 for mouse=1:length(log(DurHighBreathFz{1}))
-    residual_ctrl(mouse) = log(DurLowBreathFz{1}(mouse))-(log(DurHighBreathFz{1}(mouse))* mdl.p1 + mdl.p2);
+%     residual_ctrl(mouse) = log(DurLowBreathFz{1}(mouse))-(log(DurHighBreathFz{1}(mouse))* mdl.p1 + mdl.p2);
+    
+    y = log(DurLowBreathFz{1}(mouse));
+    x = log(DurHighBreathFz{1}(mouse));
+    residual_ctrl(mouse) =      -(mdl.p1*x - y + mdl.p2)./sqrt(mdl.p1^2 + 1);
 end
 for mouse=1:length(log(DurHighBreathFz{2}))
-    residual_rip(mouse) = log(DurLowBreathFz{2}(mouse))-(log(DurHighBreathFz{2}(mouse))* mdl.p1 + mdl.p2);
+%     residual_dzp(mouse) = log(DurLowBreathFz{2}(mouse))-(log(DurHighBreathFz{2}(mouse))* mdl.p1 + mdl.p2);
+    y = log(DurLowBreathFz{2}(mouse));
+    x = log(DurHighBreathFz{2}(mouse));
+    residual_dzp(mouse) =      -(mdl.p1*x - y + mdl.p2)./sqrt(mdl.p1^2 + 1);
+
+
 end
 % residuals on eyelid
 % residual_ctrl = CalculateDistanceToShockSafeHomeoStasisLine(DurHighBreathFz{1},DurLowBreathFz{1});
 % residual_rip = CalculateDistanceToShockSafeHomeoStasisLine(DurHighBreathFz{2},DurLowBreathFz{2});
 
 subplot(245)
-[R,P] = PlotCorrelations_BM([residual_ctrl,residual_rip],...
+[R,P] = PlotCorrelations_BM([residual_ctrl,residual_dzp],...
     [StressScore.DZP{1}(GoodMice{1}),StressScore.DZP{2}(GoodMice{2})], 'conf_bound',1);
 plot(residual_ctrl,StressScore.DZP{1}(GoodMice{1}),'k.')
 hold on
-plot(residual_rip,StressScore.DZP{2}(GoodMice{2}),'r.')
+plot(residual_dzp,StressScore.DZP{2}(GoodMice{2}),'r.')
 makepretty
 legend off
 [R,p] = corr([residual_ctrl,residual_dzp]',...
@@ -119,7 +129,7 @@ ylabel('Stress score')
 makepretty
 axis square
 
-% 
+
 % 
 % for group = 1:2
 %     for mouse = 1:length(Path{group})
