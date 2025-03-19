@@ -12,10 +12,10 @@ Group = 7;
 % Group = 9;
 % Group = [7 3];
 
-Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','Saline','Baseline'};
-Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear'};
+Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','Saline'};
+% Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear'};
 % Session_type = {'TestPre','TestPost','Cond'};
-% Session_type={'All'};
+Session_type={'Fear'};
 
 
 RangeLow = linspace(0.1526,20,261);
