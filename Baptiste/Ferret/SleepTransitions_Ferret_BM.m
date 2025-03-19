@@ -16,24 +16,28 @@ Dir{3} = MergePathForExperiment(Dir1,Dir2);
 
 
 %% transitions
+smootime = 10;
+win = 10;
+
 for ferret=1:3
     for sess=1:length(Dir{ferret}.path)
         clear Epoch TotalNoiseEpoch Sleep Wake SWSEpoch REMEpoch Epoch_01_05
         load([Dir{ferret}.path{sess} filesep 'SleepScoring_OBGamma.mat'],'Epoch','TotalNoiseEpoch','Sleep',...
-            'Wake', 'SWSEpoch', 'REMEpoch', 'Epoch_01_05')
-        if sum(DurationEpoch(SWSEpoch))/3600e4>1
+            'Wake', 'SWSEpoch', 'REMEpoch', 'Epoch_01_05' )
+        
+        if sum(DurationEpoch(SWSEpoch))/3600e4>1           
             
             Wake = or(Wake , TotalNoiseEpoch);
             Wake = mergeCloseIntervals(Wake,3e4);
             Wake = dropShortIntervals(Wake,3e4);
-            REMEpoch = mergeCloseIntervals(REMEpoch,3e4);
-            REMEpoch = dropShortIntervals(REMEpoch,3e4);
+            REMEpoch = mergeCloseIntervals(REMEpoch,10e4);
+            REMEpoch = dropShortIntervals(REMEpoch,60e4);
             NREM2 = and(Epoch_01_05 , SWSEpoch);
-            NREM2 = mergeCloseIntervals(NREM2,3e4);
-            NREM2 = dropShortIntervals(NREM2,3e4);
+            NREM2 = mergeCloseIntervals(NREM2,10e4);
+            NREM2 = dropShortIntervals(NREM2,60e4);
             NREM1 = SWSEpoch-Epoch_01_05;
-            NREM1 = mergeCloseIntervals(NREM1,3e4);
-            NREM1 = dropShortIntervals(NREM1,3e4);
+            NREM1 = mergeCloseIntervals(NREM1,10e4);
+            NREM1 = dropShortIntervals(NREM1,10e4);
             TotDur = sum(DurationEpoch(or(Epoch,TotalNoiseEpoch)))./3.6e7;
             
             for states=1:4
@@ -104,6 +108,29 @@ for ferret=1:3
             TRANSITIONS{ferret}(sess,11) = length(Trans_NREM1_NREM2)./TotDur;
             TRANSITIONS{ferret}(sess,12) = length(Trans_NREM2_NREM1)./TotDur;
             
+            
+            % arousal markers at transitions
+            load([Dir{ferret}.path{sess} filesep 'SleepScoring_OBGamma.mat'],'SmoothGamma')
+            load([Dir{ferret}.path{sess} filesep 'behavResources.mat'], 'MovAcctsd')
+            try
+                load([Dir{ferret}.path{sess} filesep 'ChannelsToAnalyse/EMG.mat'], 'channel')
+            load([Dir{ferret}.path{sess} filesep 'LFPData/LFP' num2str(channel) '.mat'])
+            end
+            
+            LFP = Restrict(LFP , Epoch);
+            FilLFP = FilterLFP(LFP,[50 300],1024);
+            try, EMG_tsd = tsd(Range(FilLFP),zscore(runmean(Data((FilLFP)).^2,ceil(smootime/median(diff(Range(FilLFP,'s'))))))); end
+            Acc_tsd = tsd(Range(MovAcctsd),zscore(runmean_BM(Data(MovAcctsd),ceil(smootime/median(diff(Range(MovAcctsd,'s')))))));
+            SmoothGamma = tsd(Range(SmoothGamma),zscore(runmean_BM(Data(SmoothGamma),ceil(smootime/median(diff(Range(SmoothGamma,'s')))))));
+            
+            St = Stop(REMEpoch);
+            for i=1:length(St)
+                SmallEp = intervalSet(St(i)-win*1e4 , St(i)+win*1e4);
+                try, EMG_Data{ferret}{sess}(i,1:length(Data(Restrict(EMG_tsd , SmallEp)))) = Data(Restrict(EMG_tsd , SmallEp)); end
+                Gamma_Data{ferret}{sess}(i,1:length(Data(Restrict(SmoothGamma , SmallEp)))) = Data(Restrict(SmoothGamma , SmallEp));
+                Acc_Data{ferret}{sess}(i,1:length(Data(Restrict(Acc_tsd , SmallEp)))) = Data(Restrict(Acc_tsd , SmallEp));
+            end
+            
             disp(sess)
         end
     end
@@ -113,16 +140,37 @@ for ferret=1:3
     State_Number{ferret}(State_Number{ferret}==0)=NaN;
     State_FirstOnset{ferret}(State_FirstOnset{ferret}==0)=NaN;
 end
+State_FirstOnset{3}(:,1) = NaN;
+
+for ferret=1:3
+    for sess=1:length(Dir{ferret}.path)
+        try
+            try, Z{ferret}{sess}{1} = EMG_Data{ferret}{sess}; end
+            Z{ferret}{sess}{2} = Gamma_Data{ferret}{sess};
+            Z{ferret}{sess}{3} = Acc_Data{ferret}{sess};
+            
+            for i=1:6
+                try, MeanData{ferret}{i}(sess,:) = runmean(nanmean(Z{ferret}{sess}{i}),round(length(Z{ferret}{sess}{i})/200)); end
+            end
+        end
+    end
+end
+
+for ferret=1:3
+    for i=1:2
+        MeanData{ferret}{i}(MeanData{ferret}{i}==0) = NaN;
+    end
+end
 
 
 
 %% figures
 Cols={[0 0 1],[.8 .5 .2],[1 0 0],[0 1 0]};
 X = 1:4;
-Legends = {'Wake','N1','N2','REM'};
+Legends = {'Wake','IS','NREM','REM'};
 NoLegends = {'','','',''};
 
-ferret=2;
+ferret=3;
 figure
 subplot(141)
 MakeSpreadAndBoxPlot3_SB({State_Prop{ferret}(:,1) State_Prop{ferret}(:,2) State_Prop{ferret}(:,3)...
@@ -133,7 +181,7 @@ makepretty_BM2
 subplot(142)
 MakeSpreadAndBoxPlot3_SB({State_MeanDur{ferret}(:,1) State_MeanDur{ferret}(:,2) State_MeanDur{ferret}(:,3)...
     State_MeanDur{ferret}(:,4)},Cols,X,Legends,'showpoints',1,'paired',0);
-ylabel('mean dur (s)')
+ylabel('median dur (s)')
 makepretty_BM2
 
 subplot(143)
@@ -150,7 +198,7 @@ makepretty_BM2
 
 
 
-
+% transitions
 Cols2 = {[.3 .3 .3],[.3 .3 .3],[.3 .3 .3],[.3 .3 .3],[.3 .3 .3],[.3 .3 .3],[.3 .3 .3],...
     [.3 .3 .3],[.3 .3 .3],[.3 .3 .3],[.3 .3 .3],[.3 .3 .3]};
 X2 = 1:12;
@@ -174,6 +222,63 @@ end
 
 
 
+figure
+subplot(141)
+Cols={[.8 .5 .2],[1 0 0],[0 1 0]};
+X = 1:3;
+Legends = {'IS','NREM','REM'};
+MakeSpreadAndBoxPlot3_SB({TRANSITIONS{ferret}(:,1) TRANSITIONS{ferret}(:,3)  TRANSITIONS{ferret}(:,5)},Cols,X,Legends,'showpoints',1,'paired',0);
+ylabel('transitions aft Wake')
+makepretty_BM2
+
+subplot(142)
+Cols={[0 0 1],[1 0 0],[0 1 0]};
+X = 1:3;
+Legends = {'Wake','NREM','REM'};
+MakeSpreadAndBoxPlot3_SB({TRANSITIONS{ferret}(:,2) TRANSITIONS{ferret}(:,11)  TRANSITIONS{ferret}(:,8)},Cols,X,Legends,'showpoints',1,'paired',0);
+ylabel('transitions aft IS')
+makepretty_BM2
+
+subplot(143)
+Cols={[0 0 1],[.8 .5 .2],[0 1 0]};
+X = 1:3;
+Legends = {'Wake','IS','REM'};
+MakeSpreadAndBoxPlot3_SB({TRANSITIONS{ferret}(:,3) TRANSITIONS{ferret}(:,12)  TRANSITIONS{ferret}(:,10)},Cols,X,Legends,'showpoints',1,'paired',0);
+ylabel('transitions aft NREM')
+makepretty_BM2
+
+subplot(144)
+Cols={[0 0 1],[.8 .5 .2],[1 0 0]};
+X = 1:3;
+Legends = {'Wake','IS','NREM'};
+MakeSpreadAndBoxPlot3_SB({TRANSITIONS{ferret}(:,6) TRANSITIONS{ferret}(:,7)  TRANSITIONS{ferret}(:,9)},Cols,X,Legends,'showpoints',1,'paired',0);
+ylabel('transitions aft REM')
+makepretty_BM2
+
+
+
+
+%% check arousal markers at the end of REM
+ferret=3;
+
+figure
+Data_to_use = zscore(MeanData{ferret}{1}')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+h=shadedErrorBar(linspace(-win,win,length(MeanData{ferret}{1})) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color= [.1 .1 .1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+Data_to_use = zscore(MeanData{ferret}{2}')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+h=shadedErrorBar(linspace(-win,win,length(MeanData{ferret}{2})) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color= [.3 .3 .3]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+Data_to_use = zscore(MeanData{ferret}{3}')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+h=shadedErrorBar(linspace(-win,win,length(MeanData{ferret}{3})) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color= [.5 .5 .5]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+xlabel('time (s)'), ylabel('Norm. power')
+f=get(gca,'Children'); legend([f(9),f(5),f(1)],'EMG','Gamma','Accelero');
+
+
+%% trash ?
 draw_curved_arrows(round(nanmedian(State_Prop{3})*100), Cols, nanmedian(TRANSITIONS{3}), Cols2)
 
 

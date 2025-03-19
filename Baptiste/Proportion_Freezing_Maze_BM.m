@@ -21,6 +21,11 @@ Drug_Group={'RipControl','RipInhib'};
 Group = [7 8];
 
 
+l{1} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_SalineShort_Cond_2sFullBin.mat');
+l{2} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_DZPShort_Cond_2sFullBin.mat');
+Drug_Group={'Saline','Diazepam'};
+Group = [13 15];
+
 
 %%
 Session_type={'Cond'}; sess=1;
@@ -32,10 +37,11 @@ for group=1:length(Group)
     for mouse = 1:length(Mouse)
         
         clear D, D = Data(l{group}.OutPutData.(Session_type{sess}).respi_freq_bm.tsd{mouse,3});
+        Length_fz{group}(n,mouse) = (length(D)*.2)/60;
         Prop_shock{group}(n,mouse) = sum(D>FreqLim)/length(D);
         Prop_safe{group}(n,mouse) = sum(D<FreqLim)/length(D);
-        Length_shock{group}(n,mouse) = sum(D>FreqLim)*.2;
-        Length_safe{group}(n,mouse) = sum(D<FreqLim)*.2;
+        Length_shock{group}(n,mouse) = (sum(D>FreqLim)*.2)/60;
+        Length_safe{group}(n,mouse) = (sum(D<FreqLim)*.2)/60;
         
         clear D_shock, D_shock = Data(l{group}.OutPutData.(Session_type{sess}).respi_freq_bm.tsd{mouse,5});
         Prop_shockShock{group}(n,mouse) = sum(D_shock>FreqLim)/length(D_shock);
@@ -60,6 +66,12 @@ end
 
 
 %% figures
+% Cols = {[.3, .745, .93],[.85, .325, .098]};
+Cols = {[.3 .3 .3],[.6 .6 .6]};
+X = [1:2];
+Legends = {'Saline','DZP'};
+
+% corr plots
 figure
 A = log10(Length_shock{1})'; B = log10(Length_safe{1})';
 PlotCorrelations_BM(A , B , 'conf_bound',1)
@@ -70,15 +82,34 @@ xlabel('Duration fz breathing >4.5Hz (log scale)'), ylabel('Fz breathing <4.5Hz 
 axis square
 
 
-
+% pie chart
 figure
-a= pie([nanmean(Length_shockShock) nanmean(Length_shockSafe) nanmean(Length_safeShock) nanmean(Length_safeSafe)]);
-set(a(1), 'FaceColor', [1 .5 .5]); set(a(3), 'FaceColor', [.7 .3 .3]); set(a(5), 'FaceColor', [.5 .5 1]); set(a(7), 'FaceColor', [.3 .3 .7]);
-f=get(gca,'Children'); legend([f(8),f(6),f(4),f(2)],['Breathing>' num2str(FreqLim) 'Hz, shock side'],...
-    ['Breathing>' num2str(FreqLim) 'Hz, safe side'],['Breathing<' num2str(FreqLim) 'Hz, shock side'],['Breathing<' num2str(FreqLim) 'Hz, safe side']);
+subplot(121)
+a= pie([nanmean(Length_shockShock{1}) nanmean(Length_shockSafe{1})]);
+set(a(1), 'FaceColor', [1 .5 .5]); set(a(3), 'FaceColor', [.7 .3 .3]);
+f=get(gca,'Children'); legend([f(4),f(2)],['Breathing>' num2str(FreqLim) 'Hz, shock side'], ['Breathing>' num2str(FreqLim) 'Hz, safe side']);
+
+subplot(122)
+a= pie([nanmean(Length_safeShock{1}) nanmean(Length_safeSafe{1})]);
+set(a(1), 'FaceColor', [.5 .5 1]); set(a(3), 'FaceColor', [.3 .3 .7]);
+f=get(gca,'Children'); legend([f(4),f(2)],['Breathing<' num2str(FreqLim) 'Hz, shock side'],['Breathing<' num2str(FreqLim) 'Hz, safe side']);
 
 
 
+% box plot safe quantity
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB(Length_shock,Cols,X,Legends,'showpoints',1,'paired',0,'size_points',15);
+ylabel('Dur fast breathing immobility')
+makepretty_BM2
+
+subplot(122)
+MakeSpreadAndBoxPlot3_SB(Length_safe,Cols,X,Legends,'showpoints',1,'paired',0,'size_points',15);
+ylabel('Dur slow breathing immobility')
+makepretty_BM2
+
+
+% others
 figure
 subplot(121)
 a=bar([1],[1]); hold on

@@ -68,6 +68,8 @@ Smooth_HR_interp{2}(2,1,:) = NaN;
 OB_Wake_Aft_Inj{1}(5,:) = NaN;
 OB_Wake_Aft_Inj{2}(6,:) = NaN;
 
+
+%%
 Cols = {[.3 .3 .3],[.3 1 .3]};
 X = 1:2;
 Legends = {'Saline','Atropine'};
@@ -302,4 +304,42 @@ Mean_All_Sp=nanmedian(Data_to_use);
 shadedErrorBar(linspace(0,1,100), Mean_All_Sp , Conf_Inter ,'-g',1);
 makepretty
 xlabel('time (norm)'), ylim([.6 1.4])
+
+
+
+%% cross-corr gamma frequencies Saline
+clear all
+
+Dir{1} = PathForExperimentsOB({'Shropshire'}, 'head-fixed', 'saline');
+Dir{2} = PathForExperimentsOB({'Shropshire'}, 'head-fixed', 'atropine');
+
+drug=1; sess=7;
+
+load([Dir{drug}.path{sess} filesep 'SleepScoring_OBGamma.mat'], 'SmoothGamma', 'inj_time')
+% load([Dir{drug}.path{sess} filesep 'B_Middle_Spectrum.mat'])
+Before_Injection = intervalSet(inj_time-1.5*3600e4 , inj_time);
+After_Injection = intervalSet(inj_time , inj_time+1.5*3600e4);
+B_Sptsd = tsd(Spectro{2}*1e4 , Spectro{1});
+OB_Sp_Bef = Restrict(B_Sptsd,Before_Injection);
+OB_Sp_Aft = Restrict(B_Sptsd,After_Injection);
+
+
+
+D = log10(Data(OB_Sp_Aft))';
+imagesc(linspace(0,1.5*60*60,length(D)) , Spectro{3} , smooth2a(D,5)), axis xy
+caxis([2 4]),% xlim([.712 .715])
+colormap viridis
+xlabel('time (min)'), ylabel('Frequency (Hz)')
+makepretty
+
+figure
+plot(nanmean(D'))
+
+figure
+imagesc(Spectro{3} , Spectro{3} , smooth2a(corr(D'),2))
+xlabel('Frequency (Hz)'), ylabel('Frequency (Hz)')
+makepretty, axis square
+colorbar, xticks([10:10:100]), yticks([10:10:100])
+caxis([0 .5])
+colormap viridis
 

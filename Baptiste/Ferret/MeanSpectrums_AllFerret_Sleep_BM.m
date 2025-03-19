@@ -93,35 +93,31 @@ end
 Mean_Spec_all{ferret}{4}{1}(8,:) = NaN;
 ferret=2; states=1; sess=5;
 for m=1:4
-    Mean_Spec_all{ferret}{m}{states}(sess,:) = NaN;;
+    Mean_Spec_all{ferret}{m}{states}(sess,:) = NaN;
 end
 
 %% figures
 Cols={[0 0 1],[.8 .5 .2],[1 0 0],[0 1 0]};
-ferret=2;
+ferret=3;
 
 figure
-for m=1:8
-    subplot(2,4,m)
+for m=1:4
+    subplot(1,4,m)
     for states=1:4
-        if m<5
-            Data_to_use = Mean_Spec_all{ferret}{m}{states};
-            Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-            h=shadedErrorBar(Range_Low , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
-            color= Cols{states}; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-        else
-            Data_to_use = Mean_Spec_all{ferret}{m}{states};
-            Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-            h=shadedErrorBar(Range_Middle , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
-            color= Cols{states}; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-        end
+        
+        Data_to_use = Mean_Spec_all{ferret}{m}{states};
+        Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+        h=shadedErrorBar(Range_Low , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+        color= Cols{states}; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+        
     end
-    if m>4, xlabel('Frequency (Hz)'), end
-    if m==1; ylabel('Power (a.u.)'), f=get(gca,'Children'); legend([f(13),f(9),f(5),f(1)],'Wake','N1','N2','REM'); elseif m==5, ylabel('power (log scale)'), end
+    xlabel('Frequency (Hz)')
+    if m==1; ylabel('Power (a.u.)'), f=get(gca,'Children'); legend([f(13),f(9),f(5),f(1)],'Wake','IS','NREM','REM'); elseif m==5, ylabel('power (log scale)'), end
     if m==1, title('OB'), end
     if m==2, title('PFC'), end
     if m==3, title('HPC'), end
     if m==4, title('AuCx'), end
+    xlim([0 10])
     makepretty
 end
 

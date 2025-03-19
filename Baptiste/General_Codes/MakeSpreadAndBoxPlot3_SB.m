@@ -76,6 +76,8 @@ for i = 1:2:length(varargin)
             if ~isvector(y_lim) || length(y_lim)~=2
                 error('Incorrect value for property ''y_lim''.');
             end
+                    case 'size_points'
+            size_points = varargin{i+1};
         otherwise
             error(['Unknown property ''' num2str(varargin{i}) '''.']);
     end
@@ -108,6 +110,9 @@ if ~exist('x_data','var')
 end
 if ~exist('ShowSigstar','var')
     ShowSigstar='sig';
+end
+if ~exist('size_points','var')
+    size_points=6;
 end
 
 
@@ -194,7 +199,7 @@ for k = 1 : length(A)
             %                         handlesplot=plotSpread(A{k}(:),'distributionColors',[.5 .5 .5],'xValues',X(k),'spreadWidth',0.8); hold on;
             %             set(handlesplot{1},'MarkerSize',10)
             handlesplot=plotSpread(A{k}(:),'distributionColors',[.5 .5 .5],'xValues',X(k),'spreadWidth',0.8); hold on;
-            set(handlesplot{1},'MarkerSize',6)
+            set(handlesplot{1},'MarkerSize',size_points)
         end
     end
     MinA(k) = min(A{k});
@@ -279,7 +284,6 @@ if ~isempty(column_test)
                 end
                 pval(i,j)=p; pval(j,i)=p;
 
-                
 
                 if h==1 && ShowSig==1
                     groups{length(groups)+1}=[x(i) x(j)];
@@ -292,6 +296,7 @@ if ~isempty(column_test)
         end
         stats(stats>thresh_signif)=nan;
         if ~horizontal
+%             sigstar(groups,stats)
             sigstar(groups,stats)
         else
             sigstarh(groups,stats)

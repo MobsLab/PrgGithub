@@ -99,6 +99,19 @@ MakeSpreadAndBoxPlot3_SB(HR_Bef_end_Act,Cols,X,Legends,'showpoints',1,'paired',0
 
 
 
+Cols = {[.3 .3 .3],[.6 .6 .6]};
+X = [1:2];
+Legends = {'Homecage','Cond'};
+
+
+figure
+MakeSpreadAndBoxPlot3_SB({HR_Wake_FirstHour_SleepPre{1} HR_Bef_end_Act{1}},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('HR active (Hz)')
+makepretty_BM2
+
+
+
+
 
 
 

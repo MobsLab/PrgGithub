@@ -5,15 +5,29 @@ load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/MeanBodyValues_Eyelid_Co
 
 Params = {'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_delta'};
        
+% for par=1:length(Params)
+%     for mouse=1:length(Mouse)
+%         try
+%             MeanVal_Shock.(Params{par})(mouse) = nanmean(Data(Restrict(OutPutData.(Params{par}).tsd{mouse,5} , intervalSet(48*60e4 , 100*60e4))));
+%         end
+%         try
+%             MeanVal_Safe.(Params{par})(mouse) = nanmean(Data(Restrict(OutPutData.(Params{par}).tsd{mouse,6} , intervalSet(48*60e4 , 100*60e4))));
+%         end
+%     end
+% end
 for par=1:length(Params)
     for mouse=1:length(Mouse)
         try
-            MeanVal_Shock.(Params{par})(mouse) = nanmean(Data(Restrict(OutPutData.(Params{par}).tsd{mouse,5} , intervalSet(48*60e4 , 100*60e4))));
+            clear D, D = Data(OutPutData.(Params{par}).tsd{mouse,5});
+            MeanVal_Shock.(Params{par})(mouse) = nanmean(D(round(size(D,1)*.9):end));
         end
         try
-            MeanVal_Safe.(Params{par})(mouse) = nanmean(Data(Restrict(OutPutData.(Params{par}).tsd{mouse,6} , intervalSet(48*60e4 , 100*60e4))));
+            clear D, D = Data(OutPutData.(Params{par}).tsd{mouse,6});
+            MeanVal_Safe.(Params{par})(mouse) = nanmean(D(round(size(D,1)*.9):end));
         end
     end
+    try, MeanVal_Shock.(Params{par})(MeanVal_Safe.(Params{par})==0) = NaN; end
+    try, MeanVal_Safe.(Params{par})(MeanVal_Safe.(Params{par})==0) = NaN; end
 end
 
 
