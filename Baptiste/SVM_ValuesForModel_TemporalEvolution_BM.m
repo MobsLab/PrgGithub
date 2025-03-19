@@ -8,10 +8,8 @@ kernels = {'linear','rbf'};
 PosLimStep = 0.5;
 PosLims = [0.3 0.6];
 DoZscore = 0;
-SaveLoc = '/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/';
 
-% load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_Saline_all_Cond_2sFullBins.mat')
-load('/media/nas7/ProjetEmbReact/DataEmbReact/NewData/Data_Physio_Freezing_Saline_Eyelid_Cond_2sFullBins.mat')
+load('/media/nas7/ProjetEmbReact/DataEmbReact/NewData/Data_Physio_Freezing_Saline_all_Cond_2sFullBins.mat')
 SessionTypes = {'Cond'}; sess=1;
 SessType = SessionTypes{sess};
 
@@ -28,7 +26,7 @@ end
 GoodMice = unique(MouseId);
 
 n=1;
-for parToUse = 1:length(ParNames)
+for parToUse = 2:length(ParNames)
     for svm_type = 1%1:length(kernels)
         
         %% Contols train and test
@@ -95,8 +93,8 @@ for parToUse = 1:length(ParNames)
                 SVMChoice_Sk_Ctrl_Mn{svm_type}(parToUse,mm) = nanmean(prediction(test_Y==0));
                 SVMChoice_Sf_Ctrl_Mn{svm_type}(parToUse,mm) = nanmean(prediction(test_Y==1));
                 
-                SVMScores_Sk_tsd{n}{mm} = tsd(Time_svm(test_Y==0) , SVMScores_Sk_Ctrl{svm_type}{parToUse}{mm}(:,1));
-                SVMScores_Sf_tsd{n}{mm} = tsd(Time_svm(test_Y==1) , SVMScores_Sf_Ctrl{svm_type}{parToUse}{mm}(:,1));
+                SVMScores_Sk_tsd{parToUse}{mm} = tsd(Time_svm(test_Y==0) , SVMScores_Sk_Ctrl{svm_type}{parToUse}{mm}(:,1));
+                SVMScores_Sf_tsd{parToUse}{mm} = tsd(Time_svm(test_Y==1) , SVMScores_Sf_Ctrl{svm_type}{parToUse}{mm}(:,1));
                 
                 % SVM temporal evol
                 try
@@ -125,6 +123,7 @@ for parToUse = 1:length(ParNames)
     n=n+1;
 end
 
+%%
 SVMScores_Sk_Ctrl_interp(SVMScores_Sk_Ctrl_interp==0)=NaN;
 SVM_score_FzShock_Cond_interp = squeeze(SVMScores_Sk_Ctrl_interp(1,:,:));
 SVM_score_FzShock_Cond_interp(find(sum(isnan(squeeze(SVMScores_Sk_Ctrl_interp(1,:,:))'))==100),:) = SVMScores_Sk_Ctrl_interp(2,find(sum(isnan(squeeze(SVMScores_Sk_Ctrl_interp(1,:,:))'))==100),:);

@@ -1,318 +1,179 @@
 
-cd('/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20250107_LSP_saline')
 
-for m=1:8
+clear all
+
+cd('/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20241211_TORCs/')
+cd('/media/nas7/React_Passive_AG/OBG/Brynza/freely-moving/20240123_long/')
+cd('/media/nas7/React_Passive_AG/OBG/Labneh/freely-moving/20221221_long/')
+
+
+%%
+smootime = 10;
+Frequency_HPC = {[.2 2.8],[2.8 6]};
+Frequency_OB = {[.5 4]};
+LineHeight = 9.5;
+Cols={[0 0 1],[.8 .5 .2],[1 0 0],[0 1 0]};
+Colors.N1 = [.8 .5 .2];
+Colors.N2 = [1 0 0];
+Colors.REM = 'g';
+Colors.Wake = 'b';
+Colors.Noise = 'k';
+c = [2 4];
+
+%% define epochs
+load('SleepScoring_OBGamma.mat', 'Sleep', 'Wake', 'Epoch', 'TotalNoiseEpoch', 'SWSEpoch', 'REMEpoch')
+% load('SleepScoring_OBGamma.mat', 'Sleep', 'Wake', 'Epoch', 'TotalNoiseEpoch', 'SmoothTheta', 'SWSEpoch', 'Info', 'ThetaEpoch', 'REMEpoch')
+
+
+% N1-N2
+load('ChannelsToAnalyse/Bulb_deep.mat')
+load(['LFPData/LFP' num2str(channel) '.mat'])
+LFP = Restrict(LFP , SWSEpoch);
+FilDelta = FilterLFP(LFP,Frequency_OB{1},1024);
+hilbert_delta = abs(hilbert(Data(FilDelta)));
+SmoothDelta_OB = tsd(Range(LFP),runmean(hilbert_delta,ceil(smootime/median(diff(Range(LFP,'s'))))));
+
+
+figure
+gamma_thresh = GetGaussianThresh_BM(log10(Data(SmoothDelta_OB)), 0, 1);
+makepretty
+
+
+N1 = and(thresholdIntervals(SmoothDelta_OB , 10^gamma_thresh , 'Direction' , 'Below') , SWSEpoch);
+N2 = SWSEpoch-N1;
+
+N1 = mergeCloseIntervals(N1 , 2e4);
+N1 = dropShortIntervals(N1 , 2e4);
+N2 = mergeCloseIntervals(N2 , 2e4);
+N2 = dropShortIntervals(N2 , 2e4);
+
+N1 = N1-or(Wake , TotalNoiseEpoch);
+N2 = N2-or(Wake , TotalNoiseEpoch);
+
+%% Spectro
+for m=1:4
     try
+        if m==1
+            load('H_Low_Spectrum.mat')
+            Range_Low = Spectro{3};
+        elseif m==2
+            load('B_Low_Spectrum.mat')
+        elseif m==3
+            load('PFCx_Low_Spectrum.mat')
+        elseif m==4
+            load('AuCx_Low_Spectrum.mat')
+        end
         
+        Sptsd{m} = tsd(Spectro{2}*1e4 , Spectro{1});
         for states=1:4
             if states==1
                 State = Wake;
             elseif states==2
-                State = SWSEpoch-Epoch_01_05;
+                State = N1;
             elseif states==3
-                State = and(SWSEpoch , Epoch_01_05);
+                State = N2;
             elseif states==4
                 State = REMEpoch;
             end
             
-            Sp_ByState{m}{states} = Restrict(Sptsd{m} , and(State,Epoch)-TotalNoiseEpoch);
+            Dur_State(states) = sum(DurationEpoch(State))/3600e4;
             
+            Sp_ByState{m}{states} = Restrict(Sptsd{m} , and(State,Epoch)-TotalNoiseEpoch);
+            if m<5
+                if states==1
+                    Sp_ByState_clean{m}{states} = CleanSpectro(Sp_ByState{m}{states} , Range_Low , 8);
+                    Mean_Spec{m}(states,:) = nanmean(Data(Sp_ByState_clean{m}{states}));
+                else
+                    Mean_Spec{m}(states,:) = nanmean(Data(Sp_ByState{m}{states}));
+                end
+            end
         end
     end
 end
 
 
-smootime = 10;
-load('ChannelsToAnalyse/dHPC_deep.mat')
-load(['LFPData/LFP' num2str(channel) '.mat'])
-
-LFP = Restrict(LFP , SWSEpoch);
-Frequency = {[.2 2.8],[2.8 5.5]};
-FilDelta = FilterLFP(LFP,Frequency{1},1024);
-FilTheta = FilterLFP(LFP,Frequency{2},1024);
-hilbert_delta = abs(hilbert(Data(FilDelta)));
-hilbert_theta = abs(hilbert(Data(FilTheta)));
-hilbert_delta(hilbert_delta>3e3) = 3e3;   
-hilbert_theta(hilbert_theta>1.2e3) = 1.2e3;
-delta_ratio = hilbert_delta./hilbert_theta;
-DeltaRatioTSD = tsd(Range(FilTheta), delta_ratio);
-SmoothDelta = tsd(Range(DeltaRatioTSD),runmean(Data(DeltaRatioTSD),ceil(20/median(diff(Range(DeltaRatioTSD,'s'))))));
-
-
-N1 = and(SWSEpoch , thresholdIntervals(SmoothDeltaOB , 10^2.722 , 'Direction' , 'Below'));
-N2 = and(SWSEpoch , thresholdIntervals(SmoothDeltaOB , 10^2.722 , 'Direction' , 'Above'));
-
-
-
-figure
-[Y,X]=hist(log10(Data(Restrict(SmoothDelta , N2))),1000);
-Y=runmean(Y,5)/sum(Y);
-plot(X,runmean(Y,5) , 'k')
-makepretty
-xlabel('theta2/delta2 HPC, N2 (log)')
-ylabel('PDF')
-axis square
-xlim([-.15 .65])
-v=vline(.3,'-r'); v.LineWidth=5;
-
-
-N2_n = and(N2 , thresholdIntervals(SmoothTheta2 , 10^.3 , 'Direction' , 'Below'));
-N3 = and(N2 , thresholdIntervals(SmoothTheta2 , 10^.3 , 'Direction' , 'Above'));
-
-
-
-
-
-
-figure
-m=1;
-subplot(421)
-imagesc(linspace(0,sum(DurationEpoch(N1))./60e4,length(Restrict(Sptsd{m} , N1))) , Range_Low , runmean(runmean(log10(Data(Restrict(Sptsd{m} , N1))'),2)',100)'), axis xy
-ylabel('N1'), title('OB'), caxis([3 5.5])
-makepretty
-
-subplot(423)
-imagesc(linspace(0,sum(DurationEpoch(N2_n))./60e4,length(Restrict(Sptsd{m} , N2_n))) , Range_Low , runmean(runmean(log10(Data(Restrict(Sptsd{m} , N2_n))'),2)',100)'), axis xy
-ylabel('N2'), caxis([3 5.5])
-makepretty
-
-subplot(425)
-imagesc(linspace(0,sum(DurationEpoch(N3))./60e4,length(Restrict(Sptsd{m} , N3))) , Range_Low , runmean(runmean(log10(Data(Restrict(Sptsd{m} , N3))'),2)',100)'), axis xy
-ylabel('N3'), caxis([3 5.5])
-makepretty
-
-subplot(427)
-imagesc(linspace(0,sum(DurationEpoch(REMEpoch))./60e4,length(Restrict(Sptsd{m} , REMEpoch))) , Range_Low , runmean(runmean(log10(Data(Restrict(Sptsd{m} , REMEpoch))'),2)',100)'), axis xy
-xlabel('time (min)'), ylabel('REM'), caxis([3 5.5])
-makepretty
-
-
-m=3;
-subplot(422)
-imagesc(linspace(0,sum(DurationEpoch(N1))./60e4,length(Restrict(Sptsd{m} , N1))) , Range_Low , runmean(runmean(log10(Data(Restrict(Sptsd{m} , N1))'),2)',100)'), axis xy
-title('HPC'), caxis([3 5.5])
-makepretty
-
-subplot(424)
-imagesc(linspace(0,sum(DurationEpoch(N2_n))./60e4,length(Restrict(Sptsd{m} , N2_n))) , Range_Low , runmean(runmean(log10(Data(Restrict(Sptsd{m} , N2_n))'),2)',100)'), axis xy
-caxis([3 5.5])
-makepretty
-
-subplot(426)
-imagesc(linspace(0,sum(DurationEpoch(N3))./60e4,length(Restrict(Sptsd{m} , N3))) , Range_Low , runmean(runmean(log10(Data(Restrict(Sptsd{m} , N3))'),2)',100)'), axis xy
-caxis([3 5.5])
-makepretty
-
-subplot(428)
-imagesc(linspace(0,sum(DurationEpoch(REMEpoch))./60e4,length(Restrict(Sptsd{m} , REMEpoch))) , Range_Low , runmean(runmean(log10(Data(Restrict(Sptsd{m} , REMEpoch))'),2)',100)'), axis xy
-caxis([3 5.5])
-xlabel('time (min)')
-makepretty
-
-
-Cols = {[.8 .5 .2],[1 0 0],[.8 .2 .2],[0 1 0]};
-
-figure
-subplot(221), m=1;
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N1)) ), 'Color' , Cols{1})
-hold on
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N2_n)) ), 'Color' , Cols{2})
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N3)) ), 'Color' , Cols{3})
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , REMEpoch)) ), 'Color' , Cols{4})
-ylabel('Power (a.u.)'), xlim([0 10])
-legend('N1','N2','N3','REM');
-title('OB')
-makepretty
-
-subplot(222), m=3;
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N1)) ), 'Color' , Cols{1})
-hold on
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N2_n)) ), 'Color' , Cols{2})
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N3)) ), 'Color' , Cols{3})
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , REMEpoch)) ), 'Color' , Cols{4})
-xlim([0 10])
-title('HPC')
-makepretty
-
-subplot(223), m=2;
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N1)) ), 'Color' , Cols{1})
-hold on
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N2_n)) ), 'Color' , Cols{2})
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N3)) ), 'Color' , Cols{3})
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , REMEpoch)) ), 'Color' , Cols{4})
-xlabel('Frequency (Hz)'), ylabel('Power (a.u.)'), xlim([0 10])
-title('PFC')
-makepretty
-
-subplot(224), m=4;
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N1)) ), 'Color' , Cols{1})
-hold on
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N2_n)) ), 'Color' , Cols{2})
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , N3)) ), 'Color' , Cols{3})
-plot(Range_Low , nanmean(Data(Restrict(Sptsd{m} , REMEpoch)) ), 'Color' , Cols{4})
-xlabel('Frequency (Hz)'), xlim([0 10])
-title('AuC')
-makepretty
-
-
-
-load('ChannelsToAnalyse/Bulb_deep.mat')
-load(['LFPData/LFP' num2str(channel) '.mat'])
-LFP = tsd(Range(LFP) , Data(LFP));
-Fil_Delta = FilterLFP(Restrict(LFP , Sleep),[.5 4],1024);
-tEnveloppe = tsd(Range(Fil_Delta), abs(hilbert(Data(Fil_Delta))) );
-SmoothDeltaOB  = tsd(Range(tEnveloppe), runmean(Data(tEnveloppe), ...
-    ceil(smootime/median(diff(Range(tEnveloppe,'s'))))));
-
-figure
-[Y,X]=hist(log10(Data(Restrict(SmoothDeltaOB , SWSEpoch))),1000);
-Y=runmean(Y,5)/sum(Y);
-plot(X,runmean(Y,5) , 'k')
-makepretty
-
-N1 = and(SWSEpoch , thresholdIntervals(SmoothDeltaOB , 10^2.722 , 'Direction' , 'Below'));
-N2 = and(SWSEpoch , thresholdIntervals(SmoothDeltaOB , 10^2.722 , 'Direction' , 'Above'));
-
-
-
+Wake = or(Wake , TotalNoiseEpoch);
 
 
 %%
+figure
+subplot(441)
+imagesc(Range(Sptsd{1})/3.6e7 , Range_Low , runmean(runmean(log10(Data(Sptsd{1})'),2)',100)'), axis xy
+ylabel('Frequency_a_l_l (Hz)')
+colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis(c)
+PlotPerAsLine(Wake,LineHeight,Colors.Wake,'timescaling',3.6e7);
+PlotPerAsLine(N1,LineHeight,Colors.N1,'timescaling',3.6e7);
+PlotPerAsLine(N2,LineHeight,Colors.N2,'timescaling',3.6e7);
+PlotPerAsLine(REMEpoch,LineHeight,Colors.REM,'timescaling',3.6e7);
+title('HPC')
+makepretty_BM2
+
+subplot(445)
+imagesc(linspace(0,Dur_State(2),length(Sp_ByState{1}{2})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{1}{2})'),2)',100)'), axis xy
+ylabel('Frequency_N_1 (Hz)')
+colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis(c)
+makepretty_BM2
+
+subplot(449)
+imagesc(linspace(0,Dur_State(3),length(Sp_ByState{1}{3})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{1}{3})'),2)',100)'), axis xy
+ylabel('Frequency_N_2 (Hz)')
+colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis(c)
+makepretty_BM2
+
+subplot(4,4,13)
+imagesc(linspace(0,Dur_State(4),length(Sp_ByState{1}{4})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{1}{4})'),2)',100)'), axis xy
+ylabel('Frequency_R_E_M (Hz)')
+colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis(c)
+makepretty_BM2
 
 
+subplot(442)
+imagesc(Range(Sptsd{1})/3.6e7 , Range_Low , runmean(runmean(log10(Data(Sptsd{2})'),2)',100)'), axis xy
+ylabel('Frequency_a_l_l (Hz)')
+colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis(c)
+PlotPerAsLine(Wake,LineHeight,Colors.Wake,'timescaling',3.6e7);
+PlotPerAsLine(N1,LineHeight,Colors.N1,'timescaling',3.6e7);
+PlotPerAsLine(N2,LineHeight,Colors.N2,'timescaling',3.6e7);
+PlotPerAsLine(REMEpoch,LineHeight,Colors.REM,'timescaling',3.6e7);
+title('OB')
+makepretty_BM2
 
-for ferret=1:3
-    for sess=1:length(Dir{ferret}.path)
-        load([Dir{ferret}.path{sess} filesep 'SleepScoring_OBGamma.mat'],'Epoch','TotalNoiseEpoch','Sleep',...
-            'Wake', 'SWSEpoch', 'REMEpoch', 'Epoch_01_05')
-        if sum(DurationEpoch(SWSEpoch))/3600e4>1
-            
-            for m=1:8
-                try
-                    if m==1
-                        load([Dir{ferret}.path{sess} filesep 'B_Low_Spectrum.mat'])
-                        RANGE = Spectro{3};
-                        Range_Low = Spectro{3};
-                    elseif m==2
-                        load([Dir{ferret}.path{sess} filesep 'PFCx_Low_Spectrum.mat'])
-                    elseif m==3
-                        load([Dir{ferret}.path{sess} filesep 'H_Low_Spectrum.mat'])
-                    elseif m==4
-                        load([Dir{ferret}.path{sess} filesep 'AuCx_Low_Spectrum.mat'])
-                    elseif m==5
-                        load([Dir{ferret}.path{sess} filesep 'B_Middle_Spectrum.mat'])
-                        RANGE = Spectro{3};
-                        Range_Middle = Spectro{3};
-                    elseif m==6
-                        load([Dir{ferret}.path{sess} filesep 'PFCx_Middle_Spectrum.mat'])
-                    elseif m==7
-                        load([Dir{ferret}.path{sess} filesep 'H_Middle_Spectrum.mat'])
-                    elseif m==8
-                        load([Dir{ferret}.path{sess} filesep 'AuCx_Middle_Spectrum.mat'])
-                    end
-                    
-                    
-                    Sptsd{m} = tsd(Spectro{2}*1e4 , Spectro{1});
-                    for states=1:4
-                        if states==1
-                            State = Wake;
-                        elseif states==2
-                            State = SWSEpoch-Epoch_01_05;
-                        elseif states==3
-                            State = and(SWSEpoch , Epoch_01_05);
-                        elseif states==4
-                            State = REMEpoch;
-                        end
-                        
-                        Dur_State(state) = sum(DurationEpoch(State))/3600e4;
+subplot(446)
+imagesc(linspace(0,Dur_State(2),length(Sp_ByState{2}{2})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{2}{2})'),2)',100)'), axis xy
+colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis(c)
+makepretty_BM2
 
-                        Sp_ByState{m}{states} = Restrict(Sptsd{m} , and(State,Epoch)-TotalNoiseEpoch);
-                        if m<5
-                            if states==1
-                                Sp_ByState_clean = CleanSpectro(Sp_ByState , RANGE , 8);
-                                Mean_Spec{ferret}{sess}{m}(states,:) = nanmean(Data(Sp_ByState_clean));
-                            else
-                                Mean_Spec{ferret}{sess}{m}(states,:) = nanmean(Data(Sp_ByState));
-                            end
-                        else
-                            Mean_Spec{ferret}{sess}{m}(states,:) = nanmean(log10(Data(Sp_ByState)));
-                        end
-                    end
-                end
-            end
-            clear Sptsd Sp_ByState Sp_ByState_clean
-            
-            disp(sess)
-        end
-    end
-end
+subplot(4,4,10)
+imagesc(linspace(0,Dur_State(3),length(Sp_ByState{2}{3})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{2}{3})'),2)',100)'), axis xy
+colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis(c)
+makepretty_BM2
 
+subplot(4,4,14)
+imagesc(linspace(0,Dur_State(4),length(Sp_ByState{2}{4})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{2}{4})'),2)',100)'), axis xy
+colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis(c)
+makepretty_BM2
 
 
 
 
 figure
-subplot(421)
-imagesc(Range(Sptsd{3})/3.6e7 , Range_Low , runmean(runmean(log10(Data(Sptsd{3})'),2)',100)'), axis xy
-ylabel('Frequency_a_l_l (Hz)')
-colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis([3 5.5])
-PlotPerAsLine(Wake,LineHeight,Colors.Wake,'timescaling',3.6e7);
-PlotPerAsLine(SWSEpoch,LineHeight,Colors.SWS,'timescaling',3.6e7);
-PlotPerAsLine(REMEpoch,LineHeight,Colors.REM,'timescaling',3.6e7);
-title('HPC')
-makepretty_BM2
+subplot(121)
+for st=2:4
+    plot(Range_Low , Mean_Spec{1}(st,:) , 'Color' , Cols{st}), hold on
+end
+xlabel('Frequency (Hz)'), xlim([0 10])
+makepretty
 
-subplot(423)
-imagesc(linspace(0,Dur_State(2),length(Sp_ByState{3}{2})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{3}{2})'),2)',100)'), axis xy
-ylabel('Frequency_R_E_M (Hz)')
-colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis([3 5.5])
-makepretty_BM2
+subplot(122)
+for st=2:4
+    plot(Range_Low , Mean_Spec{2}(st,:) , 'Color' , Cols{st}), hold on
+end
+xlabel('Frequency (Hz)'), xlim([0 10])
+makepretty
 
-subplot(425)
-imagesc(linspace(0,Dur_State(3),length(Sp_ByState{3}{3})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{3}{3})'),2)',100)'), axis xy
-ylabel('Frequency_N_1 (Hz)')
-colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis([3 5.5])
-makepretty_BM2
-
-subplot(427)
-imagesc(linspace(0,Dur_REM,length(Sp_ByState{3}{4})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{3}{4})'),2)',100)'), axis xy
-ylabel('Frequency_N_2 (Hz)')
-colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis([3 5.5])
-makepretty_BM2
-
-
-subplot(422)
-imagesc(Range(Sptsd{1})/3.6e7 , Range_Low , runmean(runmean(log10(Data(Sptsd{1})'),2)',100)'), axis xy
-ylabel('Frequency_a_l_l (Hz)')
-colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis([3 5.5])
-PlotPerAsLine(Wake,LineHeight,Colors.Wake,'timescaling',3.6e7);
-PlotPerAsLine(SWSEpoch,LineHeight,Colors.SWS,'timescaling',3.6e7);
-PlotPerAsLine(REMEpoch,LineHeight,Colors.REM,'timescaling',3.6e7);
-title('OB')
-makepretty_BM2
-
-subplot(424)
-imagesc(linspace(0,Dur_State(2),length(Sp_ByState{1}{2})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{1}{2})'),2)',100)'), axis xy
-ylabel('Frequency_R_E_M (Hz)')
-colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis([3 5.5])
-makepretty_BM2
-
-subplot(426)
-imagesc(linspace(0,Dur_State(2),length(Sp_ByState{1}{3})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{1}{3})'),2)',100)'), axis xy
-ylabel('Frequency_N_1 (Hz)')
-colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis([3 5.5])
-makepretty_BM2
-
-subplot(428)
-imagesc(linspace(0,Dur_State(2),length(Sp_ByState{1}{4})) , Range_Low , runmean(runmean(log10(Data(Sp_ByState{1}{4})'),2)',100)'), axis xy
-ylabel('Frequency_N_2 (Hz)')
-colormap jet, ylim([0 10]), hline([4 6],'--r'), caxis([3 5.5])
-makepretty_BM2
-
-
-
-
-
+a=suptitle('Brynza'); a.FontSize=20;
+a=suptitle('Shropshire'); a.FontSize=20;
+a=suptitle('Labneh'); a.FontSize=20;
 
 
 

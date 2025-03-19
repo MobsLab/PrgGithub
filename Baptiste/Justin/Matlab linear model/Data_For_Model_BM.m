@@ -1,24 +1,24 @@
 
 
 clear all
-GetAllSalineSessions_BM
 GetEmbReactMiceFolderList_BM
 Group=22;
 Mouse=Drugs_Groups_UMaze_BM(Group);
 Session_type={'Cond'};
+bin_size = 2;
 
+%%
 for sess=1%:length(Session_type)% generate all data required for analyses
         [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
-    MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'respi_freq_bm','ripples','linearposition');
+    MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'respi_freq_bm','ripples','linearposition','accelero');
     %     [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
     %         MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'instfreq_wv','ripples','linearposition');
 %     [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
 %         MeanValuesPhysiologicalParameters_BM('drugs',Mouse,lower(Session_type{sess}),'respi_freq_bm','ripples','linearposition');
 end
 
-clearvars -except OutPutData Epoch1 CondSess FearSess NameEpoch Session_type Group A
+clearvars -except OutPutData Epoch1 CondSess FearSess NameEpoch Session_type Group A Mouse
 
-Mouse=Drugs_Groups_UMaze_BM(Group);
 for sess=1:length(Session_type)
     Sessions_List_ForLoop_BM
     for mouse=1:length(Mouse)
@@ -43,26 +43,30 @@ for sess=1:length(Session_type)
             EyelidTimes.(Session_type{sess}).(Mouse_names{mouse}) = Start(Epoch1.(Session_type{sess}){mouse,2});
             ShockZoneTimes.(Session_type{sess}).(Mouse_names{mouse}) = Start(ShockZoneEpoch_Corrected.(Session_type{sess}).(Mouse_names{mouse}));
             
-            for ep=1:length(Start(Epoch1.(Session_type{sess}){mouse, 3}))
-                ShockTime_Fz_Distance_pre.(Session_type{sess}).(Mouse_names{mouse}) = Start(Epoch1.(Session_type{sess}){mouse, 2})-Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep));
+            clear St, St = Start(Epoch1.(Session_type{sess}){mouse, 3});
+            for ep=1:length(St)
                 
+                ShockTime_Fz_Distance_pre.(Session_type{sess}).(Mouse_names{mouse}) = Start(Epoch1.(Session_type{sess}){mouse, 2})-St(ep);
                 ShockTime_Fz_Distance.(Session_type{sess}).(Mouse_names{mouse}) = abs(max(ShockTime_Fz_Distance_pre.(Session_type{sess}).(Mouse_names{mouse})(ShockTime_Fz_Distance_pre.(Session_type{sess}).(Mouse_names{mouse})<0))/1e4);
                 if isempty(ShockTime_Fz_Distance.(Session_type{sess}).(Mouse_names{mouse})); ShockTime_Fz_Distance.(Session_type{sess}).(Mouse_names{mouse})=NaN; end
                 
-                for bin=1:ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, 3},ep)))/1e4)/2)-1 % bin of 2s or less
+                Ep_bef_Fz = intervalSet(St(ep)-5e4 , St(ep));
+                MeanMvtBef.(Session_type{sess}).(Mouse_names{mouse}) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).accelero.tsd{mouse,1} , Ep_bef_Fz)));
+
+                for bin=1:ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, 3},ep)))/1e4)/bin_size)-1 % bin of 2s or less
                     
-                    SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}) = intervalSet(Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))+2*(bin-1)*1e4 , Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))+2*(bin)*1e4);
+                    SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}) = intervalSet(St(ep)+bin_size*(bin-1)*1e4 , St(ep)+bin_size*(bin)*1e4);
                     PositionArray.(Session_type{sess}).(Mouse_names{mouse})(i) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).linearposition.tsd{mouse, 1} , SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))));
                     try
                         OB_FrequencyArray.(Session_type{sess}).(Mouse_names{mouse})(i) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).instfreq_wv.tsd{mouse, 1} , SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))));
                     catch
                         OB_FrequencyArray.(Session_type{sess}).(Mouse_names{mouse})(i) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).respi_freq_bm.tsd{mouse, 1} , SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))));
                     end
-                    try RipplesDensityArray.(Session_type{sess}).(Mouse_names{mouse})(i) = sum(length(Data(Restrict(OutPutData.(Session_type{sess}).ripples.ts{mouse,1}, SmallEpoch.(Session_type{sess}).(Mouse_names{mouse})))))/2; end
-                    try RipplesNumberArray.(Session_type{sess}).(Mouse_names{mouse})(i) = sum(length(Data(Restrict(OutPutData.(Session_type{sess}).ripples.ts{mouse,1}, SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))))); end
-                    GlobalTimeArray.(Session_type{sess}).(Mouse_names{mouse})(i) = Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))/1e4+2*(bin-1);
-                    TimeSinceLastShockArray.(Session_type{sess}).(Mouse_names{mouse})(i) = ShockTime_Fz_Distance.(Session_type{sess}).(Mouse_names{mouse})+2*(bin-1);
-                    TimepentFreezing.(Session_type{sess}).(Mouse_names{mouse})(i) = 2*(bin-1);
+%                     try RipplesDensityArray.(Session_type{sess}).(Mouse_names{mouse})(i) = sum(length(Data(Restrict(OutPutData.(Session_type{sess}).ripples.ts{mouse,1}, SmallEpoch.(Session_type{sess}).(Mouse_names{mouse})))))/bin_size; end
+%                     try RipplesNumberArray.(Session_type{sess}).(Mouse_names{mouse})(i) = sum(length(Data(Restrict(OutPutData.(Session_type{sess}).ripples.ts{mouse,1}, SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))))); end
+                    GlobalTimeArray.(Session_type{sess}).(Mouse_names{mouse})(i) = Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))/1e4+bin_size*(bin-1);
+                    TimeSinceLastShockArray.(Session_type{sess}).(Mouse_names{mouse})(i) = ShockTime_Fz_Distance.(Session_type{sess}).(Mouse_names{mouse})+bin_size*(bin-1);
+                    TimepentFreezing.(Session_type{sess}).(Mouse_names{mouse})(i) = bin_size*(bin-1);
                     try
                         R = Range(Restrict(OutPutData.(Session_type{sess}).linearposition.tsd{mouse,1} , SmallEpoch.(Session_type{sess}).(Mouse_names{mouse})));
                         EyelidNumber.(Session_type{sess}).(Mouse_names{mouse})(i) = sum(EyelidTimes.(Session_type{sess}).(Mouse_names{mouse})<R(1));
@@ -71,24 +75,25 @@ for sess=1:length(Session_type)
                         EyelidNumber.(Session_type{sess}).(Mouse_names{mouse})(i) = EyelidNumber.(Session_type{sess}).(Mouse_names{mouse})(i-1);
                         ShockZoneNumber.(Session_type{sess}).(Mouse_names{mouse})(i) = ShockZoneNumber.(Session_type{sess}).(Mouse_names{mouse})(i-1);
                     end
+                        MeanMovementBefEp.(Session_type{sess}).(Mouse_names{mouse})(i) = MeanMvtBef.(Session_type{sess}).(Mouse_names{mouse});
                     
                     i=i+1;
                 end
                 
-                ind_to_use = ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, 3},ep)))/1e4)/2)-1; % se(Session_type{sess}) to last freezing episode indice
+                ind_to_use = ceil(((DurationEpoch(subset(Epoch1.(Session_type{sess}){mouse, 3},ep)))/1e4)/bin_size)-1; % to last freezing episode indice
                 
-                SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}) = intervalSet(Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))+2*(ind_to_use)*1e4 , Stop(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))); % last small epoch is a bin with time < 2s
+                SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}) = intervalSet(Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))+bin_size*(ind_to_use)*1e4 , Stop(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))); % last small epoch is a bin with time < 2s
                 PositionArray.(Session_type{sess}).(Mouse_names{mouse})(i) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).linearposition.tsd{mouse, 1} , SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))));
                 try
                     OB_FrequencyArray.(Session_type{sess}).(Mouse_names{mouse})(i) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).respi_freq_bm.tsd{mouse, 1} , SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))));
                 catch
                     OB_FrequencyArray.(Session_type{sess}).(Mouse_names{mouse})(i) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).instfreq_wv.tsd{mouse, 1} , SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))));
                 end
-                try RipplesDensityArray.(Session_type{sess}).(Mouse_names{mouse})(i) = sum(length(Data(Restrict(OutPutData.(Session_type{sess}).ripples.ts{mouse,1}, SmallEpoch.(Session_type{sess}).(Mouse_names{mouse})))))/(DurationEpoch(SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))/2e4); end
-                try RipplesNumberArray.(Session_type{sess}).(Mouse_names{mouse})(i) = sum(length(Data(Restrict(OutPutData.(Session_type{sess}).ripples.ts{mouse,1}, SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))))); end
-                GlobalTimeArray.(Session_type{sess}).(Mouse_names{mouse})(i) = Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))/1e4+2*(ind_to_use);
-                TimeSinceLastShockArray.(Session_type{sess}).(Mouse_names{mouse})(i) = ShockTime_Fz_Distance.(Session_type{sess}).(Mouse_names{mouse})+2*(ind_to_use);
-                try; TimepentFreezing.(Session_type{sess}).(Mouse_names{mouse})(i) = 2*bin; catch; TimepentFreezing.(Session_type{sess}).(Mouse_names{mouse})(i) = 0; end
+%                 try RipplesDensityArray.(Session_type{sess}).(Mouse_names{mouse})(i) = sum(length(Data(Restrict(OutPutData.(Session_type{sess}).ripples.ts{mouse,1}, SmallEpoch.(Session_type{sess}).(Mouse_names{mouse})))))/(DurationEpoch(SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))/bin_size*1e4); end
+%                 try RipplesNumberArray.(Session_type{sess}).(Mouse_names{mouse})(i) = sum(length(Data(Restrict(OutPutData.(Session_type{sess}).ripples.ts{mouse,1}, SmallEpoch.(Session_type{sess}).(Mouse_names{mouse}))))); end
+                GlobalTimeArray.(Session_type{sess}).(Mouse_names{mouse})(i) = Start(subset(Epoch1.(Session_type{sess}){mouse, 3},ep))/1e4+bin_size*(ind_to_use);
+                TimeSinceLastShockArray.(Session_type{sess}).(Mouse_names{mouse})(i) = ShockTime_Fz_Distance.(Session_type{sess}).(Mouse_names{mouse})+bin_size*(ind_to_use);
+                try; TimepentFreezing.(Session_type{sess}).(Mouse_names{mouse})(i) = bin_size*bin; catch; TimepentFreezing.(Session_type{sess}).(Mouse_names{mouse})(i) = 0; end
                 try
                     R = Range(Restrict(OutPutData.(Session_type{sess}).linearposition.tsd{mouse,1} , SmallEpoch.(Session_type{sess}).(Mouse_names{mouse})));
                     EyelidNumber.(Session_type{sess}).(Mouse_names{mouse})(i) = sum(EyelidTimes.(Session_type{sess}).(Mouse_names{mouse})<R(1));
@@ -97,7 +102,8 @@ for sess=1:length(Session_type)
                     EyelidNumber.(Session_type{sess}).(Mouse_names{mouse})(i) = EyelidNumber.(Session_type{sess}).(Mouse_names{mouse})(i-1);
                     ShockZoneNumber.(Session_type{sess}).(Mouse_names{mouse})(i) = ShockZoneNumber.(Session_type{sess}).(Mouse_names{mouse})(i-1);
                 end
-                
+                                        MeanMovementBefEp.(Session_type{sess}).(Mouse_names{mouse})(i) = MeanMvtBef.(Session_type{sess}).(Mouse_names{mouse});
+
                 i=i+1;
                 
             end
@@ -107,21 +113,21 @@ for sess=1:length(Session_type)
                 if TimepentFreezing.(Session_type{sess}).(Mouse_names{mouse})(j) == 0
                     Timefreezing_cumul.(Session_type{sess}).(Mouse_names{mouse})(j) = Timefreezing_cumul.(Session_type{sess}).(Mouse_names{mouse})(j-1);
                 else
-                    Timefreezing_cumul.(Session_type{sess}).(Mouse_names{mouse})(j) = Timefreezing_cumul.(Session_type{sess}).(Mouse_names{mouse})(j-1) + 2;
+                    Timefreezing_cumul.(Session_type{sess}).(Mouse_names{mouse})(j) = Timefreezing_cumul.(Session_type{sess}).(Mouse_names{mouse})(j-1) + bin_size;
                 end
             end
             
-            try
+%             try
+%                 TotalArray_mouse.(Session_type{sess}).(Mouse_names{mouse}) = [OB_FrequencyArray.(Session_type{sess}).(Mouse_names{mouse})' PositionArray.(Session_type{sess}).(Mouse_names{mouse})' ...
+%                     GlobalTimeArray.(Session_type{sess}).(Mouse_names{mouse})' TimeSinceLastShockArray.(Session_type{sess}).(Mouse_names{mouse})' TimepentFreezing.(Session_type{sess}).(Mouse_names{mouse})'...
+%                     Timefreezing_cumul.(Session_type{sess}).(Mouse_names{mouse})' EyelidNumber.(Session_type{sess}).(Mouse_names{mouse})' ShockZoneNumber.(Session_type{sess}).(Mouse_names{mouse})'...
+%                     MeanMovementBefEp.(Session_type{sess}).(Mouse_names{mouse})' RipplesNumberArray.(Session_type{sess}).(Mouse_names{mouse})'];
+%             catch
                 TotalArray_mouse.(Session_type{sess}).(Mouse_names{mouse}) = [OB_FrequencyArray.(Session_type{sess}).(Mouse_names{mouse})' PositionArray.(Session_type{sess}).(Mouse_names{mouse})' ...
                     GlobalTimeArray.(Session_type{sess}).(Mouse_names{mouse})' TimeSinceLastShockArray.(Session_type{sess}).(Mouse_names{mouse})' TimepentFreezing.(Session_type{sess}).(Mouse_names{mouse})'...
                     Timefreezing_cumul.(Session_type{sess}).(Mouse_names{mouse})' EyelidNumber.(Session_type{sess}).(Mouse_names{mouse})' ShockZoneNumber.(Session_type{sess}).(Mouse_names{mouse})'...
-                    RipplesNumberArray.(Session_type{sess}).(Mouse_names{mouse})'];
-            catch
-                TotalArray_mouse.(Session_type{sess}).(Mouse_names{mouse}) = [OB_FrequencyArray.(Session_type{sess}).(Mouse_names{mouse})' PositionArray.(Session_type{sess}).(Mouse_names{mouse})' ...
-                    GlobalTimeArray.(Session_type{sess}).(Mouse_names{mouse})' TimeSinceLastShockArray.(Session_type{sess}).(Mouse_names{mouse})' TimepentFreezing.(Session_type{sess}).(Mouse_names{mouse})'...
-                    Timefreezing_cumul.(Session_type{sess}).(Mouse_names{mouse})' EyelidNumber.(Session_type{sess}).(Mouse_names{mouse})' ShockZoneNumber.(Session_type{sess}).(Mouse_names{mouse})'...
-                    ];
-            end
+                    MeanMovementBefEp.(Session_type{sess}).(Mouse_names{mouse})'];
+%             end
             disp(Mouse_names{mouse})
         end
     end
@@ -129,7 +135,7 @@ end
 
 DATA = TotalArray_mouse;
 Name = {'OB frequency','Position','Global Time','Time since last shock','Time spent freezing',...
-'Time spent freezing cumul','EyelidNumber','ShockZoneNumber','RipplesNumber'};
+'Time freezing cumul','EyelidNumber','ShockZoneNumber','Movement quantity'};
 
 save('/home/ratatouille/Dropbox/Mobs_member/BaptisteMaheo/Data/Data_KB/Data_Model_30112023.mat','DATA','Name')
 save('/home/ratatouille/Dropbox/Mobs_member/BaptisteMaheo/Data/Data_KB/Data_Model_DZP.mat','DATA','Name')

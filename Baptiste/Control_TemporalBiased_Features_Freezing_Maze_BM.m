@@ -1,7 +1,159 @@
 
 %% load data
 
-load('/media/nas7/ProjetEmbReact/DataEmbReact/Control_TemporalBiased.mat')
+% load('/media/nas7/ProjetEmbReact/DataEmbReact/Control_TemporalBiased.mat')
+
+
+%% generate data
+clear all
+GetEmbReactMiceFolderList_BM
+Mouse = Drugs_Groups_UMaze_BM(22);
+Session_type = {'Habituation','Cond'};
+
+for mouse=1:length(Mouse)
+    Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+    for sess=1:length(Session_type)
+        Sessions_List_ForLoop_BM
+        
+        try
+%             Acc.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'accelero');
+%             Respi.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'respi_freq_bm');
+%             FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'epoch','epochname','freezeepoch_withnoise');
+%             ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'epoch','epochname','zoneepoch_behav');
+%             ShockZone.(Session_type{sess}).(Mouse_names{mouse}) = ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}){1};
+%             SafeZone.(Session_type{sess}).(Mouse_names{mouse}) = or(ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}){2} , ZoneEpoch.(Session_type{sess}).(Mouse_names{mouse}){5});
+%             
+%             FreezingShock.(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) , ShockZone.(Session_type{sess}).(Mouse_names{mouse}));
+%             FreezingSafe.(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) , SafeZone.(Session_type{sess}).(Mouse_names{mouse}));
+            Fz_Sup4.(Session_type{sess}).(Mouse_names{mouse}) = and(thresholdIntervals(Respi.(Session_type{sess}).(Mouse_names{mouse}) ,...
+                4.5 , 'Direction' , 'Above') , FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}));
+            Fz_Inf4.(Session_type{sess}).(Mouse_names{mouse}) = FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse})-Fz_Sup4.(Session_type{sess}).(Mouse_names{mouse});
+            
+            TotDur.(Session_type{sess}).(Mouse_names{mouse}) = max(Range(Acc.(Session_type{sess}).(Mouse_names{mouse})));
+            FreezeAll_Prop{sess}(mouse) = sum(DurationEpoch(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse})))/TotDur.(Session_type{sess}).(Mouse_names{mouse});
+            FreezeShock_Prop{sess}(mouse) = sum(DurationEpoch(FreezingShock.(Session_type{sess}).(Mouse_names{mouse})))/TotDur.(Session_type{sess}).(Mouse_names{mouse});
+            FreezeSafe_Prop{sess}(mouse) = sum(DurationEpoch(FreezingSafe.(Session_type{sess}).(Mouse_names{mouse})))/TotDur.(Session_type{sess}).(Mouse_names{mouse});
+            Fz_Sup4_Prop{sess}(mouse) = sum(DurationEpoch(Fz_Sup4.(Session_type{sess}).(Mouse_names{mouse})))/TotDur.(Session_type{sess}).(Mouse_names{mouse});
+            Fz_Inf4_Prop{sess}(mouse) = sum(DurationEpoch(Fz_Inf4.(Session_type{sess}).(Mouse_names{mouse})))/TotDur.(Session_type{sess}).(Mouse_names{mouse});
+            
+            for bin=1:20
+                SmallEp = intervalSet((TotDur.(Session_type{sess}).(Mouse_names{mouse})/20)*(bin-1) , (TotDur.(Session_type{sess}).(Mouse_names{mouse})/20)*bin);
+                FreezeAll_Prop_bin{sess}(mouse,bin) = sum(DurationEpoch(and(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) , SmallEp)))/sum(DurationEpoch(SmallEp));
+                FreezeShock_Prop_bin{sess}(mouse,bin) = sum(DurationEpoch(and(FreezingShock.(Session_type{sess}).(Mouse_names{mouse}) , SmallEp)))/sum(DurationEpoch(SmallEp));
+                FreezeSafe_Prop_bin{sess}(mouse,bin) = sum(DurationEpoch(and(FreezingSafe.(Session_type{sess}).(Mouse_names{mouse}) , SmallEp)))/sum(DurationEpoch(SmallEp));
+                Fz_Sup4_Prop_bin{sess}(mouse,bin) = sum(DurationEpoch(and(Fz_Sup4.(Session_type{sess}).(Mouse_names{mouse}) , SmallEp)))./sum(DurationEpoch(SmallEp));
+                Fz_Inf4_Prop_bin{sess}(mouse,bin) = sum(DurationEpoch(and(Fz_Inf4.(Session_type{sess}).(Mouse_names{mouse}) , SmallEp)))./sum(DurationEpoch(SmallEp));
+            end
+        end
+    end
+    disp(Mouse_names{mouse})
+end
+
+FreezeAll_Prop_All=[]; FreezeShock_Prop_All=[]; FreezeSafe_Prop_All=[]; FreezeSup4_Prop_All=[];  FreezeInf4_Prop_All=[];
+for sess=1:length(Session_type)
+    FreezeAll_Prop_All = [FreezeAll_Prop_All FreezeAll_Prop_bin{sess}];
+    FreezeShock_Prop_All = [FreezeShock_Prop_All FreezeShock_Prop_bin{sess}];
+    FreezeSafe_Prop_All = [FreezeSafe_Prop_All FreezeSafe_Prop_bin{sess}];
+    FreezeSup4_Prop_All = [FreezeSup4_Prop_All Fz_Inf4_Prop_bin{sess}];
+    FreezeInf4_Prop_All = [FreezeInf4_Prop_All Fz_Inf4_Prop_bin{sess}];
+end
+
+
+
+%% figures
+Cols = {[.6 .6 .6],[.3 .3  .3]};
+X = 1:2;
+Legends = {'Habituation','Conditionning'};
+NoLegends = {'',''};
+
+figure
+subplot(455)
+PlotErrorBarN_KJ(FreezeAll_Prop,'barcolors',{[.5 .5 .5]},'paired',1,'newfig',0)
+xticks(X), xticklabels(NoLegends), xtickangle(45)
+ylabel('freezing prop'), ylim([0 .4])
+makepretty_BM2
+
+subplot(4,5,10)
+PlotErrorBarN_KJ(FreezeShock_Prop,'barcolors',{[1 .5 .5]},'paired',1,'newfig',0)
+xticks(X), xticklabels(NoLegends), xtickangle(45)
+ylabel('freezing prop'),ylim([0 .4])
+makepretty_BM2
+
+subplot(4,5,15)
+PlotErrorBarN_KJ(FreezeSafe_Prop,'barcolors',{[.5 .5 1]},'paired',1,'newfig',0)
+xticks(X), xticklabels(Legends), xtickangle(45)
+ylabel('freezing prop'), ylim([0 .4])
+makepretty_BM2
+
+% subplot(4,5,20)
+% PlotErrorBarN_KJ(Respi_Inf4_Prop,'barcolors',{[.5 .5 1]},'paired',1,'newfig',0)
+% xticks(X), xticklabels(NoLegends), xtickangle(45)
+% ylabel('<4.5Hz prop'), ylim([0 .4])
+% makepretty_BM2
+
+
+subplot(4,5,1:4)
+Data_to_use = FreezeAll_Prop_All;
+Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+b=bar(Mean_All_Sp); b.FaceColor=[.5 .5 .5]; hold on
+errorbar([1:size(FreezeAll_Prop_All,2)],Mean_All_Sp,zeros(size(Conf_Inter)),Conf_Inter,'.','vertical','Color','k')
+ylim([0 .2]), ylabel('immobility (prop)'), box off
+line([size(FreezeAll_Prop_All,2)/2+.5 size(FreezeAll_Prop_All,2)/2+.5],[0 .15],'LineStyle','--','Color','k'), text(15,.17,'first aversive stimulation')
+text(6,.2,'Habituation','FontSize',15), text(26,.2,'Conditioning','FontSize',15)
+makepretty_BM2
+
+subplot(4,5,6:9)
+Data_to_use = FreezeShock_Prop_All;
+Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+b=bar(Mean_All_Sp); b.FaceColor=[1 .5 .5]; hold on
+errorbar([1:size(FreezeAll_Prop_All,2)],Mean_All_Sp,zeros(size(Conf_Inter)),Conf_Inter,'.','vertical','Color','k')
+ylim([0 .2]), ylabel('im. breathing>4.5Hz (prop)'), box off
+line([size(FreezeAll_Prop_All,2)/2+.5 size(FreezeAll_Prop_All,2)/2+.5],[0 .15],'LineStyle','--','Color','k')
+makepretty_BM2
+
+subplot(4,5,11:14)
+Data_to_use = FreezeSafe_Prop_All;
+Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+b=bar(Mean_All_Sp); b.FaceColor=[.5 .5 1]; hold on
+errorbar([1:size(FreezeAll_Prop_All,2)],Mean_All_Sp,zeros(size(Conf_Inter)),Conf_Inter,'.','vertical','Color','k')
+ylim([0 .2]), ylabel('im. breathing<4.5Hz (prop)'), box off
+line([size(FreezeAll_Prop_All,2)/2+.5 size(FreezeAll_Prop_All,2)/2+.5],[0 .15],'LineStyle','--','Color','k')
+xlabel('time (norm)'), ylabel('freezing prop')
+makepretty_BM2
+
+subplot(4,5,18:19)
+Data_to_use = movmean(FreezeInf4_Prop_All(:,21:40)',5,'omitnan')';
+Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+b=bar(Mean_All_Sp); b.FaceColor=[.5 .5 1]; hold on
+errorbar([1:size(FreezeAll_Prop_All,2)/2],Mean_All_Sp,zeros(size(Conf_Inter)),Conf_Inter,'.','vertical','Color','k')
+ylim([.4 .7]), ylabel('<4.5Hz prop'), box off
+line([size(FreezeAll_Prop_All,2)/2+.5 size(FreezeAll_Prop_All,2)/2+.5],[0 .15],'LineStyle','--','Color','k'), text(15,.17,'first aversive stimulation')
+makepretty_BM2
+
+
+
+
+
+
+ 
+            
+            
+            
+            
+            
+            
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% old ?
+
+%% load data
+
+% load('/media/nas7/ProjetEmbReact/DataEmbReact/Control_TemporalBiased.mat')
 
 
 %% generate data
@@ -88,29 +240,29 @@ for sess=1:4
     end
 end
 
-FreezeAll_Time_All=[]; FreezeShock_Time_All=[]; FreezeSafe_Time_All=[]; QW_HC_Time_All=[];
-for sess=1:4
-    try 
-        for mouse=1:length(Mouse)
-            FreezeAll_Time_All = [FreezeAll_Time_All ; FreezeAll_Time{sess}{mouse}];
-            if sess~=2
-                FreezeShock_Time_All = [FreezeShock_Time_All ; FreezeShock_Time{sess}{mouse}];
-                FreezeSafe_Time_All = [FreezeSafe_Time_All ; FreezeSafe_Time{sess}{mouse}];
-            else
-                QW_HC_Time_All = [QW_HC_Time_All ; QW_HC_Time{sess}{mouse}];
-            end
-        end
-    end
-end
-
-
-FreezeAll_Prop_All(nanmean(FreezeAll_Prop_All')==0,:)=NaN;
-FreezeShock_Prop_All(nanmean(FreezeShock_Prop_All')==0,:)=NaN;
-FreezeSafe_Prop_All(nanmean(FreezeSafe_Prop_All')==0,:)=NaN;
-
-for sess=1:4
-    FreezeAll_Prop{sess}([1:13 25:26]) = NaN;
-end
+% FreezeAll_Time_All=[]; FreezeShock_Time_All=[]; FreezeSafe_Time_All=[]; QW_HC_Time_All=[];
+% for sess=1:4
+%     try 
+%         for mouse=1:length(Mouse)
+%             FreezeAll_Time_All = [FreezeAll_Time_All ; FreezeAll_Time{sess}{mouse}];
+%             if sess~=2
+%                 FreezeShock_Time_All = [FreezeShock_Time_All ; FreezeShock_Time{sess}{mouse}];
+%                 FreezeSafe_Time_All = [FreezeSafe_Time_All ; FreezeSafe_Time{sess}{mouse}];
+%             else
+%                 QW_HC_Time_All = [QW_HC_Time_All ; QW_HC_Time{sess}{mouse}];
+%             end
+%         end
+%     end
+% end
+% 
+% 
+% FreezeAll_Prop_All(nanmean(FreezeAll_Prop_All')==0,:)=NaN;
+% FreezeShock_Prop_All(nanmean(FreezeShock_Prop_All')==0,:)=NaN;
+% FreezeSafe_Prop_All(nanmean(FreezeSafe_Prop_All')==0,:)=NaN;
+% 
+% for sess=1:4
+%     FreezeAll_Prop{sess}([1:13 25:26]) = NaN;
+% end
 
 %% figures
 Cols1 = {[.8 .8 .8],[.6 .6 .6],[.4 .4 .4],[.2 .2 .2]};
@@ -476,6 +628,9 @@ X = [1:3];
 figure
 MakeSpreadAndBoxPlot3_SB({R_val_Over90_Sleep_on_Sleep(~ind) R_val_Over90_FzShock_on_Sleep(~ind) R_val_Over90_FzSafe_on_Sleep(~ind)},...
     Cols,X,Legends,'showpoints',0,'paired',1);
+
+
+
 
 
 

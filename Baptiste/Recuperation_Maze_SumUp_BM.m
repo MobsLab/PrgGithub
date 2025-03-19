@@ -88,32 +88,6 @@ ylim([0 .4])
 
 
 
-
-%% not with SWR occurence safe side
-load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_Saline_Eyelid_Cond_2sFullBins.mat', 'OutPutData')
-
-figure
-subplot(141)
-PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , Eyelid.Prop.Wake{2})
-axis square
-xlabel('SWR occurence, fz safe side (#/s)'), ylabel('Wake prop, Sleep Post'), xlim([0 1.2]), ylim([0 .85])
-
-subplot(142)
-PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , Eyelid.Prop.REM_s_l_e_e_p{2})
-axis square
-xlabel('SWR occurence, fz safe side (#/s)'), ylabel('REM prop, Sleep Post'), xlim([0 1.2]), ylim([0 .15])
-
-subplot(143)
-PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , HR.HR_Wake_First5min{1} , 'method' , 'pearson')
-axis square
-xlabel('SWR occurence, fz safe side (#/s)'), ylabel('HR homecage, Sleep Post'), xlim([0 1.2]), ylim([-3 2])
-
-subplot(144)
-PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , Thigmo.Thigmo_score{1} , 'method' , 'spearman')
-axis square
-xlabel('SWR occurence, fz safe side (#/s)'), ylabel('thigmo score, Sleep Post'), xlim([0 1.2]), ylim([0 .15])
-
-
 %% Correlations, homeostasis
 figure
 subplot(141)
@@ -146,31 +120,63 @@ xlabel('Breathing, fz shock side (Hz)'), ylabel('Breathing, fz safe side (Hz)')
 axis square
 
 
-%% Homeostasis with low vs highbreathig states
+
+figure
+PlotCorrelations_BM(log10(Length_fz{1}*60) , PCVal)
+xlabel('Duration immobility (log)'), ylabel('stress score')
+axis square, makepretty
+
+
+%% not with SWR occurence safe side
+load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_Saline_Eyelid_Cond_2sFullBins.mat', 'OutPutData')
+
+figure
+subplot(141)
+PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , Eyelid.Prop.Wake{2})
+axis square
+xlabel('SWR occurence, fz safe side (#/s)'), ylabel('Wake prop, Sleep Post'), xlim([0 1.2]), ylim([0 .85])
+
+subplot(142)
+PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , Eyelid.Prop.REM_s_l_e_e_p{2})
+axis square
+xlabel('SWR occurence, fz safe side (#/s)'), ylabel('REM prop, Sleep Post'), xlim([0 1.2]), ylim([0 .15])
+
+subplot(143)
+PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , HR.HR_Wake_First5min{1} , 'method' , 'pearson')
+axis square
+xlabel('SWR occurence, fz safe side (#/s)'), ylabel('HR homecage, Sleep Post'), xlim([0 1.2]), ylim([-3 2])
+
+subplot(144)
+PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , Thigmo.Thigmo_score{1} , 'method' , 'spearman')
+axis square
+xlabel('SWR occurence, fz safe side (#/s)'), ylabel('thigmo score, Sleep Post'), xlim([0 1.2]), ylim([0 .15])
+
+
+%% Homeostasis with low vs high breathig states
 figure
 subplot(131)
-A = log10(Length_shock)'; A(A==-Inf)=NaN;
-B = log10(Length_safe)';
-[R,P] = PlotCorrelations_BM(A , B , 'conf_bound',1);
+X = log10(Length_shock{1})'; X(X==-Inf)=NaN;
+Y = log10(Length_safe{1})';
+[R,P] = PlotCorrelations_BM(X , Y);
+legend(['R = ' num2str(R) '     P = ' num2str(P)])
 makepretty
 xlabel('Duration Fz >4.5Hz (log scale)'), ylabel('Duration Fz <4.5Hz (log scale)')
 axis square
 
-tbl = table(A,B);
-mdl = fitlm(tbl,'B ~ A');
-for mouse=1:29
-    residual(mouse) = B(mouse)-(A(mouse)*.6839+.9349);
-    if residual(mouse)>0
-        line([A(mouse) A(mouse)],[B(mouse) B(mouse)-residual(mouse)],'LineStyle','--','Color','g')
-    else
-        line([A(mouse) A(mouse)],[B(mouse) B(mouse)-residual(mouse)],'LineStyle','--','Color','r')
-    end
-end
-f=get(gca,'Children'); legend([f(32)],['R = ' num2str(R) '     P = ' num2str(P)]);
+tbl = table(X,Y);
+mdl = fitlm(tbl,'Y ~ X');
+t = table2array(mdl.Coefficients);
+a = t(2,1); b = t(1,1);
+
+X_proj = (X + a * (Y - b)) / (a^2 + 1); 
+Y_proj = a * X_proj + b; % Compute distances 
+d_perpendicular = (a * X - Y + b) ./ sqrt(a^2 + 1); % Perpendicular (Euclidean) distance 
+d_y = (Y - (a * X + b)); % Vertical distance
+d_x = X-X_proj; % horizontal dist 
 
 
 subplot(132)
-PlotCorrelations_BM(residual , Respi_safe , 'conf_bound',1)
+PlotCorrelations_BM(d_perpendicular , Respi_safe , 'conf_bound',1)
 makepretty
 xlabel('distance to fit'), ylabel('Breathing, safe side (Hz)')
 axis square
@@ -178,11 +184,13 @@ xlim([-1.2 .8]), ylim([1.5 5])
 
 load('PC_values.mat', 'PCVal')
 subplot(133)
-PlotCorrelations_BM(residual , PCVal , 'conf_bound',1)
+PlotCorrelations_BM(d_perpendicular , PCVal , 'conf_bound',1)
 makepretty
 xlabel('distance to fit'), ylabel('Stress score')
 axis square
 xlim([-1.2 .8]), ylim([-.7 1])
+
+
 
 %% Homeostasis with safe vs shock side
 figure

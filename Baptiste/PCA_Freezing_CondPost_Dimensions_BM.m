@@ -1,9 +1,9 @@
 
 
-load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_Saline_Eyelid_Cond_2sFullBins.mat')
+load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Eyelid_Sleep_Cond.mat')
 
 
-for par=1:length(Params)-1
+for par=[1:8 10]%1:length(Params)
     for mouse=1:length(Mouse)
         try
             clear D, D = Data(OutPutData.Cond.(Params{par}).tsd{mouse,5});
@@ -15,15 +15,16 @@ for par=1:length(Params)-1
 end
 
 
-
-for par=1:length(Params)-1
-    DATA2(par,:) = [MeanVal_Shock.(Params{par}) MeanVal_Safe.(Params{par})];
+n=1;
+for par=[1:8 10]%1:length(Params)
+    DATA2(n,:) = [MeanVal_Shock.(Params{par}) MeanVal_Safe.(Params{par})];
+    n=n+1;
 end
 DATA2(DATA2==0) = NaN;
 
 ind=and(sum(isnan(DATA2(:,1:29)))==0 , sum(isnan(DATA2(:,30:58)))==0);
 
-[~,~,~, eigen_vector2, eigen_vector] = Correlations_Matrices_Data_BM(zscore(DATA2(:,[ind ind])')', Params  , {''});
+Correlations_Matrices_Data_BM(zscore(DATA2(:,[ind ind])')', Params([1:8 10])  , {''});
 
 [z,mu,sigma] = zscore(DATA2(:,[ind ind])');
 [Data_corr,~] = corr(z,'type','pearson');
@@ -61,39 +62,14 @@ for i=1:2
     hold on
     plot(eigen_vector(b,i),'.','MarkerSize',50,'Color','k')
     
-    xticks([1:8]), xticklabels({'Heart rate','Breathing','OB gamma frequency','HPC theta power',...
-        'HPC theta frequency','OB gamma power','Ripples occurence','Heart rate variability'}), 
+    xticks([1:length(Params)]), xticklabels(Params(b)), 
     xtickangle(45)
     box off
     makepretty_BM2
     h=hline(0,'--k'); set(h,'LineWidth',2);
-    ylabel(['PC ' num2str(i) ' weight (a.u.)']), ylim([-.7 .7])
-    vline([1:8],'--k')
+    ylabel(['PC ' num2str(i) ' weight (a.u.)']), ylim([-3 3])
+    vline([1:length(Params)],'--k')
 end
-
-
-
-
-figure
-Bar_st = [nanmedian(PC_values_shock{1}) nanmedian(PC_values_shock{2})];
-Q1_st(1) = quantile(PC_values_shock{1},.25); Q1_st(2) = quantile(PC_values_shock{1},.75);
-Q2_st(1) = quantile(PC_values_shock{2},.25); Q2_st(2) = quantile(PC_values_shock{2},.75);
-
-plot(Bar_st(1),Bar_st(2),'.','MarkerSize',70,'Color',[1 .5 .5]), hold on
-line(Q1_st,[Bar_st(2) Bar_st(2)],'Color',[1 .5 .5],'LineWidth',3)
-line([Bar_st(1) Bar_st(1)],Q2_st,'Color',[1 .5 .5],'LineWidth',3)
-
-Bar_st = [nanmedian(PC_values_safe{1}) nanmedian(PC_values_safe{2})];
-Q1_st(1) = quantile(PC_values_safe{1},.25); Q1_st(2) = quantile(PC_values_safe{1},.75);
-Q2_st(1) = quantile(PC_values_safe{2},.25); Q2_st(2) = quantile(PC_values_safe{2},.75);
-
-plot(Bar_st(1),Bar_st(2),'.','MarkerSize',70,'Color',[.5 .5 1]), hold on
-line(Q1_st,[Bar_st(2) Bar_st(2)],'Color',[.5 .5 1],'LineWidth',3)
-line([Bar_st(1) Bar_st(1)],Q2_st,'Color',[.5 .5 1],'LineWidth',3)
-axis square
-xlabel('PC1 value'), ylabel('PC2 value')
-grid on
-makepretty, box on
 
 
 
@@ -124,33 +100,55 @@ plot(Bar_safe(1),Bar_safe(2),'.','MarkerSize',100,'Color',[.5 .5 1])
 
 
 
+figure
+Bar_st = [nanmedian(PC_values_shock{1}) nanmedian(PC_values_shock{2})];
+Q1_st(1) = quantile(PC_values_shock{1},.25); Q1_st(2) = quantile(PC_values_shock{1},.75);
+Q2_st(1) = quantile(PC_values_shock{2},.25); Q2_st(2) = quantile(PC_values_shock{2},.75);
+
+plot(Bar_st(1),Bar_st(2),'.','MarkerSize',70,'Color',[1 .5 .5]), hold on
+line(Q1_st,[Bar_st(2) Bar_st(2)],'Color',[1 .5 .5],'LineWidth',3)
+line([Bar_st(1) Bar_st(1)],Q2_st,'Color',[1 .5 .5],'LineWidth',3)
+
+Bar_st = [nanmedian(PC_values_safe{1}) nanmedian(PC_values_safe{2})];
+Q1_st(1) = quantile(PC_values_safe{1},.25); Q1_st(2) = quantile(PC_values_safe{1},.75);
+Q2_st(1) = quantile(PC_values_safe{2},.25); Q2_st(2) = quantile(PC_values_safe{2},.75);
+
+plot(Bar_st(1),Bar_st(2),'.','MarkerSize',70,'Color',[.5 .5 1]), hold on
+line(Q1_st,[Bar_st(2) Bar_st(2)],'Color',[.5 .5 1],'LineWidth',3)
+line([Bar_st(1) Bar_st(1)],Q2_st,'Color',[.5 .5 1],'LineWidth',3)
+axis square
+xlabel('PC1 value'), ylabel('PC2 value')
+grid on
+makepretty, box on
+
+
+
+Cols = {[1 .5 .5],[.5 .5 1]};
+X = 1:2;
+Legends = {'Shock','Safe'};
+
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({PC_values_shock{1} PC_values_safe{1}},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('PC1 values (a.u.)')
+subplot(122)
+MakeSpreadAndBoxPlot3_SB({PC_values_shock{2} PC_values_safe{2}},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('PC2 values (a.u.)')
 
 
 
 
-for mouse=1:length(Mouse)
-    for par=1:length(Params)-1
-        try
-            clear D, D = Data(OutPutData.Cond.(Params{par}).tsd{mouse,5});
-            DATA_shock{mouse}(par,:) = interp1(linspace(0,1,length(D)) , D , linspace(0,1,20));
-        end
-        try
-            clear D, D = Data(OutPutData.Cond.(Params{par}).tsd{mouse,6});
-            DATA_safe{mouse}(par,:) = interp1(linspace(0,1,length(D)) , D , linspace(0,1,20));
-        end
-    end
-    try, DATA_shock{mouse}(DATA_shock{mouse}==0) = NaN; end
-    try, DATA_safe{mouse}(DATA_safe{mouse}==0) = NaN; end
-    
-    try, DATA_shock_norm{mouse} = (DATA_shock{mouse}'-mu)./sigma; end
-    try, DATA_safe_norm{mouse} = (DATA_safe{mouse}'-mu)./sigma; end
-    
-    for i=1:size(DATA_shock,2)
-        try, PC_shock(mouse,i) = eigen_vector(~isnan(DATA_shock_norm{mouse}(i,:)),2)'*DATA_shock_norm{mouse}(i,~isnan(DATA_shock_norm{mouse}(i,:)))'; end
-        try, PC_safe(mouse,i) = eigen_vector(~isnan(DATA_safe_norm{mouse}(i,:)),2)'*DATA_safe_norm{mouse}(i,~isnan(DATA_safe_norm{mouse}(i,:)))'; end
-    end
-    disp(mouse)
-end
+figure
+Data_to_use = PC_shock;
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+h=shadedErrorBar(linspace(0,1,20) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color= [1 .5 .5]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+Data_to_use = PC_safe;
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+h=shadedErrorBar(linspace(0,1,20) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+makepretty
+
 
 figure
 Data_to_use = movmean(PC_shock',3)';
@@ -166,17 +164,121 @@ makepretty
 
 
 
+%% Sleep
+
+
+
+l=load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Eyelid_Sleep.mat');
+
+n=1;
+for par=[1:8 10]%1:length(Params)
+    DATA3(n,:) = OutPutData.sleep_pre.(Params{par}).mean(:,4);
+    DATA4(n,:) = OutPutData.sleep_pre.(Params{par}).mean(:,5);
+    DATA5(n,:) = OutPutData.sleep_pre.(Params{par}).mean(:,2);
+    n=n+1;
+end
+DATA3(DATA3==0) = NaN;
+DATA4(DATA4==0) = NaN;
+DATA5(DATA5==0) = NaN;
+
+
+z3 = (DATA3'-mu)./sigma;
+z4 = (DATA4'-mu)./sigma;
+z5 = (DATA5'-mu)./sigma;
+
+
+for pc=1:size(eigen_vector,2)
+    for mouse=1:round(size(z2,1)/2)
+        try
+            PC_values_NREM{pc}(mouse) = eigen_vector(~isnan(z3(mouse,:)),pc)'*z3(mouse,~isnan(z3(mouse,:)))';
+            PC_values_REM{pc}(mouse) = eigen_vector(~isnan(z4(mouse,:)),pc)'*z4(mouse,~isnan(z4(mouse,:)))';
+            PC_values_Wake{pc}(mouse) = eigen_vector(~isnan(z5(mouse,:)),pc)'*z5(mouse,~isnan(z5(mouse,:)))';
+            PC_values_NREM{pc}(PC_values_NREM{pc}==0)=NaN; 
+            PC_values_REM{pc}(PC_values_REM{pc}==0)=NaN;
+            PC_values_Wake{pc}(PC_values_Wake{pc}==0)=NaN;
+        end
+    end
+end
+
+
+
+
 
 figure
-Data_to_use = PC_shock;
-Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-h=shadedErrorBar(linspace(0,1,20) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
-color= [1 .5 .5]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-Data_to_use = PC_safe;
-Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-h=shadedErrorBar(linspace(0,1,20) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
-color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-makepretty
+Bar_st = [nanmedian(PC_values_shock{1}) nanmedian(PC_values_shock{2})];
+Q1_st(1) = quantile(PC_values_shock{1},.25); Q1_st(2) = quantile(PC_values_shock{1},.75);
+Q2_st(1) = quantile(PC_values_shock{2},.25); Q2_st(2) = quantile(PC_values_shock{2},.75);
+
+plot(Bar_st(1),Bar_st(2),'.','MarkerSize',70,'Color',[1 .5 .5]), hold on
+line(Q1_st,[Bar_st(2) Bar_st(2)],'Color',[1 .5 .5],'LineWidth',3)
+line([Bar_st(1) Bar_st(1)],Q2_st,'Color',[1 .5 .5],'LineWidth',3)
+
+Bar_st = [nanmedian(PC_values_safe{1}) nanmedian(PC_values_safe{2})];
+Q1_st(1) = quantile(PC_values_safe{1},.25); Q1_st(2) = quantile(PC_values_safe{1},.75);
+Q2_st(1) = quantile(PC_values_safe{2},.25); Q2_st(2) = quantile(PC_values_safe{2},.75);
+
+plot(Bar_st(1),Bar_st(2),'.','MarkerSize',70,'Color',[.5 .5 1]), hold on
+line(Q1_st,[Bar_st(2) Bar_st(2)],'Color',[.5 .5 1],'LineWidth',3)
+line([Bar_st(1) Bar_st(1)],Q2_st,'Color',[.5 .5 1],'LineWidth',3)
+
+Bar_st = [nanmedian(PC_values_NREM{1}) nanmedian(PC_values_NREM{2})];
+Q1_st(1) = quantile(PC_values_NREM{1},.25); Q1_st(2) = quantile(PC_values_NREM{1},.75);
+Q2_st(1) = quantile(PC_values_NREM{2},.25); Q2_st(2) = quantile(PC_values_NREM{2},.75);
+
+plot(Bar_st(1),Bar_st(2),'.','MarkerSize',70,'Color',[1 0 0]), hold on
+line(Q1_st,[Bar_st(2) Bar_st(2)],'Color',[1 0 0],'LineWidth',3)
+line([Bar_st(1) Bar_st(1)],Q2_st,'Color',[1 0 0],'LineWidth',3)
+
+Bar_st = [nanmedian(PC_values_REM{1}) nanmedian(PC_values_REM{2})];
+Q1_st(1) = quantile(PC_values_REM{1},.25); Q1_st(2) = quantile(PC_values_REM{1},.75);
+Q2_st(1) = quantile(PC_values_REM{2},.25); Q2_st(2) = quantile(PC_values_REM{2},.75);
+
+plot(Bar_st(1),Bar_st(2),'.','MarkerSize',70,'Color',[0 1 0]), hold on
+line(Q1_st,[Bar_st(2) Bar_st(2)],'Color',[0 1 0],'LineWidth',3)
+line([Bar_st(1) Bar_st(1)],Q2_st,'Color',[0 1 0],'LineWidth',3)
+
+Bar_st = [nanmedian(PC_values_Wake{1}) nanmedian(PC_values_Wake{2})];
+Q1_st(1) = quantile(PC_values_Wake{1},.25); Q1_st(2) = quantile(PC_values_Wake{1},.75);
+Q2_st(1) = quantile(PC_values_Wake{2},.25); Q2_st(2) = quantile(PC_values_Wake{2},.75);
+
+plot(Bar_st(1),Bar_st(2),'.','MarkerSize',70,'Color',[0 0 1]), hold on
+line(Q1_st,[Bar_st(2) Bar_st(2)],'Color',[0 0 1],'LineWidth',3)
+line([Bar_st(1) Bar_st(1)],Q2_st,'Color',[0 0 1],'LineWidth',3)
+
+
+axis square
+xlabel('PC1 value'), ylabel('PC2 value')
+grid on
+makepretty, box on
+
+
+
+
+
+
+figure
+plot(PC_values_NREM{1} , PC_values_NREM{2},'.','MarkerSize',10,'Color',[1 .5 .5])
+hold on
+plot(PC_values_safe{1} , PC_values_safe{2},'.','MarkerSize',10,'Color',[.5 .5 1])
+axis square
+xlabel('PC1 value'), ylabel('PC2 value')
+grid on
+Bar_shock = [nanmedian(PC_values_NREM{1}) nanmedian(PC_values_NREM{2})];
+Bar_safe = [nanmedian(PC_values_safe{1}) nanmedian(PC_values_safe{2})];
+for mouse=1:length(PC_values_NREM{1})
+    line([Bar_shock(1) PC_values_NREM{1}(mouse)],[Bar_shock(2) PC_values_NREM{2}(mouse)],'LineStyle','--','Color',[1 .5 .5])
+    line([Bar_safe(1) PC_values_safe{1}(mouse)],[Bar_safe(2) PC_values_safe{2}(mouse)],'LineStyle','--','Color',[.5 .5 1])
+    
+    DIST_intra{1}(mouse) = sqrt((Bar_shock(1)-PC_values_NREM{1}(mouse))^2+(Bar_shock(2)-PC_values_NREM{2}(mouse))^2);
+    DIST_intra{2}(mouse) = sqrt((Bar_safe(1)-PC_values_safe{1}(mouse))^2+(Bar_safe(2)-PC_values_safe{2}(mouse))^2);
+    
+    DIST_inter{1}(mouse) = sqrt((Bar_safe(1)-PC_values_NREM{1}(mouse))^2+(Bar_safe(2)-PC_values_NREM{2}(mouse))^2);
+    DIST_inter{2}(mouse) = sqrt((Bar_shock(1)-PC_values_safe{1}(mouse))^2+(Bar_shock(2)-PC_values_safe{2}(mouse))^2);
+end
+plot(Bar_shock(1),Bar_shock(2),'.','MarkerSize',100,'Color',[1 .5 .5])
+plot(Bar_safe(1),Bar_safe(2),'.','MarkerSize',100,'Color',[.5 .5 1])
+
+
 
 
 

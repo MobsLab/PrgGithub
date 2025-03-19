@@ -108,13 +108,13 @@ for group=1:length(Group)
                 HR_Safe{group}(mouse,i) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.heartrate.tsd{mouse,6} , SmallEp)));
                 HRVar_Safe{group}(mouse,i) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.heartratevar.tsd{mouse,6} , SmallEp)));
                 Rip_Safe{group}(mouse,i) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.ripples_density.tsd{mouse,6} , SmallEp)));
-                %                 try, SVM_Safe{group}(mouse,i) = nanmean(Data(Restrict(SVM_Sf_TSD{mouse} , SmallEp))); end
+                try, SVM_Safe{group}(mouse,i) = nanmean(Data(Restrict(SVM_Sf_TSD{mouse} , SmallEp))); end
                 
                 RESPI_Shock{group}(mouse,i) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,5} , SmallEp)));
                 HR_Shock{group}(mouse,i) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.heartrate.tsd{mouse,5} , SmallEp)));
                 HRVar_Shock{group}(mouse,i) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.heartratevar.tsd{mouse,5} , SmallEp)));
                 Rip_Shock{group}(mouse,i) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.ripples_density.tsd{mouse,5} , SmallEp)));
-                %                 try, SVM_Shock{group}(mouse,i) = nanmean(Data(Restrict(SVM_Sk_TSD{mouse} , SmallEp))); end
+                try, SVM_Shock{group}(mouse,i) = nanmean(Data(Restrict(SVM_Sk_TSD{mouse} , SmallEp))); end
                 
                 HR_Active_Shock{group}(mouse,i) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.heartrate.tsd{mouse,7} , SmallEp)));
                 HR_Active_Safe{group}(mouse,i) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.heartrate.tsd{mouse,8} , SmallEp)));
@@ -126,11 +126,12 @@ for group=1:length(Group)
                 Average_HR_Above_Safe{group}(mouse,i) = nansum(squeeze(meanHeartRatesInBins_Safe{2}{group}(mouse,i,ind)-...
                     nanmean(meanHeartRatesInBins_Safe{1}{group}(mouse,:,ind),2)).*squeeze(Dur_in_bin_Safe{2}{group}(mouse,i,ind)));
                 
-                if length(OutPutData.Cond.Saline.ripples.ts{mouse,3})>30
-                    Rip_Numb_Tot{group}(mouse,i) = length(Data(Restrict(OutPutData.Cond.Saline.ripples.ts{mouse,3} , SmallEp)))./length(Data(OutPutData.Cond.Saline.ripples.ts{mouse,3}));
-                    Rip_Numb_Safe{group}(mouse,i) = length(Data(Restrict(OutPutData.Cond.Saline.ripples.ts{mouse,6} , SmallEp)))./length(Data(OutPutData.Cond.Saline.ripples.ts{mouse,6}));
+                try
+                    if length(OutPutData.Cond.Saline.ripples.ts{mouse,3})>30
+                        Rip_Numb_Tot{group}(mouse,i) = length(Data(Restrict(OutPutData.Cond.Saline.ripples.ts{mouse,3} , SmallEp)))./length(Data(OutPutData.Cond.Saline.ripples.ts{mouse,3}));
+                        Rip_Numb_Safe{group}(mouse,i) = length(Data(Restrict(OutPutData.Cond.Saline.ripples.ts{mouse,6} , SmallEp)))./length(Data(OutPutData.Cond.Saline.ripples.ts{mouse,6}));
+                    end
                 end
-                
             end
             disp(Mouse_names{mouse})
         end
@@ -304,6 +305,50 @@ Average_HR_Above_Shock{2}(6,:)=NaN;
 
 HR_Active_Shock{1}(1,:)=NaN; % rip inhib
 HR_Active_Shock{2}([3 5 1],[7 7 11])=NaN;
+
+
+
+figure
+subplot(211)
+Data_to_use = movmean(STIM_Number{1}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-r',1); hold on;
+color= [.3 .3 .3]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+box off, ylim([0 4.5])
+ylabel('shocks (#/min)')
+makepretty
+yyaxis right
+Data_to_use = movmean(RESPI_Safe{1}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+xlim([0 100]), xlabel('time (min)'), ylabel('Breathing, safe freezing (Hz)')
+makepretty
+
+
+subplot(212)
+Data_to_use = movmean(STIM_Number{2}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-r',1); hold on;
+color= [.3 .3 .3]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+box off, ylim([0 4.5])
+ylabel('shocks (#/min)')
+makepretty
+yyaxis right
+Data_to_use = movmean(RESPI_Safe{2}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+xlim([0 100]), xlabel('time (min)'), ylabel('Breathing, safe freezing (Hz)')
+makepretty
+
+
+
+
 
 figure
 subplot(331)
