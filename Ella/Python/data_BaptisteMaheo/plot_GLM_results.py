@@ -133,8 +133,6 @@ def plot_full_model_r2(results_df, exclude_mice=None, color_excluded=True, ylim=
 #     plt.show()
 
 
-
-
 def plot_full_vs_all_predictors_boxplot(r2_results_df):
     """
     Plots the R² scores of the Full Model vs. All Predictors Model for all mice using boxplots.
@@ -519,98 +517,12 @@ import scipy.stats as stats
 import itertools
 
 
-# def plot_all_explained_variance(explained_variance_dfs):
-#     """
-#     Plots multiple bar plots comparing different explained variance models.
-#     Performs paired Wilcoxon signed-rank tests between all model comparisons 
-#     and prints statistical results with significance levels.
-
-#     Parameters:
-#     - explained_variance_dfs (dict): Dictionary where keys are model names, and values are DataFrames
-#                                      with 'Mouse' and 'Prop Explained Variance' columns.
-
-#     Returns:
-#     - pd.DataFrame: Wilcoxon test statistics with p-values and significance levels.
-#     """
-
-#     models = list(explained_variance_dfs.keys())
-#     num_models = len(models)
-
-#     # Extract all unique mice across models
-#     all_mice = set.intersection(*(set(df["Mouse"]) for df in explained_variance_dfs.values()))  # Find common mice
-
-#     # Create figure
-#     plt.figure(figsize=(12, 6))
-
-#     # Extract means and SEM for each model
-#     mean_variance = {model: explained_variance_dfs[model]["Prop Explained Variance"].mean() for model in models}
-#     sem_variance = {model: explained_variance_dfs[model]["Prop Explained Variance"].sem() for model in models}
-
-#     # Plot bars
-#     x_positions = np.arange(num_models)
-#     plt.bar(x_positions, mean_variance.values(), yerr=sem_variance.values(), capsize=5, color="lightgray", alpha=0.8)
-
-#     # Overlay individual points (scatter plot)
-#     for i, model in enumerate(models):
-#         df_filtered = explained_variance_dfs[model][explained_variance_dfs[model]["Mouse"].isin(all_mice)]
-#         x_jittered = np.full(len(df_filtered), x_positions[i]) + np.random.uniform(-0.05, 0.05, len(df_filtered))
-#         plt.scatter(x_jittered, df_filtered["Prop Explained Variance"], color="black", alpha=0.8)
-
-#     # Perform Wilcoxon signed-rank tests and store results
-#     stat_results = []
-#     comparisons = list(itertools.combinations(models, 2))  # All possible model pairs
-    
-#     for model1, model2 in comparisons:
-#         df1 = explained_variance_dfs[model1]
-#         df2 = explained_variance_dfs[model2]
-        
-#         # Keep only common mice for paired comparison
-#         common_mice = all_mice & set(df1["Mouse"]) & set(df2["Mouse"])
-#         data1 = df1[df1["Mouse"].isin(common_mice)]["Prop Explained Variance"].values
-#         data2 = df2[df2["Mouse"].isin(common_mice)]["Prop Explained Variance"].values
-
-#         if len(data1) != len(data2):
-#             print(f"Skipping comparison {model1} vs {model2} due to mismatched sample sizes.")
-#             continue
-
-#         # Wilcoxon test
-#         stat, p_value = stats.wilcoxon(data1, data2)
-
-#         # Determine significance level
-#         if p_value < 0.001:
-#             significance = "***"
-#         elif p_value < 0.01:
-#             significance = "**"
-#         elif p_value < 0.05:
-#             significance = "*"
-#         else:
-#             significance = ""
-
-
-#         # Store results
-#         stat_results.append({
-#             "Comparison": f"{model1} vs {model2}",
-#             "Statistic": stat,
-#             "p-value": p_value,
-#             "Significance Level": significance
-#         })
-
-#     # Labels and title
-#     plt.xticks(x_positions, models, rotation=15, fontsize=12)
-#     plt.ylabel("Proportional Explained Variance", fontsize=14)
-#     plt.title("Explained Variance Across Models", fontsize=14)
-#     plt.grid(axis="y", linestyle="--", alpha=0.6)
-
-#     plt.show()
-
-#     return pd.DataFrame(stat_results)
-
-
 def plot_all_explained_variance(explained_variance_dfs):
     """
     Plots multiple box plots comparing different explained variance models.
     Performs paired Wilcoxon signed-rank tests between all model comparisons 
     and prints statistical results with significance levels.
+    Additionally, performs Wilcoxon tests to compare each model's median against zero.
 
     Parameters:
     - explained_variance_dfs (dict): Dictionary where keys are model names, and values are DataFrames
@@ -630,14 +542,15 @@ def plot_all_explained_variance(explained_variance_dfs):
     # Create figure
     fig = plt.figure(figsize=(12, 6))
 
-    # Boxplot
+    # Boxplot without outliers
     sns.boxplot(
         data=combined_df,
         x="Model",
         y="Prop Explained Variance",
         width=0.2,
         boxprops={"facecolor": "lightgray"},  # Box color
-        flierprops={"marker": "o", "markersize": 5, "alpha": 0.6},  # Outliers style
+        # flierprops={"marker": "o", "color": "black", "markersize": 5, "alpha": 0.8},  # Explicitly set outlier color
+        showfliers=False  # Do not plot outliers
     )
 
     # Overlay individual points with jitter
@@ -646,7 +559,7 @@ def plot_all_explained_variance(explained_variance_dfs):
         x_jittered = np.full(len(model_data), i) + np.random.uniform(-0.05, 0.05, len(model_data))
         plt.scatter(x_jittered, model_data["Prop Explained Variance"], color="black", alpha=0.8, zorder=2)
 
-    # Perform Wilcoxon signed-rank tests and store results
+    # Perform Wilcoxon signed-rank tests for model comparisons
     stat_results = []
     comparisons = list(itertools.combinations(models, 2))  # All possible model pairs
     
@@ -683,6 +596,28 @@ def plot_all_explained_variance(explained_variance_dfs):
             "p-value": p_value,
             "Significance Level": significance
         })
+    
+    # Perform Wilcoxon signed-rank tests for each model vs zero
+    for model in models:
+        data = combined_df[combined_df["Model"] == model]["Prop Explained Variance"].values
+        stat, p_value = stats.wilcoxon(data)
+
+        # Determine significance level
+        if p_value < 0.001:
+            significance = "***"
+        elif p_value < 0.01:
+            significance = "**"
+        elif p_value < 0.05:
+            significance = "*"
+        else:
+            significance = ""
+                
+        stat_results.append({
+            "Comparison": f"{model} vs Zero",
+            "Statistic": stat,
+            "p-value": p_value,
+            "Significance Level": significance
+        })
 
     # Labels and title
     plt.xticks(range(len(models)), models, rotation=15, fontsize=12)
@@ -694,6 +629,95 @@ def plot_all_explained_variance(explained_variance_dfs):
 
     return pd.DataFrame(stat_results), fig
 
+
+
+# def plot_all_explained_variance(explained_variance_dfs):
+#     """
+#     Plots multiple box plots comparing different explained variance models.
+#     Performs paired Wilcoxon signed-rank tests between all model comparisons 
+#     and prints statistical results with significance levels.
+
+#     Parameters:
+#     - explained_variance_dfs (dict): Dictionary where keys are model names, and values are DataFrames
+#                                      with 'Mouse' and 'Prop Explained Variance' columns.
+
+#     Returns:
+#     - pd.DataFrame: Wilcoxon test statistics with p-values and significance levels.
+#     """
+
+#     models = list(explained_variance_dfs.keys())
+
+#     # Combine data from all models into a single DataFrame
+#     combined_df = pd.concat(
+#         [df.assign(Model=model) for model, df in explained_variance_dfs.items()], ignore_index=True
+#     )
+
+#     # Create figure
+#     fig = plt.figure(figsize=(12, 6))
+
+#     # Boxplot
+#     sns.boxplot(
+#         data=combined_df,
+#         x="Model",
+#         y="Prop Explained Variance",
+#         width=0.2,
+#         boxprops={"facecolor": "lightgray"},  # Box color
+#         showfliers=False  # Do not plot outliers
+#     )
+
+#     # Overlay individual points with jitter
+#     for i, model in enumerate(models):
+#         model_data = combined_df[combined_df["Model"] == model]
+#         x_jittered = np.full(len(model_data), i) + np.random.uniform(-0.05, 0.05, len(model_data))
+#         plt.scatter(x_jittered, model_data["Prop Explained Variance"], color="black", alpha=0.8, zorder=2)
+
+#     # Perform Wilcoxon signed-rank tests and store results
+#     stat_results = []
+#     comparisons = list(itertools.combinations(models, 2))  # All possible model pairs
+    
+#     for model1, model2 in comparisons:
+#         df1 = explained_variance_dfs[model1]
+#         df2 = explained_variance_dfs[model2]
+
+#         # Find common mice
+#         common_mice = set(df1["Mouse"]).intersection(set(df2["Mouse"]))
+#         data1 = df1[df1["Mouse"].isin(common_mice)]["Prop Explained Variance"].values
+#         data2 = df2[df2["Mouse"].isin(common_mice)]["Prop Explained Variance"].values
+
+#         if len(data1) != len(data2):
+#             print(f"Skipping comparison {model1} vs {model2} due to mismatched sample sizes.")
+#             continue
+
+#         # Wilcoxon test
+#         stat, p_value = stats.wilcoxon(data1, data2)
+
+#         # Determine significance level
+#         if p_value < 0.001:
+#             significance = "***"
+#         elif p_value < 0.01:
+#             significance = "**"
+#         elif p_value < 0.05:
+#             significance = "*"
+#         else:
+#             significance = ""
+
+#         # Store results
+#         stat_results.append({
+#             "Comparison": f"{model1} vs {model2}",
+#             "Statistic": stat,
+#             "p-value": p_value,
+#             "Significance Level": significance
+#         })
+
+#     # Labels and title
+#     plt.xticks(range(len(models)), models, rotation=15, fontsize=12)
+#     plt.ylabel("GLM Gain", fontsize=14)
+#     plt.title("Explained Variance Across Models", fontsize=14)
+#     plt.grid(axis="y", linestyle="--", alpha=0.6)
+
+#     plt.show()
+
+#     return pd.DataFrame(stat_results), fig
 
 
 import os

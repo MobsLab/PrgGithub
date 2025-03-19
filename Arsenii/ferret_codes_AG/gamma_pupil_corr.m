@@ -1,12 +1,43 @@
-function gamma_pupil_corr(Session_params, datapath)
-%% Description
-% for drug sessions I should define epochs manually. 
-%   For Atropine and Saline: before (Epoch - AEpoch) and after the injection (AEpoch)
-%   For Domitor: before injection (Epoch-DEpoch-ASEpoch), during domitor (DEpoch), after antisedan (ASEpoch)
-%   Then I guess I'll have to define the whole bunch of epochs of overlap of states?...
+function gamma_pupil_corr(datapath)
+%% gamma_pupil_corr
+% This function calculates correlations and distributions between OB gamma (and
+% other brain power signals) and pupil parameters.
+%
+% Epochs are used to compare states:
+%   - For no drugs sessions
+%   - For Atropine/Saline: before injection vs after injection.
+%   - For Domitor: before injection, during Domitor, and after Antisedan.
+%
+% The script assumes that DLC data (and derived parameters) and ephys signals
+% are already synchronized (via synchronized_DLC_data.csv and SleepScoring_OBGamma.mat).
 
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% -------------------- Initialization --------------------
+smootime = 3;
+FigFolder = fullfile(datapath, 'DLC', 'Figures', 'brain_pupil_corr');
+
+[~, Session_params.session_selection, ~] = fileparts(datapath);
+if contains(Session_params.session_selection, 'atropine') || contains(Session_params.session_selection, 'LSP')
+    Session_params.pharma = 'atropine';
+elseif contains(Session_params.session_selection, 'domitor')
+    Session_params.pharma = 'domitor';    
+elseif contains(Session_params.session_selection, 'saline')
+    Session_params.pharma = 'saline';       
+else
+    Session_params.pharma = 'no drugs';       
+end
+
+Session_params.fig_visibility = 'off';
+
+if contains(datapath, 'Shropshire')
+    Session_params.animal_name = 'Shropshire';
+elseif contains(datapath, 'Brynza')
+    Session_params.animal_name = 'Brynza';
+elseif contains(datapath, 'Labneh')
+    Session_params.animal_name = 'Labneh';
+end
+
+disp(['Processing session: '  Session_params.animal_name ' ' Session_params.session_selection]);
+
 %% NOT DONE AND NOT USED YET: Filtering pupil data
 % cd([datapath '/DLC'])
 % file=dir([Session_params.animal_name{Session_params.animal_selection} '*filtered.csv']);
@@ -23,7 +54,7 @@ function gamma_pupil_corr(Session_params, datapath)
 % upper_threshold = mean(mean(likelihood_pupil) + 2 * std(likelihood_pupil));
 % 
 % % Compute filtered data
-% temp_p_areas = Data(areas_pupil_tsd);
+% temp_p_areas = Data(areas_pupil);
 % 
 % filtered_pupil_x = temp_p_areas(all(likelihood_pupil >= (mean(likelihood_pupil,1:2) - 2*mean(std(likelihood_pupil))), 2), :);
 % 
@@ -31,388 +62,329 @@ function gamma_pupil_corr(Session_params, datapath)
 % time = ts(time_s(find(all(likelihood_pupil >= lower_threshold & likelihood_pupil <= upper_threshold, 2) == 1))*1e4);
 % pupil_x = tsd(Range(time), filtered_pupil_x);
 % pupil_y = tsd(Range(time), filtered_pupil_y);
-% areas_pupil_tsd = Restrict(areas_pupil_tsd, time);
+% areas_pupil = Restrict(areas_pupil, time);
 % pupil_center = Restrict(pupil_center, time);
 % pupil_mvt_tsd = Restrict(pupil_mvt_tsd, time);
 % % !!!! Rewriting variable !!!!
 
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% -------------------- Load LFP Power Data --------------------
+% Load basic LFP power traces (OB Gamma, Theta, 0.1-0.5 Hz) from file.
+load(fullfile(datapath, 'SleepScoring_OBGamma.mat'), 'SmoothGamma', 'SmoothTheta', 'smooth_01_05');
 
-%% Parameters
-smootime = 3;
-if Session_params.animal_selection == 3
-    animal_flag = 3;
-elseif Session_params.animal_selection == 2
-    animal_flag = 2;
-else
-    animal_flag = 1;
-end
+%% -------------------- Load DLC Data --------------------
+% Change to DLC folder and load previously saved DLC parameters.
+load([fullfile(datapath, 'DLC/') 'DLC_data.mat'], 'areas_pupil', 'pupil_mvt', 'velocity_nostril_center');
 
-%% Load LFP data
-% cd([datapath])
-% if Session_params.animal_selection == 1 % Labneh
-%     for l = [42 36 24 1] % vtrig, EKG, OBm, screw; Add EMG later
-%         load(['LFPData/LFP' num2str(l) '.mat'])
-%         LFP_ferret{l} = LFP;
-%     end
-% elseif Session_params.animal_selection == 2 % Brynza
-%     for l = [42 4 36 11 13 21] % vtrig, EMG, EKG, OBm, PFCm, HPCm
-%         load(['LFPData/LFP' num2str(l) '.mat'])
-%         LFP_ferret{l} = LFP;
-%     end
-% end
+%% -------------------- Load and Define Epochs --------------------
+% Load epoch definitions and additional brain power variables.
+load(fullfile(datapath, 'SleepScoring_OBGamma.mat'), ...
+    'Epoch', 'Sleep', 'Wake', 'REMEpoch', 'SWSEpoch', 'Epoch_S1', 'Epoch_S2');
 
-%% Load LFP power data
-load('SleepScoring_OBGamma.mat', 'SmoothGamma', 'SmoothTheta', 'smooth_01_05')
-
-%% Load DLC data
-cd([datapath '/DLC'])
-load('DLC_data.mat', 'areas_pupil_tsd', 'pupil_mvt_tsd', 'velocity_nostril_center'); % 'pupil_x', 'pupil_y', 
-% time_s = Range(pupil_x, 's');
-
-%% Load and define epochs
-cd(datapath)
-load('SleepScoring_OBGamma.mat', 'Epoch', 'Sleep', 'Wake', 'REMEpoch', 'SWSEpoch', 'Epoch_S1', 'Epoch_S2', 'SmoothGamma', 'SmoothTheta', 'smooth_01_05')
-
-% NREM 1 is SWS + S2 -- double check this everywhere
-
-NREM_S1 = and(Sleep , Epoch_S2)-REMEpoch; %and(SWSEpoch,Epoch_S1);
-NREM_S2 = and(Sleep , Epoch_S1)-REMEpoch; %and(SWSEpoch,Epoch_S2);
+% Define NREM epochs (here defined as combinations of Sleep and sub-epochs)
+NREM_S1 = and(Sleep, Epoch_S2) - REMEpoch; 
+NREM_S2 = and(Sleep, Epoch_S1) - REMEpoch;
 
 Epochs = {Epoch, Wake, Sleep, NREM_S1, NREM_S2, REMEpoch, or(Wake, SWSEpoch), or(Wake, NREM_S1)};
 Epoch_names = {'Full Session', 'Wake', 'Sleep', 'NREM1', 'NREM2', 'REM', 'Wake-NREM', 'Wake-NREM1'};
 Epoch_names_save = {'Full_Session', 'Wake', 'Sleep', 'NREM1', 'NREM2', 'REM', 'Wake_NREM', 'Wake_NREM1'};
 
-colours = {{[0 0 0], [1 0.5 0]}; ...% Full
-          {[0 0 1], [0.2 0.75 1]};... % Wake
-          {[1 0 0], [1 0.5 0.75]};... % Sleep
-          {[1 0.71 0.76], [1.0, 0.82, 0.86]};... % NREM1
-          {[0.55 0 0], [0.71, 0.20, 0.20]};... % NREM 2
-          {[0 1 0], [0.75 1 0.5]};... % REM
-          {[0.5 0 0.5], [0.2 6 0.5]};... % Wake-NREM
-          {[0.50 0.3550  0.88], [0.2 6 0.5]}}; % Wake-NREM1
+% Define colours for plotting each epoch (as cell array of two colours per epoch)
+colours = { {[0 0 0], [1 0.5 0]}; ...         % Full Session
+            {[0 0 1], [0.2 0.75 1]}; ...        % Wake
+            {[1 0 0], [1 0.5 0.75]}; ...         % Sleep
+            {[1 0.71 0.76], [1.0, 0.82, 0.86]}; ...  % NREM1
+            {[0.55 0 0], [0.71, 0.20, 0.20]}; ... % NREM2
+            {[0 1 0], [0.75 1 0.5]}; ...         % REM
+            {[0.5 0 0.5], [0.2 0.6 0.5]}; ...      % Wake-NREM
+            {[0.50 0.35 0.88], [0.2 0.6 0.5]} };   % Wake-NREM1
 
-%% Calculate power traces for cortex and Hpc to correlate their gamma with pupil size
-
-cd(datapath)
-if animal_flag == 2 || animal_flag == 3
-    if animal_flag == 2
-        channels = [1 11 21 13]; % AuCx OB HPC PFC for Brynza
-    elseif animal_flag == 3
-        channels = [65 21 18 12]; % AuCx OB HPC PFC for Shropshire
+%% -------------------- Load Additional LFP Power Data (for Cortex/PFC/HPC) --------------------
+if contains(Session_params.animal_name, 'Brynza') || contains(Session_params.animal_name, 'Shropshire')
+    if contains(Session_params.animal_name, 'Brynza')
+        channels = [1 11 21 13]; % AuCx, OB, HPC, PFC for Brynza
+    elseif contains(Session_params.animal_name, 'Shropshire')
+        channels = [65 21 18 12]; % AuCx, OB, HPC, PFC for Shropshire
     end
-    load('SleepScoring_OBGamma.mat', 'SmoothACxGamma', 'SmoothHPCGamma', 'SmoothPFCGamma')
-    if ~exist('SmoothHPCGamma') || ~exist('SmoothACxGamma') || ~exist('SmoothPFCGamma')
-        load('SleepScoring_OBGamma.mat', 'Epoch')
-        
+    load(fullfile(datapath, 'SleepScoring_OBGamma.mat'), 'SmoothACxGamma', 'SmoothHPCGamma', 'SmoothPFCGamma');
+    if ~exist('SmoothHPCGamma', 'var') || ~exist('SmoothACxGamma', 'var') || ~exist('SmoothPFCGamma', 'var')
+        load(fullfile(datapath, 'SleepScoring_OBGamma.mat'), 'Epoch');
         minduration = 3;
-        foldername = [datapath '/'];
+        foldername = datapath;
         % HPC
-        channel = channels(3);
-        [~,SmoothHPCGamma,~,~,~]= ...
-            FindGammaEpoch_SleepScoring(Epoch, channel, minduration, 'foldername', foldername, 'frequency', [40 60]);
-        close
-        
+        load(strcat([datapath,'/LFPData/LFP',num2str(channels(3)),'.mat']));
+        FilGamma = FilterLFP(LFP,[40 60],1024); % filtering
+        tEnveloppeGamma = tsd(Range(LFP), abs(hilbert(Data(FilGamma))) );
+        SmoothHPCGamma = tsd(Range(tEnveloppeGamma), runmean(Data(tEnveloppeGamma), ...
+            ceil(smootime/median(diff(Range(tEnveloppeGamma,'s'))))));
+        close;
+        clear LFP FilGamma tEnveloppeGamma
         % PFC
-        channel = channels(4);
-        [~,SmoothPFCGamma,~,~,~]= ...
-            FindGammaEpoch_SleepScoring(Epoch, channel, minduration, 'foldername', foldername, 'frequency', [40 60]);
-        close
-        
+        load(strcat([datapath,'/LFPData/LFP',num2str(channels(4)),'.mat']));
+        FilGamma = FilterLFP(LFP,[40 60],1024); % filtering
+        tEnveloppeGamma = tsd(Range(LFP), abs(hilbert(Data(FilGamma))) );
+        SmoothPFCGamma = tsd(Range(tEnveloppeGamma), runmean(Data(tEnveloppeGamma), ...
+            ceil(smootime/median(diff(Range(tEnveloppeGamma,'s'))))));
+        close;
+        clear LFP FilGamma tEnveloppeGamma
         % ACx
-        channel = channels(1);
-        [~,SmoothACxGamma,~,~,~]= ...
-            FindGammaEpoch_SleepScoring(Epoch, channel, minduration, 'foldername', foldername, 'frequency', [40 60]);
-        close
-        save('SleepScoring_OBGamma.mat', 'SmoothHPCGamma', 'SmoothPFCGamma', 'SmoothACxGamma', '-append');
+        load(strcat([datapath,'/LFPData/LFP',num2str(channels(1)),'.mat']));
+        FilGamma = FilterLFP(LFP,[40 60],1024); % filtering
+        tEnveloppeGamma = tsd(Range(LFP), abs(hilbert(Data(FilGamma))) );
+        SmoothACxGamma = tsd(Range(tEnveloppeGamma), runmean(Data(tEnveloppeGamma), ...
+            ceil(smootime/median(diff(Range(tEnveloppeGamma,'s'))))));
+        close;
+        clear LFP FilGamma tEnveloppeGamma
+        save(fullfile(datapath, 'SleepScoring_OBGamma.mat'), 'SmoothHPCGamma', 'SmoothPFCGamma', 'SmoothACxGamma', '-append');
     end
 end
 
-%% Smoothing DLC !!!! Rewriting variable !!!!
-areas_pupil_tsd = tsd(Range(areas_pupil_tsd), runmean(Data(areas_pupil_tsd) , ceil(smootime/median(diff(Range(areas_pupil_tsd,'s'))))));
-pupil_mvt_tsd = tsd(Range(pupil_mvt_tsd), runmean(Data(pupil_mvt_tsd) , ceil(smootime/median(diff(Range(pupil_mvt_tsd,'s'))))));
+%% -------------------- Smoothing of DLC and Brain Signals  !!!! Rewriting variables !!!! --------------------
+disp('I rewrite varibales areas_pupil; pupil_mvt; SmoothGamma; smooth_01_05; SmoothTheta; SmoothHPCGamma; SmoothPFCGamma; SmoothACxGamma')
 
-%% Smoothing brain !!!! Rewriting variable !!!!
-SmoothGamma = tsd(Range(SmoothGamma), runmean(Data(SmoothGamma) , ceil(smootime/median(diff(Range(SmoothGamma,'s'))))));
-smooth_01_05 = tsd(Range(smooth_01_05), runmean(Data(smooth_01_05) , ceil(smootime/median(diff(Range(smooth_01_05,'s'))))));
-SmoothTheta = tsd(Range(SmoothTheta), runmean(Data(SmoothTheta) , ceil(smootime/median(diff(Range(SmoothTheta,'s'))))));
-if animal_flag == 2 || animal_flag == 3
-    SmoothHPCGamma = tsd(Range(SmoothHPCGamma), runmean(Data(SmoothHPCGamma) , ceil(smootime/median(diff(Range(SmoothHPCGamma,'s'))))));
-    SmoothPFCGamma = tsd(Range(SmoothPFCGamma), runmean(Data(SmoothPFCGamma) , ceil(smootime/median(diff(Range(SmoothPFCGamma,'s'))))));
-    SmoothACxGamma = tsd(Range(SmoothACxGamma), runmean(Data(SmoothACxGamma) , ceil(smootime/median(diff(Range(SmoothACxGamma,'s'))))));
+% Smooth DLC parameters using runmean.
+areas_pupil = tsd(Range(areas_pupil), runmean(Data(areas_pupil), ceil(smootime/median(diff(Range(areas_pupil, 's'))))));
+pupil_mvt = tsd(Range(pupil_mvt), runmean(Data(pupil_mvt), ceil(smootime/median(diff(Range(pupil_mvt, 's'))))));
+
+% Smooth brain power signals.
+SmoothGamma = tsd(Range(SmoothGamma), runmean(Data(SmoothGamma), ceil(smootime/median(diff(Range(SmoothGamma, 's'))))));
+smooth_01_05 = tsd(Range(smooth_01_05), runmean(Data(smooth_01_05), ceil(smootime/median(diff(Range(smooth_01_05, 's'))))));
+SmoothTheta = tsd(Range(SmoothTheta), runmean(Data(SmoothTheta), ceil(smootime/median(diff(Range(SmoothTheta, 's'))))));
+if contains(Session_params.animal_name, 'Brynza') || contains(Session_params.animal_name, 'Shropshire')
+    SmoothHPCGamma = tsd(Range(SmoothHPCGamma), runmean(Data(SmoothHPCGamma), ceil(smootime/median(diff(Range(SmoothHPCGamma, 's'))))));
+    SmoothPFCGamma = tsd(Range(SmoothPFCGamma), runmean(Data(SmoothPFCGamma), ceil(smootime/median(diff(Range(SmoothPFCGamma, 's'))))));
+    SmoothACxGamma = tsd(Range(SmoothACxGamma), runmean(Data(SmoothACxGamma), ceil(smootime/median(diff(Range(SmoothACxGamma, 's'))))));
 end
 
-%% ZScore data
+%% -------------------- Z-Scoring --------------------
 SmoothGamma_zs = tsd(Range(SmoothGamma), zscore(Data(SmoothGamma)));
 SmoothTheta_zs = tsd(Range(SmoothTheta), zscore(Data(SmoothTheta)));
 smooth_01_05_zs = tsd(Range(smooth_01_05), zscore(Data(smooth_01_05)));
-
-if animal_flag == 2 || animal_flag == 3  
+if contains(Session_params.animal_name, 'Brynza') || contains(Session_params.animal_name, 'Shropshire') 
     SmoothHPCGamma_zs = tsd(Range(SmoothHPCGamma), zscore(Data(SmoothHPCGamma)));
     SmoothPFCGamma_zs = tsd(Range(SmoothPFCGamma), zscore(Data(SmoothPFCGamma)));
     SmoothACxGamma_zs = tsd(Range(SmoothACxGamma), zscore(Data(SmoothACxGamma)));
 end
-
-areas_pupil_tsd_zs = tsd(Range(areas_pupil_tsd), zscore(Data(areas_pupil_tsd)));
-pupil_mvt_tsd_zs = tsd(Range(pupil_mvt_tsd), zscore(Data(pupil_mvt_tsd)));
+areas_pupil_zs = tsd(Range(areas_pupil), zscore(Data(areas_pupil)));
+pupil_mvt_zs = tsd(Range(pupil_mvt), zscore(Data(pupil_mvt)));
 velocity_nostril_center_zs = tsd(Range(velocity_nostril_center), zscore(Data(velocity_nostril_center)));
 
-%% Restrict variables to epochs
-
+%% -------------------- Restrict Variables to Epochs --------------------
 for i = 1:length(Epochs)
-    % Behavioural parameters
-    pupil_mvt_r{i} = Restrict(pupil_mvt_tsd, Epochs{i});
-    areas_pupil_r{i} = Restrict(areas_pupil_tsd, Epochs{i});
+    % Behavioral/DLC parameters
+    pupil_mvt_r{i} = Restrict(pupil_mvt, Epochs{i});
+    areas_pupil_r{i} = Restrict(areas_pupil, Epochs{i});
     velocity_nostril_center_r{i} = Restrict(velocity_nostril_center, Epochs{i});
     
-    pupil_mvt_r_zs{i} = Restrict(pupil_mvt_tsd_zs, Epochs{i}); % zscored
-    areas_pupil_r_zs{i} = Restrict(areas_pupil_tsd_zs, Epochs{i}); % zscored
-    velocity_nostril_center_r_zs{i} = Restrict(velocity_nostril_center_zs, Epochs{i}); % zscored
-
-    % OB power traces
+    pupil_mvt_r_zs{i} = Restrict(pupil_mvt_zs, Epochs{i});
+    areas_pupil_r_zs{i} = Restrict(areas_pupil_zs, Epochs{i});
+    velocity_nostril_center_r_zs{i} = Restrict(velocity_nostril_center_zs, Epochs{i});
+    
+    % OB Power traces
     SmoothGamma_r{i} = Restrict(SmoothGamma, Epochs{i});
     Smooth_01_05_r{i} = Restrict(smooth_01_05, Epochs{i});
     SmoothTheta_r{i} = Restrict(SmoothTheta, Epochs{i});
-        
-    SmoothGamma_r_zs{i} = Restrict(SmoothGamma_zs, Epochs{i}); % zscored
-    Smooth_01_05_r_zs{i} = Restrict(smooth_01_05_zs, Epochs{i}); % zscored
-    SmoothTheta_r_zs{i} = Restrict(SmoothTheta_zs, Epochs{i}); % zscored
+    SmoothGamma_r_zs{i} = Restrict(SmoothGamma_zs, Epochs{i});
+    Smooth_01_05_r_zs{i} = Restrict(smooth_01_05_zs, Epochs{i});
+    SmoothTheta_r_zs{i} = Restrict(SmoothTheta_zs, Epochs{i});
     
-    if animal_flag == 2 || animal_flag == 3  
-        % HPC power traces
+    if contains(Session_params.animal_name, 'Brynza') || contains(Session_params.animal_name, 'Shropshire') 
         SmoothHPCGamma_r{i} = Restrict(SmoothHPCGamma, Epochs{i});
-        SmoothHPCGamma_r_zs{i} = Restrict(SmoothHPCGamma_zs, Epochs{i}); % zscored
-        
-        % PFC power traces
+        SmoothHPCGamma_r_zs{i} = Restrict(SmoothHPCGamma_zs, Epochs{i});
         SmoothPFCGamma_r{i} = Restrict(SmoothPFCGamma, Epochs{i});
-        SmoothPFCGamma_r_zs{i} = Restrict(SmoothPFCGamma_zs, Epochs{i}); % zscored
-        
-        % ACx power traces
+        SmoothPFCGamma_r_zs{i} = Restrict(SmoothPFCGamma_zs, Epochs{i});
         SmoothACxGamma_r{i} = Restrict(SmoothACxGamma, Epochs{i});
-        SmoothACxGamma_r_zs{i} = Restrict(SmoothACxGamma_zs, Epochs{i}); % zscored
-        
+        SmoothACxGamma_r_zs{i} = Restrict(SmoothACxGamma_zs, Epochs{i});
     end
 end
 
+% Assemble brain power signals into cell arrays.
 brain_signals = {SmoothGamma_r, Smooth_01_05_r, SmoothTheta_r};
-brain_signals_zs = {SmoothGamma_r_zs, Smooth_01_05_r_zs, SmoothTheta_r_zs}; % zscored
-
+brain_signals_zs = {SmoothGamma_r_zs, Smooth_01_05_r_zs, SmoothTheta_r_zs};
 brain_signals_names = {'OB Gamma', 'OB 0.1-0.5Hz', 'HPC Theta/Delta'};
 brain_signals_names_save = {'OB_Gamma', 'OB_01_05Hz', 'HPC_Theta_Delta'};
-
-if Session_params.animal_selection == 2 || Session_params.animal_selection == 3
+if contains(Session_params.animal_name, 'Brynza') || contains(Session_params.animal_name, 'Shropshire') 
     brain_signals = [brain_signals {SmoothHPCGamma_r, SmoothPFCGamma_r, SmoothACxGamma_r}];
-    brain_signals_zs = [brain_signals_zs {SmoothHPCGamma_r_zs, SmoothPFCGamma_r_zs, SmoothACxGamma_r_zs}];   % zscored  
+    brain_signals_zs = [brain_signals_zs {SmoothHPCGamma_r_zs, SmoothPFCGamma_r_zs, SmoothACxGamma_r_zs}];
     brain_signals_names = [brain_signals_names {'HPC Gamma', 'PFC Gamma', 'ACx Gamma'}];
     brain_signals_names_save = [brain_signals_names_save {'HPC_Gamma', 'PFC_Gamma', 'ACx_Gamma'}];
 end
   
-%% f1) Time Evolution: Raw signal. brain_signals vs PUPIL SIZE
+%% -------------------- f1) Time Evolution: Brain Power vs. Pupil Size --------------------
 clear f i
 for i = 1:length(brain_signals_zs)
     f{i} = figure('Visible', Session_params.fig_visibility);
     set(f{i}, 'Units', 'Normalized', 'Position', [0 0 1 1]);
-
-    sgtitle(['Time evolution of ' brain_signals_names{i} ' power and pupil size. Z-scored. ' Session_params.animal_name{Session_params.animal_selection} '. Session: ' Session_params.session_selection '. ' Session_params.pharma{Session_params.pharma_selection} ' ' ], 'FontWeight', 'bold')
+    sgtitle(['Time evolution of ' brain_signals_names{i} ' power and pupil size (z-scored). ' ...
+        Session_params.animal_name '. Session: ' Session_params.session_selection ...
+        '. ' Session_params.pharma], 'FontWeight', 'bold');
     
-    subplot(311)
-    plot(Range(brain_signals_zs{i}{1}, 'min'), Data(brain_signals_zs{i}{1}), '.k', 'MarkerSize', 3)
-    hold on
-    plot(Range(areas_pupil_r_zs{1}, 'min'),  Data(areas_pupil_r_zs{1}), '.', 'MarkerSize', 3, 'color', [1 0.5 0])
-    a = Range(brain_signals_zs{i}{1},'min'); len = a(end);
-    xlim([0 len])
-    xlabel('Time (min)')
-    ylabel('zscored power')
+    % Plot full session signals (subplot 1)
+    subplot(3,1,1)
+    plot(Range(brain_signals_zs{i}{1}, 'min'), Data(brain_signals_zs{i}{1}), '.k', 'MarkerSize', 3);
+    hold on;
+    plot(Range(areas_pupil_r_zs{1}, 'min'), Data(areas_pupil_r_zs{1}), '.', 'MarkerSize', 3, 'color', [1 0.5 0]);
+    a = Range(brain_signals_zs{i}{1}, 'min');
+    len = a(end);
+    xlim([0 len]);
+    xlabel('Time (min)');
+    ylabel('Z-scored power');
+    legend({brain_signals_names{i}, 'Pupil size'}, 'location', 'southwest');
     
-    legend({brain_signals_names{i}, 'Pupil size'}, 'location', 'southwest')
-    
-    % Time Evolution: Labelling states
-    
-    subplot(312)
-    hold on
-    
-    clear j
+    % Plot state-specific segments (subplot 2)
+    subplot(3,1,2)
+    hold on;
     for j = [2, 4, 5, 6]
-        plot(Range(brain_signals_zs{i}{j}, 'min'), Data(brain_signals_zs{i}{j}), '.', 'MarkerSize', 3, 'color', colours{j}{1})
-        plot(Range(areas_pupil_r_zs{j}, 'min'), Data(areas_pupil_r_zs{j}), '.', 'MarkerSize', 3, 'color', colours{j}{2})
+        plot(Range(brain_signals_zs{i}{j}, 'min'), Data(brain_signals_zs{i}{j}), '.', 'MarkerSize', 3, 'color', colours{j}{1});
+        plot(Range(areas_pupil_r_zs{j}, 'min'), Data(areas_pupil_r_zs{j}), '.', 'MarkerSize', 3, 'color', colours{j}{2});
     end
+    xlim([0 len]);
+    title([brain_signals_names{i} ' power & pupil size (states)']);
+    xlabel('Time (min)'); ylabel('Z-scored power');
+    legend({[brain_signals_names{i} ' ' Epoch_names{2}], ['Pupil area ' Epoch_names{2}], ...
+        [brain_signals_names{i} ' ' Epoch_names{4}], ['Pupil area ' Epoch_names{4}], ...
+        [brain_signals_names{i} ' ' Epoch_names{5}], ['Pupil area ' Epoch_names{5}], ...
+        [brain_signals_names{i} ' ' Epoch_names{6}], ['Pupil area ' Epoch_names{6}]}, 'location', 'southwest');
     
-    a = Range(brain_signals_zs{i}{1},'min'); len = a(end);
-    
-    xlim([0 len])
-    title(['Time evolution of ' brain_signals_names{i} ' power and pupil size. Z-scored'])
-    xlabel('Time (min)')
-    ylabel('zscored power')
-    
-    % Add legend
-    hLegend = legend({[brain_signals_names{i} ' ' Epoch_names{2}], ['Pupil area' ' ' Epoch_names{2}],...
-                      [brain_signals_names{i} ' ' Epoch_names{4}], ['Pupil area' ' ' Epoch_names{4}],...
-                      [brain_signals_names{i} ' ' Epoch_names{5}], ['Pupil area' ' ' Epoch_names{5}],...
-                      [brain_signals_names{i} ' ' Epoch_names{6}], ['Pupil area' ' ' Epoch_names{6}]});
-    set(hLegend, 'Location', 'southwest');
 end
 
-%% save f1 plots
-if ~exist([datapath '/Figures/brain_pupil_corr'])
-    mkdir(datapath, 'brain_pupil_corr');
+% Save f1 figures
+if ~exist(FigFolder, 'dir')
+    mkdir(FigFolder);
 end
 
 for i = 1:length(f)
-    saveas(f{i}, [datapath '/brain_pupil_corr/' brain_signals_names_save{i} '_pupil_size_time_evolution_' Session_params.session_selection], 'svg')
+    saveas(f{i}, fullfile(FigFolder, ...
+        [brain_signals_names_save{i} '_pupil_size_time_evolution_' Session_params.session_selection '.svg']));
 end
 close all
 
-%% f2) Correlation scatter PUPIL SIZE vs OB GAMMA
-clear i f
+%% -------------------- f2) Correlation Scatter: Pupil Size vs. OB Gamma --------------------
+clear f i
 for i = 1:length(brain_signals)
-   clear j
     for j = 1:length(Epochs)
-        Data_brain_r = log10(Data(brain_signals{i}{j}));
-        Data_areas_pupil_r = Data(Restrict(areas_pupil_r{j}, brain_signals{i}{j}));
-        
-        f{j} = figure('Visible', Session_params.fig_visibility);
-        set(f{j}, 'Units', 'Normalized', 'Position', [1, 1, 0.44, 0.76]);
-        
-        sgtitle(['Correlation between the pupil size and ' brain_signals_names{i} ' power in ' Epoch_names{j}], 'FontWeight', 'bold')
-        
-        sp_1{j} = subplot(6,6,32:36);
-        [Y,X] = hist(Data_brain_r,1000);
-        a = area(X , runmean(Y,10)); a.FaceColor=[.8 .8 .8]; a.LineWidth=3; a.EdgeColor=[0 0 0];
-        box off
-        xlabel([brain_signals_names{i} ' power (log scale)']);
-        ax1{j} = ancestor(sp_1{j}, 'axes');
-        %     xlim(ax1{1}.XLim)
-        
-        sp_2{j} = subplot(6,6,[25 19 13 7 1]);
-        [Y,X] = hist(Data_areas_pupil_r,1000);
-        a = area(X , runmean(Y,10)); a.FaceColor=[.8 .8 .8]; a.LineWidth=3; a.EdgeColor=[0 0 0];
-        set(gca,'XDir','reverse'), camroll(270), box off
-        xlabel('Pupil size');
-        
-        sp_3{j} = subplot(6,6,[2:6 8:12 14:18 20:24 26:30]);
-        hold on
-        plot(Data_brain_r(1:2000:end) , Data_areas_pupil_r(1:2000:end) , '.', 'MarkerSize', 4, 'color', colours{j}{1})
-        xticks('')
-        yticks('')
-        
-        % Get handles to axes
-        ax2{j} = ancestor(sp_2{j}, 'axes');
-        ax3{j} = ancestor(sp_3{j}, 'axes');
-        
-        link_axes_callback = @(~, ~) set(ax3{j}, 'YLim', get(ax2{j}, 'XLim'));
-        
-        % Set listeners for changes in the x-axis of subplot #1
-        addlistener(ax2{j}, 'XLim', 'PostSet', link_axes_callback);
-        
-        % You can also set a callback to synchronize them initially
-        link_axes_callback();
-        
-        linkaxes([sp_3{j} sp_1{j}], 'x')
-        axis square
-        
-        % Calculate correlations (downsampling to calculate pvalue)
-        numSamples = 1000;
-        rng(1); % Set random seed for reproducibility
-        idx = randperm(length(Data_brain_r), numSamples);
-        
-        [correlations{i}{j} pval{i}{j}] = corr(Data_brain_r(idx), Data_areas_pupil_r(idx));
-        % PlotCorrelations_BM(Data_brain_r(1:10000:end) , Data_areas_pupil_r(1:10000:end), 'color', 'k', 'Marker_Size', 1)
-        
-        hold on
-        p = polyfit(Data_brain_r(idx), Data_areas_pupil_r(idx), 1);
-        x = [min(Data_brain_r(idx))*1.1 max(Data_brain_r(idx))*1.1]; 
-        y = x.*p(1) + p(2);
-        
-        a=p(1); b=p(2);
-        
-%         k = get(gca,'Children'); legend(['R = ' num2str(correlations{i}{j}) '     P = ' num2str(pval{i}{j})]);
-        l = [ax3{j}.XLim ax3{j}.YLim];
-        %     LINE = [l(1)*.8 l(2)*.8 ; a*l(1)+b a*l(2)+b];
-        LINE = [l(1) l(2) ; a*l(1)+b a*l(2)+b]; 
-        
-        line([LINE(1,1) LINE(1,2)] , [LINE(2,1) LINE(2,2)] , 'Color' , 'r' , 'LineWidth' , 2)
-        
-                % Add text annotation to phase space subplot for correlation and p-value
-        subplot(sp_3{j});
-        annotationText = sprintf('r = %.2f\np = %.2e', correlations{i}{j}, pval{i}{j});
-        xText = ax3{j}.XLim(1) + 0.05 * (ax3{j}.XLim(2) - ax3{j}.XLim(1)); % Position text slightly to the right of the x-axis minimum
-        yText = ax3{j}.YLim(2) - 0.1 * (ax3{j}.YLim(2) - ax3{j}.YLim(1)); % Position text slightly below the y-axis maximum
-        text(xText, yText, annotationText, 'FontWeight', 'bold', 'FontSize', 10, 'Color', 'k');
-
-        pause(0.1)
-        
-        % Save figures
-%         saveas(f{j}, [datapath '/brain_pupil_corr/' brain_signals_names_save{i} '_pupil_size_corr_' Epoch_names_save{j} '_' Session_params.session_selection], 'svg')
-%         close
+        if ~isempty(Range(areas_pupil_r{j}))
+            
+            Data_brain_r = log10(Data(brain_signals{i}{j}));
+            Data_areas_pupil_r = Data(Restrict(areas_pupil_r{j}, brain_signals{i}{j}));
+            
+            f{j} = figure('Visible', Session_params.fig_visibility);
+            set(f{j}, 'Units', 'Normalized', 'Position', [1, 1, 0.44, 0.76]);
+            sgtitle(['Correlation between pupil size and ' brain_signals_names{i} ' power in ' Epoch_names{j}], 'FontWeight', 'bold');
+            
+            % Subplot for brain power histogram
+            sp_1{j} = subplot(6,6,32:36);
+            [Y, X] = hist(Data_brain_r, 1000);
+            a_hist = area(X, runmean(Y, 10));
+            a_hist.FaceColor = [0.8 0.8 0.8];
+            a_hist.LineWidth = 3; a_hist.EdgeColor = [0 0 0];
+            box off;
+            xlabel([brain_signals_names{i} ' power (log scale)']);
+            ax1{j} = ancestor(sp_1{j}, 'axes');
+            
+            % Subplot for pupil size histogram
+            sp_2{j} = subplot(6,6, [25 19 13 7 1]);
+            [Y, X] = hist(Data_areas_pupil_r, 1000);
+            a_hist = area(X, runmean(Y, 10));
+            a_hist.FaceColor = [0.8 0.8 0.8];
+            a_hist.LineWidth = 3; a_hist.EdgeColor = [0 0 0];
+            set(gca, 'XDir', 'reverse'), camroll(270), box off;
+            xlabel('Pupil size');
+            ax2{j} = ancestor(sp_2{j}, 'axes');
+            
+            % Scatter plot: brain power vs. pupil size
+            sp_3{j} = subplot(6,6, [2:6 8:12 14:18 20:24 26:30]);
+            hold on;
+            plot(Data_brain_r(1:2000:end), Data_areas_pupil_r(1:2000:end), '.', 'MarkerSize', 4, 'color', colours{j}{1});
+            xticks([]); yticks([]);
+            ax3{j} = ancestor(sp_3{j}, 'axes');
+            link_axes_callback = @(~, ~) set(ax3{j}, 'YLim', get(ax2{j}, 'XLim'));
+            addlistener(ax2{j}, 'XLim', 'PostSet', link_axes_callback);
+            link_axes_callback();
+            linkaxes([sp_3{j}, sp_1{j}], 'x');
+            axis square;
+            
+            % Downsample for correlation and p-value calculation
+            numSamples = 1000;
+            rng(1); % For reproducibility
+            idx = randperm(length(Data_brain_r), numSamples);
+            [correlations{i}{j}, pval{i}{j}] = corr(Data_brain_r(idx), Data_areas_pupil_r(idx));
+            % PlotCorrelations_BM(Data_brain_r(1:10000:end) , Data_areas_pupil_r(1:10000:end), 'color', 'k', 'Marker_Size', 1)
+            
+            hold on;
+            p_fit = polyfit(Data_brain_r(idx), Data_areas_pupil_r(idx), 1);
+            x_fit = [min(Data_brain_r(idx))*1.1, max(Data_brain_r(idx))*1.1];
+            y_fit = x_fit * p_fit(1) + p_fit(2);
+            line(x_fit, y_fit, 'Color', 'r', 'LineWidth', 2);
+            
+            
+            a=p_fit(1); b=p_fit(2);
+            
+            %         k = get(gca,'Children'); legend(['R = ' num2str(correlations{i}{j}) '     P = ' num2str(pval{i}{j})]);
+            l = [ax3{j}.XLim ax3{j}.YLim];
+            %     LINE = [l(1)*.8 l(2)*.8 ; a*l(1)+b a*l(2)+b];
+            LINE = [l(1) l(2) ; a*l(1)+b a*l(2)+b];
+            
+            line([LINE(1,1) LINE(1,2)] , [LINE(2,1) LINE(2,2)] , 'Color' , 'r' , 'LineWidth' , 2)
+            
+            % Annotate plot with correlation values
+            subplot(sp_3{j});
+            annotationText = sprintf('r = %.2f\np = %.2e', correlations{i}{j}, pval{i}{j});
+            xText = ax3{j}.XLim(1) + 0.05 * diff(ax3{j}.XLim);
+            yText = ax3{j}.YLim(2) - 0.1 * diff(ax3{j}.YLim);
+            text(xText, yText, annotationText, 'FontWeight', 'bold', 'FontSize', 10, 'Color', 'k');
+            pause(0.1);
+            % Save figures
+            saveas(f{j}, fullfile(FigFolder, [brain_signals_names_save{i} '_pupil_size_corr_' Epoch_names_save{j} '_' Session_params.session_selection '.svg']))
+        end
     end
 end
 
-brain_pupil_corr = [correlations ; pval]';
+brain_pupil_corr = [correlations; pval]';
+save(fullfile(datapath, 'SleepScoring_OBGamma.mat'), 'brain_pupil_corr', '-append');
 
-%% Save correlation values 
-% Save correlations
-save('SleepScoring_OBGamma.mat', 'brain_pupil_corr', '-append');
-
-%% f3) Pupil size distributions in all substates
+%% -------------------- f3) Pupil Size Distributions in Substates --------------------
 clear j i f
 f{1} = figure('Visible', Session_params.fig_visibility);
 set(f{1}, 'Units', 'Normalized', 'Position', [1, 1, 0.44, 0.76]);
-
 for j = [2, 4, 5, 6]
-    [Y,X]=hist(Data(areas_pupil_r{j}),1000);
-    Y=Y/sum(Y);
-    hold on
-    plot(X,runmean(Y,smootime*20), 'color', colours{j}{1}, 'LineWidth', 2)
+    [Y, X] = hist(Data(areas_pupil_r{j}), 1000);
+    Y = Y/sum(Y);
+    hold on;
+    plot(X, runmean(Y, smootime * 20), 'color', colours{j}{1}, 'LineWidth', 2);
 end
-legend({Epoch_names{2}, Epoch_names{4}, Epoch_names{5}, Epoch_names{6}}, 'location', 'northeast')
-axis square
-xlabel('pupil size values (a.u.)')
-ylabel('#');
-makepretty
-sgtitle(['Distribution of pupil sizes: ' Session_params.animal_name{Session_params.animal_selection} ' ' Session_params.session_selection], 'FontWeight', 'bold', 'FontSize', 20);
+legend({Epoch_names{2}, Epoch_names{4}, Epoch_names{5}, Epoch_names{6}}, 'location', 'northeast');
+axis square;
+xlabel('Pupil size values (a.u.)'); ylabel('#');
+makepretty;
+sgtitle(['Distribution of pupil sizes: ' Session_params.animal_name ' ' Session_params.session_selection], ...
+    'FontWeight', 'bold', 'FontSize', 20);
 
-if ~exist([datapath '/Figures/brain_pupil_corr'])
-    mkdir(datapath, 'brain_pupil_corr');
-end
-saveas(f{1}, [datapath '/brain_pupil_corr/' 'pupil_size_distribution_' Session_params.session_selection], 'svg')
+saveas(f{1}, fullfile(FigFolder, ['pupil_size_distribution_' Session_params.session_selection '.svg']));
+close all;
 
-close all
-
-%% f4) Brain power distribution in all substates: zscore/smoothing? double-check
+%% -------------------- f4) Brain Power Distributions in Substates --------------------
 clear j i f
 f{2} = figure('Visible', Session_params.fig_visibility);
 set(f{2}, 'Units', 'Normalized', 'Position', [0 0 1 1]);
-
 for i = 1:length(brain_signals)
-    subplot(2, 3, i)
+    subplot(2, 3, i);
     for j = [2, 4, 5, 6]
-        [Y,X]=hist(Data(brain_signals{i}{j}),1000);
-        Y=Y/sum(Y);
-        hold on
-        plot(X,runmean(Y,smootime+10), 'color', colours{j}{1}, 'LineWidth', 2)
-        title([brain_signals_names{i}])
+        [Y, X] = hist(Data(brain_signals{i}{j}), 1000);
+        Y = Y/sum(Y);
+        hold on;
+        plot(X, runmean(Y, smootime + 10), 'color', colours{j}{1}, 'LineWidth', 2);
     end
-    legend({Epoch_names{2}, Epoch_names{4}, Epoch_names{5}, Epoch_names{6}})
-    axis square
-    xlabel('power (a.u.)')
-    ylabel('#');
-    makepretty 
+    title(brain_signals_names{i});
+    legend({Epoch_names{2}, Epoch_names{4}, Epoch_names{5}, Epoch_names{6}});
+    axis square;
+    xlabel('Power (a.u.)'); ylabel('#');
+    makepretty;
 end
-sgtitle(['Distribution of brain power values: ' Session_params.animal_name{Session_params.animal_selection} ' ' Session_params.session_selection], 'FontWeight', 'bold', 'FontSize', 20);
+sgtitle(['Distribution of brain power values: ' Session_params.animal_name ' ' Session_params.session_selection], 'FontWeight', 'bold', 'FontSize', 20);
+saveas(f{2}, fullfile(FigFolder, ['brain_power_distribution_' Session_params.session_selection '.svg']));
+close all;
 
-saveas(f{2}, [datapath '/brain_pupil_corr/' 'brain_power_distribution_' Session_params.session_selection], 'svg')
-
-close all
-
-
-
-
-
-
-
-
-%% Old codes
+%% LEGACY CODES
 %{
 %% DOMITOR: Before/During/After epochs
 % Define the injection epochs
@@ -960,4 +932,5 @@ legend({'Before inj', 'Atropine'}, 'location', 'northwest')
 %}
 
 %}
+
 end

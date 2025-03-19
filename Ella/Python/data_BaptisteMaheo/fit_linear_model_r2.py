@@ -54,40 +54,85 @@ class FeatureTransformer(BaseEstimator, TransformerMixin):
         """Apply negative exponential transformation."""
         return np.exp(-x / self.tau)
 
+    # def transform(self, X):
+    #     """Apply transformations based on the selected variables."""
+    #     X = X.copy()
+    #     transformed_features = {}
+
+    #     # Ensure raw features are present if required for transformations
+    #     required_raw_features = set()
+    #     if "Position_sig_Global_Time" in self.selected_vars:
+    #         required_raw_features.update(["Position", "Global Time"])
+    #     if "neg_exp_Time_since_last_shock" in self.selected_vars:
+    #         required_raw_features.add("Time since last shock")
+
+    #     # Ensure X contains all required raw features
+    #     for col in required_raw_features:
+    #         if col not in X.columns:
+    #             raise KeyError(f"Required raw feature '{col}' is missing from the dataset.")
+
+    #     # Apply transformations
+    #     if "sig_Global_Time" in self.selected_vars:
+    #         transformed_features["sig_Global_Time"] = self.sigmoid_transform(X["Global Time"])
+        
+    #     if "Position_sig_Global_Time" in self.selected_vars:
+    #         transformed_features["Position_sig_Global_Time"] = X["Position"] * self.sigmoid_transform(X["Global Time"])
+        
+    #     if "neg_exp_Time_since_last_shock" in self.selected_vars:
+    #         transformed_features["neg_exp_Time_since_last_shock"] = self.exponential_transform(X["Time since last shock"])
+
+    #     # Add raw variables if included in selected_vars
+    #     for col in self.selected_vars:
+    #         if col in X.columns:
+    #             transformed_features[col] = X[col]
+        
+    #     transformed_df = pd.DataFrame(transformed_features)
+    #     print("Requested Predictors:", self.selected_vars)
+    #     print("Transformed Data:", transformed_df.head())
+
+    
+    #     return transformed_df
+    
     def transform(self, X):
         """Apply transformations based on the selected variables."""
         X = X.copy()
         transformed_features = {}
-
+    
         # Ensure raw features are present if required for transformations
         required_raw_features = set()
         if "Position_sig_Global_Time" in self.selected_vars:
             required_raw_features.update(["Position", "Global Time"])
         if "neg_exp_Time_since_last_shock" in self.selected_vars:
             required_raw_features.add("Time since last shock")
-
+    
         # Ensure X contains all required raw features
         for col in required_raw_features:
             if col not in X.columns:
                 raise KeyError(f"Required raw feature '{col}' is missing from the dataset.")
-
+    
         # Apply transformations
-        if "sig_Global_Time" in self.selected_vars:
+        if "sig_Global_Time" in self.selected_vars and "Global Time" in X:
             transformed_features["sig_Global_Time"] = self.sigmoid_transform(X["Global Time"])
         
-        if "Position_sig_Global_Time" in self.selected_vars:
+        if "Position_sig_Global_Time" in self.selected_vars and "Global Time" in X and "Position" in X:
             transformed_features["Position_sig_Global_Time"] = X["Position"] * self.sigmoid_transform(X["Global Time"])
         
-        if "neg_exp_Time_since_last_shock" in self.selected_vars:
+        if "neg_exp_Time_since_last_shock" in self.selected_vars and "Time since last shock" in X:
             transformed_features["neg_exp_Time_since_last_shock"] = self.exponential_transform(X["Time since last shock"])
-
-        # Add raw variables if included in selected_vars
+    
+        # Ensure all requested predictors are in the final output**
         for col in self.selected_vars:
             if col in X.columns:
-                transformed_features[col] = X[col]
-
-        return pd.DataFrame(transformed_features)
-
+                transformed_features[col] = X[col]  # Pass raw predictors through
+            # else:
+            #     print(f"WARNING: {col} is missing from X.columns")
+    
+        # Convert to DataFrame
+        transformed_df = pd.DataFrame(transformed_features)
+    
+        # print("Transformed Data Columns:", list(transformed_df.columns))
+    
+        return transformed_df
 
 def find_best_linear_model(df, param_grid, independent_vars, k_folds=5):
     """
@@ -109,22 +154,29 @@ def find_best_linear_model(df, param_grid, independent_vars, k_folds=5):
               - coefficients: Dictionary of fitted beta coefficients for independent variables.
               - intercept: Intercept term of the best model.
     """
+    # Print available columns in df for debugging
+    # print("Original df.columns:", list(df.columns))
+    # print("Requested independent_vars:", independent_vars)
 
-    # Identify the raw features required for transformation
-    required_raw_features = set()
+    # Ensure all independent variables are included in X_raw
+    all_features_needed = set(independent_vars)
+    
+    # Add raw features required for transformations
     if "Position_sig_Global_Time" in independent_vars:
-        required_raw_features.update(["Position", "Global Time"])
+        all_features_needed.update(["Position", "Global Time"])
     if "neg_exp_Time_since_last_shock" in independent_vars:
-        required_raw_features.add("Time since last shock")
+        all_features_needed.add("Time since last shock")
 
-    # Extract only raw features from df (transformed features are created later)
-    existing_raw_features = list(required_raw_features & set(df.columns))
-    missing_raw_features = required_raw_features - set(df.columns)
+    # Extract only existing features from df
+    existing_features = list(all_features_needed & set(df.columns))
+    # missing_features = all_features_needed - set(df.columns)
 
-    if missing_raw_features:
-        raise KeyError(f"The dataframe is missing required raw features: {missing_raw_features}")
+    # Warn if any required features are missing
+    # if missing_features:
+    #     print(f"WARNING: The following features are missing from df: {missing_features}")
 
-    X_raw = df[existing_raw_features]  # Only raw features needed for transformation
+    # Ensure X_raw includes everything needed
+    X_raw = df[existing_features]
     y = df["OB frequency"]  # Target variable
 
     pipeline = Pipeline([
@@ -151,7 +203,9 @@ def find_best_linear_model(df, param_grid, independent_vars, k_folds=5):
     mean_r2 = best_score_cv.mean()  # Mean R² across folds
 
     # Store coefficients
-    coefficients = dict(zip(independent_vars, best_model.coef_))
+    X_transformed = feature_transformer.transform(X_raw)
+    transformed_feature_names = X_transformed.columns if hasattr(X_transformed, 'columns') else range(X_transformed.shape[1])
+    coefficients = dict(zip(transformed_feature_names, best_model.coef_))
 
     # **Convert Global Time coefficient to fraction**
     if "Global Time" in coefficients and feature_transformer.global_time_range is not None:
@@ -214,6 +268,7 @@ def fit_all_predictors_model(df, best_params, independent_vars, k_folds=5):
     # Apply feature transformation using best hyperparameters
     feature_transformer = FeatureTransformer(selected_vars=independent_vars, **cleaned_params)
     X_transformed = feature_transformer.fit_transform(X_raw)
+    print("Transformed Features:", list(X_transformed.columns))
 
     # Define cross-validation
     kf = KFold(n_splits=k_folds, shuffle=True, random_state=42)
@@ -276,7 +331,7 @@ def fit_single_predictor_models(df, best_params, independent_vars, raw_predictor
     cleaned_params = {key.replace("feature_transform__", ""): value for key, value in best_params.items()}
 
     # Ensure the DataFrame contains all raw features (for transformation & model fitting)
-    required_raw_features = ["Position", "Global Time", "Time since last shock", "Time spent freezing"]
+    required_raw_features = ["Position", "Global Time", "Time since last shock", "Time spent freezing", "Movement quantity"]
     raw_features_needed = list(set(required_raw_features) & set(df.columns))  # Only keep available columns
 
     # Separate transformed features from raw predictors
@@ -361,7 +416,7 @@ def fit_leave_one_out_models(df, best_params, independent_vars, raw_predictors=N
     cleaned_params = {key.replace("feature_transform__", ""): value for key, value in best_params.items()}
 
     # Ensure the DataFrame contains all raw features (for transformation & model fitting)
-    required_raw_features = ["Position", "Global Time", "Time since last shock", "Time spent freezing"]
+    required_raw_features = ["Position", "Global Time", "Time since last shock", "Time spent freezing", "Movement quantity"]
     raw_features_needed = list(set(required_raw_features) & set(df.columns))  # Only keep available columns
 
     # Separate transformed features from raw predictors
@@ -518,11 +573,12 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
 
     Returns:
     - pd.DataFrame: DataFrame containing R² scores for each mouse and model type.
-    - dict: Dictionary containing the best parameters of the full model for each mouse.
+    - dict: Dictionary containing the best parameters, coefficients, and intercept of the full model for each mouse.
     """
 
     results = []
-    best_params_dict = {}  # Store best parameters for each mouse
+    best_params_dict = {}  # Store best parameters, coefficients, and intercept for each mouse
+    coefficients_dict = {}
 
     for mouse_id, df in mice_data.items():
         print(f"\nProcessing Mouse: {mouse_id}")
@@ -535,12 +591,12 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
         best_results = find_best_linear_model(df, param_grid, independent_vars)
         best_r2 = best_results["best_score"]
 
-        # Store best parameters
+        # Store best parameters, coefficients, and intercept
         best_params_dict[mouse_id] = best_results["best_params"]
-
-        # Fit all predictors model
-        all_results = fit_all_predictors_model(df, best_results["best_params"], independent_vars)
-        all_r2 = all_results["mean_r2"]
+        coefficients_dict[mouse_id] = {
+            "coefficients": best_results["coefficients"],
+            "intercept": best_results["intercept"]
+        }
 
         # Fit single predictor models
         single_predictor_results = fit_single_predictor_models(df, best_results["best_params"], independent_vars)
@@ -574,7 +630,7 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
             "R²": replace_sigGT_results["mean_r2"]
         })
 
-        # Store the results for the full and all-predictor models
+        # Store the results for the full model
         results.append({
             "Mouse": mouse_id,
             "Model": "Full Model",
@@ -582,17 +638,10 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
             "R²": best_r2
         })
 
-        results.append({
-            "Mouse": mouse_id,
-            "Model": "All Predictors Model",
-            "Predictor": "All Predictors",
-            "R²": all_r2
-        })
-
     # Convert results to a Pandas DataFrame
     results_df = pd.DataFrame(results)
 
-    return results_df, best_params_dict  # Return both results and best parameters
+    return results_df, best_params_dict, coefficients_dict  # Return both results and best parameters including coefficients & intercept
 
 
 # def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
@@ -601,6 +650,7 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
 #     - Full model (all predictors)
 #     - Single predictor models (one at a time)
 #     - Leave-one-out models (all but one predictor)
+#     - Model replacing Position_sig_Global_Time with Position (stored as 'Without Learning Term')
 
 #     Parameters:
 #     - mice_data (dict): Dictionary containing mouse IDs as keys and their dataframes as values.
@@ -609,11 +659,12 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
 
 #     Returns:
 #     - pd.DataFrame: DataFrame containing R² scores for each mouse and model type.
-#     - dict: Dictionary containing the best parameters of the full model for each mouse.
+#     - dict: Dictionary containing the best parameters, coefficients, and intercept of the full model for each mouse.
 #     """
 
 #     results = []
-#     best_params_dict = {}  # Store best parameters for each mouse
+#     best_params_dict = {}  # Store best parameters, coefficients, and intercept for each mouse
+#     coefficients_dict = {}
 
 #     for mouse_id, df in mice_data.items():
 #         print(f"\nProcessing Mouse: {mouse_id}")
@@ -632,6 +683,12 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
 #         # Fit all predictors model
 #         all_results = fit_all_predictors_model(df, best_results["best_params"], independent_vars)
 #         all_r2 = all_results["mean_r2"]
+
+#         # Store coefficients and intercept
+#         coefficients_dict[mouse_id] = {
+#             "coefficients": all_results["coefficients"],
+#             "intercept": all_results["intercept"]
+#         }
 
 #         # Fit single predictor models
 #         single_predictor_results = fit_single_predictor_models(df, best_results["best_params"], independent_vars)
@@ -655,6 +712,16 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
 #                 "R²": metrics["mean_r2"]
 #             })
 
+#         # Fit the model with Position instead of Position_sig_Global_Time
+#         replace_sigGT_results = fit_replace_sigGT(df, best_results["best_params"], independent_vars)
+
+#         results.append({
+#             "Mouse": mouse_id,
+#             "Model": "Modified Model",
+#             "Predictor": "Without Learning Term",
+#             "R²": replace_sigGT_results["mean_r2"]
+#         })
+
 #         # Store the results for the full and all-predictor models
 #         results.append({
 #             "Mouse": mouse_id,
@@ -673,9 +740,6 @@ def fit_models_for_all_mice(mice_data, param_grid, independent_vars):
 #     # Convert results to a Pandas DataFrame
 #     results_df = pd.DataFrame(results)
 
-#     return results_df, best_params_dict  # Return both results and best parameters
-
-
-
+#     return results_df, best_params_dict, coefficients_dict  # Return both results and best parameters including coefficients & intercept
 
 

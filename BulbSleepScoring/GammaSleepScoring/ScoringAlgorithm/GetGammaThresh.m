@@ -10,7 +10,7 @@ end
 sm_ghi(sm_ghi<=0)=[];
 [Y,X]=hist(log(sm_ghi),1000);
 Y=Y/sum(Y);
-[cf2,goodness2]=createFit2gauss(X,Y,[]);
+[cf2,goodness2]=createFit2gauss(X(:),Y(:),[]);
 a= coeffvalues(cf2);
 b=intersect_gaussians(a(2), a(5), a(3), a(6));
 

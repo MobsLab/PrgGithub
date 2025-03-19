@@ -1,23 +1,7 @@
 
-cd('/home/mobsmorty/Dropbox/Kteam/PrgMatlab/Baptiste/Temperature')
-load('Sess.mat')
 
-Mouse=[666 667 668 669 688 739 777 779 849 893];
-for mouse = 1:length(Mouse_names)
-    Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
-    %Sess.(Mouse_names{mouse}) = GetAllMouseTaskSessions(Mouse(mouse));
-    CondSess.(Mouse_names{mouse}) = Sess.(Mouse_names{mouse})(find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Cond')))));
-end
-CondSess.M666=[{CondSess.M666{1}} {CondSess.M666{4}} {CondSess.M666{7}} {CondSess.M666{8}}];
+GetEmbReactMiceFolderList_BM
 
-
-Zones={'Stim','FreezingOnset','FreezingOffset'};
-for zones=1:length(Zones)
-    for mouse=1:length(Mouse)
-        Episodes= Temperature_ShockEpisodes(Mouse(mouse),CondSess,Zones{zones},10,'Yes','Yes','Yes','Yes','Yes');
-        On_Offset_Freezing.(Zones{zones}).(Mouse_names{mouse})=Episodes;
-    end
-end
 
 clear all_mice_onset; 
 for zones=1:length(Zones)

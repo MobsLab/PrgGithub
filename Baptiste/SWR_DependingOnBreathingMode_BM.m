@@ -1,19 +1,19 @@
 
-Session_type={'Cond'};
+Session_type={'Cond'}; sess=1;
 Mouse=Drugs_Groups_UMaze_BM(22);
-[OutPutData2 , Epoch2 , NameEpoch] = ...
-    MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ripples');
+[OutPutData , Epoch , NameEpoch] = ...
+    MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ripples','ripples_density','respi_freq_bm');
 
 
 for mouse=1:length(Mouse)
     
-%     Epoch_Respi_Sup4 = thresholdIntervals(OutPutData.Cond.respi_freq_bm.tsd{mouse,3} , 4.5 , 'Direction' , 'Above');
-%     Epoch_Respi_Inf4 = thresholdIntervals(OutPutData.Cond.respi_freq_bm.tsd{mouse,3} , 4.5 , 'Direction' , 'Below');
-%     RipDensity_Sup4(mouse) = nanmean(Data(Restrict(OutPutData.Cond.ripples_density.tsd{mouse,3} , Epoch_Respi_Sup4)));
-%     RipDensity_Inf4(mouse) = nanmean(Data(Restrict(OutPutData.Cond.ripples_density.tsd{mouse,3} , Epoch_Respi_Inf4)));
-%     
-    try, RipTot_Sup4(mouse) = length(Restrict(OutPutData2.ripples.ts{mouse,3} , Epoch_Respi_Sup4)); end
-    try, RipTot_Inf4(mouse) = length(Restrict(OutPutData2.ripples.ts{mouse,3} , Epoch_Respi_Inf4)); end
+    Epoch_Respi_Sup4 = thresholdIntervals(OutPutData.respi_freq_bm.tsd{mouse,3} , 4.5 , 'Direction' , 'Above');
+    Epoch_Respi_Inf4 = thresholdIntervals(OutPutData.respi_freq_bm.tsd{mouse,3} , 4.5 , 'Direction' , 'Below');
+    RipDensity_Sup4(mouse) = nanmean(Data(Restrict(OutPutData.ripples_density.tsd{mouse,3} , Epoch_Respi_Sup4)));
+    RipDensity_Inf4(mouse) = nanmean(Data(Restrict(OutPutData.ripples_density.tsd{mouse,3} , Epoch_Respi_Inf4)));
+    
+    try, RipTot_Sup4(mouse) = length(Restrict(OutPutData.ripples.ts{mouse,3} , Epoch_Respi_Sup4)); end
+    try, RipTot_Inf4(mouse) = length(Restrict(OutPutData.ripples.ts{mouse,3} , Epoch_Respi_Inf4)); end
     
 end
 RipDensity_Inf4(5) = NaN;

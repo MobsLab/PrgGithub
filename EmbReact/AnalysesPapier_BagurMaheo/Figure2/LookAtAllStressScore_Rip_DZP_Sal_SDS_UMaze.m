@@ -50,18 +50,24 @@ for group = 1:length(GroupNames)
 end
 %% Plot all stress score params
 figure
+clear pval stats_out
 for group = 1:length(GroupNames)
     for var = 1:length(VarToUse)
-    subplot(length(VarToUse)+1,length(GroupNames),group+(length(GroupNames))*(var-1))
-    [pval , stats_out]=MakeSpreadAndBoxPlot2_SB({AllDat.(GroupNames{group}){1}(var,:),AllDat.(GroupNames{group}){2}(var,:)},...
-        {},[1,2],{'Ctrl',GroupNames{group}},'paired',0,'showpoints',1);
-    ylabel(VarNames{var})
+        subplot(length(VarToUse)+1,length(GroupNames),group+(length(GroupNames))*(var-1))
+        [pvaltemp , statstemp]=MakeSpreadAndBoxPlot2_SB({AllDat.(GroupNames{group}){1}(var,:),AllDat.(GroupNames{group}){2}(var,:)},...
+            {},[1,2],{'Ctrl',GroupNames{group}},'paired',0,'showpoints',1);
+        ylabel(VarNames{var})
+        pval(group,var) = pvaltemp(1,2);
+        stats_out(group,var) = statstemp(1,2);
     end
     
     subplot(length(VarToUse)+1,length(GroupNames),group+(length(GroupNames))*(var))
-    [pval , stats_out]=MakeSpreadAndBoxPlot2_SB({StressScore.(GroupNames{group}){1}(:),StressScore.(GroupNames{group}){2}(:)},...
+    [pvaltemp , statstemp]=MakeSpreadAndBoxPlot2_SB({StressScore.(GroupNames{group}){1}(:),StressScore.(GroupNames{group}){2}(:)},...
         {},[1,2],{'Ctrl',GroupNames{group}},'paired',0,'showpoints',1);
-ylabel('Stress Score')
+    pval(group,var+1) = pvaltemp(1,2);
+    stats_out(group,var+1) = statstemp(1,2);
+    ylabel('Stress Score')
+    n_mouse(group) = length(AllDat.(GroupNames{group}){1}(var,:));
 end
 
 for var = 1:length(VarToUse)+1

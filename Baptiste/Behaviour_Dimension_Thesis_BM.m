@@ -1,7 +1,6 @@
 
 clear all
 GetEmbReactMiceFolderList_BM
-GetAllSalineSessions_BM
 
 Session_type={'Habituation','TestPre','Cond','TestPost','Ext'};
 
@@ -14,7 +13,7 @@ NoLegends = {'','','',''};
 
 ind=1:4;
 Group=[7 8];
-Group=[11];
+Group=22;
 
 Side = {'All','Shock','Safe'};
 Zones_Lab={'Shock','Shock middle','Middle','Safe middle','Safe'};
@@ -24,7 +23,7 @@ Zones_Lab={'Shock','Shock middle','Middle','Safe middle','Safe'};
 n=1;
 for group=Group
     Mouse=Drugs_Groups_UMaze_BM(group);
-    for sess=4%1:length(Session_type)
+    for sess=1:length(Session_type)
         for mouse=1:length(Mouse)
             Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
             
@@ -923,21 +922,85 @@ xlim([5.3 7.5])
 
 
 %% tools
+
+Z = zscore(A')';
+
 figure
-for i=1:3
-    for param=1:8
-        subplot(3,8,(i-1)*8+param)
-        
-        if i==1
-            D = DATA_SAL(:,1:30);
-        elseif i==2
-            D = DATA_SAL(:,31:60);
-        else
-            D = DATA_SAL(:,61:90);
-        end
-        
-        MakeSpreadAndBoxPlot3_SB({D(param,IDX==3) D(param,IDX==1) D(param,IDX==2) D(param,IDX==4) D(param,IDX==5)},Cols,X,Legends,'showpoints',1,'paired',0);
-        
+imagesc(Z)
+
+
+figure
+[~, ~, ~, eigen_vector] = pca(Z);
+
+
+for pc=1:4
+    for i=1:length(A)
+        PC_values{pc}(i) = eigen_vector(:,pc)'*Z(:,i);
     end
+%     sd = std(PC_values{pc});
+%     PC_values{pc}(abs(PC_values{pc})>nanmean(abs(PC_values{pc}))+4*sd) = NaN;
 end
+
+figure
+imagesc(eigen_vector(:,1:3)), axis xy
+yticklabels({'SZ entries','SZ occupancy','Shocks','Speed','Thigmotaxis','Fz shock','Fz total','Fz safe'})
+xticklabels({'PC1','PC2','PC3'})
+
+
+figure
+plot(PC_values{1} , PC_values{2} , '.k' , 'MarkerSize' , 30)
+
+
+figure
+PlotCorrelations_BM(MeanSpeed.TestPre{1} , PC_values{1})
+xlabel('Distance traveled, Test Pre (a.u.)'), ylabel('PC1 values')
+axis square, makepretty_BM2
+
+load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/recov_dev.mat', 'residual')
+
+
+
+figure
+PlotCorrelations_BM(ShockZoneEntries_Density.Cond{1} , ShockZoneEntries_Density.TestPost{1})
+
+figure
+PlotCorrelations_BM(MeanSpeed.TestPre{1} , ShockZoneEntries_Density.Cond{1})
+
+figure
+PlotCorrelations_BM(MeanSpeed.TestPre{1} , ShockZoneEntries_Density.TestPost{1})
+
+
+
+
+Cols3 = {[.6 .4 .8],[.8 .6 .4],[.3 .3 .3]};
+X3 = [1:3];
+Legends3 = {'Fear+','Fear-','no learning'};
+
+IDX2 = residual
+
+figure
+D = residual;
+MakeSpreadAndBoxPlot3_SB({[D(IDX==3) D(IDX==1)] [D(IDX==2) D(IDX==4)] D(IDX==5)},Cols3,X3,Legends3,'showpoints',1,'paired',0);
+
+figure
+D = log10(FreezingShock_Dur.Cond{1});
+MakeSpreadAndBoxPlot3_SB({[D(IDX==3) D(IDX==1)] [D(IDX==2) D(IDX==4)] D(IDX==5)},Cols3,X3,Legends3,'showpoints',1,'paired',0);
+
+figure
+D = log10(FreezingSafe_Dur.Cond{1});
+MakeSpreadAndBoxPlot3_SB({[D(IDX==3) D(IDX==1)] [D(IDX==2) D(IDX==4)] D(IDX==5)},Cols3,X3,Legends3,'showpoints',1,'paired',0);
+
+figure
+D = ShockZone_Occupancy.TestPost{1};
+MakeSpreadAndBoxPlot3_SB({[D(IDX==3) D(IDX==1)] [D(IDX==2) D(IDX==4)] D(IDX==5)},Cols3,X3,Legends3,'showpoints',1,'paired',0);
+
+
+
+ylabel('Breathing, safe Fz (Hz)')
+
+
+D(IDX==3) D(IDX==1)] [D(IDX==2) D(IDX==4)] D(IDX==5)
+
+
+
 

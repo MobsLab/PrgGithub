@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['main_GLM_analyze_results.py', 'plot_GLM_results.py', 'analyse_results.py', 'fit_linear_model_r2.py']
+recent_files = ['preprocess_data.py', 'main_GLM.py', 'fit_linear_model.py', 'visualize_data.py']
 
 [main]
 version = 0.2.0

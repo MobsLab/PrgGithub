@@ -32,14 +32,14 @@ from analyse_results import (
     compare_without_learning_term
     )
 from save_load_data import ( 
-    # save_variable_to_json, 
-    load_variable_from_json
+    save_variable_to_json, 
+    # load_variable_from_json
     )
 
 # %% Load data
 
 mat_folder = r'/media/nas7/ProjetEmbReact/DataEmbReact/Data_Model_Ella'
-mat_filename = r'Data_Model_Ella.mat'
+mat_filename = r'Data_Model_Ella_mvt.mat'
 
 mice_data_original = load_mat_data(mat_folder, mat_filename)
 
@@ -47,7 +47,9 @@ figrues_path = '/home/gruffalo/Dropbox/Mobs_member/EllaCallas/Figures/2025_GLM_M
 
 # %% Keep needed columns and z-score
 
-columns_list = ['OB frequency', 'Position', 'Global Time', 'Time since last shock', 'Time spent freezing']
+# columns_list = ['OB frequency', 'Position', 'Global Time', 'Time since last shock', 'Time spent freezing']
+columns_list = ['OB frequency', 'Position', 'Global Time', 
+                'Time since last shock', 'Time spent freezing', 'Movement quantity']
 
 mice_data = filter_columns(mice_data_original, columns_list, drop_na=True)
 
@@ -65,39 +67,47 @@ param_grid = {
 
 # %% Fit models
 
-independent_vars = ["Time spent freezing", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]
+# independent_vars = ["Time spent freezing", "Position_sig_Global_Time", "neg_exp_Time_since_last_shock", "Global Time"]
+independent_vars = ["Time spent freezing", "Position_sig_Global_Time", 
+                    "neg_exp_Time_since_last_shock", "Global Time", "Movement quantity"]
 
-results, parameters = fit_models_for_all_mice(transformed_mice_data, param_grid, independent_vars)
+
+results, parameters, coefficients = fit_models_for_all_mice(transformed_mice_data, param_grid, independent_vars)
 
 # %% Save or load results
 
-# save_variable_to_json(results, mat_folder + '/results_TF_GTxSigPos_expTLS_GT_Posalone_df.json')
+save_variable_to_json(results, mat_folder + '/vf_results_TF_GTxSigPos_expTLS_GT_MV_Posalone_df.json')
 
-# save_variable_to_json(parameters, mat_folder + '/parameters_TF_GTxSigPos_expTLS_GT_Posalone_dict.json')
+save_variable_to_json(parameters, mat_folder + '/vf_parameters_TF_GTxSigPos_expTLS_GT_MV_Posalone_dict.json')
 
-results = load_variable_from_json(mat_folder + '/results_TF_GTxSigPos_expTLS_GT_Posalone_df.json')
+save_variable_to_json(coefficients, mat_folder + '/vf_coefficients_TF_GTxSigPos_expTLS_GT_MV_Posalone_dict.json')
 
-parameters = load_variable_from_json(mat_folder + '/parameters_TF_GTxSigPos_expTLS_GT_Posalone_dict.json')
+# results = load_variable_from_json(mat_folder + '/results_TF_GTxSigPos_expTLS_GT_Posalone_df.json')
+
+# parameters = load_variable_from_json(mat_folder + '/parameters_TF_GTxSigPos_expTLS_GT_Posalone_dict.json')
 
 
 # %% Plot results 
 
 excluded_mice_length = [mouse for mouse, df in mice_data.items() if len(df) < 100]
 excluded_mice_value = results[(results["Model"] == "Full Model") & (results["R²"] <= 0)]["Mouse"].tolist()
-excluded_mice = excluded_mice_length + excluded_mice_value
+excluded_mice = list(set(excluded_mice_length + excluded_mice_value + ["M1184"]))
 
-plot_full_model_r2(results)
+full_r2_black = plot_full_model_r2(results)
 fullr2_colored = plot_full_model_r2(results, exclude_mice=excluded_mice, color_excluded=True)
 
-save_plot_as_svg(fullr2_colored, 'r2_full_model_excluded_colored', figrues_path)
+save_plot_as_svg(full_r2_black, 'r2_full_model_mvt_vf', figrues_path)
+save_plot_as_svg(fullr2_colored, 'r2_full_model_mvt_excluded_colored_vf', figrues_path)
 
-plot_full_vs_all_predictors_boxplot(results)
+# plot_full_vs_all_predictors_boxplot(results)
 
 plot_r2_single_predictor_models(results, excluded_mice=excluded_mice)
 
 plot_r2_leave_one_out_models(results, excluded_mice=excluded_mice)
 
 plot_model_parameters(parameters, name=["op_point"])
+plot_model_parameters(parameters, name=["slope"])
+plot_model_parameters(parameters, name=["tau"])
 
 
 # %% Compute gain
@@ -122,7 +132,8 @@ gain_dict["Learning Term"] = gain_siggt[["Mouse", "Prop Explained Variance"]]
 
 stats, fig = plot_all_explained_variance(gain_dict)
 
-save_plot_as_svg(fig, 'r2_comparison_all_models', figrues_path)
+save_plot_as_svg(fig, 'r2_comparison_all_models_mvt_vf', figrues_path)
+
 
 
 

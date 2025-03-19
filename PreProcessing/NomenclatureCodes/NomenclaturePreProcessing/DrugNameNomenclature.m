@@ -12,8 +12,9 @@ DrugName = ...
     'DZP',... % diazepam    
     'FLX',... % fluoxetine
     'CHRONIC FLX',... % chronic fluoxetine 
+    'Ivabradine' % ivabradine
     'LPS',... % lipopolysaccharide
-'Atropine',...% muscarinic antagonist
+    'Atropine',...% muscarinic antagonist
     'CNO',...  % clozapine n oxide (for dreadd)
     'BUS',...  % buspirone
     'CHRONIC BUS',...  % chronic buspirone

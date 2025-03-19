@@ -1,5 +1,8 @@
 
 
+load('/media/nas7/ProjetEmbReact/DataEmbReact/Analogy_Fz_OtherStates_BM.mat')
+
+%%
 clear all
 GetEmbReactMiceFolderList_BM
 Group=22;
@@ -12,106 +15,277 @@ for sess=1:length(Session_type) % generate all data required for analyses
             'emg_neck','emg_pect','accelero','speed');
 end
 
-
-
-
-
-%% generate data
-GetAllSalineSessions_BM
-smoofact_Acc = 30;
-thtps_immob=2;
-
-for mouse=1:length(Mouse)
-    Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
-    try 
-        UMazeSleepSess.(Mouse_names{mouse}) = Sess.(Mouse_names{mouse})(find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Sleep')))));
-        SleepPreSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(1);
-        if length(UMazeSleepSess.(Mouse_names{mouse}))==3
-            SleepPreSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(1);
-            SleepPostPreSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(2);
-            SleepPostSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(3);
-        else
-            try
-                SleepPreSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(1);
-                SleepPostSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(2);
-            catch 
-                SleepPreSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(1);
-                SleepPostSess.(Mouse_names{mouse}) = UMazeSleepSess.(Mouse_names{mouse})(1);
-            end
+Params = {'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density',...
+    'hpc_theta_freq','hpc_theta_delta','emg_neck','emg_pect','accelero','speed'};
+for par=1:length(Params)
+    for mouse=1:length(Mouse)
+        try
+            clear D, D = Data(OutPutData.Cond.(Params{par}).tsd{mouse,5});
+            MeanVal_Shock.(Params{par})(mouse) = nanmean(D(round(size(D,1)*.9):end));
+        end
+        try
+            clear D, D = Data(OutPutData.Cond.(Params{par}).tsd{mouse,6});
+            MeanVal_Safe.(Params{par})(mouse) = nanmean(D(round(size(D,1)*.9):end));
         end
     end
+    MeanVal_Shock.(Params{par})(MeanVal_Shock.(Params{par})==0) = NaN;
+    MeanVal_Safe.(Params{par})(MeanVal_Safe.(Params{par})==0) = NaN;
 end
+MeanVal_Safe.accelero(MeanVal_Safe.accelero<1) = NaN;
 
 
+smoofact_Acc = 30;
+thtps_immob=2;
 for mouse = 1:length(Mouse)
+    if mouse<14
+        th_immob_Acc = 1e7;
+    else
+        th_immob_Acc = 1.7e7;
+    end
     try
-        if mouse<36
-            th_immob_Acc = 1e7;
-        else
-            th_immob_Acc = 1.7e7;
-        end
-        
-        NewMovAcctsd=tsd(Range(Sleep.OutPutData.sleep_pre.accelero.tsd{mouse,1}),runmean(Data(Sleep.OutPutData.sleep_pre.accelero.tsd{mouse,1}),smoofact_Acc));
+        NewMovAcctsd=tsd(Range(OutPutData.sleep_pre.accelero.tsd{mouse,1}),runmean(Data(OutPutData.sleep_pre.accelero.tsd{mouse,1}),smoofact_Acc));
         FreezeAccEpoch=thresholdIntervals(NewMovAcctsd,th_immob_Acc,'Direction','Below');
         FreezeAccEpoch=mergeCloseIntervals(FreezeAccEpoch,0.3*1e4);
         FreezeAccEpoch=dropShortIntervals(FreezeAccEpoch,thtps_immob*1e4);
         
-        Sleep1 = Sleep.Epoch1.sleep_pre{mouse,3};
+        Sleep1 = Epoch1.sleep_pre{mouse,3};
         Sleep1 = dropShortIntervals(Sleep1,30e4);
         
         Sleep_Beginning = Start(Sleep1) ;
-        Wake_Before_Sleep_Epoch{mouse} = intervalSet(0 , Sleep_Beginning(1));
-        
-        Freezing_Before_Sleep{mouse} = and(FreezeAccEpoch , Wake_Before_Sleep_Epoch{mouse});
-        Freezing_After_Sleep{mouse} = (FreezeAccEpoch-Freezing_Before_Sleep{mouse})-Sleep1;
-        
+        Wake_Before_Sleep_Epoch = intervalSet(0 , Sleep_Beginning(1));
+        QuietWake{mouse} = and(Wake_Before_Sleep_Epoch , FreezeAccEpoch);
+        QW_dur(mouse) = sum(DurationEpoch(QuietWake{mouse}))./1e4;
+        QW_MeanDur(mouse) = nanmean(DurationEpoch(QuietWake{mouse}))./1e4;
+    catch
+        QW_dur(mouse) = NaN;
+    end
+    FzSafe_Dur(mouse) = sum(DurationEpoch(Epoch1.Cond{mouse,6}))./1e4;
+    FzSafe_MeanDur(mouse) = nanmean(DurationEpoch(Epoch1.Cond{mouse,6}))./1e4;
+    FzShock_MeanDur(mouse) = nanmean(DurationEpoch(Epoch1.Cond{mouse,5}))./1e4;
+    try
+        OutPutData.sleep_pre.accelero.tsd{mouse,1} = mergeCloseIntervals(Epoch1.sleep_pre{mouse,3} , 2e4);
+        OutPutData.sleep_pre.accelero.tsd{mouse,1} = dropShortIntervals(Epoch1.sleep_pre{mouse,3} , 10e4);
+        Sleep_MeanDur(mouse) = nanmean(DurationEpoch(Epoch1.sleep_pre{mouse,3}))./1e4;
+    end
+end
+
+
+for par=1:length(Params)
+    for mouse=1:length(Mouse)
         try
-            OB = ConcatenateDataFromFolders_SB(SleepPreSess.(Mouse_names{mouse}),'spectrum','prefix','B_Low');
-            OB_Sp_Wake_Before_Sleep{mouse} = Restrict(OB , Wake_Before_Sleep_Epoch{mouse});
-            OB_Sp_Fz_Before_Sleep{mouse} = Restrict(OB , Freezing_Before_Sleep{mouse});
-            OB_Sp_Fz_After_Sleep{mouse} = Restrict(OB , Freezing_After_Sleep{mouse});
+            MeanVal_QW.(Params{par})(mouse) = nanmean(Data(Restrict(OutPutData.sleep_pre.(Params{par}).tsd{mouse,1} , QuietWake{mouse})));
         end
     end
-    disp(mouse)
+    MeanVal_QW.(Params{par})(MeanVal_QW.(Params{par})==0) = NaN;
 end
 
-for mouse = 1:length(Mouse)
-    try, Fz_Dur_HC(mouse) = sum(DurationEpoch(Freezing_Before_Sleep{mouse}))/1e4; end
-    try, OB_Low_Fz_Before_Sleep(mouse,:) = nanmean(Data(OB_Sp_Fz_Before_Sleep{mouse})); end
-end
-OB_Low_Fz_Before_Sleep(OB_Low_Fz_Before_Sleep==0)=NaN;
 
+%% figures
+Cols = {[.3 .3 .3],[.5 .5 1],[1 .5 .5]};
+X = [1:3];
+Legends = {'QW','Safe','Shock'};
+
+figure
+subplot(151), param=11;
+MakeSpreadAndBoxPlot3_SB({MeanVal_QW.(Params{param}) MeanVal_Safe.(Params{param})...
+    MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('Accelero (log scale)'), set(gca,'YScale','log')
+
+subplot(152), param=9;
+MakeSpreadAndBoxPlot3_SB({MeanVal_QW.(Params{param}) MeanVal_Safe.(Params{param})...
+    MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('EMG neck (log scale)'), set(gca,'YScale','log')
+
+subplot(153), param=5;
+MakeSpreadAndBoxPlot3_SB({MeanVal_QW.(Params{param}) MeanVal_Safe.(Params{param})...
+    MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('OB gamma power (log scale)'), set(gca,'YScale','log')
+
+subplot(154), param=2;
+MakeSpreadAndBoxPlot3_SB({MeanVal_QW.(Params{param}) MeanVal_Safe.(Params{param})...
+    MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('Heart rate (Hz)')
+
+subplot(155)
+MakeSpreadAndBoxPlot3_SB({QW_MeanDur FzSafe_MeanDur...
+    FzShock_MeanDur},Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('mean duration (s)')
+
+
+Cols = {[.3 .3 .3],[.5 .5 1],[1 .5 .5]};
+X = [1:3];
+Legends = {'Sleep','Safe','Shock'};
+
+figure,
+subplot(151), param=11;
+MakeSpreadAndBoxPlot3_SB({OutPutData.sleep_pre.(Params{param}).mean(:,3)' MeanVal_Safe.(Params{param})...
+    MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('Accelero (log scale)'), set(gca,'YScale','log')
+
+subplot(152), param=9;
+MakeSpreadAndBoxPlot3_SB({OutPutData.sleep_pre.(Params{param}).mean(:,3)' MeanVal_Safe.(Params{param})...
+    MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('EMG neck (log scale)'), set(gca,'YScale','log')
+
+subplot(153), param=5;
+MakeSpreadAndBoxPlot3_SB({OutPutData.sleep_pre.(Params{param}).mean(:,3)' MeanVal_Safe.(Params{param})...
+    MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('OB gamma power (log scale)'), set(gca,'YScale','log')
+
+subplot(154), param=2;
+MakeSpreadAndBoxPlot3_SB({OutPutData.sleep_pre.(Params{param}).mean(:,3)' MeanVal_Safe.(Params{param})...
+    MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('Heart rate (Hz)')
+
+subplot(155)
+MakeSpreadAndBoxPlot3_SB({Sleep_MeanDur FzSafe_MeanDur...
+    FzShock_MeanDur},Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('mean duration (s)')
+
+
+
+%% exhaustive
+% duration
+Cols = {[.3 .3 .3],[.5 .5 1]};
+X = [1:2];
+Legends = {'QW','Safe'};
+
+figure
+MakeSpreadAndBoxPlot3_SB({QW_dur FzSafe_Dur},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('duration (s)')
+makepretty_BM2
+
+
+% SVM markers
+Cols = {[.3 .3 .3],[.5 .5 1],[1 .5 .5]};
+X = [1:3];
+Legends = {'QW','Safe','Shock'};
+
+
+figure
+for param = 1:8
+    subplot(1,8,param)
+    
+        MakeSpreadAndBoxPlot3_SB({MeanVal_QW.(Params{param}) MeanVal_Safe.(Params{param})...
+            MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+
+    if param==1
+        ylabel('Breathing (Hz)')
+    elseif param==2
+        ylabel('Heart rate (Hz)')
+    elseif param==3
+        ylabel('Heart rate variability (a.u.)')
+    elseif param==4
+        ylabel('OB gamma frequency (Hz)')
+    elseif param==5
+        ylabel('OB gamma power (a.u.)')
+    elseif param==6
+        ylabel('Ripples occurence (#/s)')
+    elseif param==7
+        ylabel('HPC theta frequency (Hz)')
+    elseif param==8
+        ylabel('HPC theta delta')
+    end
+    makepretty_BM2
+end
+
+
+% arousal marker
+figure, n=1;
+for param = 9:12
+    subplot(1,4,n)
+    
+    MakeSpreadAndBoxPlot3_SB({MeanVal_QW.(Params{param}) MeanVal_Safe.(Params{param})...
+            MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+    
+    if n==1
+        ylabel('EMG neck (log scale)')
+    elseif n==2
+        ylabel('EMG pect (log scale)')
+    elseif n==3
+        ylabel('Accelero (log scale)')
+    elseif n==4
+        ylabel('Speed (log scale)')
+    end
+    makepretty_BM2
+    if n<4, set(gca,'YScale','log'), end
+    n=n+1;
+end
 
 
 
 
 %% sleep
-load('/media/nas7/ProjetEmbReact/DataEmbReact/States_Comparison_Fz_Sleep_QW_Act.mat')
-Params = Fear.Params; Params{8} = 'hpc_theta_delta';
-Params2 = {'accelero','emg_pect','ob_gamma_power'};
-load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/MeanBodyValues_Fz.mat', 'Freq_Max1', 'Freq_Max2')
-Mouse = Fear.Mouse;
-
-Sleep.OutPutData.sleep_pre.accelero.mean([21 23 27 37],3)=NaN;
-Fear.OutPutData.Fear.accelero.mean([21 23],[5 6])=NaN;
-Sleep.OutPutData.sleep_pre.emg_pect.mean([27],3)=NaN;
-Sleep.OutPutData.sleep_pre.ob_gamma_power.mean([37:39],3)=NaN;
-Sleep.OutPutData.sleep_pre.ob_gamma_freq.mean(24,3)=NaN;
-
-
-
-Cols = {[.5 .5 .5],[.5 .5 1],[1 .5 .5]};
-X = [1:3];
 Legends = {'Sleep','Safe','Shock'};
-NoLegends = {'','',''};
 
 figure
-[~ , ~ , Freq_Max_Sleep] = Plot_MeanSpectrumForMice_BM(squeeze(Sleep.OutPutData.sleep_pre.ob_low.mean(:,3,:)));
-xlabel('Frequency (Hz)'); ylabel('Power (a.u.)'); xlim([0 10]); ylim([0 1])
-makepretty
-v1=vline(nanmean(4.73)); set(v1,'LineStyle','--','Color',[1 .5 .5]); v2=vline(nanmean(3.053)); set(v2,'LineStyle','--','Color',[.5 .5 1])
-xticks([0:2:14])
-axis square
+for param = 1:8
+    subplot(1,8,param)
+    
+        MakeSpreadAndBoxPlot3_SB({OutPutData.sleep_pre.(Params{param}).mean(:,3)' MeanVal_Safe.(Params{param})...
+            MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+
+    if param==1
+        ylabel('Breathing (Hz)')
+    elseif param==2
+        ylabel('Heart rate (Hz)')
+    elseif param==3
+        ylabel('Heart rate variability (a.u.)')
+    elseif param==4
+        ylabel('OB gamma frequency (Hz)')
+    elseif param==5
+        ylabel('OB gamma power (a.u.)')
+    elseif param==6
+        ylabel('Ripples occurence (#/s)')
+    elseif param==7
+        ylabel('HPC theta frequency (Hz)')
+    elseif param==8
+        ylabel('HPC theta power (log scale)')
+    end
+    makepretty_BM2
+end
+
+
+% arousal marker
+figure, n=1;
+for param = 9:12
+    subplot(1,4,n)
+    
+    MakeSpreadAndBoxPlot3_SB({OutPutData.sleep_pre.(Params{param}).mean(:,3)' MeanVal_Safe.(Params{param})...
+            MeanVal_Shock.(Params{param})},Cols,X,Legends,'showpoints',0,'paired',1);
+    
+    if n==1
+        ylabel('EMG neck (log scale)')
+    elseif n==2
+        ylabel('EMG pect (log scale)')
+    elseif n==3
+        ylabel('Accelero (log scale)')
+    elseif n==4
+        ylabel('Speed (log scale)')
+    end
+    makepretty_BM2
+    if n<4, set(gca,'YScale','log'), end
+    n=n+1;
+end
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% old ?
+
+
+
 
 
 figure
