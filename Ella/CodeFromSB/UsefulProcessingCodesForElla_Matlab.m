@@ -22,7 +22,8 @@ FindNoiseEpoch_BM([cd filesep],channel,0);
 %% Get heart beats
 clear all
 Options.TemplateThreshStd=3;
-Options.BeatThreshStd=0.05;
+% Options.BeatThreshStd=0.05;
+Option.BeatThreshStd=1.5;
 load('ChannelsToAnalyse/EKG.mat')
 load(['LFPData/LFP',num2str(channel),'.mat'])
 load('StateEpochSB.mat','TotalNoiseEpoch')
