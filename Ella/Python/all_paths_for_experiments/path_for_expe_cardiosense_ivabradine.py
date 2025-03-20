@@ -71,7 +71,9 @@ def get_path_for_expe_cardiosense_ivabradine(experiment):
         mouse_data = [
             # M1690
             '/media/nas8-2/ProjectCardioSense/TestSleepScoring/2025-02-21_17-59-45',
-            '/media/nas8-2/ProjectCardioSense/TestSleepScoring/2025-02-04_16-19-07'
+            '/media/nas8-2/ProjectCardioSense/TestSleepScoring/K1690/2025-01-29_12-57-27',
+            '/media/nas8-2/ProjectCardioSense/TestSleepScoring/K1690/2025-01-30_15-45-49',
+            '/media/nas8-2/ProjectCardioSense/TestSleepScoring/2025-02-04_16-19-07',
             
         ]
         
@@ -99,6 +101,7 @@ def get_path_for_expe_cardiosense_ivabradine(experiment):
                     print(f"Warning: 'ExpeInfo' not found in {expe_info_path}")
                     
     # To remove after
+    
     elif experiment == 'Injection_Saline':
         mouse_data = [
             # M1690
@@ -145,7 +148,7 @@ def get_path_for_expe_cardiosense_ivabradine(experiment):
         mouse_data = [
             '/media/nas8-2/ProjectCardioSense/K1690/2025-03-05_10-15-01/1690_250305_Injection_Ivabradine_20mgkg',
             
-            '/media/nas8-2/ProjectCardioSense/K1711/2025-03-05_14-29-26/1711_250305_Injection_Ivabradine_20mgkg'
+            '/media/nas8-2/ProjectCardioSense/K1711/2025-03-05_14-29-26/1711_250305_Injection_Ivabradine_20mgkg',
             
             '/media/nas8-2/ProjectCardioSense/K1712/2025-03-05_16-32-38/1712_250305_Injection_Ivabradine_20mgkg',
    

@@ -55,56 +55,61 @@ def plot_variable_over_time(data, mouse_id, variable, date):
 
 import seaborn as sns
 
-def plot_variable_distribution(data, mouse_id, variable, date=None):
+def plot_variable_distribution(data_list, mouse_id, variable, dates=None, ylim=None):
     """
     Plots a violin plot to visualize the distribution of a given variable 
-    for a specific mouse. 
+    for a specific mouse across multiple datasets.
 
-    By default, it plots data from all available dates for the mouse.
-    If a specific date is provided, only that date is plotted.
+    By default, it plots data from all available dates in all provided datasets.
+    If specific dates are provided, only those dates will be plotted.
 
     INPUTS:
-        data (dict): Nested dictionary {mouse_id -> {date -> {variable -> tsd_data}}}
+        data_list (list of dicts): List of nested dictionaries {mouse_id -> {date -> {variable -> tsd_data}}}
         mouse_id (int): Mouse identifier (e.g., 1690)
         variable (str): Name of the variable to plot (e.g., 'Heartrate' or 'BreathFreq')
-        date (str, optional): If provided, plots only that date (format 'YYYYMMDD')
+        dates (list, optional): List of dates to plot (format ['YYMMDD', 'YYMMDD']). 
+                                If None, plots all available dates.
+        ylim (tuple, optional): Custom y-axis limits (e.g., (min, max)). 
+                                Defaults:
+                                  - Heartrate: (6, 14)
+                                  - BreathFreq: (0, 9)
 
     OUTPUT:
         Displays a violin plot of the selected variable's distribution.
     """
     
-    # Check if the mouse exists in the data
-    if mouse_id not in data:
-        print(f"Error: Mouse {mouse_id} not found in the dataset.")
-        return
-
-    # Extract data
     all_data = []
     labels = []
 
-    if date:  # If a specific date is requested
-        if date not in data[mouse_id]:
-            print(f"Error: No data found for Mouse {mouse_id} on {date}.")
-            return
-        if variable not in data[mouse_id][date]:
-            print(f"Error: Variable '{variable}' not found for Mouse {mouse_id} on {date}.")
-            return
-        
-        # Extract variable values for the specified date
-        values = data[mouse_id][date][variable].data
-        all_data.append(values)
-        labels.append(date)
+    # Convert YYMMDD format to YYYYMMDD for searching
+    if dates:
+        full_dates = {f"20{date}" for date in dates}  # Convert to full YYYYMMDD format
+    else:
+        full_dates = None  # If no specific dates, use all available ones
 
-    else:  # If no specific date is given, use all available dates
+    # Iterate through all provided datasets
+    for data in data_list:
+        if mouse_id not in data:
+            continue  # Skip if the mouse is not in this dataset
+
         for session_date, session_data in data[mouse_id].items():
-            if variable in session_data:
-                values = session_data[variable].data
-                all_data.append(values)
-                labels.append(session_date)
+            short_date = session_date[2:]  # Convert 'YYYYMMDD' → 'YYMMDD'
+
+            # Check if we should include this date
+            if full_dates is None or session_date in full_dates:
+                if variable in session_data:
+                    values = session_data[variable].data
+                    all_data.append(values)
+                    labels.append(short_date)
 
     if not all_data:
         print(f"Error: No data available for Mouse {mouse_id} and variable '{variable}'.")
         return
+
+    # Set default y-limits if not provided
+    if ylim is None:
+        default_ylim = {"Heartrate": (6, 14), "BreathFreq": (0, 9)}
+        ylim = default_ylim.get(variable, None)  # If variable not listed, don't set ylim
 
     # Create the plot
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -113,9 +118,13 @@ def plot_variable_distribution(data, mouse_id, variable, date=None):
     # Set labels and title
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, fontsize=12, fontweight="bold")
-    ax.set_xlabel("Date" if not date else "Session", fontsize=14, fontweight="bold")
+    ax.set_xlabel("Date" if not dates else "Selected Sessions", fontsize=14, fontweight="bold")
     ax.set_ylabel(variable, fontsize=14, fontweight="bold")
     ax.set_title(f"Distribution of {variable} (Mouse {mouse_id})", fontsize=16, fontweight="bold")
+
+    # Apply y-limits if defined
+    if ylim:
+        ax.set_ylim(ylim)
 
     # Apply custom styling
     make_pretty_plot(ax)
@@ -123,8 +132,5 @@ def plot_variable_distribution(data, mouse_id, variable, date=None):
     plt.show()
 
 # Example Usage:
-# Plot all available dates for Mouse 1690
-# plot_variable_distribution(data, 1690, 'Heartrate')
+# plot_variable_distribution([data1, data2], 1690, 'Heartrate', dates=['240221', '240223'])
 
-# Plot only for a specific date
-# plot_variable_distribution(data, 1690, 'Heartrate', date='20250221')
