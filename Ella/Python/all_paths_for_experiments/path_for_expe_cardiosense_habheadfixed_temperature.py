@@ -44,7 +44,7 @@ def get_path_for_expe_cardiosense_habheadfixed_temperature(experiment):
             '/media/nas8-2/ProjectCardioSense/K1712/2025-02-06_16-58-39',
             '/media/nas8-2/ProjectCardioSense/K1712/2025-02-08_17-28-37',
             '/media/nas8-2/ProjectCardioSense/K1712/2025-02-10_09-46-21',
-            '/media/nas8-2/ProjectCardioSense/K1712/2025-02-12_12-28-43'
+            '/media/nas8-2/ProjectCardioSense/K1712/2025-02-12_12-28-43',
         
         ]
         
@@ -145,7 +145,7 @@ def get_path_for_expe_cardiosense_habheadfixed_temperature(experiment):
             # M1690
             '/media/nas8-2/ProjectCardioSense/K1690/2025-02-24_13-05-35',
             '/media/nas8-2/ProjectCardioSense/K1690/2025-02-25_11-20-01',
-            '/media/nas8-2/ProjectCardioSense/K1690/2025-02-26_12-02-00'
+            '/media/nas8-2/ProjectCardioSense/K1690/2025-02-26_12-02-00',
             
             # M1711
             '/media/nas8-2/ProjectCardioSense/K1711/2025-02-24_15-51-08',
@@ -187,7 +187,7 @@ def get_path_for_expe_cardiosense_habheadfixed_temperature(experiment):
         mouse_data = [
             # M1690
             '/media/nas8-2/ProjectCardioSense/K1690/2025-02-27_10-54-20',
-            '/media/nas8-2/ProjectCardioSense/K1690/2025-02-28_11-43-27'
+            '/media/nas8-2/ProjectCardioSense/K1690/2025-02-28_11-43-27',
             
             # M1711
             '/media/nas8-2/ProjectCardioSense/K1711/2025-02-27_13-28-40',

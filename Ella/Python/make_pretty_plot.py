@@ -6,8 +6,6 @@ Created on Wed Mar 19 19:07:17 2025
 @author: gruffalo
 """
 
-import matplotlib.pyplot as plt
-
 def make_pretty_plot(ax):
     """
     Enhances the appearance of a given matplotlib axis based on specified styling:

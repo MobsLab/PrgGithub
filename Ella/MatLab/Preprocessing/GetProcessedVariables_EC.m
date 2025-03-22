@@ -1,5 +1,10 @@
-function GetProcessedVariables_EC()
+function GetProcessedVariables_EC(force_no_sleep_scoring)
 % Process Neural Data with Necessary Checks
+% Optional input: force_no_sleep_scoring (true/false)
+
+if nargin < 1
+    force_no_sleep_scoring = false;
+end
 
 % Define required channel files
 dHPC_deep_file = 'ChannelsToAnalyse/dHPC_deep.mat';
@@ -26,13 +31,17 @@ if exist(heartbeat_file, 'file') && exist(noise_file, 'file') && exist(sleep_sco
 end
 
 % Check for required channels for sleep scoring
-if exist(dHPC_deep_file, 'file') || exist(dHPC_rip_file, 'file')
+if force_no_sleep_scoring
+    perform_sleep_scoring = false;
+    disp('Sleep scoring is forcibly disabled by user.');
+elseif exist(dHPC_deep_file, 'file') || exist(dHPC_rip_file, 'file')
     disp('Sleep scoring can be performed.');
     perform_sleep_scoring = true;
 else
     disp('No dHPC deep or dHPC rip channel found. Skipping sleep scoring.');
     perform_sleep_scoring = false;
 end
+
 
 % Check for required channel for ripple detection
 if exist(dHPC_rip_file, 'file')
@@ -133,7 +142,7 @@ end
 %% Sleep scoring (if applicable)
 if perform_sleep_scoring
     disp('Running sleep scoring...');
-    SleepScoringOBGamma;
+    SleepScoring_Accelero_OBgamma;
 end
 
 %% Get heart beats (WITH noise correction, AFTER sleep scoring if performed)

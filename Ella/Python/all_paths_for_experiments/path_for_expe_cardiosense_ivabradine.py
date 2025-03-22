@@ -106,7 +106,7 @@ def get_path_for_expe_cardiosense_ivabradine(experiment):
         mouse_data = [
             # M1690
             '/media/nas8-2/ProjectCardioSense/K1690/2025-03-04_09-48-02/1690_250304_Injection_Saline',
-            '/media/nas8-2/ProjectCardioSense/K1690/2025-03-13_10-48-26/1690_250313_Injection_Saline'
+            '/media/nas8-2/ProjectCardioSense/K1690/2025-03-13_10-48-26/1690_250313_Injection_Saline',
 
             
             # M1711
@@ -114,7 +114,7 @@ def get_path_for_expe_cardiosense_ivabradine(experiment):
             
             # M1712
             '/media/nas8-2/ProjectCardioSense/K1712/2025-03-04_17-18-54/1712_250304_Injection_Saline',
-            '/media/nas8-2/ProjectCardioSense/K1712/2025-03-13_15-28-37/1712_250313_Injection_Saline'
+            '/media/nas8-2/ProjectCardioSense/K1712/2025-03-13_15-28-37/1712_250313_Injection_Saline',
             
             
         ]
