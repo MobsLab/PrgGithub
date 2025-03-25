@@ -8,8 +8,11 @@ Created on Thu Mar  6 17:38:37 2025
 
 # %% Import necessary modules 
 
+import os 
+os.chdir('/home/gruffalo/PrgGithub/Ella/Python/data_BaptisteMaheo/')
+
 import numpy as np
-from load_data import load_mat_data
+from load_data_GLM import load_mat_data
 from preprocess_data import filter_columns
 from transform_data import apply_sigmoid
 from fit_linear_model_r2 import ( 
