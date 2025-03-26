@@ -7,15 +7,17 @@ Created on Tue Feb  4 11:02:29 2025
 """
 
 # %% Import necessary modules 
+import os 
+os.chdir('/home/gruffalo/PrgGithub/Ella/Python/data_BaptisteMaheo/')
 
 import numpy as np
-from load_data import load_mat_data
+from load_data_GLM import load_mat_data
 from preprocess_data import filter_columns
 from transform_data import apply_sigmoid
 from visualize_data import plot_exp_transform, plot_sigmoid_transform, plot_mouse_column
 from fit_linear_model_r2 import ( 
     find_best_linear_model, 
-    # fit_all_predictors_model,
+    fit_all_predictors_model,
     fit_single_predictor_models, 
     fit_leave_one_out_models
     )
@@ -74,11 +76,12 @@ best_results = find_best_linear_model(df, param_grid, independent_vars)
 
 # Display results
 print("Best Hyperparameters:", best_results["best_params"])
+print("Best Coefficients:", best_results["coefficients"])
 print("Best R² Score:", best_results["best_score"])
 # print("Mean MAE:", best_results["best_score"])
 
-# all_results = fit_all_predictors_model(df, best_results["best_params"], independent_vars)
-# print("Best R² Score:", all_results["mean_r2"])
+all_results = fit_all_predictors_model(df, best_results["best_params"], independent_vars)
+print(all_results['mean_r2'])
 
 # Fit single-predictor models
 single_predictor_results = fit_single_predictor_models(df, best_results["best_params"], independent_vars)
