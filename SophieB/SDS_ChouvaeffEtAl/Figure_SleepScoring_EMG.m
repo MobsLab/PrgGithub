@@ -105,7 +105,7 @@ title('Theta/Delta ratio')
 set(gca,'XTick',[])
 
 % Movement % Décommenté le 31/07/24
-subplot(3,1,3), hold on
+subplot(3,1,3), hold off
 plot(Range(EMGData)/3600e4, Data(EMGData), 'linewidth',1, 'color','k')
 line([begin endin], [Info.EMG_thresh Info.EMG_thresh], 'linewidth',1, 'color',[0.7 0.7 0.7])
 xlim([begin endin]), 

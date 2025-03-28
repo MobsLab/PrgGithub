@@ -12,8 +12,9 @@ Dates = {'17042021','17042026'};
 SessionName = {'Sleep_PreSDS','Sleep_PostSDS'};
 
 
-
+% loop on both sessions
 for ss = 1:length(SessionName)
+    % loop on mice
     for mousenum = 2:4
         
         DirectoryToUse = [DataLocation,'M', num2str(mousenum),filesep,Dates{ss},filesep,SessionName{ss}];
