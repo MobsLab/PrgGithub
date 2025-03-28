@@ -75,6 +75,6 @@ params.pad=2;
 params.fpass=[0 40];
 movingwin=[3 0.2];
 params.tapers=[3 5];
-[SpH,tH,fH]=mtspecgramc(Data(FilLFP),movingwin,params);
+[SpH,tH,fH]=mtspecgramc(Data(LFP),movingwin,params);
 
 
