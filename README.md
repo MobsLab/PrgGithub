@@ -1,3 +1,7 @@
+# An introduction to Git if needed
+
+[This tutorial](https://freedium.cfd/https%3A%2F%2Fmedium.com%2F%40jake.page91%2Fthe-guide-to-git-i-never-had-a89048d4703a) is a good start to understand the basics of Git.
+
 # Update 2025-02-10
 
 There were some already existing git repos in the PrgGithub folder.
