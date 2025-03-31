@@ -22,6 +22,8 @@ switch strtrim(evalc('system(''hostname'');'))
     % Start hostname cases
     case 'gruffalo'
         p = fullfile('/home/gruffalo/',varargin{:});
+    case 'MobsEcolo'
+        p = fullfile('/home/greta',varargin{:});
       case 'mobshamilton-HP-Z440-Workstation'
         p = fullfile('/home/mobshamilton/Desktop/Alice/GitHub/',varargin{:});
     case 'pinky'

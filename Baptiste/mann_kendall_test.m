@@ -39,10 +39,10 @@ function [tau, p_value, trend] = mann_kendall_test(data, alpha)
         if tau > 0
             trend = 1;%'increasing';
         else
-            trend = 2;%'decreasing';
+            trend = -1;%'decreasing';
         end
     else
-        trend = 3;%'no trend';
+        trend = 0;%'no trend';
     end
 
     % Display results

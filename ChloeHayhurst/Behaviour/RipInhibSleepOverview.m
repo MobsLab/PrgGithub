@@ -9,12 +9,13 @@ load('AllSessions.mat');
 % Group = [1 2];
 % Group = [3 4];
 Group = 7;
+% Group = 9;
 % Group = [7 3];
 
 Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','Saline'};
-Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear'};
+% Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear'};
 % Session_type = {'TestPre','TestPost','Cond'};
-% Session_type={'All'};
+Session_type={'Fear'};
 
 
 RangeLow = linspace(0.1526,20,261);
@@ -285,11 +286,10 @@ Create_Occup_Map_CH
 % Group = [1 2 3 4];
 % Group = [1 2];
 % Group = [3 4 7];
-Group = 7;
 
 
 Session_type={'SleepPre','SleepPostPre','SleepPostPost'};
-Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline'};
+Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','','Baseline'};
 
 
 for group = Group
@@ -314,7 +314,7 @@ for group = Group
             Ytsd.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'yposition');
             HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'heartrate');
             HR_Var.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'heartratevar');
-            SpectroHPC.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'spectrum','prefix','H_Low');
+%             SpectroHPC.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'spectrum','prefix','H_Low');
         end
     end
 end
@@ -406,13 +406,28 @@ for group = Group
             for i = 1:10
                 Epoch = intervalSet(0+j, 600e4+j);
                 try
+                    SleepEpochTemp = and(Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch);
+                    SleepPropTemp.(Name{group}).(Session_type{sess})(mouse,i) = sum(Stop(SleepEpochTemp)-Start(SleepEpochTemp))/sum(Stop(Epoch)-Start(Epoch));
+
                     REMEpochTemp = and(REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch);
                     REMPropTemp.(Name{group}).(Session_type{sess})(mouse,i) = sum(Stop(REMEpochTemp)-Start(REMEpochTemp))/sum(Stop(Epoch)-Start(Epoch));
+                    REMPropTemp2.(Name{group}).(Session_type{sess})(mouse,i) = sum(Stop(REMEpochTemp)-Start(REMEpochTemp))/sum(Stop(SleepEpochTemp)-Start(SleepEpochTemp));
+                    
+%                     if isnan(REMPropTemp2.(Name{group}).(Session_type{sess})(mouse,i))
+%                         REMPropTemp2.(Name{group}).(Session_type{sess})(mouse,i) = 0;
+%                     end
+                    
                     NREMEpochTemp = and(NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch);
                     NREMPropTemp.(Name{group}).(Session_type{sess})(mouse,i) = sum(Stop(NREMEpochTemp)-Start(NREMEpochTemp))/sum(Stop(Epoch)-Start(Epoch));
-                     WakeEpochTemp = and(Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch);
+                    NREMPropTemp2.(Name{group}).(Session_type{sess})(mouse,i) = sum(Stop(NREMEpochTemp)-Start(NREMEpochTemp))/sum(Stop(SleepEpochTemp)-Start(SleepEpochTemp));
+                    
+%                     if isnan(NREMPropTemp2.(Name{group}).(Session_type{sess})(mouse,i))
+%                         NREMPropTemp2.(Name{group}).(Session_type{sess})(mouse,i) = 0;
+%                     end
+                    
+                    WakeEpochTemp = and(Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch);
                     WakePropTemp.(Name{group}).(Session_type{sess})(mouse,i) = sum(Stop(WakeEpochTemp)-Start(WakeEpochTemp))/sum(Stop(Epoch)-Start(Epoch));
-                   
+                    
                 end
                 j = j+600e4;
                 clear REMEpochTemp  NREMEpochTemp
@@ -425,96 +440,6 @@ for group = Group
     end
 end
 
-
-% 
-% for group = Group
-%     Mouse=Drugs_Groups_UMaze_CH(group);
-%     disp (Name{group})
-%     for sess=1:length(Session_type)
-%         if convertCharsToStrings(Session_type{sess})=='SleepPre'
-%             FolderList=SleepPreSess(1);
-%         elseif convertCharsToStrings(Session_type{sess})=='SleepPostPre'
-%             FolderList=SleepPostPreSess;
-%         elseif convertCharsToStrings(Session_type{sess})=='SleepPostPost'
-%             FolderList=SleepPostPostSess;
-%         end
-%         disp(Session_type{sess})
-%         for mouse=1:length(Mouse)
-%             Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
-%             disp(Mouse_names{mouse})
-%             path = FolderList.(Mouse_names{mouse}){1};
-%             cd(path)
-%             
-%             % variables
-%             load('StateEpochSB.mat', 'WakeAcc' , 'SWSEpochAcc', 'REMEpochAcc', 'Epoch');
-%             Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = WakeAcc;
-%             REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) =  REMEpochAcc;
-%             NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = SWSEpochAcc;
-%             Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) =  or(REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-%             Tot_Epoch = Epoch;
-%             Wake_prop.(Name{group}).(Session_type{sess})(mouse) = sum(Stop(Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))-Start(Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/sum(Stop(Tot_Epoch)-Start(Tot_Epoch));
-%             Wake_Dur_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean((DurationEpoch(Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4);
-%             Wake_EpNumb.(Name{group}).(Session_type{sess})(mouse) = length(Start(Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-%             Frag_Wake.(Name{group}).(Session_type{sess})(mouse) = Wake_EpNumb.(Name{group}).(Session_type{sess})(mouse)./Wake_Dur_mean.(Name{group}).(Session_type{sess})(mouse);
-% 
-%             %             HR_Wake.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-%             %             HR_NREM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-%             %             HR_REM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-%             %             HR_Sleep.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-%             %
-%             
-%             Mean_HR_Wake.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(HR_Wake.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-%             
-%             if sum(DurationEpoch(Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))) > 0
-%                 Sleep_prop.(Name{group}).(Session_type{sess})(mouse) = sum(Stop(Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))-Start(Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/sum(Stop(Tot_Epoch)-Start(Tot_Epoch));
-%                 Sleep_Dur_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean((DurationEpoch(Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4);
-%                 Sleep_EpNumb.(Name{group}).(Session_type{sess})(mouse) = length(Start(Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-%                 Frag_Sleep.(Name{group}).(Session_type{sess})(mouse) = Sleep_EpNumb.(Name{group}).(Session_type{sess})(mouse)./Sleep_Dur_mean.(Name{group}).(Session_type{sess})(mouse);
-%                 REM_prop.(Name{group}).(Session_type{sess})(mouse) = sum(Stop(REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))-Start(REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/sum(Stop(Tot_Epoch)-Start(Tot_Epoch));
-%                 REM_prop2.(Name{group}).(Session_type{sess})(mouse) = sum(Stop(REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))-Start(REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/sum(Stop(NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))-Start(NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-%                 REM_Dur_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean((DurationEpoch(REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4);
-%                 REM_EpNumb.(Name{group}).(Session_type{sess})(mouse) = length(Start(REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-%                 Frag_REM.(Name{group}).(Session_type{sess})(mouse) = REM_EpNumb.(Name{group}).(Session_type{sess})(mouse)./REM_Dur_mean.(Name{group}).(Session_type{sess})(mouse);
-%                 NREM_prop.(Name{group}).(Session_type{sess})(mouse) = sum(Stop(NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))-Start(NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/sum(Stop(Tot_Epoch)-Start(Tot_Epoch));
-%                 NREM_prop2.(Name{group}).(Session_type{sess})(mouse) = sum(Stop(NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))-Start(NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/sum(Stop(Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))-Start(Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-%                 NREM_Dur_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean((DurationEpoch(NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4);
-%                 NREM_EpNumb.(Name{group}).(Session_type{sess})(mouse) = length(Start(NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-%                 Frag_NREM.(Name{group}).(Session_type{sess})(mouse) = NREM_EpNumb.(Name{group}).(Session_type{sess})(mouse)./NREM_Dur_mean.(Name{group}).(Session_type{sess})(mouse);
-%                 %                 Mean_HR_Sleep.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(HR_Sleep.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-%                 %                 Mean_HR_NREM.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(HR_NREM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-%                 %                 Mean_HR_REM.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(HR_REM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-%                 
-%                 a = Start(Sleep_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-%                 if (a(1) == 0) == 0
-%                 LatencyToSleep.(Name{group}).(Session_type{sess})(mouse) = a(1)./1e4;
-%                 elseif a(1) == 0
-%                 LatencyToSleep.(Name{group}).(Session_type{sess})(mouse) = a(2)./1e4;
-%                 end
-%                 
-%             else
-%                 Sleep_prop.(Name{group}).(Session_type{sess})(mouse) = 0;
-%                 Sleep_Dur_mean.(Name{group}).(Session_type{sess})(mouse) = 0;
-%                 Sleep_EpNumb.(Name{group}).(Session_type{sess})(mouse) = 0;
-%                 Frag_Sleep.(Name{group}).(Session_type{sess})(mouse) = NaN;
-%                 REM_prop.(Name{group}).(Session_type{sess})(mouse) = 0;
-%                 REM_Dur_mean.(Name{group}).(Session_type{sess})(mouse) = 0;
-%                 REM_EpNumb.(Name{group}).(Session_type{sess})(mouse) = 0;
-%                 Frag_REM.(Name{group}).(Session_type{sess})(mouse) = NaN;
-%                 NREM_prop.(Name{group}).(Session_type{sess})(mouse) = 0;
-%                 NREM_Dur_mean.(Name{group}).(Session_type{sess})(mouse) = 0;
-%                 NREM_EpNumb.(Name{group}).(Session_type{sess})(mouse) = 0;
-%                 Frag_NREM.(Name{group}).(Session_type{sess})(mouse) = NaN;
-%                 %                 Mean_HR_Sleep.(Name{group}).(Session_type{sess})(mouse) = NaN;
-%                 %                 Mean_HR_NREM.(Name{group}).(Session_type{sess})(mouse) = NaN;
-%                 %                 Mean_HR_REM.(Name{group}).(Session_type{sess})(mouse) = NaN;
-%                 LatencyToSleep.(Name{group}).(Session_type{sess})(mouse) = 3600;
-%             end
-%             load(strcat(cd,'/ChannelsToAnalyse/dHPC_rip.mat'))
-%              rip_chan.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = channel;
-%             clear 'WakeAcc' 'Sleep' 'Epoch' 'a' channel
-%         end
-%     end
-% end
 
 % 
 % 

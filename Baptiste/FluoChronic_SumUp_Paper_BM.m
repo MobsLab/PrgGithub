@@ -246,4 +246,27 @@ grid on
 
 
 
+%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figure 5 : Saline & fluo chronic
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+edit FluoChronic_SumUp_Paper_BM.m
+
+%% Fz shock is like the others
+
+load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/FearCondSound.mat', 'Freq_Max_Shock_FearSound','Freq_Max1','Freq_Max2')
+load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/FearCtxt.mat', 'Freq_Max_Shock_FearCtxt')
+
+Freq_Max1(46)=4.959;
+Freq_Max2(30)=NaN;
+
+Cols = {[1 .5 .5],[.5 .5 1],[.8 .1 .2],[1 .4 .1]};
+X = 1:4;
+Legends = {'Shock','Safe','Sound','Context'};
+
+figure
+MakeSpreadAndBoxPlot3_SB({Freq_Max1(26:end) Freq_Max2(26:end) Freq_Max_Shock_FearSound Freq_Max_Shock_FearCtxt},Cols,X,Legends,'showpoints',1,'paired',0);
+ylim([0 8]), ylabel('Breathing (Hz)')
+makepretty_BM2

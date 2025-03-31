@@ -4,7 +4,7 @@ clear all
 
 cd('/media/nas6/ProjetEmbReact/transfer')
 load('Sess.mat')
-Mouse_names={'M1686'}; mouse=1;
+Mouse_names={'M1715'}; mouse=1;
 Hab_24_Sess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Habituation24H'))));
 HabSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Habituation_P'))));
 HabBlockedShockSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'HabituationBlockedShock'))));

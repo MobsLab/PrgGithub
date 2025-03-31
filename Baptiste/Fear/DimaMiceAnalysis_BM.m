@@ -3,7 +3,7 @@
 
 clear all
 
-Dir=PathForExperimentsERC_Dima('UMazePAG');
+Dir=PathForExperimentsERC('UMazePAG');
 
 for d=1:length(Dir.path)
     Mouse_names{d}= ['M' num2str(Dir.ExpeInfo{1, d}.nmouse)];

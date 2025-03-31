@@ -103,7 +103,11 @@ for drug = 1:2
     HR_FzAftInj{drug}(HR_FzAftInj{drug}==0) = NaN;
     Speed_WakeAfterInj{drug}(Speed_WakeAfterInj{drug}==0) = NaN;
     Acc_WakeAfterInj{drug}(Acc_WakeAfterInj{drug}==0) = NaN;
+    SWR_occ_NREM{drug}(SWR_occ_NREM{drug}==0) = NaN;
+    SWR_occ_Fz{drug}(SWR_occ_NREM{drug}==0) = NaN;
 end
+Wake_prop_bin{1}([10 11],:) = NaN;
+Wake_prop_bin{2}([6:8 10],:) = NaN;
 
 for bin=1:15
     [h1(bin),p1(bin)] = ttest2(Wake_prop_bin{1}(:,bin) , Wake_prop_bin{2}(:,bin));
@@ -126,6 +130,46 @@ X = [1 2];
 Legends = {'Saline','DZP'};
 
 
+figure
+MakeSpreadAndBoxPlot3_SB({Fz_PostInj_Dur{1}./4800 Fz_PostInj_Dur{2}./4800},Cols,X,Legends,'showpoints',1,'paired',0);
+ylabel('Freezing proportion')
+makepretty_BM2
+
+figure
+Plot_MeanSpectrumForMice_BM(OB_Fz{1} , 'color' , 'k')
+hold on
+Plot_MeanSpectrumForMice_BM(OB_Fz{2} , 'color' , 'r')
+xlim([0 10])
+makepretty
+f=get(gca,'Children'); legend([f(8),f(4)],'Saline','Diazepam');
+title('OB, immobility after injection')
+
+
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB(SWR_occ_Fz,Cols,X,Legends,'showpoints',1,'paired',0);
+ylabel('SWR occurence (#/s)'), ylim([0 1.8]), title('Quiet wake')
+makepretty_BM2
+subplot(122)
+MakeSpreadAndBoxPlot3_SB(SWR_occ_NREM,Cols,X,Legends,'showpoints',1,'paired',0);
+ylim([0 1.8]), title('NREM')
+makepretty_BM2
+
+
+figure
+subplot(121)
+% MakeSpreadAndBoxPlot3_SB(Wake_prop_late,Cols,X,Legends,'showpoints',1,'paired',0);
+MakeSpreadAndBoxPlot3_SB(Wake_prop_early,Cols,X,Legends,'showpoints',1,'paired',0);
+ylabel('Wake/Total')
+makepretty_BM2
+subplot(122)
+% MakeSpreadAndBoxPlot3_SB(REM_prop_late,Cols,X,Legends,'showpoints',1,'paired',0);
+MakeSpreadAndBoxPlot3_SB(REM_prop_early,Cols,X,Legends,'showpoints',1,'paired',0);
+ylabel('REM/sleep')
+makepretty_BM2
+
+
+%%
 figure
 subplot(511)
 errorbar([10:20:290] , nanmean(Wake_prop_bin{1}) , nanstd(Wake_prop_bin{1})./sqrt(size(Wake_prop_bin{1},1)) , 'b' , 'LineWidth' , 2)
@@ -161,39 +205,14 @@ try, plot(find(h4)*20-10,1,'*k'), end
 vline(90,'--r'), vline(150,'--r')
 
 subplot(529)
-MakeSpreadAndBoxPlot3_SB(Wake_prop_late,Cols,X,Legends,'showpoints',1,'paired',0);
+MakeSpreadAndBoxPlot3_SB(Wake_prop_early,Cols,X,Legends,'showpoints',1,'paired',0);
 ylabel('Wake/Total')
 subplot(5,2,10)
-MakeSpreadAndBoxPlot3_SB(REM_prop_late,Cols,X,Legends,'showpoints',1,'paired',0);
+MakeSpreadAndBoxPlot3_SB(REM_prop_early,Cols,X,Legends,'showpoints',1,'paired',0);
 ylabel('REM/sleep')
 
-errorbar([10:20:290] , nanmean(NREM_prop_bin{2}) , nanstd(NREM_prop_bin{2})./sqrt(size(NREM_prop_bin{2},1)) , 'r' , 'LineWidth' , 2)
-ylabel('NREM/total'), box off
-try, plot(find(h2)*20-10,1,'*k'), end
-vline(90,'--r'), vline(150,'--r')
 
-subplot(513)
-errorbar([10:20:290] , nanmean(REM_prop_bin{1}) , nanstd(REM_prop_bin{1})./sqrt(size(REM_prop_bin{1},1)) , 'b' , 'LineWidth' , 2)
-hold on
-errorbar([10:20:290] , nanmean(REM_prop_bin{2}) , nanstd(REM_prop_bin{2})./sqrt(size(REM_prop_bin{2},1)) , 'r' , 'LineWidth' , 2)
-ylabel('REM/total'), box off
-try, plot(find(h3)*20-10,1,'*k'), end
-vline(90,'--r'), vline(150,'--r')
 
-subplot(514)
-errorbar([10:20:290] , nanmean(REMr_prop_bin{1}) , nanstd(REMr_prop_bin{1})./sqrt(size(REMr_prop_bin{1},1)) , 'b' , 'LineWidth' , 2)
-hold on
-errorbar([10:20:290] , nanmean(REMr_prop_bin{2}) , nanstd(REMr_prop_bin{2})./sqrt(size(REMr_prop_bin{2},1)) , 'r' , 'LineWidth' , 2)
-xlabel('time post injection (min)'), ylabel('REM/sleep'), box off
-try, plot(find(h4)*20-10,1,'*k'), end
-vline(90,'--r'), vline(150,'--r')
-
-subplot(529)
-MakeSpreadAndBoxPlot3_SB(Wake_prop_late,Cols,X,Legends,'showpoints',1,'paired',0);
-ylabel('Wake/Total')
-subplot(5,2,10)
-MakeSpreadAndBoxPlot3_SB(REM_prop_late,Cols,X,Legends,'showpoints',1,'paired',0);
-ylabel('REM/sleep')
 
 
 
@@ -234,10 +253,6 @@ Plot_MeanSpectrumForMice_BM(PFC_REM{2} , 'color' , 'g')
 
 
 
-figure
-MakeSpreadAndBoxPlot3_SB({Fz_PostInj_Dur{1}./4800 Fz_PostInj_Dur{2}./4800},Cols,X,Legends,'showpoints',1,'paired',0);
-ylabel('Freezing proportion')
-
 
 [~,MaxPowerValues1] = Plot_MeanSpectrumForMice_BM(Spectro{3}.*HPC_NREM{1}{1} , 'color' , 'k' , 'threshold' , 30);
 [~,MaxPowerValues2] = Plot_MeanSpectrumForMice_BM(Spectro{3}.*HPC_NREM{2}{1} , 'color' , 'k' , 'threshold' , 30);
@@ -251,17 +266,6 @@ xlim([50 250]), ylim([0 2])
 makepretty
 f=get(gca,'Children'); legend([f(8),f(4)],'Saline','Diazepam');
 title('HPC, NREM after injection')
-
-
-
-figure
-Plot_MeanSpectrumForMice_BM(OB_Fz{1} , 'color' , 'k')
-hold on
-Plot_MeanSpectrumForMice_BM(OB_Fz{2} , 'color' , 'r')
-xlim([0 10])
-makepretty
-f=get(gca,'Children'); legend([f(8),f(4)],'Saline','Diazepam');
-title('OB, immobility after injection')
 
 
 

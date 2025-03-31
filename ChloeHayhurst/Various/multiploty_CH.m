@@ -80,10 +80,10 @@ ax(1).FontSize = 15;
 
 % Plot the second set of lines
 ax(2) = axes('Parent',fig);
-hlines{2} = plot(set2{:},'Color',[0 0.5 0]);
+hlines{2} = plot(set2{:},'Color',[1 0 0]);
 % hlines{2}.LineWidth = 2;
 
-set(ax(2),'YAxisLocation','right','Color','none','YColor',[0 0.5 0],...
+set(ax(2),'YAxisLocation','right','Color','none','YColor',[1 0 0],...
     'xlim',get(ax(1),'xlim'),'xtick',[],'box','off','XColor','k');
 ax(2).LineWidth = 2;
 ax(2).FontSize = 15;
@@ -112,11 +112,11 @@ limx1 = ax(1).XLim;
 limx3 = [limx1(1)   limx1(1) + 1.2*(limx1(2)-limx1(1))];
 
 ax(3) = axes('Parent',fig);
-hlines{3} = plot(set3{:},'Color','r');
+hlines{3} = plot(set3{:},'Color','g');
 % hlines{3}.LineWidth = 2;
 
 set(ax(3),'Position',pos3,'box','off',...
-   'Color','none','XColor','k','YColor','r',...   
+   'Color','none','XColor','k','YColor','g',...   
    'xtick',[],'xlim',limx3,'yaxislocation','right',...
    'XColor','none');
 

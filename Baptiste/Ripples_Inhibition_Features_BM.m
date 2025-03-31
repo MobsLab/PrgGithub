@@ -6,9 +6,8 @@ GetEmbReactMiceFolderList_BM
 Drug_Group={'SalineSB','ChronicFlx','AcuteFlx','Midazolam','SalineBM','Diazepam','RipControl','RipInhib'};
 Group=7:8;
 
-n=1;
-for group=Group
-    Mouse=Drugs_Groups_UMaze_BM(group);
+for group=1:length(Group)
+    Mouse=Drugs_Groups_UMaze_BM(Group(group));
     for mouse=1:length(Mouse)
         Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
         
@@ -42,16 +41,16 @@ for group=Group
         FreezeTime.(Drug_Group{group}).(Mouse_names{mouse}) = sum(Stop(FreezeEpoch.(Drug_Group{group}).(Mouse_names{mouse}))-Start(FreezeEpoch.(Drug_Group{group}).(Mouse_names{mouse})))/1e4;
         ShockFreezeTime.(Drug_Group{group}).(Mouse_names{mouse}) = sum(Stop(Freeze_Shock_Epoch.(Drug_Group{group}).(Mouse_names{mouse}))-Start(Freeze_Shock_Epoch.(Drug_Group{group}).(Mouse_names{mouse})))/1e4;
         SafeFreezeTime.(Drug_Group{group}).(Mouse_names{mouse}) = sum(Stop(Freeze_Safe_Epoch.(Drug_Group{group}).(Mouse_names{mouse}))-Start(Freeze_Safe_Epoch.(Drug_Group{group}).(Mouse_names{mouse})))/1e4;
-        FreezeTime_All{n}(mouse) = FreezeTime.(Drug_Group{group}).(Mouse_names{mouse});
-        FreezeTime_Shock{n}(mouse) = ShockFreezeTime.(Drug_Group{group}).(Mouse_names{mouse});
-        FreezeTime_Safe{n}(mouse) = SafeFreezeTime.(Drug_Group{group}).(Mouse_names{mouse});
+        FreezeTime_All{group}(mouse) = FreezeTime.(Drug_Group{group}).(Mouse_names{mouse});
+        FreezeTime_Shock{group}(mouse) = ShockFreezeTime.(Drug_Group{group}).(Mouse_names{mouse});
+        FreezeTime_Safe{group}(mouse) = SafeFreezeTime.(Drug_Group{group}).(Mouse_names{mouse});
         
         ActiveTime.(Drug_Group{group}).(Mouse_names{mouse}) = sum(Stop(ActiveEpoch.(Drug_Group{group}).(Mouse_names{mouse}))-Start(ActiveEpoch.(Drug_Group{group}).(Mouse_names{mouse})))/1e4;
         ShockActiveTime.(Drug_Group{group}).(Mouse_names{mouse}) = sum(Stop(Active_Shock_Epoch.(Drug_Group{group}).(Mouse_names{mouse}))-Start(Active_Shock_Epoch.(Drug_Group{group}).(Mouse_names{mouse})))/1e4;
         SafeActiveTime.(Drug_Group{group}).(Mouse_names{mouse}) = sum(Stop(Active_Safe_Epoch.(Drug_Group{group}).(Mouse_names{mouse}))-Start(Active_Safe_Epoch.(Drug_Group{group}).(Mouse_names{mouse})))/1e4;
-        ActiveTime_All{n}(mouse) = ActiveTime.(Drug_Group{group}).(Mouse_names{mouse});
-        ActiveTime_Shock{n}(mouse) = ShockActiveTime.(Drug_Group{group}).(Mouse_names{mouse});
-        ActiveTime_Safe{n}(mouse) = SafeActiveTime.(Drug_Group{group}).(Mouse_names{mouse});
+        ActiveTime_All{group}(mouse) = ActiveTime.(Drug_Group{group}).(Mouse_names{mouse});
+        ActiveTime_Shock{group}(mouse) = ShockActiveTime.(Drug_Group{group}).(Mouse_names{mouse});
+        ActiveTime_Safe{group}(mouse) = SafeActiveTime.(Drug_Group{group}).(Mouse_names{mouse});
         
         Start_VHC_Stim.(Drug_Group{group}).(Mouse_names{mouse}) = Start(VHC_Stim_Epoch.(Drug_Group{group}).(Mouse_names{mouse}));
         VHC_Stim_Numb.(Drug_Group{group}).(Mouse_names{mouse}) = length(Start_VHC_Stim.(Drug_Group{group}).(Mouse_names{mouse}));
@@ -64,44 +63,141 @@ for group=Group
         VHC_Stim_Numb_DuringShockActive.(Drug_Group{group}).(Mouse_names{mouse}) = length(Start(VHC_Stim_Epoch_DuringShockActive.(Drug_Group{group}).(Mouse_names{mouse})));
         VHC_Stim_Numb_DuringSafeActive.(Drug_Group{group}).(Mouse_names{mouse}) = length(Start(VHC_Stim_Epoch_DuringSafeActive.(Drug_Group{group}).(Mouse_names{mouse})));
         
-        VHC_Stim_Numb_All{n}(mouse) = VHC_Stim_Numb.(Drug_Group{group}).(Mouse_names{mouse});
+        VHC_Stim_Numb_All{group}(mouse) = VHC_Stim_Numb.(Drug_Group{group}).(Mouse_names{mouse});
         
-        VHC_Stim_Numb_DuringFreezing_All{n}(mouse) = VHC_Stim_Numb_DuringFreezing.(Drug_Group{group}).(Mouse_names{mouse});
-        VHC_Stim_Numb_DuringFreezing_Shock{n}(mouse) = VHC_Stim_Numb_DuringShockFreezing.(Drug_Group{group}).(Mouse_names{mouse});
-        VHC_Stim_Numb_DuringFreezing_Safe{n}(mouse) = VHC_Stim_Numb_DuringSafeFreezing.(Drug_Group{group}).(Mouse_names{mouse});
+        VHC_Stim_Numb_DuringFreezing_All{group}(mouse) = VHC_Stim_Numb_DuringFreezing.(Drug_Group{group}).(Mouse_names{mouse});
+        VHC_Stim_Numb_DuringFreezing_Shock{group}(mouse) = VHC_Stim_Numb_DuringShockFreezing.(Drug_Group{group}).(Mouse_names{mouse});
+        VHC_Stim_Numb_DuringFreezing_Safe{group}(mouse) = VHC_Stim_Numb_DuringSafeFreezing.(Drug_Group{group}).(Mouse_names{mouse});
         
-        VHC_Stim_Numb_DuringActive_All{n}(mouse) = VHC_Stim_Numb_DuringActive.(Drug_Group{group}).(Mouse_names{mouse});
-        VHC_Stim_Numb_DuringActive_Shock{n}(mouse) = VHC_Stim_Numb_DuringShockActive.(Drug_Group{group}).(Mouse_names{mouse});
-        VHC_Stim_Numb_DuringActive_Safe{n}(mouse) = VHC_Stim_Numb_DuringSafeActive.(Drug_Group{group}).(Mouse_names{mouse});
+        VHC_Stim_Numb_DuringActive_All{group}(mouse) = VHC_Stim_Numb_DuringActive.(Drug_Group{group}).(Mouse_names{mouse});
+        VHC_Stim_Numb_DuringActive_Shock{group}(mouse) = VHC_Stim_Numb_DuringShockActive.(Drug_Group{group}).(Mouse_names{mouse});
+        VHC_Stim_Numb_DuringActive_Safe{group}(mouse) = VHC_Stim_Numb_DuringSafeActive.(Drug_Group{group}).(Mouse_names{mouse});
+        
+        if group==1
+            % Sensibility
+            rip_chan = Get_chan_numb_BM(CondSess.(Mouse_names{mouse}){1},'rip');
+            LFP_rip = ConcatenateDataFromFolders_SB(CondSess.(Mouse_names{mouse}),'lfp','channumber',rip_chan);
+            BeforeStim = intervalSet(Start(VHC_Stim_Epoch.(Drug_Group{group}).(Mouse_names{mouse}))-.400e4 , Start(VHC_Stim_Epoch.(Drug_Group{group}).(Mouse_names{mouse}))-.05e4);
+            LFP_rip = Restrict(LFP_rip , BeforeStim);
+            Fil = FilterLFP(LFP_rip , [120 250] , 1024);
+            for stim = 1:length(Start(BeforeStim))
+                try
+                    Env = abs(hilbert(Data(Restrict(Fil , subset(BeforeStim,stim)))));
+                    % look if there is a rip in the [-300 -100ms]  interval
+                    % before VHC stim, rip if more than 2*mean in the [-400 -300] interval
+                    if sum(Env(and(scale>-300 , scale<-100))>nanmean(Env([1:sum(scale<-300)+1]))*2)>(dur_rip/median(diff(scale)))
+                        IsThereRipBefStim{group}{mouse}(stim) = 1;
+                    end
+                end
+            end
+            IsThere_RipBefStim{group}(mouse) = nanmean(IsThereRipBefStim{group}{mouse});
+            
+            % Specificity
+            SWR = ConcatenateDataFromFolders_SB(CondSess.(Mouse_names{mouse}),'ripples');
+            AroundStim = intervalSet(Start(VHC_Stim_Epoch.(Drug_Group{group}).(Mouse_names{mouse}))-.05e4 , Start(VHC_Stim_Epoch.(Drug_Group{group}).(Mouse_names{mouse}))+.05e4);
+            SWR_Fz = Restrict(SWR , FreezeEpoch.(Drug_Group{group}).(Mouse_names{mouse})-AroundStim);
+            After_SWR_Fz = intervalSet(Range(SWR_Fz) , Range(SWR_Fz)+.3e4);
+            for swr = 1:length(Range(SWR_Fz))
+                IsThereStimAftRip{group}{mouse}(swr) = length(Start(and(VHC_Stim_Epoch.(Drug_Group{group}).(Mouse_names{mouse}) , subset(After_SWR_Fz,swr))));
+            end
+            IsThere_StimAftRip{group}(mouse) = nanmean(IsThereStimAftRip{group}{mouse});
+        end
         
         
         disp(Mouse_names{mouse})
     end
-    VHC_Stim_Prop_DuringFreezing_All{n} = VHC_Stim_Numb_DuringFreezing_All{n}./VHC_Stim_Numb_All{n};
+    VHC_Stim_Prop_DuringFreezing_All{group} = VHC_Stim_Numb_DuringFreezing_All{group}./VHC_Stim_Numb_All{group};
     
-    VHC_Stim_FreezingDensity_All{n} = VHC_Stim_Numb_DuringFreezing_All{n}./FreezeTime_All{n};
-    VHC_Stim_FreezingDensity_Shock{n} = VHC_Stim_Numb_DuringFreezing_Shock{n}./FreezeTime_Shock{n};
-    VHC_Stim_FreezingDensity_Safe{n} = VHC_Stim_Numb_DuringFreezing_Safe{n}./FreezeTime_Safe{n};
+    VHC_Stim_FreezingDensity_All{group} = VHC_Stim_Numb_DuringFreezing_All{group}./FreezeTime_All{group};
+    VHC_Stim_FreezingDensity_Shock{group} = VHC_Stim_Numb_DuringFreezing_Shock{group}./FreezeTime_Shock{group};
+    VHC_Stim_FreezingDensity_Safe{group} = VHC_Stim_Numb_DuringFreezing_Safe{group}./FreezeTime_Safe{group};
     
-    VHC_Stim_ActiveDensity_All{n} = VHC_Stim_Numb_DuringActive_All{n}./ActiveTime_All{n};
-    VHC_Stim_ActiveDensity_Shock{n} = VHC_Stim_Numb_DuringActive_Shock{n}./ActiveTime_Shock{n};
-    VHC_Stim_ActiveDensity_Safe{n} = VHC_Stim_Numb_DuringActive_Safe{n}./ActiveTime_Safe{n};
-    
-    n=n+1;
+    VHC_Stim_ActiveDensity_All{group} = VHC_Stim_Numb_DuringActive_All{group}./ActiveTime_All{group};
+    VHC_Stim_ActiveDensity_Shock{group} = VHC_Stim_Numb_DuringActive_Shock{group}./ActiveTime_Shock{group};
+    VHC_Stim_ActiveDensity_Safe{group} = VHC_Stim_Numb_DuringActive_Safe{group}./ActiveTime_Safe{group};
 end
+IsThere_StimAftRip{group}([4 9]) = NaN; % ripples are bad for that one and shitty events are detected, do SWR again
 
 
 for n=1:2
-    VHC_density_shock{n} = (VHC_Stim_Numb_DuringActive_Shock{n}+VHC_Stim_Numb_DuringFreezing_Shock{n})./(FreezeTime_Shock{n}+ActiveTime_Shock{n});
-    VHC_density_safe{n} = (VHC_Stim_Numb_DuringActive_Safe{n}+VHC_Stim_Numb_DuringFreezing_Safe{n})./(FreezeTime_Safe{n}+ActiveTime_Safe{n});
+    VHC_density_shock{group} = (VHC_Stim_Numb_DuringActive_Shock{group}+VHC_Stim_Numb_DuringFreezing_Shock{group})./(FreezeTime_Shock{group}+ActiveTime_Shock{group});
+    VHC_density_safe{group} = (VHC_Stim_Numb_DuringActive_Safe{group}+VHC_Stim_Numb_DuringFreezing_Safe{group})./(FreezeTime_Safe{group}+ActiveTime_Safe{group});
 end
 
+
+group=1;
+for mouse=1:10
+    Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+    
+    clear SWR_all D R St
+    SWR_all = ConcatenateDataFromFolders_SB(CondSess.(Mouse_names{mouse}),'ripples_all');
+    D = Data(SWR_all);
+    SWR_start = ts(D(:,1));
+    SWR_Fz = Restrict(SWR_start , FreezeEpoch.(Drug_Group{group}).(Mouse_names{mouse}));
+    After_SWR_Fz = intervalSet(Range(SWR_Fz) , Range(SWR_Fz)+.25e4);
+    
+    vHC_aft_SWR = and(VHC_Stim_Epoch.(Drug_Group{group}).(Mouse_names{mouse}) , After_SWR_Fz);
+    SWR_with_vHC_After = Restrict(SWR_Fz , intervalSet(Start(vHC_aft_SWR)-.25e4 , Start(vHC_aft_SWR)));
+    R = Range(SWR_with_vHC_After)/1e4;
+    St = Start(vHC_aft_SWR)/1e4;
+    
+    for swr = 1:length(SWR_with_vHC_After)
+        ind = find(R(swr)<St,1,'first');
+        delay{mouse}(swr) = R(swr)-St(ind);
+    end
+    delay{mouse} = -(.200+delay{mouse})*1000;
+    delay{mouse}(delay{mouse}<0) = NaN;
+end
+
+DELAY = [];
+for mouse=1:10
+    DELAY = [DELAY delay{mouse}];
+end
+
+figure
+histogram(DELAY,32,'FaceColor','k');
+xlabel('delay from offline detection(ms)'), ylabel('#')
+makepretty, vline(0,'--r')
+text(20,100,['median = ' num2str(nanmedian(DELAY)) 'ms'],'FontSize',15)
+
+
+
+%% figures
 % Stims by session, time, accuracy,...
 Cols = {[.65, .75, 0],[.63, .08, .18]};
 X = 1:2;
 Legends = {'Rip sham','Rip inhib'};
 NoLegends = {'',''};
 
+
+figure
+subplot(131)
+MakeSpreadAndBoxPlot3_SB(VHC_Stim_Numb_All ,Cols,X,Legends , 'showpoints',1,'paired',0);
+ylabel('VHC stims (#)');
+makepretty_BM2
+
+subplot(132)
+MakeSpreadAndBoxPlot3_SB(VHC_Stim_FreezingDensity_Shock ,Cols,X,Legends , 'showpoints',1,'paired',0);
+ylabel('VHC stims, shock fz (#/s)');
+makepretty_BM2
+
+subplot(133)
+MakeSpreadAndBoxPlot3_SB(VHC_Stim_FreezingDensity_Safe ,Cols,X,Legends , 'showpoints',1,'paired',0,'optiontest','ttest');
+ylabel('VHC stims, safe fz (#/s)');
+makepretty_BM2
+
+
+
+figure
+PlotErrorBarN_KJ({IsThere_RipBefStim{group} IsThere_StimAftRip{group}},...
+    'barcolors',{[.3 .3 .3],[.6 .6 .6]},'x_data',[1,2],'showPoints',0,'newfig',0);
+ylabel('post hoc validation (%)')
+set(gca,'XTick',1:2,'XtickLabel',{'vHC stim triggered by SWR','SWR triggering vHC stim'})
+makepretty, xtickangle(45)
+
+
+
+%%
 figure
 subplot(131)
 MakeSpreadAndBoxPlot3_SB(FreezeTime_All ,Cols,X,Legends , 'showpoints',1,'paired',0);
@@ -218,7 +314,7 @@ Dir=PathForExperimentsEmbReact('Calibration_VHC');
 for mouse=1:length(Dir.ExpeInfo)
     Mouse(mouse) = Dir.ExpeInfo{mouse}{1}.nmouse;
     Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
-    CalibSess.(Mouse_names{mouse}) = Dir.path{mouse};  
+    CalibSess.(Mouse_names{mouse}) = Dir.path{mouse};
 end
 
 
@@ -249,10 +345,10 @@ for sess=1:10
             Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
             
             try
-                Stim_Numb_All{sess}{n}(mouse) = Stim_Numb.(Mouse_names{mouse})(sess);
-                Stim_Numb_All2{n}(mouse,sess) = Stim_Numb.(Mouse_names{mouse})(sess);
-                Stim_Dens_All{sess}{n}(mouse) = Stim_Numb.(Mouse_names{mouse})(sess)/TotEpochDur.(Mouse_names{mouse})(sess);
-                Stim_Dens_All2{n}(mouse,sess) = Stim_Numb.(Mouse_names{mouse})(sess)/TotEpochDur.(Mouse_names{mouse})(sess);
+                Stim_Numb_All{sess}{group}(mouse) = Stim_Numb.(Mouse_names{mouse})(sess);
+                Stim_Numb_All2{group}(mouse,sess) = Stim_Numb.(Mouse_names{mouse})(sess);
+                Stim_Dens_All{sess}{group}(mouse) = Stim_Numb.(Mouse_names{mouse})(sess)/TotEpochDur.(Mouse_names{mouse})(sess);
+                Stim_Dens_All2{group}(mouse,sess) = Stim_Numb.(Mouse_names{mouse})(sess)/TotEpochDur.(Mouse_names{mouse})(sess);
             end
             
         end
@@ -290,22 +386,22 @@ for group=7:8
             LFP_Data_Zscored = zscore(Data(LFP_rip_BefStim));
             LFP_Data_Zscored_tsd = tsd(Range(LFP_rip_BefStim) , LFP_Data_Zscored);
             if ~isempty(Range(LFP_rip_BefStim))
-            CleanedEpoch = and(thresholdIntervals(LFP_Data_Zscored_tsd,-2) , thresholdIntervals(LFP_Data_Zscored_tsd,2,'Direction','Below')); % when stim artefact are still in the LFP signal
-            LFP_rip_BefStim = Restrict(LFP_rip_BefStim , CleanedEpoch);
-            LFP_rip_BefStim_BandPassed_Pre =  real(LowPassFilter(Data(LFP_rip_BefStim) , 250 , 1250));
-            LFP_rip_BefStim_BandPassed =  real(HighPassFilter_BM(LFP_rip_BefStim_BandPassed_Pre , 120, 1250 ));
-            
-            LFP_rip_BefStim_BandPassed_Abs = abs(LFP_rip_BefStim_BandPassed);
-            LFP_rip_BefStim_BandPassed_Abs_Env = Envelope_Maxima_BM(LFP_rip_BefStim_BandPassed_Abs , 7);
-            BandPassed_Envelope_LFP_rip.(Drug_Group{group}).(Mouse_names{mouse})(stim , 370-length(LFP_rip_BefStim_BandPassed_Abs_Env)+1:end) = LFP_rip_BefStim_BandPassed_Abs_Env;
-            Rip_Before_Stim.(Mouse_names{mouse})(stim) = logical(length(Restrict(Rip.(Mouse_names{mouse}) , EpochBeforeStim)));
+                CleanedEpoch = and(thresholdIntervals(LFP_Data_Zscored_tsd,-2) , thresholdIntervals(LFP_Data_Zscored_tsd,2,'Direction','Below')); % when stim artefact are still in the LFP signal
+                LFP_rip_BefStim = Restrict(LFP_rip_BefStim , CleanedEpoch);
+                LFP_rip_BefStim_BandPassed_Pre =  real(LowPassFilter(Data(LFP_rip_BefStim) , 250 , 1250));
+                LFP_rip_BefStim_BandPassed =  real(HighPassFilter_BM(LFP_rip_BefStim_BandPassed_Pre , 120, 1250 ));
+                
+                LFP_rip_BefStim_BandPassed_Abs = abs(LFP_rip_BefStim_BandPassed);
+                LFP_rip_BefStim_BandPassed_Abs_Env = Envelope_Maxima_BM(LFP_rip_BefStim_BandPassed_Abs , 7);
+                BandPassed_Envelope_LFP_rip.(Drug_Group{group}).(Mouse_names{mouse})(stim , 370-length(LFP_rip_BefStim_BandPassed_Abs_Env)+1:end) = LFP_rip_BefStim_BandPassed_Abs_Env;
+                Rip_Before_Stim.(Mouse_names{mouse})(stim) = logical(length(Restrict(Rip.(Mouse_names{mouse}) , EpochBeforeStim)));
             end
         end
         Prop_Rip_Before_Stim.(Mouse_names{mouse}) = sum(Rip_Before_Stim.(Mouse_names{mouse}))/length(Rip_Before_Stim.(Mouse_names{mouse}));
-        Prop_Rip_Before_Stim_all{n}(mouse,:) = Prop_Rip_Before_Stim.(Mouse_names{mouse});
+        Prop_Rip_Before_Stim_all{group}(mouse,:) = Prop_Rip_Before_Stim.(Mouse_names{mouse});
         
         BandPassed_Envelope_LFP_rip.(Drug_Group{group}).(Mouse_names{mouse})(BandPassed_Envelope_LFP_rip.(Drug_Group{group}).(Mouse_names{mouse})==0) = NaN;
-        BandPassed_Envelope_LFP_rip_all{n}(mouse,:) = nanmean(BandPassed_Envelope_LFP_rip.(Drug_Group{group}).(Mouse_names{mouse}));
+        BandPassed_Envelope_LFP_rip_all{group}(mouse,:) = nanmean(BandPassed_Envelope_LFP_rip.(Drug_Group{group}).(Mouse_names{mouse}));
         
         clear Rg; Rg = Range(Rip.(Mouse_names{mouse}));
         for rip=1:length(Rip.(Mouse_names{mouse}))
@@ -315,7 +411,7 @@ for group=7:8
             Stim_After_Rip.(Mouse_names{mouse})(rip) = logical(length(Start(and(VHC_Stim_Epoch.(Mouse_names{mouse}) , EpochAfterRip))));
         end
         Prop_Stim_After_Rip.(Mouse_names{mouse}) = sum(Stim_After_Rip.(Mouse_names{mouse}))/length(Stim_After_Rip.(Mouse_names{mouse}));
-        Prop_Stim_After_Rip_all{n}(mouse,:) = Prop_Stim_After_Rip.(Mouse_names{mouse});
+        Prop_Stim_After_Rip_all{group}(mouse,:) = Prop_Stim_After_Rip.(Mouse_names{mouse});
         
         disp(Mouse_names{mouse})
     end
@@ -354,11 +450,11 @@ for group=7
             end
             
             BandPassed_Envelope_AroundRip.(Drug_Group{group}).(Mouse_names{mouse})(BandPassed_Envelope_AroundRip.(Drug_Group{group}).(Mouse_names{mouse})==0) = NaN;
-            BandPassed_Envelope_AroundRip_all{n}(mouse,:) = nanmean(BandPassed_Envelope_AroundRip.(Drug_Group{group}).(Mouse_names{mouse}));
+            BandPassed_Envelope_AroundRip_all{group}(mouse,:) = nanmean(BandPassed_Envelope_AroundRip.(Drug_Group{group}).(Mouse_names{mouse}));
         end
         disp(Mouse_names{mouse})
     end
-    BandPassed_Envelope_AroundRip_all{n}(BandPassed_Envelope_AroundRip_all{n}==0)=NaN;
+    BandPassed_Envelope_AroundRip_all{group}(BandPassed_Envelope_AroundRip_all{group}==0)=NaN;
     n=n+1;
 end
 
@@ -386,7 +482,7 @@ cols=[.3, .745, .93]; h.mainLine.Color=cols; h.patch.FaceColor=cols; h.edge(1).C
 xlim([-250 -100]), vline(0,'--r'), vline(-200,'--r')
 ylabel('enveloppe amplitude (a.u.)'), xlabel('time (ms)')
 t=text(0,350,'VHC stims','Color','r');
-f=get(gca,'Children'); l=legend([f(9),f(5)],'Ripples sham','Ripples inhib'); 
+f=get(gca,'Children'); l=legend([f(9),f(5)],'Ripples sham','Ripples inhib');
 
 a=suptitle('Signal enveloppe after band pass filter 120-250Hz'); a.FontSize=12;
 

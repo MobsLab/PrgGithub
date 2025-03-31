@@ -99,19 +99,29 @@ BadEpoch = intervalSet(Start(BadEpoch)-1e4,Stop(BadEpoch)+1e4);
 GoodEpoch = TotalEpoch-BadEpoch;
 
 %% PLOT 
-% 
+% modif EC to link two subplots on 20/03/2025 and make starts more visible
 if plo
-    subplot(211)
-    plot(Range(LFP,'s'),Data(LFP)), hold on
-    plot(Range(Filt_LFP_High,'s'),Data(Filt_LFP_High)), hold on
-    plot(Times(1:end)/1e4,Vals(1:end),'*')
-    xlabel('time (s)'), ylabel('EKG')
-    xlim([30 40]) 
+    figure;
 
-    subplot(212)
-    plot(Range(HeartRate,'s'),Data(HeartRate))
-    xlabel('time (s)'), ylabel('Heart Rate - Hz')
+    ax1 = subplot(211); % First subplot (LFP + detected heartbeats)
+    plot(Range(LFP,'s'), Data(LFP), 'k', 'LineWidth', 1.5), hold on % Black for raw LFP
+    plot(Range(Filt_LFP_High,'s'), Data(Filt_LFP_High), 'b', 'LineWidth', 1.5), hold on % Blue for filtered LFP
+    plot(Times(1:end)/1e4, Vals(1:end), 'ro', 'MarkerSize', 6, 'MarkerFaceColor', 'r') % Red for detected beats
+    xlabel('Time (s)'), ylabel('EKG')
+    legend({'Raw LFP', 'Filtered LFP', 'Detected Beats'}, 'Location', 'best')
+    grid on
+
+    ax2 = subplot(212); % Second subplot (Heart Rate)
+    plot(Range(HeartRate,'s'), Data(HeartRate), 'b', 'LineWidth', 1.5) 
+    xlabel('Time (s)'), ylabel('Heart Rate (Hz)')
+    legend({'Heart Rate'}, 'Location', 'best')
+    grid on
+
+    % Link the x-axes of both plots
+    linkaxes([ax1, ax2], 'x'); 
 end
+
+
 
 
 end
