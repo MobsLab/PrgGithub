@@ -119,6 +119,8 @@ SmoothGamma_int2f = SmoothGammaf;
 
 cd('') % find session, Epoch=intervalSet(0,1e7) if I remember correctly
 
+%% Raw traces
+edit Ferret_Paper_RawTraces_SleepStates.m
 
 %% Spectrograms
 edit Ferret_Paper_Spectrograms_SleepStates.m
