@@ -20,7 +20,7 @@ def get_path_for_expe_cardiosense_ivabradine(experiment):
 
     dir_info = {'path': [], 'ExpeInfo': [], 'nMice': [], 'experiment': experiment, 'name': []}
     
-    if experiment == 'Basal_Pre-Injection':
+    if experiment == 'Basal_Pre_Injection':
         mouse_data = [
             # M1690
             '/media/nas8-2/ProjectCardioSense/K1690/2025-03-04_09-48-02/1690_250304_Basal_Pre-Injection',

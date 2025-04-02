@@ -35,8 +35,8 @@ def compute_tsd_correlation(data_dict, mouse_id, date, var1, var2):
         raise ValueError("No overlapping time points between the two variables.")
 
     # Extract synchronized data
-    data1 = tsd1.loc[common_times].data
-    data2 = tsd2.loc[common_times].data
+    data1 = tsd1[common_times].data
+    data2 = tsd2[common_times].values
 
     # Compute Pearson correlation
     r, p = pearsonr(data1, data2)
