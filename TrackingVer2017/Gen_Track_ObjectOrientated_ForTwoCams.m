@@ -164,10 +164,10 @@ end
             %%initialize the arduino
             poi=inputdlg('What num arduino?'); poi=str2double(poi);
             if isunix
-                            eval(['a = serial(''/dev/ttyACM',num2str(poi),''');']);
+                eval(['a = serial(''/dev/ttyACM',num2str(poi),''');']);
 
             else
-            eval(['a = serial(''COM',num2str(poi),''');']);
+                eval(['a = serial(''COM',num2str(poi),''');']);
             end
             try
                 fopen(a);

@@ -78,6 +78,7 @@ global arduinoDictionary % list of numbers to send to arduino for each case
 arduinoDictionary.On=1; % Tells Intan its time to go
 arduinoDictionary.Off=3; % switches Intan off
 arduinoDictionary.TenFrames=2; % Sync with intan every 1000 frames
+arduinoDictionary.GetTemp=5; % Sync with intan every 1000 frames
 
 %% Task parameters
 global nametypes; nametypes={'Sleep'};
@@ -354,7 +355,6 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
         % The code waits here until enableTrack is set to 1 by StartSession
         
         while enableTrack
-            disp('start')
             
             % Activate the camera and send the image to the workspace
             pause(time_image-etime(KeepTime.t2,KeepTime.t1));
@@ -386,14 +386,13 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
                 % For compression the actual picture is updated faster so
                 % as to save it
                 if strcmp(TrObjLocal.camera_type,'Webcam')
-                    tic
+                    
                     if length(size(IM))==3
                         IM = rgb2gray(IM);
                     end
                     frame.cdata = cat(3,IM,IM,IM);
                     frame.colormap = [];
                     try,writeVideo(writerObj,frame);GotFrame(num_fr) = 1;catch, GotFrame(num_fr) = 0;disp('missed frame video'),end
-                    toc
                 else
                     frame.cdata = cat(3,IM,IM,IM);
                     frame.colormap = [];
@@ -423,10 +422,66 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
                % -------------------------------------------------------------------------------
                % ------------------- Every 10 frames sync with intan  -----------------------
                
-               if  mod(num_fr,10)==0
-                fwrite(a,arduinoDictionary.TenFrames);
-                disp('frame')
-                end
+               % if  mod(num_fr,10)==0
+               %     fwrite(a,arduinoDictionary.TenFrames);
+               %     disp('frame')
+               %     if  mod(num_fr,40)==0
+               %         % tic
+               %         fwrite(a,arduinoDictionary.GetTemp);
+               %         % pause(1); 
+               %         while a.BytesAvailable==0
+               %         end
+               %         % Temperature(num_fr,1) = fread(a,a.BytesAvailable);
+               %         Temperature(num_fr,1) = str2double(fgetl(a));
+               %         disp(Temperature(end))
+               %         % toc
+               %     end
+               % 
+               % end
+
+               % if  mod(num_fr,10)==0
+               %     fwrite(a,arduinoDictionary.TenFrames);
+               %     disp('frame')
+               % 
+               %     if  mod(num_fr,80)==0
+               %         fwrite(a, arduinoDictionary.GetTemp); % Send request to Arduino
+               % 
+               %         if a.BytesAvailable > 0
+               %             temp_str = fgetl(a);  % Read the entire line as a string
+               % 
+               %             Temperature(num_fr,1) = str2double(temp_str); % Convert to numerical value
+               %             disp(['Temperature: ', num2str(Temperature(num_fr,1), '%.2f'), ' °C']);
+               %         end
+               %     end
+               % 
+               % end
+
+               if mod(num_fr,10) == 0
+                   fwrite(a, arduinoDictionary.TenFrames);
+                   disp('frame')
+
+                   if mod(num_fr,40) == 0
+                       fwrite(a, arduinoDictionary.GetTemp); % Request temperature
+
+                       pause(0.1); % Allow time for response
+
+                       if a.BytesAvailable > 0
+                           temp_str = fgetl(a);  % Read the temperature
+
+                           if strcmp(temp_str, 'ERROR')
+                               warning('Arduino failed to read temperature.');
+                               Temperature(num_fr,1) = NaN; % Assign NaN if no valid reading
+                           else
+                               Temperature(num_fr,1) = str2double(temp_str); % Convert to number
+                               disp(['Temperature: ', num2str(Temperature(num_fr,1), '%.2f'), ' °C']);
+                           end
+                       else
+                           warning('No temperature data received from Arduino.');
+                           Temperature(num_fr,1) = NaN;
+                       end
+                   end
+               end
+
                 
             KeepTime.t2 = clock;
             
@@ -441,9 +496,9 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
                 
         fwrite(a,arduinoDictionary.Off); % switch off intan
         
-     
         
-        save([ExpeInfo.name_folder,filesep,'behavResources.mat'],'time', 'GotFrame');
+        
+        save([ExpeInfo.name_folder,filesep,'behavResources.mat'],'time', 'GotFrame','Temperature');
         clear ref mask Ratio_IMAonREAL
 
         
@@ -545,4 +600,4 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
             set(textUM4,'string',num2str(ymax));
         end
     end
-end
+    end
