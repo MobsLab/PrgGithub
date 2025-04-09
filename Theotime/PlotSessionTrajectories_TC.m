@@ -27,7 +27,7 @@ function PlotSessionTrajectories_TC(mice, varargin)
 
 %% Input parser
 p = inputParser;
-addRequired(p, 'mice', @(x) (isnumeric(x) && isvector(x)) || (ischar(x) && strcmp(x, 'all')));
+addRequired(p, 'mice', @(x) (isnumeric(x) && isvector(x)) || (ischar(x) && strcmp(x, 'all')) || isstruct(x));
 addOptional(p,'stimPost',false,@(x) islogical(x));
 addOptional(p,'gradual',false,@(x) islogical(x));
 addOptional(p,'sub',false,@(x) islogical(x));
@@ -44,13 +44,16 @@ shockZone = [0 0; 0 0.43; 0.35 0.43; 0.35 0; 0 0];
 numtest = 4;
 
 %% Get data
-if sub
-    Dir = PathForExperimentsERC("SubPAG");
+if ~isstruct(mice)
+    if sub
+        Dir = PathForExperimentsERC("SubPAG");
+    else
+        Dir = PathForExperimentsERC("UMazePAG");
+    end
+    Dir = RestrictPathForExperiment(Dir,'nMice', mice);
 else
-    Dir = PathForExperimentsERC("UMazePAG");
+    Dir = mice;
 end
-
-Dir = RestrictPathForExperiment(Dir,'nMice', mice);
 
 a = cell(length(Dir.path),1);
 to_skip = [];
