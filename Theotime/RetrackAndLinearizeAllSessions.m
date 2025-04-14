@@ -56,8 +56,8 @@ for i = 1:length(sessions)
     % as it's Int16, one element is 2 bytes - hence there are 2*nChannels bytes per sample point
     amplifier = dir(amplifier_file);
     size_bytes = amplifier.bytes;
-    durationTemplate = size_bytes / (nChannels * 2 * sampling_rate);
-    disp('Duration of the amplifier file:');
+    durationTemplate = floor(size_bytes / (nChannels * 2 * sampling_rate));
+    fprintf('Duration of the amplifier file for the %s session:\n', sessions{i});
     disp(durationTemplate/60);
 
     nb_sessions = length(aviFiles);
@@ -226,7 +226,7 @@ for i = 1:length(sessions)
         % Calculate duration
         amplifier = dir(amplifier_file);
         size_bytes = amplifier.bytes;
-        durationNew = size_bytes / (nChannels * 2 * sampling_rate);
+        durationNew = floor(size_bytes / (nChannels * 2 * sampling_rate));
         % Check duration difference
         if abs(durationNew - durationTemplate) > 0.1* durationTemplate
             if amplifier.folder ~= xmlFiles(w).folder
@@ -296,7 +296,11 @@ for i = 1:length(sessions)
 
             % Save the new data
             happy = inputdlg('Happy with the tracking and linearization? (0/1)', 'redo with GUI');
-            happy = eval(happy{1});
+            try
+                happy = eval(happy{1});
+            catch
+                keyboard
+            end
 
             if ~happy
                 disp('Redoing the tracking and linearization with GUI');
