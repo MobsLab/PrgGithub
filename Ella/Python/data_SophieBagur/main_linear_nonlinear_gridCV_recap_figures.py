@@ -81,7 +81,8 @@ model_all_df = combine_dataframes_on_timebins(spike_counts[mouse_id], maze_rebin
 
 # Split the data 
 data = model_all_df
-train_data, test_data = extract_random_bouts(data, bout_length=10, percent=10, random_state=22)
+# train_data, test_data = extract_random_bouts(data, bout_length=10, percent=10, random_state=22)
+train_data, test_data = extract_random_bouts(data, bout_length=10, percent=10, random_state=30)
 
 # Set threshold values
 # threshold_values = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]
@@ -222,9 +223,9 @@ recap_fig = create_recapitulatory_figure(
             variable_column="Accelero"
 )
 
-save_plot_as_svg(figures_directory + '/ln_recap_figures', 
-                 f'241127_{dependent_var}_ln_recap_figure',
-                 fig=recap_fig)
+# save_plot_as_svg(figures_directory + '/ln_recap_figures', 
+#                  f'241127_{dependent_var}_ln_recap_figure',
+#                  fig=recap_fig)
 
 
 visu_fig =  create_visualization_figure(
@@ -245,6 +246,6 @@ visu_fig =  create_visualization_figure(
             dependent_var=dependent_var
 )
 
-save_plot_as_svg(figures_directory + '/ln_recap_figures', 
-                 f'241127_{dependent_var}_ln_visualize_figure',
-                 fig=visu_fig)
+# save_plot_as_svg(figures_directory + '/ln_recap_figures', 
+#                  f'241127_{dependent_var}_ln_visualize_figure',
+#                  fig=visu_fig)
