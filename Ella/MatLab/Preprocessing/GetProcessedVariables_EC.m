@@ -70,15 +70,6 @@ else
     disp('B_High_Spectrum.mat already exists or Bulb deep channel not found. Skipping high frequency spectra computation.');
 end
 
-%% Get breathing from OB
-if ~exist(respi_freq_file, 'file') && exist(low_spectrogram_file, 'file')
-    load(low_spectrogram_file, 'Spectro');
-    Spectrum_Frequency = ConvertSpectrum_in_Frequencies_BM(Spectro{3}, Spectro{2} * 1e4, Spectro{1});
-    save(respi_freq_file, 'Spectrum_Frequency');
-else
-    disp('RespiFreq.mat already exists or B_Low_Spectrum.mat not found. Skipping OB breathing computation.');
-end
-
 %% Get heart beats (without noise correction first)
 if exist(EKG_file, 'file')
     load(EKG_file, 'channel');
@@ -128,7 +119,7 @@ end
 %% Compute noise epochs (only if sleep scoring is NOT performed)
 if ~perform_sleep_scoring && compute_OB_gamma
     FindNoiseEpoch_BM([cd filesep], channel, 0);
-    
+
     % Close all noise-related plots
     close all;
 else
@@ -170,6 +161,24 @@ if exist(EKG_file, 'file') && exist(lfp_file, 'file')
 
 end
 
+%% Get breathing from OB
+if ~exist(respi_freq_file, 'file') && exist(low_spectrogram_file, 'file')
+    load(low_spectrogram_file, 'Spectro');
+    Spectrum_Frequency = ConvertSpectrum_in_Frequencies_BM(Spectro{3}, Spectro{2} * 1e4, Spectro{1});
+
+    % Remove noise if available
+    if exist('StateEpochSB.mat', 'file')
+        load('StateEpochSB.mat', 'Epoch');  % Clean epoch
+        Spectrum_Frequency = Restrict(Spectrum_Frequency, Epoch);
+        disp('Denoised RespiFreq');
+    end
+    save(respi_freq_file, 'Spectrum_Frequency');
+
+
+else
+    disp('RespiFreq.mat already exists or B_Low_Spectrum.mat not found. Skipping OB breathing computation.');
+end
+
 %% Get gamma power (only if sleep scoring is NOT performed)
 if ~perform_sleep_scoring && compute_OB_gamma
     load(Bulb_deep_file, 'channel');
@@ -184,7 +193,15 @@ if ~perform_sleep_scoring && compute_OB_gamma
         smootime = 3;
         SmoothGamma = tsd(Range(tot_ghi), runmean(Data(tot_ghi), ceil(smootime / median(diff(Range(tot_ghi, 's'))))));
 
+        % Remove noise if available
+        if exist('StateEpochSB.mat', 'file')
+            load('StateEpochSB.mat', 'Epoch');  % This is the clean (non-noisy) epoch
+            SmoothGamma = Restrict(SmoothGamma, Epoch);
+            disp('Denoised SmoothGamma')
+        end
+
         save('SleepScoring_OBGamma', 'SmoothGamma');
+
     else
         disp('LFP data file missing for Bulb deep channel. Skipping gamma power computation.');
     end

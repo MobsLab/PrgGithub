@@ -2,7 +2,7 @@
 
 edit edit RefSubtraction_multi.m
 % In the folder wher the amplifier.dat is
-RefSubstraction_multi('amplifier.dat',96, 3, 'M1712',[],[],[0:31],'M1712',[],[],[32:63]);
+RefSubstraction_multi('amplifier.dat',96, 3, 'M1690',[],[],[0:31],'M1712',[],[],[32:63]);
 % Then same with the auxiliary (3/mouse)
 
 %% Get low frequency spectra - example with bulb
@@ -61,6 +61,7 @@ save('SleepScoring_OBGamma','SmoothGamma')
 
 %% Sleep scoring
 SleepScoringOBGamma
+SleepScoring_Accelero_OBgamma
 
 %% Get ripples
 CreateRipplesSleep('stim',0,'restrict',1,'sleep',1)
