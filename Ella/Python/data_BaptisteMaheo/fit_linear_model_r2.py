@@ -226,7 +226,7 @@ def find_best_linear_model(df, param_grid, independent_vars, k_folds=5):
 def fit_all_predictors_model(df, best_params, independent_vars, k_folds=5):
     """
     Fits a multiple linear regression model using all specified predictors.
-    Handles transformed features dynamically based on the `independent_vars` list.
+    Handles transformed features dynamically based on the independent_vars list.
 
     Parameters:
         df (pd.DataFrame): Dataframe containing the raw features and target variable.
@@ -248,61 +248,54 @@ def fit_all_predictors_model(df, best_params, independent_vars, k_folds=5):
         for key, value in best_params.items()
     }
 
-    # Identify raw features required for transformations
-    required_raw_features = set()
+    # Identify all features needed
+    all_features_needed = set(independent_vars)
+
+    # Add raw features required by transformed terms
     if "Position_sig_Global_Time" in independent_vars:
-        required_raw_features.update(["Position", "Global Time"])
+        all_features_needed.update(["Position", "Global Time"])
     if "neg_exp_Time_since_last_shock" in independent_vars:
-        required_raw_features.add("Time since last shock")
-    
-    # Extract only raw features from df (transformed ones are created inside the transformer)
-    existing_raw_features = list(required_raw_features & set(df.columns))
-    missing_raw_features = required_raw_features - set(df.columns)
+        all_features_needed.add("Time since last shock")
 
-    if missing_raw_features:
-        raise KeyError(f"The dataframe is missing required raw features: {missing_raw_features}")
+    # Use only available features in the dataframe
+    existing_raw_features = list(all_features_needed & set(df.columns))
 
-    X_raw = df[existing_raw_features]  # Only required raw features
-    y = df["OB frequency"]  # Target variable
+    if not existing_raw_features:
+        raise KeyError("No required raw features found in dataframe.")
 
-    # Apply feature transformation using best hyperparameters
+    X_raw = df[existing_raw_features]
+    y = df["OB frequency"]
+
+    # Apply feature transformation
     feature_transformer = FeatureTransformer(selected_vars=independent_vars, **cleaned_params)
     X_transformed = feature_transformer.fit_transform(X_raw)
-    print("Transformed Features:", list(X_transformed.columns))
 
-    # Define cross-validation
+    # Cross-validation
     kf = KFold(n_splits=k_folds, shuffle=True, random_state=42)
 
-    # Define pipeline (No feature transformation inside, as it's already done)
+    # Fit model
     pipeline = Pipeline([
-        ("regressor", LinearRegression())  # Fit linear regression
+        ("regressor", LinearRegression())
     ])
 
-    # Compute cross-validated scores BEFORE fitting on full data
     r2_scores = cross_val_score(pipeline, X_transformed, y, cv=kf, scoring="r2")
     mean_r2 = np.mean(r2_scores)
 
     mae_scores = cross_val_score(pipeline, X_transformed, y, cv=kf, scoring="neg_mean_absolute_error")
-    mean_mae = -np.mean(mae_scores)  # Convert to positive MAE
+    mean_mae = -np.mean(mae_scores)
 
-    # Fit the model using all transformed predictors
     pipeline.fit(X_transformed, y)
-
-    # Extract fitted model
     fitted_model = pipeline.named_steps["regressor"]
 
-    # Store coefficients
     coefficients = dict(zip(X_transformed.columns, fitted_model.coef_))
     intercept = fitted_model.intercept_
 
-    # Return results
     return {
         "coefficients": coefficients,
         "intercept": intercept,
-        "mean_r2": mean_r2,  # Matches GridSearchCV
+        "mean_r2": mean_r2,
         "mean_mae": mean_mae
     }
-
 
 
 def fit_single_predictor_models(df, best_params, independent_vars, raw_predictors=None, k_folds=5):

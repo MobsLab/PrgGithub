@@ -1,8 +1,8 @@
 
-Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline'};
-Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear'};
+Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','','Baseline'};
+Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond'};
 group = 7;
-
+% group = 9;
 
 %% BEHAVIOUR
 % They avoid the shock zone, and freeze in the corners
@@ -136,7 +136,6 @@ figure('color',[1 1 1])
 Sessions = {'TestPre','CondPre','TestPostPre','CondPost','TestPostPost'};
 n = 1;
 Mouse=Drugs_Groups_UMaze_CH(group);
-figure
 for i = 1:5
     subplot(1,5,i)
     a = movmean(OccupMap_squeeze.Unblocked.(Sessions{i}){1},[0 2],2);
@@ -260,60 +259,147 @@ ylabel('Wake proportion')
 makepretty_CH
 subplot(235)
 MakeSpreadAndBoxPlot3_SB({REM_prop.(Name{group}).SleepPre REM_prop.(Name{group}).SleepPostPre REM_prop.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1);
-ylabel('REM proportion all')
+ylabel('REM proportion')
 % ylim([0.1 0.8])
 makepretty_CH
 subplot(236)
-MakeSpreadAndBoxPlot3_SB({REM_prop2.(Name{group}).SleepPre REM_prop2.(Name{group}).SleepPostPre REM_prop2.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1);
-ylabel('REM proportion sleep')
+MakeSpreadAndBoxPlot3_SB({NREM_prop.(Name{group}).SleepPre NREM_prop.(Name{group}).SleepPostPre NREM_prop.(Name{group}).SleepPostPost},Cols,X,Legends,'paired',1,'showpoints',1);
+ylabel('NREM proportion')
 % ylim([0 0.16])
 makepretty_CH
 mtitle(Name{group})
 end
 
 %
+% 
+% Session_type={'SleepPre','SleepPostPre','SleepPostPost'};
+% 
+% Col1 = [0.3 0.3 0.3];
+% Col2 = [0.7 0.7 0.7];
+% 
+% time = linspace(1,100,10);
+% figure
+% j = 1;
+% for sess = 1:3
+%     subplot(3,3,j), hold on
+%     a1 = errorbar(time, nanmean(WakePropTemp.Baseline.(Session_type{sess})),stdError(WakePropTemp.Baseline.(Session_type{sess})),'color',Col1);
+%     a2 = errorbar(time, nanmean(WakePropTemp.RipControlSleep.(Session_type{sess})),stdError(WakePropTemp.RipControlSleep.(Session_type{sess})),'color',Col2);
+%     ylabel(Session_type{sess})
+%     xlabel('time (minutes)')
+%     title('Wake Prop')
+%     legend([a1 a2],'Baseline','RipControl')
+%     makepretty_CH
+%     j = j+1;
+%     subplot(3,3,j), hold on
+%     a1 = errorbar(time, nanmean(NREMPropTemp.Baseline.(Session_type{sess})),stdError(NREMPropTemp.Baseline.(Session_type{sess})),'color',Col1);
+%     a2 = errorbar(time, nanmean(NREMPropTemp.RipControlSleep.(Session_type{sess})),stdError(NREMPropTemp.RipControlSleep.(Session_type{sess})),'color',Col2);
+%     ylabel(Session_type{sess})
+%     xlabel('time (minutes)')
+%     title('NREM Prop')
+%     legend([a1 a2],'Baseline','RipControl')
+%     makepretty_CH
+%     j = j+1;
+%     subplot(3,3,j), hold on
+%     a1 = errorbar(time, nanmean(REMPropTemp.Baseline.(Session_type{sess})),stdError(REMPropTemp.Baseline.(Session_type{sess})),'color',Col1);
+%     a2 = errorbar(time, nanmean(REMPropTemp.RipControlSleep.(Session_type{sess})),stdError(REMPropTemp.RipControlSleep.(Session_type{sess})),'color',Col2);
+%     j = j+1;
+%     ylim([0 0.3])
+%     xlabel('time (minutes)')
+%     ylabel(Session_type{sess})
+%     title('REM Prop')
+%     legend([a1 a2],'Baseline','RipControl')
+%     makepretty_CH
+% end
+% 
+% 
+
 
 Session_type={'SleepPre','SleepPostPre','SleepPostPost'};
 
-Col1 = [0.3 0.3 0.3];
-Col2 = [0.7 0.7 0.7];
+Col1 = [0.6, 0.8, 1];
+Col2 = [0.2, 0.4, 0.8];
+Col3 = [0, 0, 0.5];
 
 time = linspace(1,100,10);
+
 figure
-j = 1;
-for sess = 1:3
-    subplot(3,3,j), hold on
-    a1 = errorbar(time, nanmean(WakePropTemp.Baseline.(Session_type{sess})),stdError(WakePropTemp.Baseline.(Session_type{sess})),'color',Col1);
-    a2 = errorbar(time, nanmean(WakePropTemp.RipControlSleep.(Session_type{sess})),stdError(WakePropTemp.RipControlSleep.(Session_type{sess})),'color',Col2);
-    ylabel(Session_type{sess})
-    xlabel('time (minutes)')
-    title('Wake Prop')
-    legend([a1 a2],'Baseline','RipControl')
-    makepretty_CH
-    j = j+1;
-    subplot(3,3,j), hold on
-    a1 = errorbar(time, nanmean(NREMPropTemp.Baseline.(Session_type{sess})),stdError(NREMPropTemp.Baseline.(Session_type{sess})),'color',Col1);
-    a2 = errorbar(time, nanmean(NREMPropTemp.RipControlSleep.(Session_type{sess})),stdError(NREMPropTemp.RipControlSleep.(Session_type{sess})),'color',Col2);
-    ylabel(Session_type{sess})
-    xlabel('time (minutes)')
-    title('NREM Prop')
-    legend([a1 a2],'Baseline','RipControl')
-    makepretty_CH
-    j = j+1;
-    subplot(3,3,j), hold on
-    a1 = errorbar(time, nanmean(REMPropTemp.Baseline.(Session_type{sess})),stdError(REMPropTemp.Baseline.(Session_type{sess})),'color',Col1);
-    a2 = errorbar(time, nanmean(REMPropTemp.RipControlSleep.(Session_type{sess})),stdError(REMPropTemp.RipControlSleep.(Session_type{sess})),'color',Col2);
-    j = j+1;
-    ylim([0 0.3])
-    xlabel('time (minutes)')
-    ylabel(Session_type{sess})
-    title('REM Prop')
-    legend([a1 a2],'Baseline','RipControl')
-    makepretty_CH
-end
+
+subplot(311), hold on
+a1 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPre),stdError(WakePropTemp.Baseline.SleepPre),'color',Col1);
+a2 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPostPre),stdError(WakePropTemp.Baseline.SleepPostPre),'color',Col2);
+a3 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPostPost),stdError(WakePropTemp.Baseline.SleepPostPost),'color',Col3);
+
+ylabel('Wake')
+xlabel('time (minutes)')
+legend([a1 a2 a3],'SleepPre','SleepPostPre','SleepPostPost')
+makepretty_CH
+
+
+subplot(312), hold on
+a1 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPre),stdError(NREMPropTemp.Baseline.SleepPre),'color',Col1);
+a2 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPostPre),stdError(NREMPropTemp.Baseline.SleepPostPre),'color',Col2);
+a3 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPostPost),stdError(NREMPropTemp.Baseline.SleepPostPost),'color',Col3);
+
+ylabel('NREM')
+xlabel('time (minutes)')
+makepretty_CH
+
+
+
+subplot(313), hold on
+a1 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPre),stdError(REMPropTemp.Baseline.SleepPre),'color',Col1);
+a2 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPostPre),stdError(REMPropTemp.Baseline.SleepPostPre),'color',Col2);
+a3 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPostPost),stdError(REMPropTemp.Baseline.SleepPostPost),'color',Col3);
+
+ylabel('REM')
+xlabel('time (minutes)')
+makepretty_CH
 
 
 
 
+Session_type={'SleepPre','SleepPostPre','SleepPostPost'};
+
+Col1 = [0,0,1];
+Col2 = [1,0,0];
+Col3 = [0,1,0];
+
+time = linspace(1,100,10);
+
+figure
+
+subplot(311), hold on
+a1 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPre),stdError(WakePropTemp.Baseline.SleepPre),'color',Col1);
+a2 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPre),stdError(NREMPropTemp.Baseline.SleepPre),'color',Col2);
+a3 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPre),stdError(REMPropTemp.Baseline.SleepPre),'color',Col3);
+
+ylabel('SleepPre')
+xlabel('time (minutes)')
+legend([a1 a2 a3],'Wake','NREM','REM')
+makepretty_CH
+
+subplot(312), hold on
+a1 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPostPre),stdError(WakePropTemp.Baseline.SleepPostPre),'color',Col1);
+a2 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPostPre),stdError(NREMPropTemp.Baseline.SleepPostPre),'color',Col2);
+a3 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPostPre),stdError(REMPropTemp.Baseline.SleepPostPre),'color',Col3);
+
+ylabel('SleepPostPre')
+xlabel('time (minutes)')
+legend([a1 a2 a3],'Wake','NREM','REM')
+makepretty_CH
+
+subplot(313), hold on
+a1 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPostPost),stdError(WakePropTemp.Baseline.SleepPostPost),'color',Col1);
+a2 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPostPost),stdError(NREMPropTemp.Baseline.SleepPostPost),'color',Col2);
+a3 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPostPost),stdError(REMPropTemp.Baseline.SleepPostPost),'color',Col3);
+
+ylabel('SleepPostPost')
+xlabel('time (minutes)')
+legend([a1 a2 a3],'Wake','NREM','REM')
+makepretty_CH
+
+
+    
+    
 
 

@@ -8,14 +8,14 @@
 %   - Ground noise
 %   - User defined threshold on LFP amplitude
 %   - User defined epochs of noise
-% 
+%
 %%INPUT
 % foldername        : location of data & save location
 % channel_hpc       : HPC channel, spectrum will be calculated if necessary
 % user_confirmation (optional) :  0 to skip the user confirmation, 1 otherwise
 %
 %
-%%OUTPUT 
+%%OUTPUT
 % Epoch             : epoch with no noise
 % TotalNoiseEpoch   : epoch with all the noise
 % SubNoiseEpoch     : structure with all different noise epochs
@@ -114,29 +114,39 @@ title('Global Spectrogramm : determine noise periods');
 %% High frequency noise
 Ok_HighFreq = 'n';
 while ~strcmpi(Ok_HighFreq,'y')
-    
+
     % display spectrum
-    subplot(4,1,2), hold off,
+    h1 = subplot(4,1,2); hold off,
     imagesc(tH,fH(fH<=20 & fH>=18),10*log10(HighSp)'), axis xy,
-    
+
     % calucate noise from HighNoiseThresh
     HighNoiseEpoch = thresholdIntervals(NoiseTSD,HighNoiseThresh,'Direction','Above');
-    
+    yLeft = ylim;
+
     % display values and noise epochs
-    hold on, plot(Range(NoiseTSD,'s'),Data(NoiseTSD)/max(Data(NoiseTSD))+19,'b')
-    hold on, plot(Range(Restrict(NoiseTSD,HighNoiseEpoch),'s'),Data(Restrict(NoiseTSD,HighNoiseEpoch))/max(Data(NoiseTSD))+19,'*w')
+    yyaxis right,
+    hold on, plot(Range(NoiseTSD,'s'),Data(NoiseTSD),'b')
+    % hold on, plot(Range(NoiseTSD,'s'),Data(NoiseTSD)/max(Data(NoiseTSD))+19,'b')
+    plot(Range(Restrict(NoiseTSD,HighNoiseEpoch),'s'),Data(Restrict(NoiseTSD,HighNoiseEpoch)),'*w')
+    % plot(Range(Restrict(NoiseTSD,HighNoiseEpoch),'s'),Data(Restrict(NoiseTSD,HighNoiseEpoch))/max(Data(NoiseTSD))+19,'*w')
     title(['18-20Hz Spectrogramm, determined High Noise Epochs are in white (total=',num2str(floor(10*sum(Stop(HighNoiseEpoch,'s')-Start(HighNoiseEpoch,'s')))/10),'s)']);
-    
+    yRight = ylim;
+
     %can skip this step if user_confirmation==0
     if user_confirmation % user can change HighNoiseThresh manually
         Ok_HighFreq = input('--- Are you satisfied with High Noise Epochs (y/n)? ','s');
         if ~strcmpi(Ok_HighFreq,'y')
-            HighNoiseThresh =  input(['Give a new High Noise Threshold (Current=',num2str(HighNoiseThresh), ') : ']);
+            [~,HighNoiseThresh] = ginput(1);
+            % HighNoiseThresh =  input(['Give a new High Noise Threshold (Current=',num2str(HighNoiseThresh), ') : ']);
+            HighNoiseThresh = ((HighNoiseThresh - yLeft(1)) / (yLeft(2) - yLeft(1))) * ...
+                (yRight(2) - yRight(1)) + yRight(1);
+
+            delete(h1)
         end
     else
         Ok_HighFreq='y';
     end
-    
+
 end
 
 
@@ -145,12 +155,12 @@ end
 % Stim
 % -------------------------------------------------------------
 % In case there is an issue with the stim digital channel,
-% false stim will be treated as noise. Comment the IF section below 
+% false stim will be treated as noise. Comment the IF section below
 % and make sure to set StimNoiseEpoch to intervalSet([],[]);
 
 if exist('behavResources.mat')>0
     load('behavResources.mat','TTLInfo');
-    
+
     if exist('TTLInfo')
         if isfield(TTLInfo,'StimEpoch')
             StimNoiseEpoch= intervalSet(Start(TTLInfo.StimEpoch), Start(TTLInfo.StimEpoch)+0.2*1E4);
@@ -171,23 +181,32 @@ Ok_LowFreq='n';
 while ~strcmpi(Ok_LowFreq,'y')
 
     % display spectrum
-    subplot(4,1,3), hold off,
+    h1 = subplot(4,1,3); hold off,
     imagesc(tH,fH(fH<=2),10*log10(LowSp)'), axis xy
-    
+    yLeft = ylim;
+
     % calucate noise from GndNoiseThresh
     GndNoiseEpoch = thresholdIntervals(GndNoiseTSD,GndNoiseThresh,'Direction','Above');
-    
+
     % display values and noise epochs
-    hold on, plot(Range(GndNoiseTSD,'s'),Data(GndNoiseTSD)/max(Data(GndNoiseTSD))+1,'b')
-    hold on, plot(Range(Restrict(GndNoiseTSD,GndNoiseEpoch),'s'),Data(Restrict(GndNoiseTSD,GndNoiseEpoch))/max(Data(GndNoiseTSD))+1,'*w')
-    title(['0-2Hz Spectrogramm, determined Ground Noise Epochs are in white (total=',num2str(floor(10*sum(Stop(GndNoiseEpoch,'s')-Start(GndNoiseEpoch,'s')))/10),'s)']);
-    
-     %can skip this step if user_confirmation==0
+    yyaxis right,
+    hold on, plot(Range(GndNoiseTSD,'s'),Data(GndNoiseTSD),'b')
+    % hold on, plot(Range(NoiseTSD,'s'),Data(NoiseTSD)/max(Data(NoiseTSD))+19,'b')
+    hold on, plot(Range(Restrict(GndNoiseTSD,GndNoiseEpoch),'s'),Data(Restrict(GndNoiseTSD,GndNoiseEpoch)),'*w')
+    % plot(Range(Restrict(NoiseTSD,HighNoiseEpoch),'s'),Data(Restrict(NoiseTSD,HighNoiseEpoch))/max(Data(NoiseTSD))+19,'*w')
+    yRight = ylim;
+
+    %can skip this step if user_confirmation==0
     if user_confirmation
         % user can change GndNoiseThresh manually
         Ok_LowFreq = input('--- Are you satisfied with Ground Noise Epochs (y/n)? ','s');
         if ~strcmpi(Ok_LowFreq,'y')
-            GndNoiseThresh = input(['Give a new High Noise Threshold (Current=',num2str(GndNoiseThresh), ') : ']);
+            [~,GndNoiseThresh] = ginput(1);
+            GndNoiseThresh = ((GndNoiseThresh - yLeft(1)) / (yLeft(2) - yLeft(1))) * ...
+                (yRight(2) - yRight(1)) + yRight(1);
+
+            % GndNoiseThresh = input(['Give a new High Noise Threshold (Current=',num2str(GndNoiseThresh), ') : ']);
+            delete(h1)
         end
     else
         Ok_LowFreq='y';
@@ -210,25 +229,25 @@ else
     Do_Thresh='n';
     disp('no ThresholdedNoiseEpoch step')
 end
-    
+
 % if user wants to put the threshold manually
 if strcmpi(Do_Thresh,'y')
     Ok_Thresh='n';
     while strcmpi(Ok_Thresh,'n')
-        
+
         % plot data
         subplot(4,1,4), hold off,
         plot(Range(LFP,'s'),Data(LFP))
         title(['Please place upper bound for threshold'])
-        
+
         % User inputs superior bound
         [~,ThresholdedNoiseEpochThresh] = ginput(1);
-        
+
         % calculate noise from ThresholdedNoiseEpochThresh
         ThresholdedNoiseEpoch = thresholdIntervals(LFP,ThresholdedNoiseEpochThresh,'Direction','Above');
         ThresholdedNoiseEpoch = mergeCloseIntervals(ThresholdedNoiseEpoch,5E4);
         hold on, plot(Range(Restrict(LFP,ThresholdedNoiseEpoch),'s'),Data(Restrict(LFP,ThresholdedNoiseEpoch)),'r')
-        
+
         if user_confirmation
             % check if user is satisfied or wants to redefine
             Ok_Thresh=input('--- Are you satisfied with Thresholded Noise Epochs (y/n -- k for keyboard)? ','s');
@@ -240,7 +259,7 @@ if strcmpi(Do_Thresh,'y')
             Ok_Thresh='y';
         end
     end
-    
+
 else
     % defined as empty if user doesn't define epochs
     ThresholdedNoiseEpoch = intervalSet([],[]);
@@ -258,7 +277,7 @@ end
 
 % if user wants to put the threshold manually
 if strcmpi(Do_Weird,'y')
-% if Do_Weird(Do_Thresh,'y') corrected SB Jan 2018
+    % if Do_Weird(Do_Thresh,'y') corrected SB Jan 2018
     CheckWeirdEpoch=0; % this variable is set to 1 only after a correct format of times is entered
     while CheckWeirdEpoch==0
         disp('Enter start and stop time (s) of WeirdNoise')
@@ -282,7 +301,7 @@ close(fig_Noise)
 
 % Define total noise and epoch with no noise
 TotalNoiseEpoch = or(or(or(GndNoiseEpoch,HighNoiseEpoch),or(WeirdNoiseEpoch,ThresholdedNoiseEpoch)),...
-                        StimNoiseEpoch);
+    StimNoiseEpoch);
 Epoch = TotalEpoch-TotalNoiseEpoch;
 
 % Group the parameters together

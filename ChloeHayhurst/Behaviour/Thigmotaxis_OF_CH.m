@@ -45,6 +45,8 @@ if strcmp(arena_type, 'OF')
     
     distances = sqrt((x_data - center(1)).^2 + (y_data - center(2)).^2);
     
+    %     distances = (sqrt((x_data - center(1)).^2 + (y_data - center(2)).^2))/radius;
+    
     % Calcul des rayons pour les zones
     inner_limit = radius * sqrt(percent_inner);  % Zone intérieure
     
@@ -57,7 +59,7 @@ if strcmp(arena_type, 'OF')
     % in_outer_zone = distances > inner_limit & distances <= radius;
     in_outer_zone = distances > inner_limit;
     in_specific_zone = distances > specific_inner_limit & distances <= specific_outer_limit;  % Zone spécifique (entre 25% et 30%)
-    
+        
 elseif strcmp(arena_type, 'HC')
     % HomeCage : AlignedXtsd is comprised between 0 and 40 and Aligned
     % Ytsd between 0 and 20

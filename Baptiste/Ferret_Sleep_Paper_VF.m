@@ -31,9 +31,96 @@ edit Transition_Wake_Sleep_Ferret_BM.m
 % Figure 2 : REM/NREM/IS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% Spectrograms
+cd('/media/nas7/React_Passive_AG/OBG/Brynza/freely-moving/20240202_saline')
+load('SleepScoring_OBGamma.mat', 'Wake', 'REMEpoch', 'SWSEpoch', 'SmoothTheta', 'SmoothGamma')
+REMEpoch = mergeCloseIntervals(REMEpoch,25e4);
+REMEpoch = dropShortIntervals(REMEpoch,25e4);
+H = load('H_Low_Spectrum.mat');
+H_Sptsd = tsd(H.Spectro{2}*1e4 , H.Spectro{1});
+[H_Sptsd_clean,~,EpochClean] = CleanSpectro(H_Sptsd , H.Spectro{3} , 5);
+
+figure
+subplot(6,1,4:5)
+
+imagesc(Range(H_Sptsd)/3.6e7 , H.Spectro{3} , runmean(runmean(log10(Data(H_Sptsd)'),5)',50)'), axis xy
+ylabel('Frequency (Hz)')
+colormap viridis, caxis([2.8 4.3])
+
+LineHeight = 19;
+Colors.SWS = 'r';
+Colors.REM = 'g';
+Colors.Wake = 'b';
+Colors.Noise = [0 0 0];
+PlotPerAsLine(Wake,LineHeight,Colors.Wake,'timescaling',3.6e7);
+PlotPerAsLine(SWSEpoch,LineHeight,Colors.SWS,'timescaling',3.6e7);
+PlotPerAsLine(REMEpoch,LineHeight,Colors.REM,'timescaling',3.6e7);
+title('Hippocampus', 'FontSize', 14)
+
+% % clean ?
+% figure
+% imagesc(Range(H_Sptsd_clean)/3.6e7 , H.Spectro{3} , runmean(runmean(log10(Data(H_Sptsd_clean)'),5)',50)'), axis xy
+% xlabel('time (hours)'), ylabel('Frequency (Hz)')
+% colormap jet
+% 
+% LineHeight = 19;
+% Colors.SWS = 'r';
+% Colors.REM = 'g';
+% Colors.Wake = 'b';
+% Colors.Noise = [0 0 0];
+% PlotPerAsLine(and(Wake,EpochClean),LineHeight,Colors.Wake,'timescaling',3.6e7);
+% PlotPerAsLine(and(SWSEpoch,EpochClean),LineHeight,Colors.SWS,'timescaling',3.6e7);
+% PlotPerAsLine(and(REMEpoch,EpochClean),LineHeight,Colors.REM,'timescaling',3.6e7);
+subplot(616)
+
+plot(Range(SmoothTheta,'s')/3.6e3 , runmean(Data(SmoothTheta),1e4) , 'k' , 'LineWidth',1)
+xlim([0 max(Range(SmoothTheta,'s')/3.6e3)]), ylim([0 10])
+box off
+ylabel('Theta/Delta')
+xlabel('Time (hours)'), ylabel('Gamma power')
+
+
+% B = load('B_Middle_Spectrum.mat');
+B = load('B_High_Spectrum.mat');
+
+B_Sptsd = tsd(B.Spectro{2}*1e4 , B.Spectro{1});
+
+subplot(6,1,1:2)
+
+imagesc(Range(B_Sptsd)/3.6e7 , B.Spectro{3} , runmean(runmean(log10(Data(B_Sptsd)'),5)',500)'), axis xy
+ylabel('Frequency (Hz)'), ylim([20 100])
+caxis([2 3.5])
+
+LineHeight = 95;
+Colors.SWS = 'r';
+Colors.REM = 'g';
+Colors.Wake = 'b';
+Colors.Noise = [0 0 0];
+PlotPerAsLine(Wake,LineHeight,Colors.Wake,'timescaling',3.6e7);
+PlotPerAsLine(SWSEpoch,LineHeight,Colors.SWS,'timescaling',3.6e7);
+PlotPerAsLine(REMEpoch,LineHeight,Colors.REM,'timescaling',3.6e7);
+title('Olfactory Bulb', 'FontSize', 14)
+
+subplot(613)
+
+plot(Range(SmoothGamma,'s')/3.6e3 , runmean(Data(SmoothGamma),1e4) , 'k' , 'LineWidth',1)
+xlim([0 max(Range(SmoothGamma,'s')/3.6e3)]), ylim([0 7e2])
+box off
+
+%% Corr plot
+Epoch_4h = intervalSet(0, 4*3600*1e4);
+SmoothGammaf = Restrict(SmoothGamma, Epoch_4h);
+SmoothThetaf = Restrict(SmoothTheta, Epoch_4h);
+Sleepf = and(Sleep, Epoch_4h);
+Wakef = and(Wake, Epoch_4h);
+SWSEpochf = and(SWSEpoch, Epoch_4h);
+REMEpochf = and(REMEpoch, Epoch_4h);
+SmoothGamma_int2f = SmoothGammaf;
+
+cd('') % find session, Epoch=intervalSet(0,1e7) if I remember correctly
+
 %% Raw traces
 edit Ferret_Paper_RawTraces_SleepStates.m
-
 
 %% Spectrograms
 edit Ferret_Paper_Spectrograms_SleepStates.m

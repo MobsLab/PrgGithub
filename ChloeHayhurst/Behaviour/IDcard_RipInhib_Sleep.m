@@ -5,7 +5,7 @@ load('/media/nas8-2/ProjetEmbReact/transfer/AllSessions.mat')
 % GetEmbReactMiceFolderList_BM
 Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear','LastCondPre'};
 
-Mouse_names = 'M1714';
+Mouse_names = 'M1715';
 
 RangeLow = linspace(0.1526,20,261);
 RangeHigh = linspace(22,98,32);

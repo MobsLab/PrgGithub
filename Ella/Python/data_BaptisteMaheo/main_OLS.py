@@ -7,8 +7,10 @@ Created on Thu Mar  6 14:30:33 2025
 """
 
 # %% Import necessary modules 
+import os 
+os.chdir('/home/gruffalo/PrgGithub/Ella/Python/data_BaptisteMaheo/')
 
-from load_data import load_mat_data
+from load_data_GLM import load_mat_data
 from preprocess_data import filter_columns, filter_mice, normalize_data, add_interaction_term
 from transform_data import apply_sigmoid
 from visualize_data import plot_exp_transform, plot_sigmoid_transform, plot_mouse_column

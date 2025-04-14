@@ -1,4 +1,4 @@
-figure, plot(Range(Restrict, and(MovAcctsd,Sleep_OB)function [samples,index] = Restrict(samples,intervals,varargin)
+function [samples,index] = Restrict(samples,intervals,varargin)
 
 %Restrict - Keep only samples that fall in a given list of time intervals.
 %

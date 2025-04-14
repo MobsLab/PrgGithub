@@ -1,50 +1,50 @@
 
-NicotineOF.OFPre{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_OFPre';
-% NicotineOF.OFPre{2}='/media/nas7/Nicotine/Mouse1529/1529_NicotineOF_OF.Pre';
-NicotineOF.OFPre{2}='/media/nas7/Nicotine/Mouse1531/1531_NicotineOF_OFPre';
-NicotineOF.OFPre{3}='/media/nas7/Nicotine/Mouse1532/1532_NicotineOF_OFPre';
-NicotineOF.OFPre{4}='/media/nas7/Nicotine/Mouse1686/NicotineOF/OF_Pre';
-NicotineOF.OFPre{5}='/media/nas7/Nicotine/Mouse1687/NicotineOF/OF_Pre';
-NicotineOF.OFPre{6}='/media/nas7/Nicotine/Mouse1685/NicotineOF/OFPre';
+NicotineOF.Pre{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_OFPre';
+% NicotineOF.Pre{2}='/media/nas7/Nicotine/Mouse1529/1529_NicotineOF_OF.OFPre';
+NicotineOF.Pre{2}='/media/nas7/Nicotine/Mouse1531/1531_NicotineOF_OFPre';
+NicotineOF.Pre{3}='/media/nas7/Nicotine/Mouse1532/1532_NicotineOF_OFPre';
+NicotineOF.Pre{4}='/media/nas7/Nicotine/Mouse1686/NicotineOF/OF_Pre';
+NicotineOF.Pre{5}='/media/nas7/Nicotine/Mouse1687/NicotineOF/OF_Pre';
+NicotineOF.Pre{6}='/media/nas7/Nicotine/Mouse1685/NicotineOF/OFPre';
 
-NicotineOF.OFPost{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_OFPost';
-% NicotineOF.OFPost{2}='/media/nas7/Nicotine/Mouse1529/1529_NicotineOF_OFPost';
-NicotineOF.OFPost{2}='/media/nas7/Nicotine/Mouse1531/1531_NicotineOF_OFPost';
-NicotineOF.OFPost{3}='/media/nas7/Nicotine/Mouse1532/1532_NicotineOF_OFPost';
-NicotineOF.OFPost{4}='/media/nas7/Nicotine/Mouse1686/NicotineOF/OF_Post';
-NicotineOF.OFPost{5}='/media/nas7/Nicotine/Mouse1687/NicotineOF/OF_Post';
-NicotineOF.OFPost{6}='/media/nas7/Nicotine/Mouse1685/NicotineOF/OFPost';
+NicotineOF.Post{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_OFPost';
+% NicotineOF.Post{2}='/media/nas7/Nicotine/Mouse1529/1529_NicotineOF_OFPost';
+NicotineOF.Post{2}='/media/nas7/Nicotine/Mouse1531/1531_NicotineOF_OFPost';
+NicotineOF.Post{3}='/media/nas7/Nicotine/Mouse1532/1532_NicotineOF_OFPost';
+NicotineOF.Post{4}='/media/nas7/Nicotine/Mouse1686/NicotineOF/OF_Post';
+NicotineOF.Post{5}='/media/nas7/Nicotine/Mouse1687/NicotineOF/OF_Post';
+NicotineOF.Post{6}='/media/nas7/Nicotine/Mouse1685/NicotineOF/OFPost';
 
-SalineOF.OFPre{1}='/media/nas7/Nicotine/Mouse1685/SalineOF/OF_Pre';
-SalineOF.OFPre{2}='/media/nas7/Nicotine/Mouse1686/SalineOF/OF_Pre';
-SalineOF.OFPre{3}='/media/nas7/Nicotine/Mouse1612/SalineOF/OFPre';
-SalineOF.OFPre{4}='/media/nas7/Nicotine/Mouse1641/SalineOF/OFPre';
-SalineOF.OFPre{5}='/media/nas7/Nicotine/Mouse1644/SalineOF/OFPre';
-SalineOF.OFPre{6}='/media/nas7/Nicotine/Mouse1687/SalineOF/OFPre';
-SalineOF.OFPre{7}='/media/nas7/Nicotine/Mouse1688/SalineOF/OFPre';
-
-
-SalineOF.OFPost{1}='/media/nas7/Nicotine/Mouse1685/SalineOF/OF_Post';
-SalineOF.OFPost{2}='/media/nas7/Nicotine/Mouse1686/SalineOF/OF_Post';
-SalineOF.OFPost{3}='/media/nas7/Nicotine/Mouse1612/SalineOF/OFPost';
-SalineOF.OFPost{4}='/media/nas7/Nicotine/Mouse1641/SalineOF/OFPost';
-SalineOF.OFPost{5}='/media/nas7/Nicotine/Mouse1644/SalineOF/OFPost';
-SalineOF.OFPost{6}='/media/nas7/Nicotine/Mouse1687/SalineOF/OFPost';
-SalineOF.OFPost{7}='/media/nas7/Nicotine/Mouse1688/SalineOF/OFPost';
+SalineOF.Pre{1}='/media/nas7/Nicotine/Mouse1685/SalineOF/OF_Pre';
+SalineOF.Pre{2}='/media/nas7/Nicotine/Mouse1686/SalineOF/OF_Pre';
+SalineOF.Pre{3}='/media/nas7/Nicotine/Mouse1612/SalineOF/OFPre';
+SalineOF.Pre{4}='/media/nas7/Nicotine/Mouse1641/SalineOF/OFPre';
+SalineOF.Pre{5}='/media/nas7/Nicotine/Mouse1644/SalineOF/OFPre';
+SalineOF.Pre{6}='/media/nas7/Nicotine/Mouse1687/SalineOF/OFPre';
+SalineOF.Pre{7}='/media/nas7/Nicotine/Mouse1688/SalineOF/OFPre';
 
 
-NicotineLowOF.OFPre{1}='/media/nas7/Nicotine/Mouse1614/OFNicotine0.05/OFPre';
-NicotineLowOF.OFPre{2}='/media/nas7/Nicotine/Mouse1644/OFNicotine0.05/OFPre';
-NicotineLowOF.OFPre{3}='/media/nas7/Nicotine/Mouse1688/NicotineOF/OFPre';
-NicotineLowOF.OFPre{4}='/media/nas7/Nicotine/Mouse1641/NicotineOF/OFPre';
-NicotineLowOF.OFPre{5}='/media/nas7/Nicotine/Mouse1612/NicotineOF/OFPre';
+SalineOF.Post{1}='/media/nas7/Nicotine/Mouse1685/SalineOF/OF_Post';
+SalineOF.Post{2}='/media/nas7/Nicotine/Mouse1686/SalineOF/OF_Post';
+SalineOF.Post{3}='/media/nas7/Nicotine/Mouse1612/SalineOF/OFPost';
+SalineOF.Post{4}='/media/nas7/Nicotine/Mouse1641/SalineOF/OFPost';
+SalineOF.Post{5}='/media/nas7/Nicotine/Mouse1644/SalineOF/OFPost';
+SalineOF.Post{6}='/media/nas7/Nicotine/Mouse1687/SalineOF/OFPost';
+SalineOF.Post{7}='/media/nas7/Nicotine/Mouse1688/SalineOF/OFPost';
 
 
-NicotineLowOF.OFPost{1}='/media/nas7/Nicotine/Mouse1614/OFNicotine0.05/OFPost';
-NicotineLowOF.OFPost{2}='/media/nas7/Nicotine/Mouse1644/OFNicotine0.05/OFPost';
-NicotineLowOF.OFPost{3}='/media/nas7/Nicotine/Mouse1688/NicotineOF/OFPost';
-NicotineLowOF.OFPost{4}='/media/nas7/Nicotine/Mouse1641/NicotineOF/OFPost';
-NicotineLowOF.OFPost{5}='/media/nas7/Nicotine/Mouse1612/NicotineOF/OFPost';
+NicotineLowOF.Pre{1}='/media/nas7/Nicotine/Mouse1614/OFNicotine0.05/OFPre';
+NicotineLowOF.Pre{2}='/media/nas7/Nicotine/Mouse1644/OFNicotine0.05/OFPre';
+NicotineLowOF.Pre{3}='/media/nas7/Nicotine/Mouse1688/NicotineOF/OFPre';
+NicotineLowOF.Pre{4}='/media/nas7/Nicotine/Mouse1641/NicotineOF/OFPre';
+NicotineLowOF.Pre{5}='/media/nas7/Nicotine/Mouse1612/NicotineOF/OFPre';
+
+
+NicotineLowOF.Post{1}='/media/nas7/Nicotine/Mouse1614/OFNicotine0.05/OFPost';
+NicotineLowOF.Post{2}='/media/nas7/Nicotine/Mouse1644/OFNicotine0.05/OFPost';
+NicotineLowOF.Post{3}='/media/nas7/Nicotine/Mouse1688/NicotineOF/OFPost';
+NicotineLowOF.Post{4}='/media/nas7/Nicotine/Mouse1641/NicotineOF/OFPost';
+NicotineLowOF.Post{5}='/media/nas7/Nicotine/Mouse1612/NicotineOF/OFPost';
 
 
 SalineHC{1}='/media/nas7/Nicotine/Mouse1411/20230224/';
@@ -70,17 +70,20 @@ NicotineHC{6}='/media/nas7/Nicotine/Mouse1416/20230302/';
 NicotineHC{7}='/media/nas7/Nicotine/Mouse1417/20230302/';
 NicotineHC{8}='/media/nas7/Nicotine/Mouse1418/20230302/';
 NicotineHC{9}='/media/nas7/Nicotine/Mouse1385/20230203/';
-NicotineHC{10}='/media/nas7/Nicotine/Mouse1391/20230203/';
-NicotineHC{11}='/media/nas7/Nicotine/Mouse1393/20230203/';
+% NicotineHC{10}='/media/nas7/Nicotine/Mouse1391/20230203/';
+NicotineHC{10}='/media/nas7/Nicotine/Mouse1393/20230203/';
+% NicotineHC{11} ='/media/nas7/Nicotine/Mouse1386/20230203/'; % 0.25 mg/kg
+% NicotineHC{12} ='/media/nas7/Nicotine/Mouse1394/20230203/'; % 0.25 mg/kg
+% NicotineHC{13} ='/media/nas7/Nicotine/Mouse1376/20230206/'; % 0.2 mg/kg
+% NicotineHC{14}='/media/nas7/Nicotine/Mouse1377/20230206/'; % 0.2 mg/kg
 
+AtropineOF.Pre{1} = '/media/nas7/Atropine/Mouse1500/30012024/OF_Pre';
+AtropineOF.Pre{2} = '/media/nas7/Atropine/Mouse1531/OF_Pre';
+AtropineOF.Pre{3} = '/media/nas7/Atropine/Mouse1533/OF_Pre';
 
-AtropineOF.OFPre{1} = '/media/nas7/Atropine/Mouse1500/30012024/OF_Pre';
-AtropineOF.OFPre{2} = '/media/nas7/Atropine/Mouse1531/OF_Pre';
-AtropineOF.OFPre{3} = '/media/nas7/Atropine/Mouse1533/OF_Pre';
-
-AtropineOF.OFPost{1} = '/media/nas7/Atropine/Mouse1500/30012024/OF_Post';
-AtropineOF.OFPost{2} = '/media/nas7/Atropine/Mouse1531/OF_Post';
-AtropineOF.OFPost{3} = '/media/nas7/Atropine/Mouse1533/OF_Post';
+AtropineOF.Post{1} = '/media/nas7/Atropine/Mouse1500/30012024/OF_Post';
+AtropineOF.Post{2} = '/media/nas7/Atropine/Mouse1531/OF_Post';
+AtropineOF.Post{3} = '/media/nas7/Atropine/Mouse1533/OF_Post';
 
 
 DiazepamHC{1}='/media/nas6/ProjetEmbReact/Mouse1207/20210730/';

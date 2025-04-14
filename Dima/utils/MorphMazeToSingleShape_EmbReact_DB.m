@@ -36,9 +36,10 @@ if ~exist('ZoneDef')
 end
 
 % get user input
-if exist('XYInput')
-    x = XYInput(1,:);
-    y = XYInput(2,:);
+if exist('XYInput') && ~isempty(XYInput)
+    %% The XYInput is already transposed
+    y = XYInput(1,:);
+    x = XYInput(2,:);
 else
     figure
     imagesc(double(Ref)), colormap jet, hold on
@@ -98,4 +99,6 @@ xlim([-0.2 1.2])
 ylim([-0.2 1.2])
 legend({'SHK','SF','CNT','SHKCNT','SFCNT'})
 
+% Wait for the figure to close before continuing
+waitfor(gcf)
 end

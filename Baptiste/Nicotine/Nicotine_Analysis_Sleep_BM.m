@@ -232,7 +232,7 @@ end
 
 
 %% Spectrograms after injection
-clear all
+% clear all
 
 
 smootime=1; time_aft_inj=10;
@@ -310,8 +310,8 @@ a=suptitle('OB Low spectrograms after injection'); a.FontSize=20;
 
 
 
-
-clear all
+% 
+% clear all
 
 GetSleepSessions_Drugs_BM
 

@@ -9,8 +9,8 @@ Created on Thu Sep 26 11:11:11 2024
 # %%
 
 # Set working directory
-# import os
-# os.chdir(r'/home/gruffalo/PrgGithub/Ella/Python/projects/data_Sophie')
+import os
+os.chdir(r'/home/gruffalo/PrgGithub/Ella/Python/data_SophieBagur')
 
 # Import necessary packages and modules
 from load_data import load_dataframes
