@@ -23,7 +23,6 @@ from load_plot_matlab_data.plot_matlab_variables import (
     plot_multiple_variables_over_time,
     plot_variable_distribution,
     plot_variable_joyplot,
-    # compute_and_plot_variable_correlations
     )
 
 # %% Define datasets configuration and load data
@@ -146,18 +145,25 @@ plot_variable_distribution(datasets, 1690, 'Heartrate', experiment_keys=["Inject
 plot_variable_distribution(datasets, 1690, 'BreathFreq', experiment_keys=["Injection_Ivabradine_5mgkg"])
 
 plot_variable_over_time(datasets, 1690, 'Heartrate', 
-                        experiment_keys=['Injection_Ivabradine_5mgkg'], smooth=True, smooth_window=100)
+                        experiment_keys=['Injection_Ivabradine_5mgkg'], 
+                        smooth=True, smooth_window=300, ylim=(4,12), xlim=(-200,12200))
 
 plot_variable_over_time(datasets, 1712, 'Heartrate', 
-                        experiment_keys=['Injection_Ivabradine_5mgkg'], smooth=True, smooth_window=100)
+                        experiment_keys=['Injection_Ivabradine_5mgkg'], 
+                        smooth=True, smooth_window=300, ylim=(4,12), xlim=(-200,12200))
 
 # %% Injection Ivabradine 10mgkg
 
 plot_variable_distribution(datasets, 1690, 'Heartrate', experiment_keys=["Injection_Ivabradine_10mgkg"])
 plot_variable_distribution(datasets, 1690, 'BreathFreq', experiment_keys=["Injection_Ivabradine_10mgkg"])
 
+plot_variable_over_time(datasets, 1690, 'Heartrate', 
+                        experiment_keys=['Injection_Ivabradine_10mgkg'], 
+                        smooth=True, smooth_window=300, ylim=(4,12), xlim=(-200,12200))
+
 plot_variable_over_time(datasets, 1712, 'Heartrate', 
-                        experiment_keys=['Injection_Ivabradine_10mgkg'], smooth=True, smooth_window=100)
+                        experiment_keys=['Injection_Ivabradine_10mgkg'], 
+                        smooth=True, smooth_window=300, ylim=(4,12), xlim=(-200,12200))
 
 # %% Injection Ivabradine 20mgkg
 
@@ -165,10 +171,24 @@ plot_variable_distribution(datasets, 1690, 'Heartrate', experiment_keys=["Inject
 plot_variable_distribution(datasets, 1690, 'BreathFreq', experiment_keys=["Injection_Ivabradine_20mgkg"])
 
 plot_variable_over_time(datasets, 1690, 'Heartrate', 
-                        experiment_keys=['Injection_Ivabradine_20mgkg'], smooth=True, smooth_window=100)
+                        experiment_keys=['Injection_Ivabradine_20mgkg'], 
+                        smooth=True, smooth_window=100, ylim=(2,12))
+
+plot_variable_over_time(datasets, 1711, 'Heartrate', 
+                        experiment_keys=['Injection_Ivabradine_20mgkg'], 
+                        smooth=True, smooth_window=100, ylim=(2,12))
+
+plot_multiple_variables_over_time(datasets, 1711, ['Heartrate', 'BreathFreq'], 
+                                  '250305', experiment_keys=['Injection_Ivabradine_20mgkg'],
+                                  smooth=True, smooth_window_dict={'Heartrate': 100, 'BreathFreq': 100})
 
 plot_variable_over_time(datasets, 1712, 'Heartrate', 
-                        experiment_keys=['Injection_Ivabradine_20mgkg'], smooth=True, smooth_window=100)
+                        experiment_keys=['Injection_Ivabradine_20mgkg'], 
+                        smooth=True, smooth_window=100, ylim=(2,12))
+
+plot_variable_over_time(datasets, 1712, 'BreathFreq', dates='250311',  
+                        smooth=True, smooth_window=100, ylim=(0,5))
+
 
 # %% Compare saline and ivabradine
 
@@ -188,4 +208,6 @@ plot_variable_distribution(datasets, 1711, 'Heartrate')
 
 plot_variable_distribution(datasets, 1711, 'BreathFreq')
 
+plot_variable_distribution(datasets, 1712, 'Heartrate')
 
+plot_variable_distribution(datasets, 1712, 'BreathFreq')
