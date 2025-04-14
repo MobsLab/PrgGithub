@@ -65,7 +65,7 @@ for mm=1:length(MiceNumber)
     mm
     
     clear eigenvalues Spikes StimEpoch Ripples StimEpoch strength templates correlations eigenvectors lambdaMax
-    load(['RippleReactInfo_NewRipples_Mouse',num2str(MiceNumber(mm)),'.mat'])
+    load(['RippleReactInfo_NewRipples_Cond_Mouse',num2str(MiceNumber(mm)),'.mat'])
     Q = MakeQfromS(Spikes,Binsize); % data from the conditionning session
     
     % Define the template epochs
@@ -105,8 +105,6 @@ for mm=1:length(MiceNumber)
         DatPoints.(EpochNames{k}) = size(dat,1);
         
         [templates.(EpochNames{k}),correlations.(EpochNames{k}),eigenvalues.(EpochNames{k}),eigenvectors.(EpochNames{k}),lambdaMax.(EpochNames{k})] = ActivityTemplates_SB(dat,0);
-        
-        
         
     end
     
@@ -189,9 +187,6 @@ for mm=1:length(MiceNumber)
                     PeakNumShuff{mm}{k}(comp,kk) = NaN;
                     PeakNum{mm}{k}(comp,kk) = NaN;
                 end
-                
-                
-                
             end
             
             % Link to LinPos

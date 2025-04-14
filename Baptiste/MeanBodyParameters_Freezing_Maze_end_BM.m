@@ -45,11 +45,6 @@ makepretty_BM2
 
 
 
-
-
-
-
-
 %% mean spectrum
 clear all
 Session_type={'Cond'};

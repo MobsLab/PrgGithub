@@ -394,8 +394,8 @@ ylabel('SZ occupancy (prop)'), ylim([0 .35])
 
 
 
-figure, n=1;
-for i=[1:6 8]
+figure, n=2;
+for i=1:8
     subplot(1,7,n)
     
     if n==1

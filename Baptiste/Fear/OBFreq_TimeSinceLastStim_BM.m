@@ -32,7 +32,7 @@ l{2} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_RipInh
 
 %% parameters
 Session_type={'Cond'}; sess=1;
-max_time = 1000;
+max_time = 100;
 x=1:max_time;
 
 %% data collection
@@ -57,15 +57,15 @@ for group=1:length(Drug_Group)
             if InterStimDur>max_time
                 InterStimDur =max_time;
             end
-            %             for bin=1:InterStimDur
-            %
-            %                 Bin = intervalSet(St(stim)+(bin-1)*1e4 , St(stim)+bin*1e4);
-            %
-            %                 Respi_all{group}{mouse}(stim,bin) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,3} , Bin)));
-            %                 Respi_shock{group}{mouse}(stim,bin) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,5} , Bin)));
-            %                 Respi_safe{group}{mouse}(stim,bin) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,6} , Bin)));
-            %
-            %             end
+            for bin=1:InterStimDur
+                
+                Bin = intervalSet(St(stim)+(bin-1)*1e4 , St(stim)+bin*1e4);
+                
+                Respi_all{group}{mouse}(stim,bin) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,3} , Bin)));
+                Respi_shock{group}{mouse}(stim,bin) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,5} , Bin)));
+                Respi_safe{group}{mouse}(stim,bin) = nanmean(Data(Restrict(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,6} , Bin)));
+                
+            end
         end
         Respi_all{group}{mouse}(Respi_all{group}{mouse}==0) = NaN;
         Respi_shock{group}{mouse}(Respi_shock{group}{mouse}==0) = NaN;
@@ -159,35 +159,35 @@ makepretty_BM2
 
 
 figure
-subplot(211)
+subplot(5,1,1:2)
 clear D, D = AllStim_Respi_shock{1}(:,x);
-plot(x , movmean(nanmean(D),3,'omitnan') , '.' , 'MarkerSize' , 20 , 'Color' , [1 .5 .5]), hold on
+plot(x , movmean(nanmean(D),5,'omitnan') , '.' , 'MarkerSize' , 20 , 'Color' , [1 .5 .5]), hold on
 errhigh = nanstd(D)/sqrt(size(D,1));
 errlow  = zeros(1,length(x));
-er = errorbar(x,movmean(nanmean(D),3,'omitnan'),errlow,errhigh);
+er = errorbar(x,movmean(nanmean(D),5,'omitnan'),errlow,errhigh);
 er.Color = [0 0 0]; er.LineStyle = 'none'; er.CapSize=1;
 clear D, D = AllStim_Respi_safe{1}(:,x);
-plot(x , movmean(nanmean(D),3,'omitnan') , '.' , 'MarkerSize' , 20 , 'Color' , [.5 .5 1]), hold on
+plot(x , movmean(nanmean(D),5,'omitnan') , '.' , 'MarkerSize' , 20 , 'Color' , [.5 .5 1]), hold on
 errhigh = nanstd(D)/sqrt(size(D,1));
 errlow  = zeros(1,length(x));
-er = errorbar(x,movmean(nanmean(D),3,'omitnan'),errlow,errhigh);
+er = errorbar(x,movmean(nanmean(D),5,'omitnan'),errlow,errhigh);
 er.Color = [0 0 0]; er.LineStyle = 'none'; er.CapSize=1;
-xlim([0 200]), ylim([2 6.5]), grid on
+xlim([0 max_time]), ylim([2 6.5]), grid on
 f=get(gca,'Children'); legend([f(4),f(2)],'shock','safe');
 xlabel('time since last shock'), ylabel('Breathing (Hz)')
 makepretty_BM2
 
 subplot(513)
-b=bar(movmean(nanmean(AllStim_Respi_shock{1}(ind,x))-nanmean(AllStim_Respi_safe{1}(ind,x)),1)); b.FaceColor=[.1 .1 .1]; box off
-xlim([0 200]), ylim([-2 4]), ylabel('Breathing diff (Hz)')
+b=bar(movmean(nanmean(AllStim_Respi_shock{1}(:,x))-nanmean(AllStim_Respi_safe{1}(:,x)),5,'omitnan')); b.FaceColor=[.1 .1 .1]; box off
+xlim([0 max_time]), ylim([-2 4]), ylabel('Breathing diff (Hz)')
 
 subplot(514)
 a=bar(sum(~isnan(AllStim_Respi_shock{1}))); a.FaceColor=[1 .5 .5]; box off
-xlim([0 200]), ylim([0 22]), ylabel('mice (#)')
+xlim([0 max_time]), ylim([0 22]), ylabel('mice (#)')
 
 subplot(515)
 a=bar(sum(~isnan(AllStim_Respi_safe{1}))); a.FaceColor=[.5 .5 1]; box off
-xlim([0 200]), ylim([0 22]), ylabel('mice (#)')
+xlim([0 max_time]), ylim([0 22]), ylabel('mice (#)')
 xlabel('time since last shock'),
 
 

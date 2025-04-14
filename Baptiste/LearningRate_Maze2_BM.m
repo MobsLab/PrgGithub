@@ -39,7 +39,7 @@ for sess=1:2
     for group=1:length(Drug_Group)
         Mouse=Drugs_Groups_UMaze_BM(Group(group));
         [OutPutData.(Session_type{sess}).(Drug_Group{group}) , Epoch1.(Session_type{sess}).(Drug_Group{group}) , NameEpoch] = ...
-            MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'speed','heartrate');
+            MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'speed','heartrate','ripples');
     end
 end
 
@@ -139,6 +139,8 @@ for group=1:length(Group)
     HR_Safe{group}(HR_Safe{group}<7.5) = NaN;
     HR_Shock{group}(HR_Shock{group}<7.5) = NaN;
     RESPI_Safe{group}(RESPI_Safe{group}>6) = NaN;
+Rip_Numb_Tot{group}(isnan(STIM_Number{1})) = NaN;
+    Rip_Numb_Safe{group}(isnan(STIM_Number{1})) = NaN;
 end
 
 
@@ -150,55 +152,85 @@ for group=1:length(Drug_Group)
 end
 
 
+% Rip_Numb_Tot{1}(21,11) = NaN;  
 
 %% Figures all eyelid
 Average_HR_Above_Shock{1}(:,16)=NaN; % all eyelid
 HR_Active_Shock{1}(:,16)=NaN;
 
 figure
+subplot(121)
 Data_to_use = movmean(STIM_Number{1}',3,'omitnan')';
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 Mean_All_Sp=nanmean(Data_to_use);
-h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-r',1); hold on;
-color= [.5 .3 .1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-box off, ylim([0 2])
-ylabel('shocks (#/min)')
+h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+color= [.2 .2 .2]; h.mainLine.Color=color; %h.patch.FaceColor=[]; 
+ylim([0 2]), ylabel('shocks (#/min)')
 makepretty
 yyaxis right
 Data_to_use = movmean(RESPI_Safe{1}',3,'omitnan')';
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 Mean_All_Sp=nanmean(Data_to_use);
 h=shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
-color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-xlim([0 100]), xlabel('time (min)'), ylabel('Breathing, safe freezing (Hz)')
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=[.3 .3 1]; 
+xlim([0 100]), ylim([2.9 3.9]), xlabel('time (min)'), ylabel('Breathing, safe freezing (Hz)')
 makepretty
 
 
-
-
-figure
-Data_to_use = movmean(Rip_Numb_Tot{1}',3,'omitnan')';
-% Data_to_use = Rip_Numb_Safe{1};
+subplot(122)
+Data_to_use = movmean(Rip_Numb_Safe{1}',3,'omitnan')'; %Data_to_use(23,11:13) = NaN;
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 Mean_All_Sp=nanmean(Data_to_use);
 h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-r',1); hold on;
-color= [.1 .3 .5]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-xlim([0 100]), xlabel('time (min)'), ylabel('SWR numb (norm)'), hline(.0678,'--k')
+color= [.1 .3 .5]; h.mainLine.Color=color; h.patch.FaceColor=color; 
+ylabel('SWR numb (norm)'), ylim([.02 .16]), hline(nanmean(nanmean(Rip_Numb_Safe{1}')),'--k'), xlim([0 100])
 makepretty
 
+plot([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , 'o'  , 'Color' , [.1 .3 .5] , 'MarkerSize',5)
+plot([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , 'o'  , 'Color' , [.1 .3 .5] , 'MarkerSize',10)
 
-
-Data_to_use = movmean(Rip_Numb_Tot{1}',3,'omitnan')';
+clear h p
+Data_to_use = movmean(Rip_Numb_Safe{1}',3,'omitnan')'; 
 for i=1:18
     clear d, d = Data_to_use(:,i);
-    try, [h(i) , p(i)] = ttest(d(~isnan(d)) , ones(sum(~isnan(d)),1)*.0678); end
+    try, [h(i) , p(i)] = ttest(d(~isnan(d)) , ones(sum(~isnan(d)),1)*nanmean(nanmean(Rip_Numb_Safe{1}'))); end
+    try, [p2(i) , h(i)] = ranksum(d(~isnan(d)) , ones(sum(~isnan(d)),1)*nanmean(nanmean(Rip_Numb_Safe{1}'))); end
 end
 [corrected_p, h]=bonf_holm(p);
+[corrected_p2, h]=bonf_holm(p2);
 X_ax = [bin_size/2:bin_size:bin_tot*bin_size-bin_size/2];
-plot(X_ax(corrected_p<.05) , .15 , '*k')
+plot(X_ax(corrected_p<.05) , .16 , '*' , 'Color' , [.1 .3 .5] , 'MarkerSize' , 15)
+
+yyaxis right
+Data_to_use = movmean(RESPI_Safe{1}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=[.3 .3 1]; 
+xlim([0 100]), ylim([2.9 3.9]), xlabel('time (min)'), ylabel('Breathing, safe freezing (Hz)')
+makepretty
+
+plot([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , 'o'  , 'Color' , [.3 .3 1] , 'MarkerSize',5)
+plot([bin_size/2:bin_size:bin_tot*bin_size-bin_size/2] , Mean_All_Sp , 'o'  , 'Color' , [.3 .3 1] , 'MarkerSize',10)
+
+clear h p
+Data_to_use = movmean(RESPI_Safe{1}',3,'omitnan')'; 
+for i=1:18
+    clear d, d = Data_to_use(:,i); D = nanmean(Data_to_use(:,1:4)');
+    try, [h(i) , p(i)] = ttest(d(~isnan(d)) , D(~isnan(d))'); end
+    try, [p2(i) , h(i)] = ranksum(d(~isnan(d)) , ones(sum(~isnan(d)),1)*nanmean(nanmean(RESPI_Safe{1}'))); end
+end
+[corrected_p, h]=bonf_holm(p);
+[corrected_p2, h]=bonf_holm(p2);
+X_ax = [bin_size/2:bin_size:bin_tot*bin_size-bin_size/2];
+plot(X_ax(corrected_p<.05) , 3.8 , '*' , 'Color' , [.5 .5 1] , 'MarkerSize' , 15)
 
 
 
+
+
+
+%% others
 figure
 Data_to_use = movmean(Rip_Safe{1}',3,'omitnan')';
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
@@ -209,7 +241,6 @@ xlim([0 100]), ylim([.25 .75]), xlabel('time (min)'), ylabel('SWR occurence (#/s
 makepretty
 
 
-%% others
 figure
 subplot(231)
 Data_to_use = movmean(STIM_Number{1}',3,'omitnan')';

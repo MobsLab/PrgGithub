@@ -15,8 +15,18 @@ for mouse=1:length(Mouse)
     try, RipTot_Sup4(mouse) = length(Restrict(OutPutData.ripples.ts{mouse,3} , Epoch_Respi_Sup4)); end
     try, RipTot_Inf4(mouse) = length(Restrict(OutPutData.ripples.ts{mouse,3} , Epoch_Respi_Inf4)); end
     
+    try
+        clear R, R = Range(OutPutData.respi_freq_bm.tsd{mouse,5});
+        End_Epoch_shock = intervalSet(R(round(size(R,1)*.9)) , R(end));
+    end
+    clear R, R = Range(OutPutData.respi_freq_bm.tsd{mouse,6});
+    End_Epoch_safe = intervalSet(R(round(size(R,1)*.9)) , R(end));
+    try, RipTot_Sup4_end(mouse) = length(Restrict(OutPutData.ripples.ts{mouse,3} , and(Epoch_Respi_Sup4 , End_Epoch_shock))); end
+    try, RipTot_Inf4_end(mouse) = length(Restrict(OutPutData.ripples.ts{mouse,3} , and(Epoch_Respi_Inf4 , End_Epoch_safe))); end
+    
 end
-RipDensity_Inf4(5) = NaN;
+RipTot_Inf4_end(RipTot_Inf4_end==0) = NaN;
+RipTot_Sup4_end(RipTot_Inf4_end==0) = NaN;
 
 Cols = {[1 .5 .5],[.5 .5 1]};
 X = [1:2];
@@ -36,7 +46,9 @@ set(a(1), 'FaceColor', [1 .5 .5]); set(a(3), 'FaceColor', [.5 .5 1]);
 
 
 
-
+figure
+a= pie([nanmean(RipTot_Sup4_end) nanmean(RipTot_Inf4_end)]);
+set(a(1), 'FaceColor', [1 .5 .5]); set(a(3), 'FaceColor', [.5 .5 1]);
 
 
 

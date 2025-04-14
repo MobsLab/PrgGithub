@@ -64,7 +64,7 @@ Params.Accelero_thresh = thresh;
 save('behavResources_SB.mat','Behav','Params')
 
 % Ripples
-CreateRipplesSleep_BM
+CreateRipplesSleep
 
 % InstFreq
 MakeInstFreqForSession_BM

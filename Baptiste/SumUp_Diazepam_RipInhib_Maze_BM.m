@@ -5,7 +5,7 @@ GetAllSalineSessions_BM
 
 % Session_type={'Fear','Cond','Ext','TestPost','TestPre','Hab'};
 % Session_type={'TestPre','Cond','TestPost','Ext','Fear'};
-Session_type={'Cond'};
+Session_type={'Cond','TestPost'};
 
 Drug_Group={'SalineSB','ChronicFlx','AcuteFlx','Midazolam','SalineBM_Short','Diazepam_Short','RipSham','RipInhib','PAG','All_eyelid','All_saline','Elisa','Saline','RipInhib2','Diazepam','ChronicBUS','AcuteBUS','RipControl','RipInhib1','RipControl1','RipInhibPaired','RipControlPaired','Sal_Maze1_1stMaze','Sal_Maze4_1stMaze','DZP_Maze1_1stMaze','DZP_Maze4_1stMaze'};
 
@@ -26,6 +26,7 @@ NoLegends = {'','','',''};
 
 
 %%
+n=1;
 for group=1:length(Group)
     Mouse=Drugs_Groups_UMaze_BM(Group(group));
     for sess=1:length(Session_type)

@@ -63,8 +63,8 @@ for mouse = 1:length(Mouse)
     FzSafe_MeanDur(mouse) = nanmean(DurationEpoch(Epoch1.Cond{mouse,6}))./1e4;
     FzShock_MeanDur(mouse) = nanmean(DurationEpoch(Epoch1.Cond{mouse,5}))./1e4;
     try
-        OutPutData.sleep_pre.accelero.tsd{mouse,1} = mergeCloseIntervals(Epoch1.sleep_pre{mouse,3} , 2e4);
-        OutPutData.sleep_pre.accelero.tsd{mouse,1} = dropShortIntervals(Epoch1.sleep_pre{mouse,3} , 10e4);
+        Epoch1.sleep_pre{mouse,3} = mergeCloseIntervals(Epoch1.sleep_pre{mouse,3} , 2e4);
+        Epoch1.sleep_pre{mouse,3} = dropShortIntervals(Epoch1.sleep_pre{mouse,3} , 10e4);
         Sleep_MeanDur(mouse) = nanmean(DurationEpoch(Epoch1.sleep_pre{mouse,3}))./1e4;
     end
 end

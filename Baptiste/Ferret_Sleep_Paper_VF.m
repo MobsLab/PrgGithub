@@ -76,8 +76,12 @@ edit SleepTransitions_Ferret_BM.m
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Figure 3: Breathing on brain rhtyhms
+% Figure 3: OB/pupil correlation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% cross-corr
+
+
 
 
 %% corr Breathing/gamma
