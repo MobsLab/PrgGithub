@@ -242,7 +242,7 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
                 set(chronostim,'ForegroundColor','k');
                 set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
             elseif strcmp('EPM',ExpeInfo.namePhase)
-                ExpeInfo.lengthPhase=1200;
+                ExpeInfo.lengthPhase=900;
                 set(inputDisplay(10),'string','No Shock');
                 set(chronostim,'ForegroundColor','k');
                 set(inputDisplay(11),'string','You can relax','ForegroundColor','k');
@@ -827,7 +827,7 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
         xlim([0.5 2.5])
         box off
         
-        saveas(figbilan,'FigBilan.fig')
+        saveas(figbilan,[ExpeInfo.name_folder,filesep,'FigBilan.fig'])
         saveas(figbilan,[ExpeInfo.name_folder,filesep,'FigBilan.png'])
         close(figbilan)
         
