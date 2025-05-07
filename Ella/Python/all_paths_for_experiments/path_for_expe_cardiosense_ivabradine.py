@@ -9,7 +9,7 @@ Created on Wed Mar 19 15:10:47 2025
 import os
 import scipy.io
 
-def get_path_for_expe_cardiosense_ivabradine(experiment):
+def get_path_for_expe_cardiosense_ivabradine_determine_dosage(experiment):
     '''
     INPUT:
         experiment (str): Name of the experiment.
