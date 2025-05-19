@@ -1,4 +1,11 @@
 
+load('/media/nas7/ProjetEmbReact/DataEmbReact/PlaceCells_Reactivation.mat')
+
+MakeSpreadAndBoxPlot3_SB({RippleAmp(ShockCells),RippleAmp(MidCells),RippleAmp(SafeCells)},Cols2,X2_plo,Legends2,'showpoints',1,'paired',0)
+
+
+
+%%
 clear all
 cd /media/DataMOBsRAIDN/ProjectEmbReact/Figures/HPC_Reactivations/Data
 
@@ -226,11 +233,9 @@ end
 
 
 %% Create pseudo-population with only place cells
-
 MeanFR_AroundRip_all=[];
 FR_PreRipples = [];
 FR_Ripples = [];
-
 
 for sess=1:length(Session_type)
     LinFiring_AllPlaceCells{sess} = [];

@@ -27,6 +27,7 @@ function SpikeSorting_Analysis_AG(directory)
 %    error('Please provide a directory path to your ferret session data.');
 % end
 Dir = PathForExperimentsOB('Shropshire', 'freely-moving', 'all', 'TORCs');
+Dir = PathForExperimentsOB('Shropshire', 'head-fixed', 'none', 'TORCs');
 
 sessions = {...
             '20241205_TORCs', ...
@@ -40,9 +41,10 @@ sessions = {...
             '20241221_TORCs', ...
             '20241223_TORCs'};
 
-
-exp_path  = '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/';
-session = sessions{5}; %5
+sessions = Dir.name';
+exp_path  = '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/';
+% '/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/';
+session = sessions{1}; %1
 
 directory = [exp_path session];
 cd(directory)
@@ -123,7 +125,7 @@ end
 % A{n} = ts(...) for each selected cluster
 A = {};
 n=1;
-for i = colIndex
+for i = 1:47;%colIndex
     A{n} = ts(spikes(:,i)*1e1);
     n = n+1;
 end

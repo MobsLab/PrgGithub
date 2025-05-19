@@ -1,3 +1,10 @@
+%% Create separate files for freely moving with multiple mice
+
+edit edit RefSubtraction_multi.m
+% In the folder wher the amplifier.dat is
+RefSubstraction_multi('amplifier.dat',96, 3, 'M1690',[],[],[0:31],'M1712',[],[],[32:63]);
+% Then same with the auxiliary (3/mouse)
+
 %% Get low frequency spectra - example with bulb
 load('ChannelsToAnalyse/Bulb_deep.mat')
 LowSpectrumSB([cd filesep],channel,'B')
@@ -22,7 +29,8 @@ FindNoiseEpoch_BM([cd filesep],channel,0);
 %% Get heart beats
 clear all
 Options.TemplateThreshStd=3;
-Options.BeatThreshStd=0.05;
+% Options.BeatThreshStd=0.05;
+Option.BeatThreshStd=1.5;
 load('ChannelsToAnalyse/EKG.mat')
 load(['LFPData/LFP',num2str(channel),'.mat'])
 load('StateEpochSB.mat','TotalNoiseEpoch')
@@ -53,6 +61,7 @@ save('SleepScoring_OBGamma','SmoothGamma')
 
 %% Sleep scoring
 SleepScoringOBGamma
+SleepScoring_Accelero_OBgamma
 
 %% Get ripples
 CreateRipplesSleep('stim',0,'restrict',1,'sleep',1)

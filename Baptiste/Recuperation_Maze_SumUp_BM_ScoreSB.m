@@ -1,7 +1,46 @@
 close all,clear all
 
-%% Sleep
 
+
+%% paper figures
+% homeostasis
+load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/Fear_related_measures.mat','Length_shock','Length_safe')
+load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/PC_values.mat', 'PCVal')
+
+figure
+A = log10(Length_shock{1})'; B = log10(Length_safe{1})';
+PlotCorrelations_BM(A , B , 'conf_bound',1)
+makepretty
+xlabel('Duration fz breathing >4.5Hz (log scale)'), ylabel('Fz breathing <4.5Hz (log scale)')
+axis square
+
+
+X = log10(Length_shock{1})'; X(X==-Inf)=NaN;
+Y = log10(Length_safe{1})';
+
+tbl = table(X,Y);
+mdl = fitlm(tbl,'Y ~ X');
+t = table2array(mdl.Coefficients);
+a = t(2,1); b = t(1,1);
+
+X_proj = (X + a * (Y - b)) / (a^2 + 1); 
+Y_proj = a * X_proj + b; % Compute distances 
+d_perpendicular = (a * X - Y + b) ./ sqrt(a^2 + 1); % Perpendicular (Euclidean) distance 
+d_y = (Y - (a * X + b)); % Vertical distance
+d_x = X-X_proj; % horizontal dist 
+
+
+figure
+PlotCorrelations_BM(d_perpendicular , PCVal , 'conf_bound',1 , 'method' , 'spearman')
+makepretty
+xlabel('distance to fit'), ylabel('Breathing, safe side (Hz)')
+axis square
+xlim([-1.2 .8]), ylim([1.5 5])
+
+
+
+
+%% Sleep
 Eyelid = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/All_Eyelid_Sleep.mat','Prop');
 Respi = load('/media/nas7/ProjetEmbReact/DataEmbReact/ThesisData/Physio_BehavGroup.mat', 'DATA_SAL');
 HR = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/HR_Homecage_Eyelid.mat');

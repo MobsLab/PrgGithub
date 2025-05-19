@@ -165,7 +165,7 @@ for k = 1 : length(A)
     if sum(isnan(A{k}))<length(A{k})
 %         a=iosr.statistics.boxPlot(X(k),A{k}(:),'boxColor',Cols{k},'lineColor',[0.95 0.95 0.95],'medianColor','k','boxWidth',0.5,'showOutliers',false);
 %         a=iosr.statistics.boxPlot(X(k),A{k}(:),'boxColor',Cols{k},'lineColor',[0.95 0.95 0.95],'medianColor',Cols{k},'boxWidth',0.4,'showOutliers',false);
-        a=iosr.statistics.boxPlot(X(k),A{k}(:),'boxColor',Cols{k},'lineColor',[.5 .5 .5],'medianColor',Cols{k},'boxWidth',0.4,'showOutliers',false);
+        a=iosr.statistics.boxPlot(X(k),A{k}(:),'boxColor',Cols{k},'lineColor',[1 1 1],'medianColor',Cols{k},'boxWidth',0.4,'showOutliers',false);
         a.handles.upperWhiskers.Visible='off';a.handles.upperWhiskerTips.Visible='off';
         a.handles.lowerWhiskers.Visible='off';a.handles.lowerWhiskerTips.Visible='off';
         a.handles.medianLines.LineWidth = 10;

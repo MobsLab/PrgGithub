@@ -135,16 +135,17 @@ end
 
 figure
 subplot(131)
-Data_to_use = H.(Param{param}).TestPre;
+Data_to_use = movmean(H.(Param{param}).TestPre',3)';
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 h=shadedErrorBar(linspace(0,25,100) , nanmean(Data_to_use) , Conf_Inter ,'-k',1);
 hold on
-Data_to_use = H.(Param{param}).Cond;
+Data_to_use = movmean(H.(Param{param}).Cond',3)';
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 h=shadedErrorBar(linspace(0,25,100) , nanmean(Data_to_use) , Conf_Inter ,'-r',1);
 xlabel('Speed (cm/s)'), ylabel('Heart rate (Hz)')
 f=get(gca,'Children'); legend([f([8 4])],'TestPre','Cond');
-xlim([1 15]), ylim([12.4 13.3])
+xlim([2 15]), ylim([12.4 13.1])
+makepretty_BM2
 
 subplot(132)
 Data_to_use = H_shock.(Param{param}).TestPre;

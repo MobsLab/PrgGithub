@@ -444,7 +444,12 @@ for i = 1:length(varargin)
                 
             case 'respi_freq_bm'
                 for mouse=1:length(Mouse_names)
-                    OutPutVar.(Mouse_names{mouse})=ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'respi_freq_BM');
+                    OutPutVar.(Mouse_names{mouse})=ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'respi_freq_bm');
+                end
+                                
+            case 'respi_freq_bm_clean'
+                for mouse=1:length(Mouse_names)
+                    OutPutVar.(Mouse_names{mouse})=ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'respi_freq_bm_clean');
                 end
                 
             case 'ob_gamma_freq'
@@ -913,10 +918,10 @@ for i = 1:length(varargin)
                             
                             OutPutData.(varargin{1, i}).max_freq(mouse,states) = RANGE(OutPutData.(varargin{1, i}).max_freq(mouse,states) + noise_thr-1);
                             OutPutData.(varargin{1, i}).mean(mouse,states,:) = nanmean(Data(Restrict(OutPutVar.(Mouse_names{mouse}) , Epoch{mouse,states})));
-                            %      OutPutData.(varargin{1, i}).spectrogram{mouse,states} = Restrict(OutPutVar.(Mouse_names{mouse}) , Epoch{mouse,states});
-                            
+                                 OutPutData.(varargin{1, i}).spectrogram{mouse,states} = Restrict(OutPutVar.(Mouse_names{mouse}) , Epoch{mouse,states});
+                            % subsample spectro for lighter
                             R = Range(OutPutVar.(Mouse_names{mouse})); D = Data(OutPutVar.(Mouse_names{mouse}));
-                            OutPutData.(varargin{1, i}).spectrogram{mouse,states} = Restrict(tsd(R(1:10:end) , D(1:10:end,:)) , Epoch{mouse,states});
+                            OutPutData.(varargin{1, i}).spectrogram{mouse,states} = Restrict(tsd(R(1:10:end) , D(1:100:end,:)) , Epoch{mouse,states});
                             
                             
                         catch

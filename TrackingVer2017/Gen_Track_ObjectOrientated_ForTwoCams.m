@@ -110,7 +110,8 @@ end
             'TrackTwoMice_IRComp_ObjectOrientated',...
             'TrackTwoMice_Imetronic_IRComp_ObjectOrientated',...
             'UMazeTracking_IRComp_ObjectOrientated_CH',...
-            'TrackingHeadFixed_IRComp_ObjectOrientated'};
+            'TrackingHeadFixed_IRComp_ObjectOrientated',...
+            'UMazeTracking_IRComp_ObjectOrientated_TwoCams_NoArduino'};
 
         strfcts=strjoin(FctCell,'|');
         uicontrol('Style', 'popup','String', strfcts,'Position', [20 340 100 50],'Callback', @setfct);
@@ -164,10 +165,10 @@ end
             %%initialize the arduino
             poi=inputdlg('What num arduino?'); poi=str2double(poi);
             if isunix
-                            eval(['a = serial(''/dev/ttyACM',num2str(poi),''');']);
+                eval(['a = serial(''/dev/ttyACM',num2str(poi),''');']);
 
             else
-            eval(['a = serial(''COM',num2str(poi),''');']);
+                eval(['a = serial(''COM',num2str(poi),''');']);
             end
             try
                 fopen(a);

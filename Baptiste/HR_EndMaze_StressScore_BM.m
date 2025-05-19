@@ -1,5 +1,7 @@
 
 
+load('/media/nas7/ProjetEmbReact/DataEmbReact/HR_end_task.mat')
+
 %% correlation HR end task and stress score
 clear all
 
@@ -55,6 +57,14 @@ load('PC_values.mat', 'PCVal')
 
 %% figures
 figure
+PlotCorrelations_BM(HR_Bef_end_Act-HR_Wake_FirstHour_SleepPre , PCVal)
+axis square
+xlabel('HR end task, Fz safe'), ylabel('stress score')
+makepretty
+
+
+
+
 subplot(131)
 PlotCorrelations_BM(HR_Bef_end_tot-HR_Wake_FirstHour_SleepPre , PCVal)
 axis square
