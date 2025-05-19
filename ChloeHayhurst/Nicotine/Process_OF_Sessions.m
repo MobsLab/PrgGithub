@@ -1,17 +1,38 @@
 clear all, close all
 load('behavResources.mat')
 
-
 if not(exist('B_Low_Spectrum.mat'))
     load('ChannelsToAnalyse/Bulb_deep.mat')
     channel;
     LowSpectrumSB([cd filesep],channel,'B')
 end
+
+if not(exist('B_Low_Spectrum.mat'))
+    load('ChannelsToAnalyse/Bulb_deep.mat')
+    channel;
+    HighSpectrum([cd filesep],channel,'B')
+end
+
+
 if not(exist('StateEpochSB.mat'))
     load('ChannelsToAnalyse/Bulb_deep.mat')
     channel;
     FindNoiseEpoch_BM([cd filesep],channel,0);
 end
+
+load('ChannelsToAnalyse/Bulb_deep.mat')
+load(strcat('LFPData/LFP',num2str(channel),'.mat'));
+
+% find gamma epochs
+disp('... Creating Gamma Epochs ');
+smootime=3;
+FilGamma=FilterLFP(LFP,[50 70],1024);
+HilGamma=hilbert(Data(FilGamma));
+H=abs(HilGamma);
+tot_ghi=tsd(Range(LFP),H);
+smooth_ghi=tsd(Range(tot_ghi),runmean(Data(tot_ghi),ceil(smootime/median(diff(Range(tot_ghi,'s'))))));
+
+save('StateEpochSB.mat','smooth_ghi','-append');
 
 CreateRipplesSleep('stim',0,'restrict',0,'sleep',0,'plotavg',0)
 
@@ -73,8 +94,9 @@ if not(exist('AlignedXtsd','var'))
         
         figure, hold on
         plot(Data(AlignedXtsd),Data(AlignedYtsd))
+        hline(0,'r--'); hline(1,'r--'); vline(0,'r--'); vline(1,'r--'); 
         
-        satisfied = input('Satisfied?')
+        satisfied = input('Satisfied? (0/1)')
     end
 end
 save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd','-append');

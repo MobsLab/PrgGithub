@@ -16,15 +16,12 @@ elseif MouseOnDrugs==0
         'TestPost_EyeShock' 'Extinction_EyeShock' 'ExtinctionBlockedShock_EyeShock' 'ExtinctionBlockedSafe_EyeShock'};
     
 elseif MouseOnDrugs ==1
-%     SessNames={'Habituation24HPre_PreDrug' 'Habituation_PreDrug' 'HabituationBlockedShock_PreDrug' 'HabituationBlockedSafe_PreDrug' 'SleepPre_PreDrug',...
-%         'TestPre_PreDrug' 'UMazeCondExplo_PreDrug'  'UMazeCondBlockedShock_PreDrug' 'UMazeCondBlockedSafe_PreDrug',...
-%         'SleepPost_PreDrug' 'UMazeCondExplo_PostDrug' 'UMazeCondBlockedShock_PostDrug' 'UMazeCondBlockedSafe_PostDrug',...
-%         'SleepPost_PostDrug' 'TestPost_PostDrug'  'ExtinctionBlockedShock_PostDrug' 'ExtinctionBlockedSafe_PostDrug' 'Extinction_PostDrug'};
+    SessNames={'UMazeCondExplo_PreDrug'  'UMazeCondBlockedShock_PreDrug' 'UMazeCondBlockedSafe_PreDrug'};
 end
 a=1;
 for ss=1:length(SessNames)
     disp(SessNames{ss})
-    if MouseNum >= 1685
+    if MouseNum >= 1594
     Dir=PathForExperimentsEmbReact_CH(SessNames{ss});
     else
     Dir=PathForExperimentsEmbReact(SessNames{ss});
