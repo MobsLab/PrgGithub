@@ -4,7 +4,6 @@ MiceNumber = [490,507,508,509,510,512,514];
 
 epoch_names = {'Shock','NoShock','Centre','CentreShock','CentreNoShock'};
 SessionNames = {'UMazeCond'};
-num_bootstraps = 100;
 SaveFolder = '/media/DataMOBsRAIDN/ProjectEmbReact/Figures/SpikeAnalysis/PFCNeurons_UMazeSpatialFiring/';
 cd /media/DataMOBsRAIDN/ProjectEmbReact/Mouse490/20161201/ProjectEmbReact_M490_20161201_UMazeCond/Cond5
 load('B_Low_Spectrum.mat')
