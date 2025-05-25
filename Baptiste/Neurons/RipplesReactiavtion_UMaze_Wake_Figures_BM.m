@@ -10,6 +10,11 @@ MakeSpreadAndBoxPlot3_SB({AllComp_Shock_rip./nanmedian(AllComp_Shock_ctrl) AllCo
 ylabel('Activation strength'), set(gca,'YScale','log')
 makepretty_BM2
 
+figure
+MakeSpreadAndBoxPlot3_SB({AllComp_Shock_ctrl./nanmedian(AllComp_Shock_ctrl) AllComp_Safe_ctrl./nanmedian(AllComp_Safe_ctrl)},{[1 .5 .5],[.5 .5 1]},[1 2],{'Shock','Safe'},'showpoints',0,'paired',1)
+ylabel('Activation strength'), set(gca,'YScale','log')
+makepretty_BM2
+
 
 
 

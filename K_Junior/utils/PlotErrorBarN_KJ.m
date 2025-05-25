@@ -264,7 +264,7 @@ if showpoints && ~horizontal
     %plot points, indicating value for each individual
     for i=1:N
         temp=A{i}(~isnan(A{i}));
-        plot(x(i)*ones(length(temp),1)+0.1,temp,'ko','markerfacecolor','w') 
+        plot(x(i)*ones(length(temp),1)+0.1,temp,'.k') 
     end
 
     %if paired data, data are linked together, for each individual, with line

@@ -1,3 +1,4 @@
+
 clear all
 DoZscore = 0;
 ParToKeep = {[1:7],[2:7],[1,4,5,6,7],[1,2,3,6,7],[1:5]};
@@ -7,7 +8,8 @@ SaveLoc = '/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/';
 
 %% Load data
 % Controls
-cd /home/mobsrick/Documents/Data_PaperSBBM
+cd /media/nas7/ProjetEmbReact/DataEmbReact
+
 load('Data_Physio_Freezing_RipInhib_Ctrl_Cond_2sFullBins.mat')
 % get hte hand corrected OB values
 OB_MaxFreq_Maze_BM;

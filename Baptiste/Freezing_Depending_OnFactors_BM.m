@@ -4,18 +4,21 @@
 % or after 
 % edit Freezing_FarFromStims_Maze_BM.m
 
-Cols={[1 .5 .5],[.5 .5 1]};
-X=[1:2];
-Legends={'Shock','Safe'};
+% for physio see edit Blocked_vs_Explo_SessionsAnalysis_BM.m
 
-%% Cond and Ext
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%     with mean spectrums
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 Session_type={'TestPre','Cond'};
 for sess=1:2
-for group=1:length(Drug_Group)
-Mouse=Drugs_Groups_UMaze_BM(Group(group));
-[OutPutData.(Session_type{sess}).(Drug_Group{group}) , Epoch1.(Session_type{sess}).(Drug_Group{group}) , NameEpoch] = ...
-MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'speed','heartrate');
-end
+    for group=1:length(Drug_Group)
+        Mouse=Drugs_Groups_UMaze_BM(Group(group));
+        [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
+            MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'speed','heartrate');
+    end
 end
 
 

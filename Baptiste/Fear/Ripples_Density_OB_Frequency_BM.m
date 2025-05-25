@@ -26,7 +26,7 @@ for mouse=1:length(Mouse)
         Respi.(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}),'respi_freq_bm');
         RespiFreezing.(Session_type{sess}).(Mouse_names{mouse}) = Restrict(Respi.(Session_type{sess}).(Mouse_names{mouse}) , FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}));
         
-        %         [All_Freq.(Session_type{sess}).(Mouse_names{mouse}) , EpLength.(Mouse_names{mouse}) , EpProp_2_4.(Mouse_names{mouse}) , TimeProp_thr_2_4.(Mouse_names{mouse}) , TimeProp_abs_2_4.(Mouse_names{mouse})] = FreezingSpectrumEpisodesAnalysis_BM(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) , Respi.(Session_type{sess}).(Mouse_names{mouse}) , Freq_Limit);
+        [All_Freq.(Session_type{sess}).(Mouse_names{mouse}) , EpLength.(Mouse_names{mouse}) , EpProp_2_4.(Mouse_names{mouse}) , TimeProp_thr_2_4.(Mouse_names{mouse}) , TimeProp_abs_2_4.(Mouse_names{mouse})] = FreezingSpectrumEpisodesAnalysis_BM(FreezeEpoch.(Session_type{sess}).(Mouse_names{mouse}) , Respi.(Session_type{sess}).(Mouse_names{mouse}) , Freq_Limit);
         
     end
     disp(Mouse_names{mouse})

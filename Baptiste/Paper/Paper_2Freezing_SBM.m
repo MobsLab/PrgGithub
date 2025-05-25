@@ -41,10 +41,6 @@ edit Example_Panel_Paper_FreezingMaze_BM.m
 edit MeanBodyParameters_Freezing_Maze_BM.m
 
 
-% SVM
-edit SVMscores_SomaticOnly_Maze_BM.m
-
-
 % proportion
 edit Proportion_Freezing_Maze_BM.m
 
@@ -55,6 +51,9 @@ edit Proportion_Freezing_Maze_BM.m
 %% Sound & context
 edit SVMscores_Sound_Ctxt_Maze_BM.m
 
+
+%% increase HR Test-Pre/Cond
+edit HeartRate_TestPre_Cond_Maze_BM.m
 
 %% correl heart
 edit HR_EndMaze_StressScore_BM.m

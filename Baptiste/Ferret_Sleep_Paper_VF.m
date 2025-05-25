@@ -3,7 +3,7 @@
 % Figure 1 : OB gamma tracks Wake/sleep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Raw traces
-edit Ferret_Paper_RawTraces_Gamma.m
+edit Ferret_Paper_RawTraces_SleepStates.m
 
 
 %% Mean spectrum

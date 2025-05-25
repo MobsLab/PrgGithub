@@ -157,6 +157,10 @@ PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , Thigmo.Thigmo_sc
 axis square
 xlabel('SWR occurence, fz safe side (#/s)'), ylabel('thigmo score, Sleep Post'), xlim([0 1.2]), ylim([0 .15])
 
+figure
+PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , PCVal)
+axis square
+xlabel('SWR occurence, fz safe side (#/s)'), ylabel('stress score'), xlim([0 1.2]), ylim([-.6 .8])
 
 %% Homeostasis with low vs high breathig states
 figure

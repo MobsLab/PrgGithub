@@ -5,21 +5,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 edit Example_Trajectories_Paper_FreezingMaze_BM.m
 
-
-%% time, breathing & episodes length
-edit Blocked_vs_Explo_SessionsAnalysis_BM.m
-
+%% ROC curves
+edit ROC_curves_BodyParametersFreezingUMaze_SB.m
 
 %% tail temperature
 edit TailTemperature_Freezing_UMaze_BM.m
 
+%% OB gamma
+edit OB_HighDuringFreezing_Drugs_UMaze_BM.m
+
+%% More physio
+edit MeanBodyParameters_Freezing_Maze_end_BM.m
+
+%% SVM
+edit SVMscores_SomaticOnly_Maze_BM.m
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sup 2 : 2 freezing depending on factors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-edit Freezing_Depending_OnFactors_BM.m
+%% time, breathing & episodes length
+edit Blocked_vs_Explo_SessionsAnalysis_BM.m
 
 
 %% calibration
@@ -27,7 +34,7 @@ edit Calibration_Features_Eyelid_BM.m
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-              %   Temporal features
+              %  Sup 3:  Temporal features
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 edit OBFreq_TimeSinceLastStim_BM.m
@@ -38,80 +45,49 @@ edit Control_TemporalBiased_Features_Freezing_Maze_BM.m
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 3 : analogy 2 sound conditionning
+% Sup 4  : analogy 2 sound conditionning
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 edit FreezingComparison_Maze_SoundCond_BM.m
 
+edit SVMscores_Sound_Ctxt_Maze_BM.m
 
-load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/FearCondSound.mat', 'Freq_Max_Shock_FearSound','Freq_Max1','Freq_Max2')
-load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/FearCtxt.mat', 'Freq_Max_Shock_FearCtxt')
-
-Freq_Max1(46)=4.959;
-Freq_Max2(30)=NaN;
-
-Cols = {[1 .5 .5],[.5 .5 1],[.8 .1 .2],[1 .4 .1]};
-X = 1:4;
-Legends = {'Shock','Safe','Sound','Context'};
-
-figure
-MakeSpreadAndBoxPlot3_SB({Freq_Max1(26:end) Freq_Max2(26:end) Freq_Max_Shock_FearSound Freq_Max_Shock_FearCtxt},Cols,X,Legends,'showpoints',1,'paired',0);
-ylim([0 8]), ylabel('Breathing (Hz)')
-makepretty_BM2
+edit Freezing_Length_OB_Power_BM.m
 
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 4 : ROC curves & physio
+% Sup 5 : analogy 2 freezing with active / quiet wake / sleep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/ROC_curves.mat')
-% or after 
-% edit ROC_curves_BodyParametersFreezingUMaze_BM.m
+edit SVM_AllStates_UMazePaper.m
 
 
-
-%% OB gamma
-edit OB_Gamma_During_Freezing_UMaze_BM.m
-
+edit Analogy_Fz_OtherStates_BM.m
 
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 6 : Rip control
+% Sup 7 : More recuperation features
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-edit Control_Rip_Features_RipInhib_BM.m
+edit Recuperation_Maze_SumUp_BM_ScoreSB.m.m
 
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 7 : Ripples on breathing phase
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-edit Ripples_Phase_on_Breathing_BM.m
-load('/media/nas7/ProjetEmbReact/DataEmbReact/Ripples_On_Breathing_Phase.mat')
-
-
-
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 9 : Reactivations
+% Sup 8 : Ripples & reactivation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 edit RipplesReactiavtion_UMaze_Wake_Figures_BM.m
 
+edit Ripples_Inhibition_Features_BM.m
+
+edit Finalfigures_DecodePositionWithPhysio_FullEp_RipInhib_SVM.m
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 10 : analogy 2 freezing with active / quiet wake / sleep
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-edit Analogy_Fz_OtherStates_BM.m
-
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 12 : More sleep / SD
+% Sup 9 : More safety learning
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -119,17 +95,14 @@ edit Analogy_Fz_OtherStates_BM.m
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 13 : Fluo extended
+% Sup 10 : More DZP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-edit FluoChronic_SumUp_Paper_BM.m
+edit Finalfigures_DecodePositionWithPhysio_FullEp_DZP_SVM.m
 
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 14 : Rip Inhib extended
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+edit Diazepam_SumUp_Paper_BM.m
 
-edit RipInhib_SumUp_Paper_BM.m
+edit Sleep_DZP_Homecage_BM.m
 
 
 

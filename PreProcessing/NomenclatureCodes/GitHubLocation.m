@@ -30,6 +30,8 @@ switch strtrim(evalc('system(''hostname'');'))
         p = fullfile('/home/pinky/Documents',varargin{:});
     case 'mouse'
         p = fullfile('/home/mickey/Documents/Theotime', varargin{:});
+            case 'ratatouille'
+        p = fullfile('/home/ratatouille/', varargin{:});
 %##%
         % End hostname cases
     otherwise

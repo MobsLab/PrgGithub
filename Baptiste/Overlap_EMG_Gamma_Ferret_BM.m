@@ -1,7 +1,19 @@
 
-load('/media/nas7/React_Passive_AG/OBG/Data_Paper/Paper_Data_Ferret.mat')
+%% figures
+clear all
+load('/media/nas7/React_Passive_AG/OBG/Data_Paper/Overlap_EMG_Gamma.mat')
 
-%%
+Cols = {[.2 .5 .8],[.8 .5 .2],[.5 .2 .8]};
+X = 1:3;
+Legends = {'F1','F2','F3'};
+
+figure
+MakeSpreadAndBoxPlot3_SB({Overlap(1,:) Overlap(2,:) Overlap(3,:)},Cols,X,Legends,'showpoints',1,'paired',0,'showsigstar','none');
+ylabel('Score agreement'), ylim([0 1])
+makepretty_BM2
+
+
+%% generqte data
 clear all
 
 % sessions
@@ -72,15 +84,6 @@ Overlap(3,2)=NaN;
 Overlap(Overlap==0)=NaN;
 
 
-%% figures
-Cols = {[.2 .5 .8],[.8 .5 .2],[.5 .2 .8]};
-X = 1:3;
-Legends = {'F1','F2','F3'};
-
-figure
-MakeSpreadAndBoxPlot3_SB({Overlap(1,:) Overlap(2,:) Overlap(3,:)},Cols,X,Legends,'showpoints',1,'paired',0,'showsigstar','none');
-ylabel('Overlap'), ylim([0 1])
-makepretty_BM2
 
 
 

@@ -16,7 +16,13 @@ X = [1:2.5];
 Legends = {'Shock','Safe'};
 
 figure
-MakeSpreadAndBoxPlot3_SB({nanmean(OutPutData.Cond.ob_high.mean(:,5,10:end),3) nanmean(OutPutData.Cond.ob_high.mean(:,6,10:end),3)},Cols,X,Legends,'showpoints',0,'paired',1);
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({nanmean(OutPutData.Cond.ob_high.mean(:,5,13:end),3) nanmean(OutPutData.Cond.ob_high.mean(:,6,13:end),3)},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('OB gamma power (a.u.)')
+makepretty_BM2
+
+subplot(122)
+MakeSpreadAndBoxPlot3_SB({OutPutData.Cond.ob_high.max_freq(:,5) OutPutData.Cond.ob_high.max_freq(:,6)},Cols,X,Legends,'showpoints',0,'paired',1);
 ylabel('OB gamma power (a.u.)')
 makepretty_BM2
 

@@ -1,7 +1,7 @@
 
 
 clear all
-Mouse=Drugs_Groups_UMaze_BM(11);
+Mouse=Drugs_Groups_UMaze_BM(22);
 Session_type={'Cond','Ext'};
 
 for sess=1:length(Session_type)
@@ -10,7 +10,7 @@ for sess=1:length(Session_type)
 end
 load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/OB_Spec.mat','OB_Low_Spec')
 
-ind_shock=13:91; % ind=39:78; 13-91 --> 1-7Hz
+ind=13:91; % ind=39:78; 13-91 --> 1-7Hz
 for sess=1:length(Session_type)
     for mouse=1:length(Mouse)
         Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
@@ -147,7 +147,7 @@ end
 %% figures
 figure, mouse=34; sess=2;
 subplot(121)
-[R,P]=PlotCorrelations_BM(FzLength_Shock.(Session_type{sess}){mouse} , OB_Mean_Fz_ByEp_Shock.(Session_type{sess}){mouse} , 'color' , [1 .5 .5])
+[R,P]=PlotCorrelations_BM(FzLength_Shock.(Session_type{sess}){mouse} , OB_Mean_Fz_ByEp_Shock.(Session_type{sess}){mouse} , 'method' , 'spearman')
 axis square
 xlabel('fz ep length (s)'), ylabel('Mean OB power in the episode (a.u.)')
 title('Shock')
@@ -179,17 +179,13 @@ title('Safe')
 
 
 figure, sess=2;
-subplot(121)
-MakeSpreadAndBoxPlot4_SB({R_shock.(Session_type{sess})},{[.3 .3 .3]},1,{'Shock'},'showpoints',1,'paired',0);
-h=hline(0); set(h,'LineWidth',2); ylim([-1 1]), ylabel('R values')
-[h,p]=ttest(R_shock.(Session_type{sess}),zeros(1,length(R_shock.(Session_type{sess}))))
-title(['p = ' num2str(p)])
+MakeSpreadAndBoxPlot4_SB({R_shock.(Session_type{sess}) R_safe.(Session_type{sess})},{[1 .5 .5],[.5 .5 1]},[1 2],{'Shock','Safe'},'showpoints',1,'paired',0); 
+h=hline(0,'--k'); set(h,'LineWidth',2); ylim([-1 1]), ylabel('R values')
+makepretty_BM2
+[p, h, stats] = signrank(R_shock.(Session_type{sess}),zeros(1,length(R_shock.(Session_type{sess}))))
+[p, h, stats] = signrank(R_safe.(Session_type{sess}),zeros(1,length(R_safe.(Session_type{sess}))))
 
-subplot(122)
-MakeSpreadAndBoxPlot4_SB({R_safe.(Session_type{sess})},{[.3 .3 .3]},1,{'Safe'},'showpoints',1,'paired',0);
-h=hline(0); set(h,'LineWidth',2); ylim([-1 1])
-[h,p]=ttest(R_safe.(Session_type{sess}),zeros(1,length(R_safe.(Session_type{sess}))))
-title(['p = ' num2str(p)])
+
 
 
 figure, sess=2;

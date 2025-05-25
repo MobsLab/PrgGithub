@@ -1,4 +1,22 @@
 
+
+load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/FearCondSound.mat', 'Freq_Max_Shock_FearSound','Freq_Max1','Freq_Max2')
+load('/media/nas7/ProjetEmbReact/DataEmbReact/PaperData/FearCtxt.mat', 'Freq_Max_Shock_FearCtxt')
+
+Freq_Max1(46)=4.959;
+Freq_Max2(30)=NaN;
+
+Cols = {[1 .5 .5],[.5 .5 1],[.8 .1 .2],[1 .4 .1]};
+X = 1:4;
+Legends = {'Shock','Safe','Sound','Context'};
+
+figure
+MakeSpreadAndBoxPlot3_SB({Freq_Max1(26:end) Freq_Max2(26:end) Freq_Max_Shock_FearSound Freq_Max_Shock_FearCtxt},Cols,X,Legends,'showpoints',1,'paired',0);
+ylim([0 8]), ylabel('Breathing (Hz)')
+makepretty_BM2
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Generate data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -373,6 +391,32 @@ Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 clear Mean_All_Sp; Mean_All_Sp=nanmean(Data_to_use);
 shadedErrorBar(linspace(0,1,100) , runmean(Mean_All_Sp,5) , runmean(Conf_Inter,5) ,'-r',1); hold on;
 xlabel('norm time'), ylabel('OB power (a.u.)'), box off, l=ylim; yticks(l), yticklabels({'0','1'})
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+l{1} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_Saline_Eyelid_Ext_2sFullBins.mat');
+l{2} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_SoundTest.mat');
+l{3} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_FearCtxt.mat');
+
+
+Cols = {[1 .5 .5],[.5 .5 1],[.8 .1 .2],[1 .4 .1]};
+X = 1:4;
+Legends = {'Shock','Safe','Sound','Context'};
+
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({l{1}.OutPutData.Ext.respi_freq_bm.mean(:,5) l{1}.OutPutData.Ext.respi_freq_bm.mean(:,6)...
+    l{2}.OutPutData.sound_test.respi_freq_bm.mean(:,2) l{3}.OutPutData.fear_ctxt.respi_freq_bm.mean(:,2)},Cols,X,Legends,'showpoints',1,'paired',0);
+ylim([0 8]), ylabel('Breathing (Hz)')
+makepretty_BM2
+
+subplot(122)
+MakeSpreadAndBoxPlot3_SB({l{1}.OutPutData.Ext.ripples_density.mean(:,5) l{1}.OutPutData.Ext.ripples_density.mean(:,6)...
+    l{2}.OutPutData.sound_test.ripples_density.mean(:,2) l{3}.OutPutData.fear_ctxt.ripples_density.mean(:,2)},Cols,X,Legends,'showpoints',1,'paired',0);
+ylim([0 1.5]), ylabel('Breathing (Hz)')
+makepretty_BM2
 
 
 

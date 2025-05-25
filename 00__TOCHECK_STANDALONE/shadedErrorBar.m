@@ -163,8 +163,8 @@ H.patch=patch(xP,yP,1,'facecolor',patchColor,...
 
 
 %Make nice edges around the patch. 
-H.edge(1)=plot(x,lE,'-','color',edgeColor);
-H.edge(2)=plot(x,uE,'-','color',edgeColor);
+% H.edge(1)=plot(x,lE,'-','color',edgeColor);
+% H.edge(2)=plot(x,uE,'-','color',edgeColor);
 
 %The main line is now covered by the patch object and was plotted first to
 %extract the RGB value of the main plot line. I am not aware of an easy way
