@@ -40,7 +40,7 @@ if ~isfield(Params, 'LinearDist')
         imagesc(Params.mask+Params.Zone{1})
         hold on;
         plot(xxx*Params.Ratio_IMAonREAL, yyy*Params.Ratio_IMAonREAL)
-        title('Give 4 points: Shk-ext corner, shk-center corner, safe-center corner, safe-ext corner.')
+        title('Give 4 points for linearization: Shk-near (middle of the arm), shk-far (center of the corner), safe-far (center of corner), safe-near.')
         curvexy=ginput(4);
         clf
     end

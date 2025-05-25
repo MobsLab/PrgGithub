@@ -57,7 +57,7 @@ combined_data = combine_mouse_data(spike_counts,
 
 # %% Fit model (long calculation)
 
-random_seed=30
+random_seed=30 # random state used to generate training and testing set
     
 # Collect all results
 all_results = []

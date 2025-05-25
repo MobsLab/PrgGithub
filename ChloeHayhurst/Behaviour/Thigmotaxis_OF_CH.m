@@ -16,6 +16,8 @@ for i = 1:2:length(varargin)
             arena_type = varargin{i+1};
         case 'ring'
             ring = varargin{i+1};  % Par exemple, [0.2 0.25] donne l'époque passée dans les 5% du cercle entre 20 et 25% en partant du centre
+        case 'tsdata'
+            tsdata = varargin{i+1};
     end
 end
 
@@ -31,6 +33,9 @@ if ~exist('ring','var')
     ring = [0.5 1];
 end
 
+if ~exist('tsdata','var')
+    tsdata = 0;
+end
 
 if strcmp(arena_type, 'OF')
     % Paramètres géométriques
@@ -126,5 +131,9 @@ end
 Thigmotaxis = sum(in_outer_zone) / (sum(in_inner_zone) + sum(in_outer_zone));
 
 % DistanceToCenter = tsd(Range(Xtsd),distances);
+if tsdata == 1
+    distances = tsd(Range(Xtsd) , distances);
+end
+
 
 end

@@ -40,30 +40,26 @@ for ss = 1:length(SessionName)
         figure
         while happy==0
             
-            subplot(311)
+            subplot(211)
             plot(Range(EMGData,'s'),Data(EMGData))
             hold on
             plot(Range(Restrict(EMGData,SleepEpoch),'s'),Data(Restrict(EMGData,SleepEpoch)))
             line(xlim,[EMG_thresh EMG_thresh])
-            ylabel('EMG')
-            title('EMG linear scale')
+            ylabel('EMG linear scale')
             
-            subplot(312)
+            subplot(212)
             plot(Range(EMGData,'s'),Data(EMGData))
             hold on
             plot(Range(Restrict(EMGData,SleepEpoch),'s'),Data(Restrict(EMGData,SleepEpoch)))
             line(xlim,[EMG_thresh EMG_thresh])
-            ylabel('EMG')
-            title('EMG log scale')
+            ylabel('EMG log scale')
             set(gca,'YScale','log')
-
-            subplot(313)
-            nhist(log(Data(EMGData)))
-            hold on
-            line(log([EMG_thresh EMG_thresh]),ylim)
+            samexaxis
+            
             happy = input('are you happy? 0/1');
             if happy ==0
-                subplot(312)
+                whichplot = input('ste threshol on linear (1) or log (2) plot');
+                subplot(2,1,whichplot)
                 [~,EMG_thresh] = ginput(1);
                 SleepEpoch_all = thresholdIntervals(EMGData, EMG_thresh, 'Direction','Below');
                 SleepEpoch = mergeCloseIntervals(SleepEpoch_all, minduration*1e4);
@@ -98,7 +94,7 @@ for ss = 1:length(SessionName)
         FilDelta = FilterLFP(LFP,Frequency{2},1024);
         hilbert_theta = abs(hilbert(Data(FilTheta)));
         hilbert_delta = abs(hilbert(Data(FilDelta)));
-        theta_ratio = runmean(hilbert_theta,200) ./ runmean(hilbert_delta,200);
+        theta_ratio = runmean(hilbert_theta,200) ./ (runmean(hilbert_delta,200));
         ThetaRatioTSD = tsd(Range(FilTheta), theta_ratio);
         
         % smooth Theta / delta ratio

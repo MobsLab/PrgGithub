@@ -1,17 +1,20 @@
-function GetProcessedVariables_EC(force_no_sleep_scoring)
+function GetProcessedVariables_EC(sleepscoring, predefine_gammathresh)
 % Process Neural Data with Necessary Checks
-% Optional input: force_no_sleep_scoring (true/false)
+% Inputs:
+%   - sleepscoring: true/false to enable or disable sleep scoring
+%   - predefine_gammathresh: numeric value for gamma threshold (optional)
 
 if nargin < 1
-    force_no_sleep_scoring = false;
+    sleepscoring = false;
+end
+if nargin < 2
+    predefine_gammathresh = [];
 end
 
+
 % Define required channel files
-dHPC_deep_file = 'ChannelsToAnalyse/dHPC_deep.mat';
-dHPC_rip_file = 'ChannelsToAnalyse/dHPC_rip.mat';
 Bulb_deep_file = 'ChannelsToAnalyse/Bulb_deep.mat';
 EKG_file = 'ChannelsToAnalyse/EKG.mat';
-lfp_file = '';
 
 % Define output files to check
 heartbeat_file = 'HeartBeatInfo.mat';
@@ -27,45 +30,39 @@ if exist(heartbeat_file, 'file') && exist(noise_file, 'file') && exist(sleep_sco
     if lower(user_input) ~= 'y'
         disp('Skipping processing.');
         return;
+    else
+        fprintf('--- Starting preprocessing of neural data ---\n');
     end
-end
-
-% Check for required channels for sleep scoring
-if force_no_sleep_scoring
-    perform_sleep_scoring = false;
-    disp('Sleep scoring is forcibly disabled by user.');
-elseif exist(dHPC_deep_file, 'file') || exist(dHPC_rip_file, 'file')
-    disp('Sleep scoring can be performed.');
-    perform_sleep_scoring = true;
 else
-    disp('No dHPC deep or dHPC rip channel found. Skipping sleep scoring.');
-    perform_sleep_scoring = false;
-end
-
-
-% Check for required channel for ripple detection
-if exist(dHPC_rip_file, 'file')
-    perform_ripple_detection = true;
-else
-    disp('No dHPC rip channel found. Skipping ripple detection.');
-    perform_ripple_detection = false;
+    fprintf('--- Starting preprocessing of neural data ---\n');
 end
 
 % Check for Bulb_deep channel for OB gamma power calculation
 compute_OB_gamma = exist(Bulb_deep_file, 'file');
+if compute_OB_gamma
+    load(Bulb_deep_file, 'channel');
+    channel_bulb = channel;
+end
+
+% Initialize folder name
+foldername = pwd;
+if foldername(end) ~= filesep
+    foldername(end+1) = filesep;
+end
+
 
 %% Get low frequency spectra - example with bulb
 if compute_OB_gamma && ~exist(low_spectrogram_file, 'file')
-    load(Bulb_deep_file, 'channel');
-    LowSpectrumSB([cd filesep], channel, 'B');
+    fprintf('Computing low frequency spectrum...\n');
+    LowSpectrumSB(foldername, channel_bulb, 'B');
 else
     disp('B_Low_Spectrum.mat already exists or Bulb deep channel not found. Skipping low frequency spectra computation.');
 end
 
 %% Get high frequency spectra - example with bulb
 if compute_OB_gamma && ~exist(high_spectrogram_file, 'file')
-    load(Bulb_deep_file, 'channel');
-    HighSpectrum([cd filesep], channel, 'B');
+    fprintf('Computing high frequency spectrum...\n');
+    HighSpectrum(foldername, channel_bulb, 'B');
 else
     disp('B_High_Spectrum.mat already exists or Bulb deep channel not found. Skipping high frequency spectra computation.');
 end
@@ -73,37 +70,30 @@ end
 %% Get heart beats (without noise correction first)
 if exist(EKG_file, 'file')
     load(EKG_file, 'channel');
-    lfp_file = ['LFPData/LFP', num2str(channel), '.mat'];
+    channel_ekg = channel;
+    lfp_file = fullfile('LFPData', ['LFP', num2str(channel_ekg), '.mat']);
 
     if exist(lfp_file, 'file')
         load(lfp_file, 'LFP');
 
-        % Initial options for heartbeat detection
         Options.TemplateThreshStd = 3;
         Options.BeatThreshStd = 1.5;
         modify_options = true;
 
         while modify_options
-            % First, detect heartbeats WITHOUT noise correction and plot
-            disp('Plotting detected heartbeats before computing noise...');
+            fprintf('Plotting detected heartbeats before computing noise...\n');
             [Times, Template, HeartRate, ~] = DetectHeartBeats_EmbReact_SB(LFP, intervalSet([], []), Options, 1);
-
-            % Get figure handle
             hb_figure = gcf;
 
-            % Pause execution for inspection
-            disp('Inspect the plot. Do you want to modify the detection options? (y/n)');
-            user_input = input('Enter y to modify options, n to continue: ', 's');
+            user_input = input('Inspect the plot. Do you want to modify the detection options? (y/n): ', 's');
 
-            % Close the plot after inspection
             if ishandle(hb_figure)
                 close(hb_figure);
             end
 
-            % Allow user to modify options
             if lower(user_input) == 'y'
-                Options.TemplateThreshStd = input('Enter new TemplateThreshStd value: ');
-                Options.BeatThreshStd = input('Enter new BeatThreshStd value: ');
+                Options.TemplateThreshStd = input('Enter new TemplateThreshStd value (default = 3): ');
+                Options.BeatThreshStd = input('Enter new BeatThreshStd value (default = 1.5): ');
             else
                 modify_options = false;
             end
@@ -115,50 +105,58 @@ else
     disp('EKG channel file not found. Skipping heart beat detection.');
 end
 
-
-%% Compute noise epochs (only if sleep scoring is NOT performed)
-if ~perform_sleep_scoring && compute_OB_gamma
-    FindNoiseEpoch_BM([cd filesep], channel, 0);
-
-    % Close all noise-related plots
-    close all;
+%% Compute noise epochs (always)
+if compute_OB_gamma
+    fprintf('Computing noisy epochs...\n');
+    FindNoiseEpoch_BM(foldername, channel_bulb, 0);
+    close all force;
 else
-    if ~compute_OB_gamma
-        disp('Bulb deep channel not found. Skipping noisy epoch computation.');
-    else
-        disp('Sleep scoring includes noise detection. Skipping separate noisy epoch computation.');
-    end
+    disp('Bulb deep channel not found. Skipping noisy epoch computation.');
 end
 
 %% Sleep scoring (if applicable)
-if perform_sleep_scoring
-    disp('Running sleep scoring...');
-    SleepScoring_Accelero_OBgamma;
+if sleepscoring && compute_OB_gamma
+    load('StateEpochSB.mat', 'Epoch');
+
+    smootime = 3;
+    Frequency = [50 70];
+    minduration = 3;
+
+    fprintf('Running sleep scoring...\n');
+    if isempty(predefine_gammathresh)
+        [SleepEpoch, SmoothGamma, Info] = FindGammaEpoch_SleepScoring(Epoch, channel_bulb, minduration, ...
+            'foldername', foldername, 'smoothwindow', smootime);
+    else
+        [SleepEpoch, SmoothGamma, Info] = FindGammaEpoch_SleepScoring(Epoch, channel_bulb, minduration, ...
+            'foldername', foldername, 'smoothwindow', smootime, ...
+            'predefinegammathresh', predefine_gammathresh);
+    end
+
+    WakeEpoch = Epoch - SleepEpoch;
+    save('SleepScoring_OBGamma.mat', 'SleepEpoch', 'WakeEpoch', 'SmoothGamma', 'Info');
+    disp('Saved sleep and wake epochs.');
 end
 
-%% Get heart beats (WITH noise correction, AFTER sleep scoring if performed)
-if exist(EKG_file, 'file') && exist(lfp_file, 'file')
-    % Check if noise epochs were computed
+%% Get heart beats (WITH noise correction)
+if exist(EKG_file, 'file') && exist('lfp_file', 'var') && exist(lfp_file, 'file')
     if exist('StateEpochSB.mat', 'file')
         load('StateEpochSB.mat', 'TotalNoiseEpoch');
         [Times, Template, HeartRate, GoodEpoch] = DetectHeartBeats_EmbReact_SB(LFP, TotalNoiseEpoch, Options, 1);
+        disp('Denoised HeartBeatInfo')
     else
         disp('StateEpochSB.mat missing, proceeding without noise correction.');
         GoodEpoch = [];
     end
 
-    % Store results
     EKG.HBTimes = ts(Times);
     EKG.HBShape = Template;
     EKG.DetectionOptions = Options;
     EKG.HBRate = HeartRate;
     EKG.GoodEpoch = GoodEpoch;
 
-    % Save results
     save('HeartBeatInfo.mat', 'EKG');
     saveas(gcf, 'EKGCheck.fig');
     saveas(gcf, 'EKGCheck.png');
-
 end
 
 %% Get breathing from OB
@@ -166,23 +164,19 @@ if ~exist(respi_freq_file, 'file') && exist(low_spectrogram_file, 'file')
     load(low_spectrogram_file, 'Spectro');
     Spectrum_Frequency = ConvertSpectrum_in_Frequencies_BM(Spectro{3}, Spectro{2} * 1e4, Spectro{1});
 
-    % Remove noise if available
     if exist('StateEpochSB.mat', 'file')
-        load('StateEpochSB.mat', 'Epoch');  % Clean epoch
+        load('StateEpochSB.mat', 'Epoch');
         Spectrum_Frequency = Restrict(Spectrum_Frequency, Epoch);
         disp('Denoised RespiFreq');
     end
     save(respi_freq_file, 'Spectrum_Frequency');
-
-
 else
     disp('RespiFreq.mat already exists or B_Low_Spectrum.mat not found. Skipping OB breathing computation.');
 end
 
 %% Get gamma power (only if sleep scoring is NOT performed)
-if ~perform_sleep_scoring && compute_OB_gamma
-    load(Bulb_deep_file, 'channel');
-    lfp_file = ['LFPData/LFP', num2str(channel), '.mat'];
+if ~sleepscoring && compute_OB_gamma
+    lfp_file = fullfile('LFPData', ['LFP', num2str(channel_bulb), '.mat']);
 
     if exist(lfp_file, 'file')
         load(lfp_file, 'LFP');
@@ -193,30 +187,29 @@ if ~perform_sleep_scoring && compute_OB_gamma
         smootime = 3;
         SmoothGamma = tsd(Range(tot_ghi), runmean(Data(tot_ghi), ceil(smootime / median(diff(Range(tot_ghi, 's'))))));
 
-        % Remove noise if available
-        if exist('StateEpochSB.mat', 'file')
-            load('StateEpochSB.mat', 'Epoch');  % This is the clean (non-noisy) epoch
-            SmoothGamma = Restrict(SmoothGamma, Epoch);
-            disp('Denoised SmoothGamma')
-        end
+        % if exist('StateEpochSB.mat', 'file')
+        %     load('StateEpochSB.mat', 'Epoch');
+        %     SmoothGamma = Restrict(SmoothGamma, Epoch);
+        %     disp('Denoised SmoothGamma')
+        % end
 
-        save('SleepScoring_OBGamma', 'SmoothGamma');
-
+        save('SleepScoring_OBGamma.mat', 'SmoothGamma', '-append');
     else
         disp('LFP data file missing for Bulb deep channel. Skipping gamma power computation.');
     end
 else
-    if perform_sleep_scoring
+    if sleepscoring
         disp('Sleep scoring includes gamma power computation. Skipping separate gamma power computation.');
     end
 end
 
-%% Get ripples
-if perform_ripple_detection
-    CreateRipplesSleep('stim', 0, 'restrict', 1, 'sleep', 1);
-end
+%% Wrap-up
+fprintf('--- Preprocessing complete. ---\n');
+fprintf('Generated files include:\n');
+if exist(heartbeat_file, 'file'), fprintf(' - %s\n', heartbeat_file); end
+if exist(noise_file, 'file'), fprintf(' - %s\n', noise_file); end
+if exist(sleep_scoring_file, 'file'), fprintf(' - %s\n', sleep_scoring_file); end
+if exist(respi_freq_file, 'file'), fprintf(' - %s\n', respi_freq_file); end
 
-% Close any remaining figures
-close all;
-
+close all force;
 end

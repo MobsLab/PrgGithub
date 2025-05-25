@@ -65,7 +65,7 @@ for imouse = 1:length(Dir.path)
     end
     %%% Check if CleanAlignedXtsd exists
     if ~isfield(a{imouse}.behavResources, "CleanAlignedXtsd") && isfield(a{imouse}.behavResources, "AlignedXtsd")
-        warning(strcat("No CleanAligned Xtsd found for ", Dir.name{imouse}, "! Using AlignedXtsd..."))        
+        warning(strcat("No CleanAligned Xtsd found for ", Dir.name{imouse}, "! Using AlignedXtsd..."))
         for j = 1:numel(a{imouse}.behavResources)
             a{imouse}.behavResources(j).CleanAlignedXtsd = a{imouse}.behavResources(j).AlignedXtsd;
             a{imouse}.behavResources(j).CleanAlignedYtsd = a{imouse}.behavResources(j).AlignedYtsd;
@@ -79,7 +79,7 @@ for imouse = 1:length(Dir.path)
             a{imouse}.behavResources(j).CleanAlignedXtsd = a{imouse}.behavResources(j).Xtsd;
             a{imouse}.behavResources(j).CleanAlignedYtsd = a{imouse}.behavResources(j).Ytsd;
         end
-    else 
+    else
         for j = 1:numel(a{imouse}.behavResources)
             a{imouse}.behavResources(j).CleanAlignedXtsd = a{imouse}.behavResources(j).AlignedXtsd;
             a{imouse}.behavResources(j).CleanAlignedYtsd = a{imouse}.behavResources(j).AlignedYtsd;
@@ -99,17 +99,17 @@ for i=1:length(a)
     id_Pre{i} = FindSessionID_ERC(a{i}.behavResources, 'TestPre');
     id_Cond{i} = FindSessionID_ERC(a{i}.behavResources, 'Cond');
     id_Post{i} = FindSessionID_ERC(a{i}.behavResources, 'TestPost');
-    if length(id_Pre{i})~=numtest
-        warning(strcat('There are not ', ' ',  num2str(numtest), ' ', ' pre tests but rather ',' ', num2str(length(id_Pre{i})), ' ', ' in ', ' ', Dir.name{i}, '. Plotting those instead.'))
-    end
-
-    if length(id_Cond{i})~=numtest
-        warning(strcat('There are not', num2str(numtest), 'Cond tests but rather', num2str(length(id_Cond{i})), 'in', Dir.name{i}, '. Plotting those instead.'))
-    end
-
-    if length(id_Post{i})~=numtest
-        warning(strcat('There are not', num2str(numtest), 'post tests but rather', num2str(length(id_Post{i})), 'in', Dir.name{i}, '. Plotting those instead.'))
-    end
+    % if length(id_Pre{i})~=numtest
+    %     warning(strcat('There are not ', ' ',  num2str(numtest), ' ', ' pre tests but rather ',' ', num2str(length(id_Pre{i})), ' ', ' in ', ' ', Dir.name{i}, '. Plotting those instead.'))
+    % end
+    %
+    % if length(id_Cond{i})~=numtest
+    %     warning(strcat('There are not', num2str(numtest), 'Cond tests but rather', num2str(length(id_Cond{i})), 'in', Dir.name{i}, '. Plotting those instead.'))
+    % end
+    %
+    % if length(id_Post{i})~=numtest
+    %     warning(strcat('There are not', num2str(numtest), 'post tests but rather', num2str(length(id_Post{i})), 'in', Dir.name{i}, '. Plotting those instead.'))
+    % end
 
 end
 
@@ -120,11 +120,24 @@ fh = figure('units', 'normalized', 'outerposition', [0 0 0.85 0.5]);
 if ~isempty(to_skip)
     valid_indices = find(~ismember(Dir.name, to_skip));
 else
-    valid_indices = length(Dir.name);
+    valid_indices = 1:length(Dir.name);
 end
-tabs = arrayfun(@(x) uitab('Title', Dir.name{x}), valid_indices);
+tabs = arrayfun(@(x) uitab('Title', Dir.name{x}), 1:length(valid_indices));
 for itab = 1:length(tabs)
     curtab = tabs(itab);
+    sessions_same = true;
+    if contains(Dir.manipe{itab}, 'PAG')
+        star_color = 'red';
+    elseif contains(Dir.manipe{itab}, 'MFB')
+        star_color = 'green';
+    elseif contains(Dir.manipe{itab}, 'Reversal')
+        star_color = 'yellow';
+        disp('REVERSAL!')
+    elseif contains(Dir.manipe{itab}, 'Novel')
+        star_color = 'magenta';
+    else 
+        star_color = 'cyan'
+    end
     itab = valid_indices(itab);
     % PreTests
     ax(1) = axes('Parent', curtab, 'position', [0.03 0.07 0.3 0.85]);
@@ -149,8 +162,16 @@ for itab = 1:length(tabs)
     hold on
     if gradual
         colors = linspace(0.2, 0.8, length(id_Cond{itab})); % Generate shades of grey
-    else 
+        if length(id_Cond{itab}) ~= length(id_Post{itab})
+            colorsPost = linspace(0.2, 0.8, length(id_Post{itab})); % Generate more shades of grey in case of reversal protocol/anormal number of tests
+            sessions_same = false;
+            warning('The number of tests in the conditioning and posttest sessions are different for %s. The colors will be different as well.', Dir.name{itab});
+        end
+    else
         colors = 0.2*ones(1, length(id_Cond{itab}));
+        if length(id_Cond{itab}) ~= length(id_Post{itab})
+            colorsPost = linspace(0.2, 0.8, length(id_Post{itab})); % Generate shades of grey
+        end
     end
     for itest = length(id_Cond{itab}):-1:1
         plot(Data(a{itab}.behavResources(id_Cond{itab}(itest)).CleanAlignedXtsd),Data(a{itab}.behavResources(id_Cond{itab}(itest)).CleanAlignedYtsd),...
@@ -158,7 +179,7 @@ for itab = 1:length(tabs)
         tempX = Data(a{itab}.behavResources(id_Cond{itab}(itest)).CleanAlignedXtsd);
         tempY = Data(a{itab}.behavResources(id_Cond{itab}(itest)).CleanAlignedYtsd);
         plot(tempX(a{itab}.behavResources(id_Cond{itab}(itest)).PosMat(:,4)==1),tempY(a{itab}.behavResources(id_Cond{itab}(itest)).PosMat(:,4)==1),...
-            'p','Color','r','MarkerFaceColor','red','MarkerSize',16);
+            'p','Color', star_color ,'MarkerFaceColor', star_color,'MarkerSize',16);
         clear tempX tempY
     end
     set(gca,'XtickLabel',{},'YtickLabel',{});
@@ -173,16 +194,19 @@ for itab = 1:length(tabs)
     ax(3) = axes('Parent', curtab, 'position', [0.69 0.07 0.3 0.85]);
     axes(ax(3));
     hold on
+    if ~sessions_same
+        colors = colorsPost;
+    end
     for itest = length(id_Post{itab}):-1:1
         %%% Same as for Cond, we plot with gradual colors
         plot(Data(a{itab}.behavResources(id_Post{itab}(itest)).CleanAlignedXtsd),Data(a{itab}.behavResources(id_Post{itab}(itest)).CleanAlignedYtsd),...
             'LineWidth',3, 'Color', [colors(itest) colors(itest) colors(itest)]);
 
-        if stimPost
+        if stimPost & itest <= length(id_Cond{itab})
             tempX = Data(a{itab}.behavResources(id_Cond{itab}(itest)).CleanAlignedXtsd);
             tempY = Data(a{itab}.behavResources(id_Cond{itab}(itest)).CleanAlignedYtsd);
             plot(tempX(a{itab}.behavResources(id_Cond{itab}(itest)).PosMat(:,4)==1),tempY(a{itab}.behavResources(id_Cond{itab}(itest)).PosMat(:,4)==1),...
-                'p','Color','r','MarkerFaceColor','red','MarkerSize',16);
+                'p','Color',star_color,'MarkerFaceColor',star_color,'MarkerSize',16);
             clear tempX tempY
         end
     end
