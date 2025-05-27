@@ -21,7 +21,7 @@ save('AllFolderNames.mat','FolderName')
 
 Fill_Folders_UMaze_RipInhib_Sleep
 
-% Fill_Folders_UMaze_Short_Protocol_CH
+Fill_Folders_UMaze_Short_Protocol_CH
 % Fill_Folders_UMaze_CH
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -54,7 +54,6 @@ for sess=1:length(Session_type)
                     DATA = tsd(Range(Accelero.(Session_type{sess}).(Mouse_names{mouse})) , log10(Data(Accelero.(Session_type{sess}).(Mouse_names{mouse}))));
                     thr_physio1 = 5; thr_physio2 = 9;
                 elseif param==3
-                elseif param==3
                     DATA = HeartRateVar.(Session_type{sess}).(Mouse_names{mouse});
                     thr_physio1 = 0; thr_physio2 = .35;
                 end

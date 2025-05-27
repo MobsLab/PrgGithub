@@ -54,13 +54,14 @@ for group = 4:5
 
         load('SWR.mat','tRipples')
         
-        EpochDrugs1.(Name{group})(mouse) = Stop(Epoch_Drugs{1});
+        EpochDrugs1.(Name{group})(mouse) = min(Range(AlignedXtsd));
         EpochDrugs2.(Name{group})(mouse) = Start(Epoch_Drugs{2});
         
-        Fifteen_Bef_Inj = intervalSet(EpochDrugs1.(Name{group})(mouse)-900e4 , EpochDrugs1.(Name{group})(mouse));
+        Fifteen_Bef_Inj = intervalSet(EpochDrugs1.(Name{group})(mouse) , EpochDrugs1.(Name{group})(mouse)+900e4);
         Fifteen_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse) , EpochDrugs2.(Name{group})(mouse)+900e4);
         
-        figure
+      
+        %         figure
         
         for sess = 1:length(Session_type)
             
@@ -100,10 +101,17 @@ for group = 4:5
             ActiveXtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             ActiveYtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             
-            subplot(1,2,sess)
-            clear h
-            h = histogram2(Data(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Data(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),[-5:25],[-5:45]);
-            OccupMap.(Name{group}).(Session_type{sess})(:,:,mouse) = (h.Values)./nansum(h.Values(:));
+            try
+                load('HeartBeatInfo.mat', 'EKG')
+                HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(EKG.HBRate,Epoch_to_use);
+                HRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+                MeanHRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = nanmean(HRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+            end
+            
+%             subplot(1,2,sess)
+%             clear h
+%             h = histogram2(Data(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Data(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),[-5:25],[-5:45]);
+%             OccupMap.(Name{group}).(Session_type{sess})(:,:,mouse) = (h.Values)./nansum(h.Values(:));
 
         end
     end
@@ -144,14 +152,14 @@ for mouse = Mouse
         
         try
             riptemp2 = Restrict(Ripts.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Fztemp);
-            RipDensTemp.(Name{group}).(Session_type{sess})(k,i) = length(riptemp2)/Fztimetemp.(Name{group}).(Session_type{sess})(k,i);
+            RipDensTempFz.(Name{group}).(Session_type{sess})(k,i) = length(riptemp2)/Fztimetemp.(Name{group}).(Session_type{sess})(k,i);
             NumberRipFzTemp.(Name{group}).(Session_type{sess})(k,i) = length(riptemp2);
         catch
             if Fztimetemp.(Name{group}).(Session_type{sess})(k,i)>0
-                RipDensTemp.(Name{group}).(Session_type{sess})(k,i) = 0;
+                RipDensTempFz.(Name{group}).(Session_type{sess})(k,i) = 0;
                 NumberRipFzTemp.(Name{group}).(Session_type{sess})(k,i) = 0;
             else
-                RipDensTemp.(Name{group}).(Session_type{sess})(k,i) = NaN;
+                RipDensTempFz.(Name{group}).(Session_type{sess})(k,i) = NaN;
                 NumberRipFzTemp.(Name{group}).(Session_type{sess})(k,i) = NaN;
             end
         end
@@ -179,7 +187,7 @@ for group = 4:5
         Mouse_names = Mouse_names_DzpHC;
     end
     for mouse = 1:length(Mouse_names)
-        Fifteen_Bef_Inj = intervalSet(EpochDrugs1.(Name{group})(mouse)-900e4 , EpochDrugs1.(Name{group})(mouse));
+        Fifteen_Bef_Inj = intervalSet(EpochDrugs1.(Name{group})(mouse), EpochDrugs1.(Name{group})(mouse)+900e4);
         Fifteen_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse) , EpochDrugs2.(Name{group})(mouse)+900e4);
         for sess = 1:length(Session_type)
             if sess==1; Epoch_to_use = Fifteen_Bef_Inj;
@@ -188,9 +196,8 @@ for group = 4:5
             clear AlignedXtsd_Epoch AlignedYtsd_Epoch
             disp(Mouse_names(mouse));
             disp(sess);
-            Epoch = intervalSet(0,max(Range(Accelero.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))));
-            XtsdAlignedActive = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch-SleepEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            YtsdAlignedActive = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch-SleepEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+            XtsdAlignedActive = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch_to_use-SleepEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+            YtsdAlignedActive = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch_to_use-SleepEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             
             [~,Distance,~,~,~] = Thigmotaxis_OF_CH(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),'HC','figure',0,'percent_inner',0.7);
             [~,DistanceActive,~,~,~] = Thigmotaxis_OF_CH(XtsdAlignedActive, YtsdAlignedActive,'HC','figure',0,'percent_inner',0.7);
@@ -227,6 +234,7 @@ for group = 4:5
         end
     end
 end
+
 
 
 RangeLow = linspace(0.1526,20,261);
@@ -299,71 +307,7 @@ figure
 Bar2 = bar(time, median(Fztimetemp.NicotineHC.Post(:,1:30))/1e4, 'FaceAlpha', 0.3, 'FaceColor', [0.5 0.5 0.5],'EdgeColor','none');
 title('median')
 
-
-%
-% 
-% 
-% Col1=[0.7 0.7 0.7];
-% Col2=[0.3 0.3 0.3];
-% Col3=[1, 0.6, 0.6];
-% Col4=[0.6, 0, 0];
-% time = [1:15];
-% figure('color', [1 1 1]), hold on
-% subplot(1,4,1:3), hold on
-% e1 = errorbar(time, nanmean(ThigmoTempNoSleep.SalineHC.Pre),stdError(ThigmoTempNoSleep.SalineHC.Pre),'color',Col1);
-% e2 = errorbar(time, nanmean(ThigmoTempNoSleep.SalineHC.Post),stdError(ThigmoTempNoSleep.SalineHC.Post),'color',Col2);
-% 
-% e3 = errorbar(time, nanmean(ThigmoTempNoSleep.NicotineHC.Pre),stdError(ThigmoTempNoSleep.NicotineHC.Pre),'color',Col3);
-% e4 = errorbar(time, nanmean(ThigmoTempNoSleep.NicotineHC.Post),stdError(ThigmoTempNoSleep.NicotineHC.Post),'color',Col4);
-% 
-% legend([e1 e2 e3 e4],'Saline Pre','Saline Post','Nicotine Pre','Nicotine Post')
-% 
-% 
-% makepretty_CH
-% ylim([0 1.2]);
-% p_valuesPre = zeros(1, 15);
-% A = ThigmoTempNoSleep.SalineHC.Pre;
-% B = ThigmoTempNoSleep.NicotineHC.Pre;
-% for i = 1:15
-%     p_valuesPre(i) = ranksum(A(:,i), B(:,i));
-% end
-% p_valuesPost = zeros(1, 15);
-% A = ThigmoTempNoSleep.SalineHC.Post;
-% B = ThigmoTempNoSleep.NicotineHC.Post;
-% for i = 1:15
-%     p_valuesPost(i) = ranksum(A(:,i), B(:,i));
-% end
-% 
-% subplot(144)
-% Cols={[0.7 0.7 0.7],[0.3 0.3 0.3],[1, 0.6, 0.6],[0.6, 0, 0]};
-% X=[1:4];
-% Legends={'Saline Pre','Saline Post','Nicotine Pre','Nicotine Post'};
-% MakeSpreadAndBoxPlot3_SB({ThigmoNoSleep.SalineHC.Pre ThigmoNoSleep.SalineHC.Post ThigmoNoSleep.NicotineHC.Pre ThigmoNoSleep.NicotineHC.Post},Cols,X,Legends,'showpoints',1,'paired',0)
-% ylim([0 1.2])
-% makepretty_CH
-% 
-% mtitle('Homecage thigmotaxis')
-
-
-% 
-% 
-% Mouse_names = {'M1411','M1412','M1613','M1414','M1415','M1416','M1417','M1418','M1385','M1391','M1393'};
-% 
-% 
-% for mouse = 1:length(Mouse_names)
-%     RipdensityCell(mouse,:) =     Data(RipDensity_tsd.NicotineHC.Post.(Mouse_names{mouse}));
-% end
-% Mouse_names = {'M1411','M1412','M1414','M1416','M1417','M1418','M1207','M1224','M1225','M1227','M1252','M1253','M1254'};
-% 
-% 
-% for mouse = 1:length(Mouse_names)
-%         RipdensityCell2(mouse,:) =     Data(RipDensity_tsd.SalineHC.Post.(Mouse_names{mouse}));
-% end
-% 
-%     
-%     
-%     
-
+%%
 
 Col1=[0.7 0.7 0.7];
 Col2=[0.3 0.3 0.3];
@@ -372,22 +316,22 @@ Col4=[0.13, 0.55, 0.13];
 time = linspace(1,15,30);
 figure('color',[1 1 1])
 subplot(1,4,1:3), hold on
-Data_to_use = DistanceToCenterActive.SalineHC.Pre/2;
+Data_to_use = DistanceToCenter2.SalineHC.Pre/2;
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use, 1));
 h1=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
 h1.mainLine.Color=Col1; h1.patch.FaceColor=Col1; h1.edge(1).Color=Col1; h1.edge(2).Color=Col1; h1.mainLine.LineWidth=2;
 
-Data_to_use = DistanceToCenterActive.SalineHC.Post/2;
+Data_to_use = DistanceToCenter2.SalineHC.Post/2;
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use, 1));
 h2=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
 h2.mainLine.Color=Col2; h2.patch.FaceColor=Col2; h2.edge(1).Color=Col2; h2.edge(2).Color=Col2; h2.mainLine.LineWidth=2;
 
-Data_to_use = DistanceToCenterActive.NicotineHC.Pre/2;
+Data_to_use = DistanceToCenter2.NicotineHC.Pre/2;
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use, 1));
 h3=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
 h3.mainLine.Color=Col3; h3.patch.FaceColor=Col3; h3.edge(1).Color=Col3; h3.edge(2).Color=Col3; h3.mainLine.LineWidth=2;
 
-Data_to_use = DistanceToCenterActive.NicotineHC.Post/2;
+Data_to_use = DistanceToCenter2.NicotineHC.Post/2;
 Conf_Inter=nanstd(Data_to_use)/sqrt(length(Data_to_use));
 h4=shadedErrorBar(time,nanmean(Data_to_use),Conf_Inter,'g',1);
 h4.mainLine.Color=Col4; h4.patch.FaceColor=Col4; h4.edge(1).Color=Col4; h4.edge(2).Color=Col4; h4.mainLine.LineWidth=2;
@@ -400,10 +344,10 @@ subplot(144)
 Cols={[0.7 0.7 0.7],[0.3 0.3 0.3],[0.56, 0.93, 0.56],[0.13, 0.55, 0.13]};
 X=[1:4];
 Legends={'Saline Pre','Saline Post','Nicotine Pre','Nicotine Post'};
-MakeSpreadAndBoxPlot3_SB({DistanceToCenterActive_mean.SalineHC.Pre/2 DistanceToCenterActive_mean.SalineHC.Post/2 DistanceToCenterActive_mean.NicotineHC.Pre/2 DistanceToCenterActive_mean.NicotineHC.Post/2},Cols,X,Legends,'showpoints',1,'paired',0)
+MakeSpreadAndBoxPlot3_SB({DistanceToCenter_mean.SalineHC.Pre/2 DistanceToCenter_mean.SalineHC.Post/2 DistanceToCenter_mean.NicotineHC.Pre/2 DistanceToCenter_mean.NicotineHC.Post/2},Cols,X,Legends,'showpoints',1,'paired',0)
 makepretty_CH
 
-mtitle('HC, Distance to the center (active)');
+mtitle('HC, Distance to the center');
 
 %%
 
@@ -438,7 +382,7 @@ for thresh = 1:6
     %                         PlotCorrelations_BM(FreezeTimeAcc.(Name{group}).(Session_type{sess})/1e4,TimeOver.(Name{group}).(Session_type{sess}),'colortouse','k');
     %             PlotCorrelations_BM(DistanceToCenter_mean.(Name{group}).(Session_type{sess}),Ratio.(Name{group}).(Session_type{sess}),'colortouse','k');
     makepretty
-    xlabel('DistanceToCenter')
+    xlabel(['Time Breathing under ',num2str(Threshold(thresh))])
     ylabel(['Time Breathing over ',num2str(Threshold(thresh))])
     %             ylabel(['Ratio Under/Over ',num2str(Threshold(thresh))])
     
@@ -446,4 +390,5 @@ for thresh = 1:6
 end
 
 
-    
+
+

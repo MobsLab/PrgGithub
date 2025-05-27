@@ -17,16 +17,16 @@ for c = 1:length(ch)
     if strcmp('line', get(thisChild, 'Type'))
         if strcmp('.', get(thisChild, 'Marker'))
             if get(thisChild, 'MarkerSize')<15
-                        set(thisChild, 'MarkerSize', 30);
+                        set(thisChild, 'MarkerSize', 20);
             end
         end
         if strcmp('-', get(thisChild, 'LineStyle'))
-            set(thisChild, 'LineWidth', 2);
+            set(thisChild, 'LineWidth', 1);
         end
     elseif strcmp('stair', get(thisChild, 'Type'))
-                    set(thisChild, 'LineWidth', 2);
+                    set(thisChild, 'LineWidth', 1);
     elseif strcmp('errorbar', get(thisChild, 'Type'))
-                    set(thisChild, 'LineWidth', 2);
+                    set(thisChild, 'LineWidth', 1);
 
     end
 end

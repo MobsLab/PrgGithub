@@ -29,7 +29,7 @@ LFPEKG = FilterLFP(LFP,[1 200],1024);
 load('Ripples.mat')
 
 
-writerObj = VideoWriter(['FreezingExample5.avi']);
+writerObj = VideoWriter(['FreezingExample_VF.avi']);
 writerObj.FrameRate = 20;
 writerObj.Quality = 70;
 

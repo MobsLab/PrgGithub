@@ -21,6 +21,15 @@ sm_fact = 0; MaxSmoothFact=20;
 SrdZone=20; maxsrndsz=80;
 camera_type = [];
 
+% Added to match online tracking (EC added on 07/05/25)
+MouseTemp=[];
+global th_immob; th_immob=20;
+global thtps_immob; thtps_immob=2;
+global delStim; delStim=12;%was 12 for PAG and 15 for eyeshock(?? Dima/18.02.2018)
+global delStimreturn; delStimreturn=12;%was 12 for PAG  and 5 for eyeshock(?? Dima/18.02.2018)
+global Zone ZoneLabels  % the Zones in the UMaze - set by the user
+global DoorChangeMat % Matrix of times at which the door was moved
+
 intvar=[]; % temporary variable to load from .mat
 datas=[]; % variable name for frames
 fr=1; % frame number
@@ -91,19 +100,19 @@ hand(4)=uicontrol(hand(1),'style','pushbutton',...
         end
         type=inputdlg('Track from matlab files (1) or from Video (2)?','Type of tracking')
         type=eval(type{1});
-        
+
         camera_type=questdlg('What kind of video input are you using?',['Camera  choice'],'IRCamera','Webcam','IRCamera');
-        
+
         start=1;
         doin=0;
         accel=3; % from 0 to  20
-        
+
         if type==1
             GetFileInfo
         else
             GetVidInfo
         end
-figure(hand(1));
+        figure(hand(1));
         watchin=subplot(2,2,1);
         ImageDisplayTop = imagesc(double(IM));
         axis image
@@ -111,7 +120,7 @@ figure(hand(1));
         PositionPlot=plot(0,0,'m+');
         bnw_watchin=subplot(2,2,3);
         ImageDisplayBottom = imagesc((ones(size(ref,1),size(ref,2))));
-        
+
         hand(7)=uicontrol(hand(1),'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.35 0.8/9 0.05],...
@@ -119,7 +128,7 @@ figure(hand(1));
             'tag','play',...
             'callback', @play_vid,...
             'BackgroundColor',button_col);
-        
+
         hand(8)=uicontrol(hand(1),'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.25 0.8/9 0.05],...
@@ -127,7 +136,7 @@ figure(hand(1));
             'tag','stop',...
             'callback', @stop_vid,...
             'BackgroundColor',button_col);
-        
+
         hand(9)=uicontrol(hand(1),'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.15 0.8/9 0.05],...
@@ -135,7 +144,7 @@ figure(hand(1));
             'tag','get_mask',...
             'callback', @make_mask,...
             'BackgroundColor',button_col);
-        
+
         hand(10)=uicontrol(hand(1),'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.05 0.8/9 0.05],...
@@ -143,8 +152,8 @@ figure(hand(1));
             'tag','done',...
             'callback', @Done,...
             'BackgroundColor',button_col);
-        
-        
+
+
         slider_seuil = uicontrol(hand(1),'style','slider',...
             'units','normalized',...
             'position',[0.6 0.1 0.02 0.7],...
@@ -158,8 +167,8 @@ figure(hand(1));
             'position',[0.6 0.05 0.02 0.03],...
             'string',num2str(BW_threshold));
         set(slider_seuil,'value',BW_threshold);
-        
-        
+
+
         slider_rapport = uicontrol(hand(1),'style','slider',...
             'units','normalized',...
             'position',[0.65 0.1 0.02 0.7],...
@@ -173,7 +182,7 @@ figure(hand(1));
             'position',[0.65 0.05 0.02 0.03],...
             'string',num2str(shape_ratio));
         set(slider_rapport,'value',shape_ratio/typical_rapport);
-        
+
         slider_small=uicontrol(hand(1),'style','slider',...
             'units','normalized',...
             'position',[0.7 0.1 0.02 0.7],...
@@ -187,7 +196,7 @@ figure(hand(1));
             'position',[0.7 0.05 0.02 0.03],...
             'string',num2str(smaller_object_size));
         set(slider_small,'value',smaller_object_size/typical_size);
-        
+
         slider_speed = uicontrol(hand(1),'style','slider',...
             'units','normalized',...
             'position',[0.5 0.1 0.02 0.7],...
@@ -201,7 +210,7 @@ figure(hand(1));
             'position',[0.5 0.05 0.02 0.03],...
             'string',num2str(accel));
         set(slider_speed,'value',accel/10);
-        
+
         slider_time = uicontrol(hand(1),'style','slider',...
             'units','normalized',...
             'position',[0.55 0.1 0.02 0.7],...
@@ -215,7 +224,7 @@ figure(hand(1));
             'position',[0.55 0.05 0.02 0.03],...
             'string',num2str(chrono));
         set(slider_time,'value',fr/totframe);
-        
+
         slider_strel = uicontrol(hand(1),'style','slider',...
             'units','normalized',...
             'position',[0.75 0.1 0.02 0.7],...
@@ -229,7 +238,7 @@ figure(hand(1));
             'position',[0.75 0.05 0.02 0.03],...
             'string',num2str(strsz));
         set(slider_strel,'value',strsz/maxsrtsz);
-        
+
         slider_smooth = uicontrol(hand(1),'style','slider',...
             'units','normalized',...
             'position',[0.8 0.1 0.02 0.7],...
@@ -243,8 +252,8 @@ figure(hand(1));
             'position',[0.8 0.05 0.02 0.03],...
             'string',num2str(sm_fact));
         set(slider_smooth,'value',sm_fact/MaxSmoothFact);
-        
-        
+
+
         slider_srdzone = uicontrol(hand(1),'style','slider',...
             'units','normalized',...
             'position',[0.85 0.1 0.02 0.7],...
@@ -258,24 +267,24 @@ figure(hand(1));
             'position',[0.85 0.05 0.02 0.03],...
             'string',num2str(maxsrndsz));
         set(slider_srdzone,'value',SrdZone/maxsrndsz);
-        
+
         set(slider_time,'value',fr/totframe);
-        
+
         pause(0.1)
         fr=1;
         go=0;
         OldIm=mask;
         OldZone=mask;
-        
+
         %         keyboard
         while start==1
             pause(0.001)
             while (go==1) %'Everything',
                 showfig=1;
                 GenTracking
-                
+
                 totnum=totnum+1;
-                
+
                 % accelerate frame rate according to slider
                 pause(fcy/accel)
                 if accel<5
@@ -285,13 +294,13 @@ figure(hand(1));
                 elseif accel>9
                     fr=fr+10;
                 end
-                
+
                 fr=max(mod(fr,totframe+1),1);
                 set(slider_time,'value',fr/totframe);
                 set(text(10),'string',num2str(chrono));
             end
-            
-            
+
+
             while (go==2) %'Just the Nans'
                 showfig=1;
                 indnan=find(isnan(PosMat(:,2)));
@@ -307,7 +316,7 @@ figure(hand(1));
                     pause(fcy/accel)
                 end
             end
-            
+
             if go==3 % answer 'TrackOffLine' to 'Do you need to improve tacking? '
                 showfig=0;
                 n=1;
@@ -319,13 +328,14 @@ figure(hand(1));
                     waitbar(fr/totframe,waittracking);
                     GenTracking
                 end
-                
+
                 close(waittracking)
                 set(hand(7),'enable','on');
                 set(hand(8),'enable','on');
                 set(hand(9),'enable','on');
-                
+
                 review=figure;
+                set(review, 'Position', [100, 100, 1200, 600]);
                 subplot(131), imagesc(ref), colormap gray, axis image
                 hold on
                 plot(PosMat(:,2)*Ratio_IMAonREAL,PosMat(:,3)*Ratio_IMAonREAL,'color',[1 0.5 0.2]);
@@ -341,49 +351,106 @@ figure(hand(1));
                 difftime=diff(PosMat(:,1));
                 hist(difftime(difftime<1),size(PosMat,1)/10)
                 title('Sampling Histogram')
-                
+
                 savetrack=inputdlg('Are you happy?(y/n)','Save offline tracking');
-                
+
                 % keyboard
                 if savetrack{1}=='y'
-                    
+
                     [PosMat,PosMatInit,im_diff,im_diffInit,Vtsd,Xtsd,Ytsd,Imdifftsd]=CommonInterpPosMatImDiff(im_diff,chrono,PosMat);
-                    
-                    
+
+
                     saveas(review,[nameFile 'review.fig']);
                     saveas(review,[ nameFile 'review.png']);
-                    
+
                     save('behavResources_Offline.mat','PosMat','PosMatInit','im_diff','im_diffInit','Vtsd','Xtsd','Ytsd','Imdifftsd',...
                         'ref','mask','Ratio_IMAonREAL','BW_threshold','smaller_object_size','sm_fact','strsz','SrdZone','shape_ratio');
-                    
-%                     try
-%                         freezefig=figure;
-%                         plot(im_diff(:,1),(im_diff(:,2)))
-%                         [~,th_immob] = ginput(1);
-%                         % Do some extra code-specific calculations
-%                         FreezeEpoch=thresholdIntervals(Imdifftsd,th_immob,'Direction','Below');
-%                         FreezeEpoch=mergeCloseIntervals(FreezeEpoch,0.3*1E4);
-%                         FreezeEpoch=dropShortIntervals(FreezeEpoch,2*1E4);
-%                         save('behavResources_Offline.mat','FreezeEpoch','-append');
-%                     end
-                    
-                    
+
+                    %                     try
+                    %                         freezefig=figure;
+                    %                         plot(im_diff(:,1),(im_diff(:,2)))
+                    %                         [~,th_immob] = ginput(1);
+                    %                         % Do some extra code-specific calculations
+                    %                         FreezeEpoch=thresholdIntervals(Imdifftsd,th_immob,'Direction','Below');
+                    %                         FreezeEpoch=mergeCloseIntervals(FreezeEpoch,0.3*1E4);
+                    %                         FreezeEpoch=dropShortIntervals(FreezeEpoch,2*1E4);
+                    %                         save('behavResources_Offline.mat','FreezeEpoch','-append');
+                    %                     end
+
+
+                    % >>> ADD BEHAVIOR ANALYSIS AND SAVE <<< EC 09/05/25
+                    try
+                        FreezeEpoch = thresholdIntervals(Imdifftsd, th_immob, 'Direction', 'Below');
+                        FreezeEpoch = mergeCloseIntervals(FreezeEpoch, 0.3*1E4);
+                        FreezeEpoch = dropShortIntervals(FreezeEpoch, thtps_immob*1E4);
+                        Freeze = sum(End(FreezeEpoch) - Start(FreezeEpoch));
+                    catch
+                        Freeze = NaN;
+                        Freeze2 = NaN;
+                    end
+
+                    Xtemp = Data(Xtsd);
+                    T1 = Range(Xtsd);
+
+                    % Load needed variables from behavResources.mat
+                    if exist('behavResources.mat', 'file')
+                        temp = load('behavResources.mat', 'Zone', 'ZoneLabels', 'th_immob');
+                        if isfield(temp, 'Zone'), Zone = temp.Zone; else, warning('Zone not found.'); Zone = {}; end
+                        if isfield(temp, 'ZoneLabels'), ZoneLabels = temp.ZoneLabels; else, warning('ZoneLabels not found.'); ZoneLabels = {}; end
+                        if isfield(temp, 'th_immob'), th_immob = temp.th_immob; else, warning('th_immob not found.'); th_immob = NaN; end
+                    else
+                        warning('behavResources.mat not found.');
+                        Zone = {};
+                        ZoneLabels = {};
+                        th_immob = NaN;
+                    end
+
+                    XXX = floor(Data(Xtsd)*Ratio_IMAonREAL);
+                    XXX(isnan(XXX)) = 240;
+                    YYY = floor(Data(Ytsd)*Ratio_IMAonREAL);
+                    YYY(isnan(YYY)) = 320;
+                    for t = 1:length(Zone)
+                        try
+                            ZoneIndices{t}=find(diag(Zone{t}(XXX,YYY)));
+                            Xtemp2=Xtemp*0;
+                            Xtemp2(ZoneIndices{t})=1;
+                            ZoneEpoch{t}=thresholdIntervals(tsd(T1,Xtemp2),0.5,'Direction','Above');
+                            Occup(t)=size(ZoneIndices{t},1)./size(XXX,1);
+                            FreezeTime(t)=length(Data(Restrict(Xtsd,and(FreezeEpoch,ZoneEpoch{t}))))./length(Data((Restrict(Xtsd,ZoneEpoch{t}))));
+                        catch
+                            ZoneIndices{t}=[];
+                            ZoneEpoch{t}=intervalSet(0,0);
+                            Occup(t)=0;
+                            FreezeTime(t)=0;
+                        end
+                    end
+
+                    clear t T1 Xtemp Xtemp2 XXX YYY
+
+                    save('behavResources_Offline.mat', ...
+                        'FreezeEpoch','th_immob','thtps_immob', ...
+                        'Zone','ZoneEpoch','ZoneIndices','FreezeTime','Occup','DoorChangeMat', ...
+                        'delStim','delStimreturn','MouseTemp','ZoneLabels','-append');
+
+                    % >>><<<
+
+
                     close(review);
                     go=0;
                     start = 0;
                 else
                     go=0;
                 end
-                
+
                 im_diff=[]; PosMat = [];
             end
-            
+
         end
-        
+
         function make_mask(~,~)
             GenMask
         end
-        
+
         function play_vid(~,~)
             start=1;
             playwhat=questdlg('What do you want to watch? ','Play','Everything','Just the Nans','Nothing','Nothing');
@@ -401,7 +468,7 @@ figure(hand(1));
                 go=0;
             end
         end
-        
+
         function stop_vid(~,~)
             choice=questdlg('Do you need to improve tracking? ','what to do?','No','Track offline','Add to batch','No');
             if  length(choice)==13 %'Track offline'
@@ -416,7 +483,7 @@ figure(hand(1));
                 set(hand(7),'enable','on');
                 set(hand(9),'enable','on');
             elseif length(choice)== 12 % Add to batch'
-                
+
                 go=0;
                 nanind=1E7;
                 set(hand(7),'enable','on');
@@ -428,22 +495,22 @@ figure(hand(1));
                 else
                     batchlist{3,batchnum}=nameFile;
                 end
-                
-                
+
+
                 try
                     save('InfoTrackingOffline.mat','ref','mask','Ratio_IMAonREAL','BW_threshold','smaller_object_size','sm_fact','strsz','SrdZone','shape_ratio','-append')
                 catch
                     save('InfoTrackingOffline.mat','ref','mask','Ratio_IMAonREAL','BW_threshold','smaller_object_size','sm_fact','strsz','SrdZone','shape_ratio')
                 end
                 go=0;
-                
+
                 batchnum=batchnum+1;
                 options.Resize='on';
                 options.WindowStyle='normal';
 
             end
         end
-        
+
         function Done(~,~)
             start=0;
             go=0;
@@ -463,11 +530,11 @@ figure(hand(1));
             end
             pause(0.0001);
         end
-        
+
         function GetFileInfo
-            
+
             private=0;
-            
+
             PathName =  uigetdir;
             cd(PathName);
             lis=dir(PathName);
@@ -475,8 +542,8 @@ figure(hand(1));
             try
                 PosMat=load('PosMat.mat');PosMat=struct2array(PosMat);
             end
-            
-            
+
+
             try
                 availinfo(1)=exist('behavResources.mat');
                 availinfo(2)=exist('InfoTrackingOffline.mat');
@@ -521,7 +588,7 @@ figure(hand(1));
                 catch
                     msgbox('No reference found, cannot proceed','No ref !!','warn')
                     cd(PathName);
-                    
+
                 end
             end
             for i=1:length(lis)
@@ -530,9 +597,9 @@ figure(hand(1));
                     index=[index,i];
                 end
             end
-            
+
             try
-                
+
                 totframe=length(index);
                 datas=load(NameLis{index(1)});datas=struct2array(datas);
                 t1=datas.time;
@@ -547,9 +614,9 @@ figure(hand(1));
                 occupation = zeros(ny,nx);
                 RGBoccupation=zeros(size(occupation,1),size(occupation,2),3); %matrice couleur
                 fcy=durmax/totframe;
-                
-                
-                
+
+
+
                 try
                     if private==0
                         cd ..
@@ -572,7 +639,7 @@ figure(hand(1));
                     end
                     cd(PathName);
                 end
-                
+
                 try
                     if private==0
                         cd ..
@@ -588,7 +655,7 @@ figure(hand(1));
                     shape_ratio=0;
                     cd(PathName);
                 end
-                
+
                 try
                     if private==0
                         cd ..
@@ -602,8 +669,8 @@ figure(hand(1));
                     se = strel('disk',strsz);
                     cd(PathName);
                 end
-                
-                
+
+
                 try
                     keyboard
                     if private==0
@@ -627,7 +694,7 @@ figure(hand(1));
                         Ratio_IMAonREAL=1;
                     end
                 end
-                
+
                 try
                     if private==0
                         cd ..
@@ -641,12 +708,12 @@ figure(hand(1));
                     smaller_object_size_imdiff=0;
                     cd(PathName);
                 end
-                
+
             end
         end
-        
+
         function GetVidInfo
-            
+
             [nameFile,PathName,FilterIndex] =  uigetfile({'*.avi';'*.mpg';'*.wmv';'*.mov'});
             disp('loading file, be patient')
             cd(eval(strcat('''',PathName,'''')))
@@ -656,8 +723,14 @@ figure(hand(1));
             IM=(double(vidFrames(:,:,3,1)));
             [l2,l1] = size(IM);
             typical_size = 5*sqrt(l1*l2);
-            durmax = inputdlg('how long is recording in s');
-            durmax = eval(durmax{1});
+            % durmax = inputdlg('how long is recording in s');
+            % durmax = eval(durmax{1});
+            %%%% Modified by EC 07/05/25
+            duration_sec = OBJ.Duration;  % Extract video duration in seconds
+            default_dur = {num2str(duration_sec)};
+            answer = inputdlg('How long is recording in seconds?', 'Recording Duration', 1, default_dur);
+            durmax = str2double(answer{1});
+            %%%%
             fcy=durmax/totframe;
             nx = l2/10;
             ny = l1/10;
@@ -673,7 +746,7 @@ figure(hand(1));
             try
                 PosMat=load('PosMat.mat');PosMat=struct2array(PosMat);
             end
-            
+
             try
                 ref=load(filenameinfotracking{indavail},'ref');ref=struct2array(ref);
                 if length(size(ref))==3
@@ -684,9 +757,9 @@ figure(hand(1));
                 end
             catch
                 msgbox('No reference found, cannot proceed','No ref !!','waarn')
-                
+
             end
-            
+
             try
                 try
                     intvar=load(filenameinfotracking{indavail},'Ratio_IMAonREAL');
@@ -696,7 +769,7 @@ figure(hand(1));
                     intvar=load(filenameinfotracking{indavail},'pixratio');
                     Ratio_IMAonREAL=1./intvar.pixratio;
                 end
-                
+
             catch
                 getpixrat=questdlg('There is no pixel ratio, do you want to get the scale?','Scale Tracking','yes','no','yes');
                 if length(getpixrat)==3
@@ -705,7 +778,7 @@ figure(hand(1));
                     Ratio_IMAonREAL=1;
                 end
             end
-            
+
             try
                 mask=load(filenameinfotracking{indavail},'mask');mask=struct2array(mask);
                 if size(mask,1)==0
@@ -722,8 +795,8 @@ figure(hand(1));
                     GenMask
                 end
             end
-            
-            
+
+
             try
                 intvar=load(filenameinfotracking{indavail},'smaller_object_size','BW_threshold','shape_ratio');
                 BW_threshold=intvar.BW_threshold;
@@ -734,17 +807,17 @@ figure(hand(1));
                 smaller_object_size=0;
                 shape_ratio=0;
             end
-            
+
             try
                 intvar=load(filenameinfotracking{indavail},'strsz');
                 strsz=intvar.strsz;
                 se = strel('disk',strsz);
-                
+
             catch
                 strsz=0;
                 se = strel('disk',strsz);
             end
-            
+
             try
                 intvar=load(filenameinfotracking{indavail},'BW_threshold_imdiff','smaller_object_size_imdiff');
                 BW_threshold_imdiff=intvar.BW_threshold_imdiff;
@@ -753,12 +826,12 @@ figure(hand(1));
                 BW_threshold_imdiff=0;
                 smaller_object_size_imdiff=0;
             end
-            
+
         end
-        
-        
-        
-        
+
+
+
+
     end
 
 %% Create an artificial ref
@@ -780,6 +853,7 @@ figure(hand(1));
         refno=1;
         imtoref=[];
         ref=[];
+        refs = {};
         hand(7)=uicontrol(hand(1),'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.35 0.8/9 0.05],...
@@ -787,7 +861,7 @@ figure(hand(1));
             'tag','play',...
             'callback', @play_vid,...
             'BackgroundColor',button_col);
-        
+
         hand(8)=uicontrol(hand(1),'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.25 0.8/9 0.05],...
@@ -795,7 +869,7 @@ figure(hand(1));
             'tag','getframe',...
             'callback', @get_frame,...
             'BackgroundColor',button_col);
-        
+
         hand(9)=uicontrol(hand(1),'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.15 0.8/9 0.05],...
@@ -803,7 +877,7 @@ figure(hand(1));
             'tag','done',...
             'callback', @Done,...
             'BackgroundColor',button_col);
-        
+
         slider_speed = uicontrol(hand(1),'style','slider',...
             'units','normalized',...
             'position',[0.7 0.1 0.05 0.7],...
@@ -817,7 +891,7 @@ figure(hand(1));
             'position',[0.725 0.05 0.05 0.03],...
             'string',num2str(accel));
         set(slider_speed,'value',accel/10);
-        
+
         slider_time = uicontrol(hand(1),'style','slider',...
             'units','normalized',...
             'position',[0.8 0.1 0.05 0.7],...
@@ -830,16 +904,16 @@ figure(hand(1));
             'units','normalized',...
             'position',[0.825 0.05 0.05 0.03],...
             'string',num2str(chrono));
-        
+
         set(slider_time,'value',fr/totframe);
         pause(0.1)
-        
+
         while start==1
             pause(0.001)
-            
+
             while go==1
                 fr=1;
-                
+
                 while fr<=totframe & refno<=2
                     vidFrames = read(OBJ,fr);
                     IM=(double(vidFrames(:,:,3,1)))/256;
@@ -858,7 +932,7 @@ figure(hand(1));
                     end
                     fr=max(mod(fr,totframe+1),1)
                 end
-                
+
                 if refno==3
                     %                     keyboard
                     ref1=refs{1};
@@ -868,7 +942,7 @@ figure(hand(1));
                     where=inputdlg('Where is the mouse on the top frame? Top(T)/Bottom(B)/Left(L)/Right(R)','Mouse location');
                     subplot(new_ref)
                     [x,y]=ginput(1);
-                    
+
                     if where{1}=='T'
                         ref=[ref1(1:floor(y),:);ref2(floor(y)+1:end,:)];
                     elseif where{1}=='B'
@@ -892,16 +966,16 @@ figure(hand(1));
                     go=0;
                     refno=1;
                     imtoref=[];
-                    
+
                 end
             end
         end
-        
+
         function get_frame(~,~)
             refs{refno}=IM;
             refno=refno+1;
         end
-        
+
         function Done(~,~)
             start=0;
             go=0;
@@ -914,17 +988,17 @@ figure(hand(1));
             delete(watchin);delete(slider_time);delete(slider_speed);
             delete(new_ref);
         end
-        
-        
-        
+
+
+
         function play_vid(~,~)
             go=1;
             refno=1;
             imtoref=[];
         end
-        
+
         function GetVidInfo
-            
+
             [nameFile,PathName,FilterIndex] =  uigetfile({'*.avi';'*.mpg';'*.wmv';'*.mov'});
             cd(eval(strcat('''',PathName,'''')))
             disp('loading file, be patient')
@@ -936,17 +1010,17 @@ figure(hand(1));
             IM=(double(vidFrames(:,:,3,1)))/256;
             disp('file loaded')
         end
-        
-        
+
+
     end
 
 %% Function called by the others
     function GenMask
         %   keyboard
         mask=ones(size(IM,1),size(IM,2));
-        
+
         color_on = [ 0 0 0];
-        
+
         %% graphical interface n�3
         mask_fig=figure('units','normalized',...
             'position',[0.15 0.1 0.8 0.8],...
@@ -955,60 +1029,60 @@ figure(hand(1));
             'menubar','none',...
             'tag','figure mask');
         set(mask_fig,'Color',color_on);
-        
+
         uicontrol(mask_fig,'style','text', ...
             'units','normalized',...
             'position',[0.25 0.02 0.06 0.03],...
             'string','click on maze edges');
-        
+
         uicontrol(mask_fig,'style','text', ...
             'units','normalized',...
             'position',[0.70 0.02 0.06 0.03],...
             'string','satisfied?');
-        
+
         maskbutton(1)= uicontrol(mask_fig,'style','pushbutton',...
             'units','normalized',...
             'position',[0.25 0.85 0.08 0.05],...
             'string','Circle',...
             'callback', @Option_Circle);
-        
+
         maskbutton(2)= uicontrol(mask_fig,'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.25 0.08 0.05],...s
             'string','save',...
             'callback', @save_mask);
-        
+
         maskbutton(3)=uicontrol(mask_fig,'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.65 0.08 0.05],...
             'string','mask IN',...
             'callback', @Do_maskIN);
-        
+
         maskbutton(4)= uicontrol(mask_fig,'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.75 0.08 0.05],...
             'string','Reset mask',...
             'callback', @Reset_mask);
-        
+
         maskbutton(5)=uicontrol(mask_fig,'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.55 0.08 0.05],...
             'string','mask OUT',...
             'callback', @Do_maskOUT);
-        
+
         maskbutton(6)= uicontrol(mask_fig,'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.45 0.08 0.05],...
             'string','Load mask',...
             'callback', @Load_mask);
-        
+
         maskbutton(7)= uicontrol(mask_fig,'style','pushbutton',...
             'units','normalized',...
             'position',[0.01 0.04 0.08 0.05],...
             'string','Close',...
             'callback', @fermeture_mask);
-        
-        
+
+
         ref2=IM;
         figure(mask_fig),colormap gray
         subplot(1,2,1), imagesc(ref),axis image
@@ -1028,7 +1102,7 @@ figure(hand(1));
             maskint=uint8(BW);
             maskint=uint8(-(double(maskint)-1));
             mask=uint8(double(mask).*double(maskint));
-            
+
             colormap gray
             ref2((find(mask==0)))=0;
             figure(mask_fig), subplot(1,2,2)
@@ -1037,12 +1111,12 @@ figure(hand(1));
                 set(maskbutton(var_boucle),'Enable','on')
             end
         end
-        
+
         function Do_maskOUT(obj,event)
             for var_boucle=1:7
                 set(maskbutton(var_boucle),'Enable','off')
             end
-            
+
             figure(mask_fig), subplot(1,2,1)
             if Docircle
                 imel = imellipse;
@@ -1052,7 +1126,7 @@ figure(hand(1));
             end
             maskint=uint8(BW);
             mask=uint8(double(mask).*double(maskint));
-            
+
             colormap gray
             ref2((find(mask==0)))=0;
             figure(mask_fig), subplot(1,2,2)
@@ -1061,28 +1135,28 @@ figure(hand(1));
                 set(maskbutton(var_boucle),'Enable','on')
             end
         end
-        
+
         function Load_mask(obj,event)
             [filename,path] = uigetfile('*.mat','Please select a mask for this session');
             try
                 load(strcat(path,filename),'mask');
             catch
                 msg_box=msgbox('no mask found in this file','mask','modal');
-                
+
             end
-            
+
             if size(mask)~=size(IM)
                 mask=ones(size(IM,1),size(IM,2));
                 msg_box=msgbox('Mask wrong size, resetting','mask','modal');
             end
-            
+
             ref2=IM;
             ref2((find(mask==0)))=0;
             figure(mask_fig), subplot(1,2,2)
             imagesc(ref2),axis image
-            
+
         end
-        
+
         function Option_Circle(obj,event)
             if Docircle
                 Docircle=0;
@@ -1091,9 +1165,9 @@ figure(hand(1));
                 Docircle=1;
                 subplot(1,2,1), title('CIRCLE ACITVATED','Color','w')
             end
-            
+
         end
-        
+
         function Reset_mask(obj,event)
             figure(mask_fig),colormap gray
             subplot(1,2,1), imagesc(IM),axis image
@@ -1102,8 +1176,8 @@ figure(hand(1));
             ref2=IM;
             subplot(122), imagesc(ref2), axis image
         end
-        
-        
+
+
         function save_mask(obj,event) % keep ref in memory
             try
                 save('InfoTrackingOffline.mat','mask','-append');
@@ -1112,16 +1186,16 @@ figure(hand(1));
             end
             msg_box=msgbox('Mask saved','save','modal');
         end
-        
+
         function fermeture_mask(obj,event)
             delete(mask_fig)
         end
-        
-        
+
+
     end
 
     function GenTracking
-        
+
         if type==1
             datas=load(NameLis{index(fr)});datas=struct2array(datas);
             IM=double(datas.image)/256;
@@ -1131,15 +1205,15 @@ figure(hand(1));
             IM=(double(vidFrames(:,:,3,1)))/256;
             chrono=fr*fcy;
         end
-        
+
         [Pos,ImDiff,PixelsUsed,NewIm,FzZone]=Track_ImDiff(double(IM),double(mask),double(ref),BW_threshold,smaller_object_size,sm_fact,se,SrdZone,...
             Ratio_IMAonREAL,OldIm,OldZone,camera_type);
-        
+
         diffshow=double(NewIm);
         diffshow(FzZone==1)=0.4;
         diffshow(OldZone==1)=0.4;
         diffshow(NewIm==1)=0.8;
-        
+
         if sum(isnan(Pos))==0
             PosMat(fr,1)=chrono;
             PosMat(fr,2)=Pos(1);
@@ -1158,16 +1232,16 @@ figure(hand(1));
             x_oc = max(round(Pos(1)*Ratio_IMAonREAL/l1*nx),1);
             y_oc = max(round(Pos(2)*Ratio_IMAonREAL/l2*ny),1);
             occupation(y_oc,x_oc) = occupation(y_oc,x_oc) + 1;
-            
+
         else
-            
+
             PosMat(fr,:)=[chrono;NaN;NaN;NaN];
             im_diff(fr,1:3)=[chrono;NaN;NaN];
             MouseTemp(fr,1:2)=[chrono;NaN];
             nannum=nannum+1;
-            
+
         end
-        
+
         if showfig==1
             set(PositionPlot,'Xdata',Pos(1).*Ratio_IMAonREAL,'YData',Pos(2).*Ratio_IMAonREAL)
             set(ImageDisplayBottom,'Cdata',diffshow);
@@ -1175,23 +1249,23 @@ figure(hand(1));
             subplot(bnw_watchin)
             title(strcat('nans since last change :',num2str(double(nannum/totnum))))
         end
-        
+
         occupation_norm=occupation/n;
         n=n+1;
         log_occupation_norm=log(1+occupation_norm); % echelle log
         max_log_oc=max(max(log_occupation_norm));
         log_occupation_norm=log_occupation_norm/max_log_oc;
-        
+
         nopath=(occupation==0); % endroit o� la souris n'est jamais pass�e
-        
+
         RGBoccupation(:,:,3)=nopath;
         RGBoccupation(:,:,2)=nopath;
         RGBoccupation(:,:,1)= log_occupation_norm+nopath; %en blanc l� o� elle n'est jamais pass�e ; en rouge ailleurs ;
-        
-        
+
+
         OldIm=NewIm;
         OldZone=FzZone;
-        
+
     end
 
 
@@ -1216,7 +1290,7 @@ figure(hand(1));
         elseif doin==1
             BW_threshold_imdiff = get( slider_seuil, 'value');
             set(text(2),'string',num2str(BW_threshold_imdiff))
-            
+
         end
     end
 
@@ -1278,9 +1352,9 @@ figure(hand(1));
     end
 
     function LaunchBatch(~,~)
-        
+
         keyboard
-        
+
         for b=1:batchnum-1 % for each file of batchlist
             try
                 disp(num2str(b/batchnum))
@@ -1295,11 +1369,11 @@ figure(hand(1));
                     IM=(double(vidFrames(:,:,3,1)))/256;
                     [l2,l1] = size(IM);
                     nameFile=batchlist{3,b};
-                    
+
                 else % matlab frame
                     lis=dir(batchlist{2,b});
                     index=[];
-                    
+
                     for i=1:length(lis)
                         NameLis{i}=lis(i).name;
                         if strfind(NameLis{i},'frame')
@@ -1315,15 +1389,15 @@ figure(hand(1));
                     [l2,l1] = size(ref);
                     durmax=etime(t2,t1);
                 end
-                
+
                 typical_size = 5*sqrt(l1*l2);
                 nx = l2/10;
                 ny = l1/10;
                 occupation = zeros(ny,nx);
                 RGBoccupation=zeros(size(occupation,1),size(occupation,2),3); %matrice couleur
                 fcy=durmax/totframe;
-                
-                
+
+
                 try
                     ref=load('InfoTrackingOffline.mat','ref');
                     ref=struct2array(ref);
@@ -1344,7 +1418,7 @@ figure(hand(1));
                 catch
                     Ratio_IMAonREAL=1;
                 end
-                
+
                 try
                     mask=load('InfoTrackingOffline.mat','mask');
                     mask=struct2array(mask);
@@ -1354,29 +1428,29 @@ figure(hand(1));
                 catch
                     mask=ones(size(ref,1),size(ref,2));
                 end
-                
+
                 try
                     intvar=load('InfoTrackingOffline.mat','smaller_object_size','BW_threshold','shape_ratio');
                     BW_threshold=intvar.BW_threshold;
                     smaller_object_size=intvar.smaller_object_size;
                     shape_ratio=intvar.shape_ratio;
-                    
+
                 catch
                     batchlist{4,b}='no posmat thresholds';
                 end
-                
+
                 try
                     intvar=load('InfoTrackingOffline.mat','strsz');
                     strsz=intvar.strsz;
                     se = strel('disk',strsz);
-                    
+
                 catch
                     strsz=0;
                     se = strel('disk',strsz);
                 end
-                
-                
-                
+
+
+
                 if dobatch==1
                     PosMat=[]; im_diff=[];
                     disp('Tracking calculation')
@@ -1386,11 +1460,11 @@ figure(hand(1));
                         fr=i;
                         GenTracking
                     end
-                    
+
                     disp('Tracking done, saving')
-                    
-                    
-                    
+
+
+
                     review=figure;
                     subplot(131), imagesc(ref), colormap gray, axis image
                     hold on
@@ -1407,36 +1481,92 @@ figure(hand(1));
                     difftime=diff(PosMat(:,1));
                     hist(difftime(difftime<1),size(PosMat,1)/10)
                     title('Sampling Histogram')
-                    
+
                     [~,nameFile,~]=fileparts(nameFile);
-                    
+
                     [PosMat,PosMatInit,im_diff,im_diffInit,Vtsd,Xtsd,Ytsd,Imdifftsd]=CommonInterpPosMatImDiff(im_diff,chrono,PosMat);
-                    
-                    
+
+
                     saveas(review,[nameFile 'review.fig']);
                     saveas(review,[ nameFile 'review.png']);
-                    
+
                     save('behavResources_Offline.mat','PosMat','PosMatInit','im_diff','im_diffInit','Vtsd','Xtsd','Ytsd','Imdifftsd',...
                         'ref','mask','Ratio_IMAonREAL','BW_threshold','smaller_object_size','sm_fact','strsz','SrdZone','shape_ratio');
-                    
-%                     try
-%                         freezefig=figure;
-%                         plot(im_diff(:,1),(im_diff(:,2)))
-%                         [~,th_immob] = ginput(1);
-%                         % Do some extra code-specific calculations
-%                         FreezeEpoch=thresholdIntervals(Imdifftsd,th_immob,'Direction','Below');
-%                         FreezeEpoch=mergeCloseIntervals(FreezeEpoch,0.3*1E4);
-%                         FreezeEpoch=dropShortIntervals(FreezeEpoch,2*1E4);
-%                         save('behavResources_Offline.mat','FreezeEpoch','-append');
-%                     end
-                    
-                    
+
+                    %                     try
+                    %                         freezefig=figure;
+                    %                         plot(im_diff(:,1),(im_diff(:,2)))
+                    %                         [~,th_immob] = ginput(1);
+                    %                         % Do some extra code-specific calculations
+                    %                         FreezeEpoch=thresholdIntervals(Imdifftsd,th_immob,'Direction','Below');
+                    %                         FreezeEpoch=mergeCloseIntervals(FreezeEpoch,0.3*1E4);
+                    %                         FreezeEpoch=dropShortIntervals(FreezeEpoch,2*1E4);
+                    %                         save('behavResources_Offline.mat','FreezeEpoch','-append');
+                    %                     end
+
+
+                    % >>> ADD BEHAVIOR ANALYSIS AND SAVE <<< EC 09/05/25
+                    try
+                        FreezeEpoch = thresholdIntervals(Imdifftsd, th_immob, 'Direction', 'Below');
+                        FreezeEpoch = mergeCloseIntervals(FreezeEpoch, 0.3*1E4);
+                        FreezeEpoch = dropShortIntervals(FreezeEpoch, thtps_immob*1E4);
+                        Freeze = sum(End(FreezeEpoch) - Start(FreezeEpoch));
+                    catch
+                        Freeze = NaN;
+                        Freeze2 = NaN;
+                    end
+
+                    Xtemp = Data(Xtsd);
+                    T1 = Range(Xtsd);
+
+                    % Load needed variables from behavResources.mat
+                    if exist('behavResources.mat', 'file')
+                        temp = load('behavResources.mat', 'Zone', 'ZoneLabels', 'th_immob');
+                        if isfield(temp, 'Zone'), Zone = temp.Zone; else, warning('Zone not found.'); Zone = {}; end
+                        if isfield(temp, 'ZoneLabels'), ZoneLabels = temp.ZoneLabels; else, warning('ZoneLabels not found.'); ZoneLabels = {}; end
+                        if isfield(temp, 'th_immob'), th_immob = temp.th_immob; else, warning('th_immob not found.'); th_immob = NaN; end
+                    else
+                        warning('behavResources.mat not found.');
+                        Zone = {};
+                        ZoneLabels = {};
+                        th_immob = NaN;
+                    end
+
+                    XXX = floor(Data(Xtsd)*Ratio_IMAonREAL);
+                    XXX(isnan(XXX)) = 240;
+                    YYY = floor(Data(Ytsd)*Ratio_IMAonREAL);
+                    YYY(isnan(YYY)) = 320;
+                    for t = 1:length(Zone)
+                        try
+                            ZoneIndices{t}=find(diag(Zone{t}(XXX,YYY)));
+                            Xtemp2=Xtemp*0;
+                            Xtemp2(ZoneIndices{t})=1;
+                            ZoneEpoch{t}=thresholdIntervals(tsd(T1,Xtemp2),0.5,'Direction','Above');
+                            Occup(t)=size(ZoneIndices{t},1)./size(XXX,1);
+                            FreezeTime(t)=length(Data(Restrict(Xtsd,and(FreezeEpoch,ZoneEpoch{t}))))./length(Data((Restrict(Xtsd,ZoneEpoch{t}))));
+                        catch
+                            ZoneIndices{t}=[];
+                            ZoneEpoch{t}=intervalSet(0,0);
+                            Occup(t)=0;
+                            FreezeTime(t)=0;
+                        end
+                    end
+
+                    clear t T1 Xtemp Xtemp2 XXX YYY
+
+                    save('behavResources_Offline.mat', ...
+                        'FreezeEpoch','th_immob','thtps_immob', ...
+                        'Zone','ZoneEpoch','ZoneIndices','FreezeTime','Occup','DoorChangeMat', ...
+                        'delStim','delStimreturn','MouseTemp','ZoneLabels','-append');
+
+                    % >>><<<
+
                     close(review);
-                    
-                    
+
+
                     im_diff=[]; % Julie 22.12.2014
                     batchlist{4,b}='OK';
-                    
+
                 end
             catch
                 keyboard

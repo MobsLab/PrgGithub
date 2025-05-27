@@ -146,3 +146,40 @@ axis square
 % end
 
 
+
+
+%% To get the plot with log sclae
+figure
+plot((DurHighBreathFz{2}), (DurLowBreathFz{2}),'r.')
+hold on
+plot((DurHighBreathFz{1}), (DurLowBreathFz{1}),'k.')
+makepretty
+set(gca,'YScale','log')
+set(gca,'XScale','log')
+yl = ylim;
+xl = xlim;
+xlabel('Dur fast breath immobility')
+ylabel('Dur slow breath immobility')
+legend off
+[R,p] = corr(log(DurHighBreathFz{1})', log(DurLowBreathFz{1})','type','Spearman');
+title(['R= ' num2str(R) '  P= ' num2str(p)])
+
+
+
+
+figure
+[R,P] = PlotCorrelations_BM(log(DurHighBreathFz{1}+1e-5),log(DurLowBreathFz{1}+1e-5), 'conf_bound',1);
+% plot(DurHighBreathFz{1},DurLowBreathFz{1},'.')
+hold on
+plot(log(DurHighBreathFz{2}), log(DurLowBreathFz{2}),'r.')
+makepretty
+StressScore = GetStressScore_Sal_DZP_Rip;
+axis square
+xlabel('Dur fast breath immobility')
+ylabel('Dur slow breath immobility')
+legend off
+[R,p] = corr(log(DurHighBreathFz{1})', log(DurLowBreathFz{1})','type','Spearman');
+title(['R= ' num2str(R) '  P= ' num2str(p)])
+ylim(log(yl))
+xlim(log(xl))
+

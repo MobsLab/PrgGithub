@@ -69,8 +69,8 @@ plot_r2_comparison(results_ln_loaded, model_1='BF', model_2='HR', r2_type = 'tra
 plot_r2_comparison(results_ln_loaded, model_1='motion', model_2='BFmotion', r2_type='test')
 
 
-save_plot_as_svg(figures_directory, 'r2_train_bp', r2_train_bp)
-save_plot_as_svg(figures_directory, 'r2_test_bp', r2_test_bp)
+# save_plot_as_svg(figures_directory, 'r2_train_bp', r2_train_bp)
+# save_plot_as_svg(figures_directory, 'r2_test_bp', r2_test_bp)
 
 
 # %% Sort neurons according to firing rate

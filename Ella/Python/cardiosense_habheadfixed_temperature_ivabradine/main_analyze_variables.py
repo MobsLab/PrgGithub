@@ -14,7 +14,7 @@ if python_path not in sys.path:
     sys.path.append(python_path)
 
 from all_paths_for_experiments.path_for_expe_cardiosense_habheadfixed_temperature import get_path_for_expe_cardiosense_habheadfixed_temperature
-from all_paths_for_experiments.path_for_expe_cardiosense_ivabradine import get_path_for_expe_cardiosense_ivabradine
+from all_paths_for_experiments.path_for_expe_cardiosense_ivabradine import get_path_for_expe_cardiosense_ivabradine_determine_dosage
 
 from load_plot_matlab_data.load_matlab_variables import load_data_into_datasets
 from load_plot_matlab_data.format_matlab_variables import build_datasets
@@ -30,11 +30,11 @@ entries = [
     ("HabHeadFixed_Test_Temperature", "Test_HeatingPad", get_path_for_expe_cardiosense_habheadfixed_temperature, '#EF9651'),
     ("HeadFixed_Temperature_Basal", "Temp_Basal", get_path_for_expe_cardiosense_habheadfixed_temperature, '#D2665A'),
     ("HeadFixed_Temperature_HeatingLamp", "Temp_Heating", get_path_for_expe_cardiosense_habheadfixed_temperature, '#B82132'),
-    ("Basal_Pre_Injection", "Basal_Pre_Injection", get_path_for_expe_cardiosense_ivabradine, '#E5D0AC'),
-    ("Injection_Saline", "Saline", get_path_for_expe_cardiosense_ivabradine, '#C1D8C3'),
-    ("Injection_Ivabradine_5mgkg", "Ivab5", get_path_for_expe_cardiosense_ivabradine, '#6A9C89'),
-    ("Injection_Ivabradine_10mgkg", "Ivab10", get_path_for_expe_cardiosense_ivabradine, '#3D8D7A'),
-    ("Injection_Ivabradine_20mgkg", "Ivab20", get_path_for_expe_cardiosense_ivabradine, '#255F38'),
+    ("Basal_Pre_Injection", "Basal_Pre_Injection", get_path_for_expe_cardiosense_ivabradine_determine_dosage, '#E5D0AC'),
+    ("Injection_Saline", "Saline", get_path_for_expe_cardiosense_ivabradine_determine_dosage, '#C1D8C3'),
+    ("Injection_Ivabradine_5mgkg", "Ivab5", get_path_for_expe_cardiosense_ivabradine_determine_dosage, '#6A9C89'),
+    ("Injection_Ivabradine_10mgkg", "Ivab10", get_path_for_expe_cardiosense_ivabradine_determine_dosage, '#3D8D7A'),
+    ("Injection_Ivabradine_20mgkg", "Ivab20", get_path_for_expe_cardiosense_ivabradine_determine_dosage, '#255F38'),
 ]
 
 datasets = build_datasets(entries)

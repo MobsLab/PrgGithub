@@ -44,10 +44,15 @@ DirSocialDefeat_totSleepPost_dreadd_cno = PathForExperiments_SD_MC('SleepPostSD_
 tempbin = 3600; %bin size to plot variables overtime
 
 time_st = 0*3600*1e4; %begining of the sleep session
-time_end=3*1e8;  %end of the sleep session
+ time_end=3*1e8;  %end of the sleep session
+
 
 time_mid_end_first_period = 1.5*3600*1e4; %1.5         %2 first hours (insomnia)
 time_mid_begin_snd_period = 3.3*3600*1e4;%3.3           4 last hours(late pahse of the night)
+ 
+%% Suggested correction SB to follow late period
+% time_mid_begin_snd_period = 5*3600*1e4;%3.3           4 last hours(late pahse of the night)
+%  time_end=7.5*3600*1e4;  %end of the sleep session
 
 lim_short_rem_1 = 25; %25 take all rem bouts shorter than limit
 lim_short_rem_2 = 15;
