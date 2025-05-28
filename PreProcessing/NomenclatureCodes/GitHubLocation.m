@@ -30,11 +30,6 @@ switch strtrim(evalc('system(''hostname'');'))
         p = fullfile('/home/pinky/Documents',varargin{:});
     case 'mouse'
         p = fullfile('/home/mickey/Documents/Theotime', varargin{:});
-        <<<<<<< HEAD
-    case 'ratatouille'
-        p = fullfile('/home/ratatouille/', varargin{:});
-        ||||||| parent of 3c0489db (update: new paths, new functions for session handling and session plotting (especially around stims))
-        =======
     case 'ratatouille'
         p = fullfile('/home/ratatouille/', varargin{:});
     case 'pinky-VirtualBox'
