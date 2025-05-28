@@ -5,6 +5,15 @@ edit RetrackAndLinearizeAllSessions
 edit Correct_BadBehavResources_BM.m
 edit OfflineTrackingFinal_CompNewTracking
 
+% If ZoneEpochs need to be recomputed
+for t = 1:3
+    Xtemp2=Range(Xtsd)*0;
+    Xtemp2(ZoneIndices{t})=1;
+    ZoneEpoch{t}=thresholdIntervals(tsd(Range(Xtsd),Xtemp2),0.5,'Direction','Above');
+
+end
+save('behavResources.mat','ZoneEpoch','-append')
+
 %% Align maze across sessions and/or mice
 
 % Code below extracted from these codes
