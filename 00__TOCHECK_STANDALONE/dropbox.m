@@ -74,9 +74,9 @@ switch strtrim(evalc('system(''hostname'');'))
     case 'pinky'
         p = fullfile('/home/pinky/Dropbox',varargin{:});
     case 'mouse'
-        p = fullfile('/home/mickey/Dropbox/Mobs_member/Theotime De Charrin/Figures',varargin{:});
+        p = fullfile('/home/mickey/Dropbox/Mobs_member/Theotime_De_Charrin/Figures',varargin{:});
     case 'theodechrn'
-        p = fullfile('/home/theodechrn/Dropbox/Mobs_member/Theotime De Charrin/Figures',varargin{:});
+        p = fullfile('/home/theodechrn/Dropbox/Mobs_member/Theotime_De_Charrin/Figures',varargin{:});
         %##%
         % End hostname cases
     otherwise
