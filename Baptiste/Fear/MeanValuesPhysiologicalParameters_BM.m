@@ -53,6 +53,7 @@ function [OutPutData , Epoch , NameEpoch , OutPutTSD] = MeanValuesPhysiologicalP
 % - pfc_delta_power
 % - ob_gamma_power
 % - ob_gamma_freq
+% - hpc_theta_delta
 
 % Calculated on the following epoch:
 % - For FEAR experiments :
@@ -918,10 +919,9 @@ for i = 1:length(varargin)
                             
                             OutPutData.(varargin{1, i}).max_freq(mouse,states) = RANGE(OutPutData.(varargin{1, i}).max_freq(mouse,states) + noise_thr-1);
                             OutPutData.(varargin{1, i}).mean(mouse,states,:) = nanmean(Data(Restrict(OutPutVar.(Mouse_names{mouse}) , Epoch{mouse,states})));
-                                 OutPutData.(varargin{1, i}).spectrogram{mouse,states} = Restrict(OutPutVar.(Mouse_names{mouse}) , Epoch{mouse,states});
                             % subsample spectro for lighter
                             R = Range(OutPutVar.(Mouse_names{mouse})); D = Data(OutPutVar.(Mouse_names{mouse}));
-                            OutPutData.(varargin{1, i}).spectrogram{mouse,states} = Restrict(tsd(R(1:10:end) , D(1:100:end,:)) , Epoch{mouse,states});
+%                             OutPutData.(varargin{1, i}).spectrogram{mouse,states} = Restrict(tsd(R(1:100:end) , D(1:100:end,:)) , Epoch{mouse,states});
                             
                             
                         catch

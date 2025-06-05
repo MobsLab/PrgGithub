@@ -99,7 +99,6 @@ if strcmp(select,'id')
 end
 
 
-
 nIntervals = size(intervals,1);
 lfp = [];
 indices = [];

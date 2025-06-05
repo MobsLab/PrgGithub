@@ -37,11 +37,24 @@ end
 
 session_dlc = session_dlc';
 
-% Remove shady sessions         
-remove = {'/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241120_yves_train',...
+% Remove shady sessions
+remove = {'/media/nas7/React_Passive_AG/OBG/Labneh/head-fixed/20230308', ...
+    '/media/nas7/React_Passive_AG/OBG/Labneh/head-fixed/20230225', ...
+    '/media/nas7/React_Passive_AG/OBG/Labneh/head-fixed/20230505_1',...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241120_yves_train',...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241123_yves_train', ...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241125_yves_train', ...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241126_yves_train', ...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241128_yves_train', ...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241129_yves_test' , ...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241130_yves_test' , ...
     '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241203_yves_test',...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241204_TORCs', ...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241205_TORCs', ...
     '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241206_TORCs',...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241209_TORCs',...    
     '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241212_TORCs',...
+    '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241214_TORCs', ...
     '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20241228_TORCs_saline',...   % Almost closed eyes
     '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20250102_TORCs_atropine',... % unreliable tracking
     '/media/nas8/OB_ferret_AG_BM/Shropshire/head-fixed/20250103_TORCs_saline',... % unreliable tracking
@@ -61,7 +74,7 @@ session_dlc = session_dlc(keepIdx);
 
 %% Synchronize LFP and DLC
 % Produces synced timeline in DLC_data.mat
-for sess = 6:length(session_dlc)
+for sess = 1:length(session_dlc)
     % cd(session_dlc{1})
     disp(['Running session: ' session_dlc{sess}])
     disp('Syncing DLC and Ephys...')
@@ -77,14 +90,14 @@ end
 
 %% Correlate brain signals with pupil size
 for sess = sess_ts % 1:length(session_dlc)
-    cd(session_dlc{sess})
+%     cd(session_dlc{sess})
     disp('Running pupil-brain correlation analysis...')
     gamma_pupil_corr(session_dlc{sess})
 end
 
 %% Full dataset analysis
 % Initialize
-smootime = 3;
+smootime = 300;
 allCorrelations = NaN(6, numel(session_dlc), 8);
 allPValues = NaN(6, numel(session_dlc), 8);
 % allPupilSizes = NaN(numel(session_dlc), 8);
@@ -98,6 +111,123 @@ colours = { {[0 0 0], [1 0.5 0]}; ...         % Full Session
             {[0.5 0 0.5], [0.2 0.6 0.5]}; ...      % Wake-NREM
             {[0.50 0.35 0.88], [0.2 0.6 0.5]} };   % Wake-NREM1
 
+%% Pupil sizes distributions
+for sess = 1:numel(session_dlc)
+    datapath = session_dlc{sess};
+    [~, sess_name, ~] = fileparts(datapath);
+    disp(['Processing: ' sess_name])
+    
+    % Pull out pupil sizes and zscore
+    load(fullfile(datapath, 'DLC', 'DLC_data.mat'), 'areas_pupil')
+%     D1 = Data(areas_pupil);
+    D1 = zscore(Data(areas_pupil));
+    D1(movstd(zscore(Data(areas_pupil)),10)>.5) = NaN;
+    D1 = movmean(D1,ceil(smootime/median(diff(Range(areas_pupil,'s')))),'omitnan');
+    TSD1 = tsd(Range(areas_pupil) , D1);
+
+        % Pull out states
+    clear Epoch Sleep Wake REMEpoch SWSEpoch Epoch_S1 Epoch_S2
+    load(fullfile(datapath, 'SleepScoring_OBGamma.mat'), ...
+        'Epoch', 'Sleep', 'Wake', 'REMEpoch', 'SWSEpoch', 'Epoch_S1', 'Epoch_S2');
+    
+    % Define NREM epochs (here defined as combinations of Sleep and sub-epochs)
+    NREM_S1 = and(Sleep, Epoch_S2) - REMEpoch;
+    NREM_S2 = and(Sleep, Epoch_S1) - REMEpoch;
+    
+    Epochs = {Epoch, Wake, Sleep, SWSEpoch, NREM_S1, NREM_S2, REMEpoch, or(Wake, SWSEpoch), or(Wake, NREM_S1)};
+    Epoch_names = {'Full Session', 'Wake', 'Sleep', 'NREM', 'NREM1', 'NREM2', 'REM', 'Wake-NREM', 'Wake-NREM1'};
+    
+    % Populate the matrices with correlation and p-value data for this session
+    for epoch = 1:length(Epochs)
+        allPupilSizes(sess, epoch) = Restrict(TSD1, Epochs{epoch});
+    end
+end
+
+%%
+nSessions = size(session_dlc,1);
+% nEpochs = size(Epoch_names(selected),2);
+
+X = [1 2 3];
+selected = [2 4 7]; 
+Cols = {[0 0 1], [0.55 0 0], [0 1 0]};
+Legends = {'Wake','NREM','REM'};
+
+figure
+clf
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({Data(allPupilSizes(:, 2)) Data(allPupilSizes(:, 4)) Data(allPupilSizes(:, 7))},Cols,X,Legends,'showpoints',0,'paired',0)
+
+subplot(122)
+% ——————— Extract your three epochs ———————
+wake = Data(allPupilSizes(:,2));   % epoch 2 = Wake
+nrem = Data(allPupilSizes(:,4));   % epoch 4 = NREM
+rem  = Data(allPupilSizes(:,7));   % epoch 7 = REM
+
+% ——————— Compute common bins ———————
+allData = [wake; nrem; rem];
+nbins   = 200;  % adjust as needed
+edges   = linspace(min(allData), max(allData), nbins+1);
+centers = edges(1:end-1) + diff(edges)/2;
+
+% ——————— Bin each series ———————
+cw = histcounts(wake, edges);
+cn = histcounts(nrem, edges);
+cr = histcounts(rem,  edges);
+
+cw = (cw - min(cw)) / (max(cw) - min(cw));
+cn = (cn - min(cn)) / (max(cn) - min(cn));
+cr  = (cr  - min(cr )) / (max(cr ) - min(cr ));
+
+
+% ——————— Plot histogram-areas ———————
+hold on
+area(centers, cw, 'FaceColor',Cols{1}, 'FaceAlpha',0.4, 'EdgeColor','none');
+area(centers, cn, 'FaceColor',Cols{2}, 'FaceAlpha',0.4, 'EdgeColor','none');
+area(centers, cr, 'FaceColor',Cols{3}, 'FaceAlpha',0.4, 'EdgeColor','none');
+hold off
+
+% ——————— Beautify ———————
+xlim([centers(1) centers(end)]);
+camroll(270)
+xlabel('Z-scored pupil size');
+ylabel('Count');
+legend({'Wake','NREM','REM'}, 'Location','NorthWest');
+set(gca,'Box','off','TickDir','out');
+set(gca,'YDir','reverse')
+
+[Y,X] = hist(log10(wake),1000);
+a = area(X , runmean(Y,3)); a.FaceColor=[.8 .8 .8]; a.LineWidth=3; a.EdgeColor=[0 0 0];
+xlabel('OB 0.1-1 power (a.u.)'), xlim([1.4 2.8])
+set(gca,'XDir','reverse'), camroll(270), box off
+v2=vline(2.13,'-r'); v2.LineWidth=5;
+
+%
+for sess = 1:size(allPValues, 2)
+    for epoch = 1:size(allPValues, 3)
+        D{sess, epoch} = Data(allPupilSizes(sess, epoch));
+        data_mean_pupil(sess, epoch) = nanmean(D{sess, epoch}, 1);
+        h{epoch}=histogram(D{sess, epoch},'NumBins',200);
+        HistData(sess,epoch,:) = h{epoch}.Values./sum(h{epoch}.Values);
+    end
+end
+
+figure
+cols = {'-b', '-r', '-g'};
+    i = 1;
+
+for epoch = [2 4 7]
+    hold on
+    Data_to_use = squeeze(HistData(:, epoch, :));
+    Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+    shadedErrorBar(linspace(-2,4,200), runmean(nanmean(Data_to_use),3) , runmean(Conf_Inter,3) ,cols{i},1); hold on;
+    % ylim([0 .045])
+    xlabel('Pupil size (zscore)'), ylabel('PDF')
+    makepretty
+    i = i + 1;
+end
+
+
+%% Brain-pupil correlations
 for sess = 1:numel(session_dlc)
     datapath = session_dlc{sess};
     [~, sess_name, ~] = fileparts(datapath);

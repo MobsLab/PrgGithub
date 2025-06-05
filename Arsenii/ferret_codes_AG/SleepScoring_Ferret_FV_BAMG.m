@@ -316,25 +316,25 @@ disp(' ')
 if doob
     disp(' ')
     disp('------------------------------------------------------------')
-    disp(' STEP 6: DEFINING S1 and S2 using 0.1-0.5 Hz rhythm')
+    disp(' STEP 6: DEFINING S1 and S2 using 0.5-4 Hz rhythm')
     disp('------------------------------------------------------------')
     disp(' ')
-    disp('0.1-0.5 Hz Epochs')
+    disp('0.5-4 Hz Epochs')
     
     % changed by BM on 02/03/2025 SleepOB--> SleepOB-ThetaEpoch_OB, focus only on NREM to subdivise it
-    [Epoch_01_05, smooth_01_05, Info_temp] = Find_01_05_Epoch(SleepOB-ThetaEpoch_OB, Epoch, channel_bulb, minduration,...
+    [Epoch_Delta, smooth_delta, Info_temp] = Find_Delta_Epoch(SleepOB-ThetaEpoch_OB, Epoch, channel_bulb, minduration,...
         'foldername', foldername, 'smoothwindow', smootime, 'continuity', continuity); 
     
     Info_OB=ConCatStruct(Info_OB,Info_temp); clear Info_temp;
     clear Info_temp;
     
     disp(' ')
-    disp('0.1-0.5 Hz: DONE')
+    disp('0.5-4 Hz: DONE')
     disp(' ')
 else
     disp(' ')
     disp('------------------------------------------------------------')
-    disp(' STEP 6 SKIPPED: NO 0.1-0.5 Hz')
+    disp(' STEP 6 SKIPPED: NO 0.5-4 Hz')
     disp('------------------------------------------------------------')
     disp(' ')    
 end
@@ -352,16 +352,25 @@ if doob
     SleepWiNoise = or(REMEpochWiNoise,SWSEpochWiNoise);
     Sleep = or(REMEpoch,SWSEpoch);
     
-    [Epoch_S1, Epoch_S2] = ...
-        Score_01_05_Epochs_SleepScoring(SleepOB, Epoch_01_05, minduration, Info_OB);
+    
+    % for IS and NREM, need to be corrected to ensure continuity
+    disp('          ...defining NREM (high delta power)')
+    NREM = and(SWSEpoch,Epoch_delta);
+    NREM = mergeCloseIntervals(NREM,minduration*1e4);
+    NREM = dropShortIntervals(NREM,minduration*1e4);
+    
+    disp('          ...defining S2 (low 0.1-0.5Hz power)')
+    IS = SWSEpoch-NREM;
+    
+    
     
     Info=Info_OB;
     ThetaEpoch = ThetaEpoch_OB;
     disp('           >>>  Saving OBgamma stages  <<<')
     disp(' ')
-    save('SleepScoring_OBGamma','Epoch_S1', 'Epoch_S2', 'Epoch_01_05', 'REMEpoch','SWSEpoch','Wake','REMEpochWiNoise', ...
+    save('SleepScoring_OBGamma','NREM', 'IS', 'Epoch_Delta', 'REMEpoch','SWSEpoch','Wake','REMEpochWiNoise', ...
         'SWSEpochWiNoise', 'WakeWiNoise','Sleep','SleepWiNoise', ...
-        'SmoothGamma','ThetaEpoch','SmoothTheta', 'smooth_01_05', 'Info',...
+        'SmoothGamma','ThetaEpoch','SmoothTheta', 'smooth_delta', 'Info',...
         'Epoch','SubNoiseEpoch','TotalNoiseEpoch', ...
         'microWakeEpochOB','microSleepEpochOB','-append');
     clear ThetaEpoch Info Sleep;
@@ -378,10 +387,10 @@ if is_accelero
     ThetaEpoch = ThetaEpoch_acc;
     disp('           >>>  Saving Accelero stages  <<<')
     disp(' ')
-    save('SleepScoring_Accelero','Epoch_01_05','REMEpoch','SWSEpoch','Wake','REMEpochWiNoise', ...
+    save('SleepScoring_Accelero','Epoch_Delta','REMEpoch','SWSEpoch','Wake','REMEpochWiNoise', ...
         'SWSEpochWiNoise', 'WakeWiNoise','Sleep','SleepWiNoise', ...
         'ImmobilityEpoch','tsdMovement', 'MovementEpoch', ...
-        'ThetaEpoch','SmoothTheta','smooth_01_05', 'ThetaRatioTSD','Info',...
+        'ThetaEpoch','SmoothTheta','smooth_delta', 'ThetaRatioTSD','Info',...
         'Epoch','SubNoiseEpoch','TotalNoiseEpoch', ...
         'microWakeEpochAcc','microSleepEpochAcc','-append');
     clear ThetaEpoch Info Sleep;
@@ -447,7 +456,7 @@ if PlotFigure==1
         end
     else
         Figure_SleepScoring_OBGamma(foldername)
-        Figure_SleepScoring_OBGamma_01_05(foldername)
+        Figure_SleepScoring_OBGamma_Delta(foldername)
     end
     
     %Accelerometer

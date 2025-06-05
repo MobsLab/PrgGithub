@@ -231,6 +231,43 @@ plot(X_ax(corrected_p<.05) , 3.8 , '*' , 'Color' , [.5 .5 1] , 'MarkerSize' , 15
 
 
 %% others
+
+
+HR_Active_Shock{1}(1,11) = NaN;
+
+
+figure
+subplot(121)
+Data_to_use = movmean(HR_Active_Shock{1}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+color= [1 .5 .5]; h.mainLine.Color=color; h.patch.FaceColor=color;
+Data_to_use = movmean(HR_Active_Safe{1}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; 
+xlim([0 100]), ylim([11.8 13.2]), xlabel('time (min)'), ylabel('Heart rate active (Hz)')
+makepretty
+
+
+subplot(122)
+Data_to_use = movmean(HR_Active_Shock{2}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+color= [1 .5 .5]; h.mainLine.Color=color; h.patch.FaceColor=color;
+Data_to_use = movmean(HR_Active_Safe{2}',3,'omitnan')';
+Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
+Mean_All_Sp=nanmean(Data_to_use);
+h=shadedErrorBar([bin_size:bin_size:bin_tot*bin_size] , Mean_All_Sp , Conf_Inter ,'-k',1); hold on;
+color= [.5 .5 1]; h.mainLine.Color=color; h.patch.FaceColor=color; 
+xlim([0 100]), ylim([11.8 13.2]), xlabel('time (min)'), ylabel('Heart rate active (Hz)')
+makepretty
+
+
+
 figure
 Data_to_use = movmean(Rip_Safe{1}',3,'omitnan')';
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));

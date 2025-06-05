@@ -1,67 +1,89 @@
 
-clear all
 
-Dir1 = PathForExperimentsOB({'Shropshire'}, 'freely-moving','saline');
-Dir2 = PathForExperimentsOB({'Shropshire'}, 'freely-moving','none');
-Dir = MergePathForExperiment(Dir1,Dir2);
 
-pwd = Dir.path{5};
+pwd = '/media/nas7/React_Passive_AG/OBG/Brynza/freely-moving/20240202_saline/';
 
-Frequency_HPC = {[.2 2.8],[2.8 6]};
-Frequency_OB = {[.5 4]};
-
-%% raw signals Sleep
-load([pwd filesep 'ChannelsToAnalyse/Bulb_deep.mat'])
-load([pwd filesep 'LFPData/LFP' num2str(channel) '.mat'])
-OB_gamma = FilterLFP(LFP,[20 100],1024);
-OB_delta = FilterLFP(LFP,[.1 5],1024);
-OB_delta2 = FilterLFP(LFP,[.5 4],1024);
-
-load([pwd filesep 'ChannelsToAnalyse/ThetaREM.mat'])
-load([pwd filesep 'LFPData/LFP' num2str(channel) '.mat'])
-HPC_theta = FilterLFP(LFP,[1 8],1024);
-
+%% EMG - OB
+for l=[4 11 20 2] % EMG, OB, HPC, AuCx
+    load([pwd 'LFPData/LFP' num2str(l) '.mat'])
+    LFP_ferret{l} = LFP;
+end
+l = 11; LFP_ferret_Fil{l} = FilterLFP(LFP_ferret{l},[20 100],1024);
+l = 4; LFP_ferret_Fil2{l} = FilterLFP(LFP_ferret{l},[50 300],1024);
+l = 2; LFP_ferret_Fil3{l} = FilterLFP(LFP_ferret{l},[.5 10],1024);
+l = 4; LFP_ferret_Fil3{l} = FilterLFP(LFP_ferret{l},[.5 10],1024);
+l = 11; LFP_ferret_Fil4{l} = FilterLFP(LFP_ferret{l},[.1 100],1024);
+l = 20; LFP_ferret_Fil5{l} = FilterLFP(LFP_ferret{l},[.1 100],1024);
 
 figure
 subplot(131)
-plot(Range(OB_gamma,'s') , Data(OB_gamma) , 'k' , 'LineWidth' , .2)
-hold on
-plot(Range(HPC_theta,'s') , Data(HPC_theta)-5e3 , 'k' , 'LineWidth' , .2)
-plot(Range(OB_delta,'s') , Data(OB_delta)-10e3 , 'k' , 'LineWidth' , .2)
-xlim([3127 3127+10]), ylim([-1.3e4 4e3]), axis off
-text(3127,0,'OB','FontSize',15)
-text(3127,-5e3,'HPC','FontSize',15)
-text(3127,-1e4,'OB','FontSize',15)
-line([3128 3130],[-1.3e4 -1.3e4],'LineStyle','-','Color','k','LineWidth',5)
-text(3128.5,-1.1e4,'2s','FontSize',15)
-text(3127+4,4e3,'REM','FontSize',20)
+i=0;
+plot(Range(LFP_ferret_Fil2{4},'s') , Data(LFP_ferret_Fil2{4})-i*4.5e3 , 'k'), hold on
+i=i+1;
+plot(Range(LFP_ferret_Fil5{20},'s') , Data(LFP_ferret_Fil5{20})*2-i*4.5e3 , 'k'), hold on
+i=i+1;
+plot(Range(LFP_ferret_Fil4{11},'s') , (Data(LFP_ferret_Fil4{11}))-i*4.5e3 , 'k'), hold on
+i=i+1;
+plot(Range(LFP_ferret_Fil{11},'s') , Data(LFP_ferret_Fil{11})-i*4.5e3 , 'k')
+xlim([12586 12590]), ylim([-16e3 4e3]), axis off % xlim([12840 12844])
+text(12585,0,'EMG','FontSize',15)
+text(12585,-4200,'HPC','FontSize',15)
+text(12585,-9000,'OB','FontSize',15)
+text(12585,-13000,'OB gamma','FontSize',15)
 
 subplot(132)
-plot(Range(OB_gamma,'s') , Data(OB_gamma) , 'k' , 'LineWidth' , .2)
-hold on
-plot(Range(HPC_theta,'s') , Data(HPC_theta)-5e3 , 'k' , 'LineWidth' , .2)
-plot(Range(OB_delta,'s') , Data(OB_delta)-10e3 , 'k' , 'LineWidth' , .2)
-xlim([3329 3329+10]), ylim([-1.3e4 4e3]), axis off
-text(3329+4,4e3,'IS','FontSize',20)
+i=0;
+plot(Range(LFP_ferret_Fil2{4},'s') , Data(LFP_ferret_Fil2{4})-i*4.5e3 , 'k'), hold on
+i=i+1;
+plot(Range(LFP_ferret_Fil5{20},'s') , Data(LFP_ferret_Fil5{20})*2-i*4.5e3 , 'k'), hold on
+i=i+1;
+plot(Range(LFP_ferret_Fil4{11},'s') , (Data(LFP_ferret_Fil4{11}))-i*4.5e3 , 'k'), hold on
+i=i+1;
+plot(Range(LFP_ferret_Fil{11},'s') , Data(LFP_ferret_Fil{11})-i*4.5e3 , 'k')
+xlim([9621 9625]), ylim([-16e3 4e3]), axis off 
 
 subplot(133)
-plot(Range(OB_gamma,'s') , Data(OB_gamma) , 'k' , 'LineWidth' , .2)
+i=0;
+plot(Range(LFP_ferret_Fil2{4},'s') , Data(LFP_ferret_Fil2{4})-i*4.5e3 , 'k'), hold on
+i=i+1;
+plot(Range(LFP_ferret_Fil5{20},'s') , Data(LFP_ferret_Fil5{20})*2-i*4.5e3 , 'k'), hold on
+i=i+1;
+plot(Range(LFP_ferret_Fil4{11},'s') , (Data(LFP_ferret_Fil4{11}))-i*4.5e3 , 'k'), hold on
+i=i+1;
+plot(Range(LFP_ferret_Fil{11},'s') , Data(LFP_ferret_Fil{11})-i*4.5e3 , 'k')
+xlim([10003 10007]), ylim([-16e3 4e3]), axis off
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% with accelero
+pwd = '/media/nas7/React_Passive_AG/OBG/Brynza/freely-moving/20240202_saline/';
+
+l=11;
+load([pwd 'LFPData/LFP' num2str(l) '.mat'])
+LFP_ferret{l} = LFP;
+LFP_ferret_Fil{l} = FilterLFP(LFP_ferret{l},[20 100],1024);
+
+load([pwd 'behavResources.mat'])
+Smooth_Acc = tsd(Range(MovAcctsd) , movmean(Data(MovAcctsd),10,'omitnan'));
+
+
+figure
+subplot(121)
+bar(Range(Smooth_Acc,'s') , Data(Smooth_Acc)/1e5+200 , 'k' , 'LineWidth',1)
 hold on
-plot(Range(HPC_theta,'s') , Data(HPC_theta)-5e3 , 'k' , 'LineWidth' , .2)
-plot(Range(OB_delta,'s') , Data(OB_delta)-10e3 , 'k' , 'LineWidth' , .2)
-xlim([5474 5474+10]), ylim([-1.3e4 4e3]), axis off
-text(5474+4,4e3,'NREM','FontSize',20)
+plot(Range(LFP_ferret_Fil{11},'s') , Data(LFP_ferret_Fil{11})+5e3 , 'k')
+xlim([191.5 195.5]), axis off
+text(191,1e3,'Motion','FontSize',15)
+text(191,5e3,'OB','FontSize',15)
+text(192.5,8e3,'Wake','FontSize',20)
 
-
-
-%% trash ?
-subplot(131)
-plot(Range(OB_gamma,'s') , Data(OB_gamma) , 'k' , 'LineWidth' , .2)
+subplot(122)
+bar(Range(Smooth_Acc,'s') , Data(Smooth_Acc)/1e5+200 , 'k' , 'LineWidth',1)
 hold on
-plot(Range(HPC_theta,'s') , Data(HPC_theta)-5e3 , 'k' , 'LineWidth' , .2)
-plot(Range(OB_delta,'s') , Data(OB_delta)-10e3 , 'k' , 'LineWidth' , .2)
-xlim([148 148+10]), ylim([-1.3e4 4e3]), %axis off
+plot(Range(LFP_ferret_Fil{11},'s') , Data(LFP_ferret_Fil{11})+5e3 , 'k')
+xlim([6886 6890]), ylim([0 8e3]), axis off
+text(6886+1.5,8e3,'Sleep','FontSize',20)
 
-title('Wake')
 
-subplot(132)

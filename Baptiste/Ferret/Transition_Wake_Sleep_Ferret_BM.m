@@ -1,6 +1,8 @@
 
-
+clear all
 load('/media/nas7/React_Passive_AG/OBG/Data_Paper/TransitionsEMG_OB.mat')
+
+
 
 %%
 clear all
@@ -20,7 +22,7 @@ Dir{3} = MergePathForExperiment(Dir1,Dir2);
 
 minduration = 3;
 smootime = 3;
-win = 5; % window around transition in s
+win = 20; % window around transition in s
 
 %%
 for ferret=1:3
@@ -104,62 +106,62 @@ end
 % EMG-OB
 figure
 subplot(121)
-Data_to_use = MeanData{ferret}{1};
+Data_to_use = MeanData{ferret}{1}; Data_to_use = Data_to_use(:,1:500:end);
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , runmean(Conf_Inter,5e2),'-k',1); hold on;
-color= [.2 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-Data_to_use = MeanData{ferret}{2};
+h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color= [.2 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; 
+Data_to_use = MeanData{ferret}{2}; Data_to_use = Data_to_use(:,1:500:end);
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , runmean(Conf_Inter,5e2),'-k',1); hold on;
-color= [.6 .6 .6]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-f=get(gca,'Children'); legend([f([5 1])],'EMG','OB');
+h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , Conf_Inter,'-k',1); hold on;
+color= [.6 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; 
+f=get(gca,'Children'); legend([f([3 1])],'EMG','OB');
 makepretty
 text(-3,1.2,'Wake','FontSize',15), text(3,1.2,'Sleep','FontSize',15)
-vline(0,'--r'), xlabel('time (s)'), ylabel('Norm. power'), ylim([-1.5 1.3])
+vline(0,'--r'), xlabel('time (s)'), ylabel('Norm. power'), ylim([-1 2])
 
 subplot(122)
-Data_to_use = MeanData{ferret}{4};
+Data_to_use = MeanData{ferret}{4}; Data_to_use = Data_to_use(:,1:500:end);
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , runmean(Conf_Inter,5e2),'-k',1); hold on;
-color= [.2 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-Data_to_use = MeanData{ferret}{5};
+h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , Conf_Inter,'-k',1); hold on;
+color= [.2 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; 
+Data_to_use = MeanData{ferret}{5}; Data_to_use = Data_to_use(:,1:500:end);
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , runmean(Conf_Inter,5e2),'-k',1); hold on;
-color= [.6 .6 .6]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , Conf_Inter,'-k',1); hold on;
+color= [.6 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; 
 makepretty
 text(-3,1.2,'Sleep','FontSize',15), text(3,1.2,'Wake','FontSize',15)
-vline(0,'--r'), xlabel('time (s)'), ylabel('Norm. power'), ylim([-1.5 1.5])
+vline(0,'--r'), xlabel('time (s)'), ylabel('Norm. power'), ylim([-1 2])
 
 
 
 % Acc-OB
 figure
 subplot(121)
-Data_to_use = MeanData{ferret}{3};
+Data_to_use = MeanData{ferret}{3}; Data_to_use = Data_to_use(:,1:50:end);
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , runmean(Conf_Inter,5e2),'-k',1); hold on;
-color= [.2 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-Data_to_use = MeanData{ferret}{2};
+h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , Conf_Inter,'-k',1); hold on;
+color= [.2 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; 
+Data_to_use = MeanData{ferret}{2}; Data_to_use = Data_to_use(:,1:500:end);
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , runmean(Conf_Inter,5e2),'-k',1); hold on;
-color= [.6 .6 .6]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-f=get(gca,'Children'); legend([f([5 1])],'Motion','OB');
+h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color= [.6 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color;
+f=get(gca,'Children'); legend([f([3 1])],'Motion','OB');
 makepretty
 text(-3,1.2,'Wake','FontSize',15), text(3,1.2,'Sleep','FontSize',15)
-vline(0,'--r'), xlabel('time (s)'), ylabel('Norm. power'), ylim([-1.8 1.3])
+xlabel('time (s)'), ylabel('Norm. power'), ylim([-1 2.5]), vline(0,'--r')
 
 subplot(122)
-Data_to_use = MeanData{ferret}{6};
+Data_to_use = MeanData{ferret}{6}; Data_to_use = Data_to_use(:,1:50:end);
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , runmean(Conf_Inter,5e2),'-k',1); hold on;
-color= [.2 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
-Data_to_use = MeanData{ferret}{5};
+h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color= [.2 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; 
+Data_to_use = MeanData{ferret}{5}; Data_to_use = Data_to_use(:,1:500:end);
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
-h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , runmean(Conf_Inter,5e2),'-k',1); hold on;
-color= [.6 .6 .6]; h.mainLine.Color=color; h.patch.FaceColor=color; h.edge(1).Color=color; h.edge(2).Color=color;
+h=shadedErrorBar(linspace(-win,win,length(Data_to_use)) , nanmean(Data_to_use) , Conf_Inter ,'-k',1); hold on;
+color= [.6 .2 .2]; h.mainLine.Color=color; h.patch.FaceColor=color; 
 makepretty
 text(-3,1.2,'Sleep','FontSize',15), text(3,1.2,'Wake','FontSize',15)
-vline(0,'--r'), xlabel('time (s)'), ylabel('Norm. power'), ylim([-1.5 1.5])
+xlabel('time (s)'), ylabel('Norm. power'), ylim([-1 2.5]), vline(0,'--r')
 
 
 

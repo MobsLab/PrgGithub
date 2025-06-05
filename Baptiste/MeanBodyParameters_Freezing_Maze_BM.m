@@ -55,7 +55,8 @@ Session_type={'Cond'};
 Mouse=Drugs_Groups_UMaze_BM(22);
 for sess=1:length(Session_type)
     [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
-        MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ob_low','ob_high','hpc_low','hpc_vhigh');
+        MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'hpc_vhigh');
+%         MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ob_low','ob_high','hpc_low','hpc_vhigh');
 end
 
 
