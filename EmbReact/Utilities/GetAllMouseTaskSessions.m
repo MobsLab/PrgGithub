@@ -33,7 +33,7 @@ elseif MouseOnDrugs ==1
 end
 a=1;
 for ss=1:length(SessNames)
-    disp(SessNames{ss})
+%     disp(SessNames{ss})
     Dir=PathForExperimentsEmbReact(SessNames{ss});
     for d=1:length(Dir.path)
         for dd=1:length(Dir.path{d})

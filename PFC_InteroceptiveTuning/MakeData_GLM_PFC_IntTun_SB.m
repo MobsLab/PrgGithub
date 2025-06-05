@@ -54,7 +54,6 @@ for sess=1:length(SessionNames)
                 accelero = Restrict(accelero,ts(Range(OBSpec_concat)));
                 VarToSave.Accelero = Data(accelero);
                 
-                
                 % Heart rate
                 if ismember(MiceNumber(mm),MiceNumber_EKG)
                     heartrate=ConcatenateDataFromFolders_SB(FolderList,'heartrate');

@@ -21,12 +21,12 @@ for c = 1:length(ch)
             end
         end
         if strcmp('-', get(thisChild, 'LineStyle'))
-            set(thisChild, 'LineWidth', 1);
+            set(thisChild, 'LineWidth', 2);
         end
     elseif strcmp('stair', get(thisChild, 'Type'))
-                    set(thisChild, 'LineWidth', 1);
+                    set(thisChild, 'LineWidth', 2);
     elseif strcmp('errorbar', get(thisChild, 'Type'))
-                    set(thisChild, 'LineWidth', 1);
+                    set(thisChild, 'LineWidth',2);
 
     end
 end

@@ -27,7 +27,7 @@ for grp = 1:2
         % load SeepScoring
         load('SleepScoring_Accelero.mat','REMEpoch','Wake','SWSEpoch')
         % Restrict to the same duration for everyone
-        Epoch = intervalSet(0*3600*1e4,7.5*3600*1e4);
+        Epoch = intervalSet(3.5*3600*1e4,7*3600*1e4);
         Wake = and(Wake,Epoch);
         REMEpoch = and(REMEpoch,Epoch);
         SWSEpoch = and(SWSEpoch,Epoch);
@@ -100,7 +100,7 @@ cd /home/pinky/Documents/Figure_PapierMathilde/Spectres
 Regions = fieldnames(MeanSpec);
 Epochs = fieldnames(MeanSpec.PFC);
 for ep = 1:length(Epochs)
-    fig = figure;
+    fig = figure('name',Epochs{ep});
     for reg = 1:length(Regions)
         for IndivMice = 0:1
             subplot(2,3,reg+3*IndivMice)
@@ -114,7 +114,7 @@ for ep = 1:length(Epochs)
                 shadedErrorBar(f{reg},nanmean(log(dat)),(stdError(log(dat))),'k')
             end
             hold on
-            MnDel{reg}{1} = max(dat(:,1:find(f{reg}>3,1,'first'))');
+            MnDel{reg}{1} = max(dat(:,find(f{reg}>1,1,'first'):find(f{reg}>4,1,'first'))');
             MnThet{reg}{1} = max(dat(:,find(f{reg}>5,1,'first'):find(f{reg}>10,1,'first'))');
             
             % SDS
@@ -130,7 +130,7 @@ for ep = 1:length(Epochs)
             else
                 shadedErrorBar(f{reg},nanmean(log(dat)),(stdError(log(dat))),'r')
             end
-            MnDel{reg}{2} = max(dat(:,1:find(f{reg}>3,1,'first'))');
+            MnDel{reg}{2} = max(dat(:,find(f{reg}>1,1,'first'):find(f{reg}>4,1,'first'))');
             MnThet{reg}{2} = max(dat(:,find(f{reg}>5,1,'first'):find(f{reg}>10,1,'first'))');
             
             title(Regions{reg})
@@ -142,7 +142,7 @@ for ep = 1:length(Epochs)
     end
     %         saveas(fig.Number,['Spectra',Epochs{ep},'.fig'])
     
-    fig = figure;
+    fig = figure('name',Epochs{ep});
     for reg = 1:length(Regions)
         subplot(2,3,reg)
         MakeSpreadAndBoxPlot2_SB(MnDel{reg},{},[1:2],{'Ctrl','SDS'},'paired',0)
