@@ -86,7 +86,7 @@ for group = 1:2
             end
             HR{group}(i) = nanmean(MnHR_CTRL_BySpeed);
             HRVar{group}(i) = nanmean(HRVar_CTRL_BySpeed);
-            
+
         else
             HR{group}(i) = NaN;
             HRVar{group}(i) = NaN;

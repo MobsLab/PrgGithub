@@ -1,6 +1,85 @@
 
 
-%% oscillations
+clear all
+load('ExpeInfo.mat')
+BaseFileName = ['M' num2str(ExpeInfo.nmouse) '_' ExpeInfo.date '_' ExpeInfo.SessionType];
+FinalFolder = cd;
+is_OpenEphys = false;
+system(['ndm_lfp ' BaseFileName])
+
+% copy .xml .nrs LFPDattttta with InfoLFP ChannelsToAnalyse ExpeInfo.mat
+
+SetCurrentSession([BaseFileName '.xml'])
+SessLength = MakeData_LFP_PluggedOnly(FinalFolder,ExpeInfo);
+
+for i=[190 210 215 239]
+    disp(['loading and saving LFP' num2str(InfoLFP.channel(i)) ' in LFPData...']);
+    % FMA toolbox function to load LFP
+    LFP_temp = GetLFP(InfoLFP.channel(i));
+    %data to tsd
+    LFP = tsd(LFP_temp(:,1)*1E4, LFP_temp(:,2));
+    SessLength = max(LFP_temp(:,1));
+    %save
+    save([foldername '/LFPData/LFP' num2str(InfoLFP.channel(i))], 'LFP');
+    clear LFP LFP_temp
+end
+
+
+load('ChannelsToAnalyse/dHPC_rip.mat')
+LowSpectrumSB([cd filesep],channel,'dH')
+
+load('ChannelsToAnalyse/vHPC_rip.mat')
+LowSpectrumSB([cd filesep],channel,'vH')
+VeryHighSpectrum([cd filesep],channel,'vH')
+
+
+load('LFPData/LFP209.mat')
+FilLFP = FilterLFP(LFP,[50 300],1024);
+Noise = tsd(Range(FilLFP),runmean(Data((FilLFP)).^2,ceil(.3/median(diff(Range(FilLFP,'s'))))));
+StimEpoch = thresholdIntervals(Noise , 2e3 , 'Direction' , 'Above');
+StimEpoch = mergeCloseIntervals(StimEpoch , 1e4);
+StimEpoch = intervalSet(Start(StimEpoch)-1e4 , Start(StimEpoch)+1.5e4);
+Epoch = intervalSet(0 , max(Range(LFP)));
+NoStimEpoch = Epoch-StimEpoch;
+TotalNoiseEpoch = StimEpoch;
+
+save('StateEpochSB.mat','StimEpoch','Epoch','NoStimEpoch','TotalNoiseEpoch')
+
+
+
+CreateRipplesSleep('restrict',0,'clean',0)
+CreateRipplesSleep('recompute',1,'thresh',[5 7;6 8],'restrict',0,'clean',0) % for ventral
+
+load('dSWR.mat')
+[Y,X] = hist(Range(tRipples,'s'),[0:1:max(Range(LFP,'s'))]);
+Y = runmean(Y,1); % smooth to get a  better idea of ripple density
+dSWR_density = tsd(X'*1E4,Y');
+save('dSWR.mat','dSWR_density','-append')
+
+load('vSWR.mat')
+[Y,X] = hist(Range(tRipples,'s'),[0:1:max(Range(LFP,'s'))]);
+Y = runmean(Y,1); % smooth to get a  better idea of ripple density
+vSWR_density = tsd(X'*1E4,Y');
+save('vSWR.mat','vSWR_density','-append')
+
+smootime=5;
+Frequency{1} = [5 10];
+Frequency{2} = [2 5];
+FilTheta = FilterLFP(LFP,Frequency{1},1024);
+FilDelta = FilterLFP(LFP,Frequency{2},1024);
+hilbert_theta = abs(hilbert(Data(FilTheta)));
+hilbert_delta = abs(hilbert(Data(FilDelta)));
+hilbert_delta(hilbert_delta<100) = 100;
+theta_ratio = hilbert_theta ./ hilbert_delta;
+theta_ratio = hilbert_theta;
+ThetaRatioTSD = tsd(Range(FilTheta), theta_ratio);
+SmoothTheta = tsd(Range(ThetaRatioTSD),runmean(Data(ThetaRatioTSD),ceil(smootime/median(diff(Range(ThetaRatioTSD,'s'))))));
+save('StateEpochSB.mat','SmoothTheta','-append')
+
+
+
+
+%% figures
 % spectro
 figure
 dH_Low = load('dH_Low_Spectrum.mat');
@@ -18,7 +97,6 @@ xlabel('time (min)'), ylabel('Frequency (Hz)')
 makepretty_BM2
 
 colormap jet 
-colorbar
 
 
 
@@ -50,7 +128,7 @@ plot(dH_Low.Spectro{3} , nanmean(Data(Restrict(dHLow_tsd , Wake))) , 'b')
 hold on
 plot(dH_Low.Spectro{3} , nanmean(Data(Restrict(dHLow_tsd , SWSEpoch))) , 'r')
 plot(dH_Low.Spectro{3} , nanmean(Data(Restrict(dHLow_tsd , REMEpoch))) , 'g')
-xlabel('Frequency (Hz)'), ylabel('Power (a.u.)'), xlim([0 15])
+xlabel('Frequency (Hz)'), ylabel('dHPC power (a.u.)'), xlim([0 15])
 legend('Wake','NREM','REM')
 makepretty
 
@@ -59,7 +137,7 @@ plot(dH_Low.Spectro{3} , nanmean(Data(Restrict(vHLow_tsd , Wake))) , 'b')
 hold on
 plot(dH_Low.Spectro{3} , nanmean(Data(Restrict(vHLow_tsd , SWSEpoch))) , 'r')
 plot(dH_Low.Spectro{3} , nanmean(Data(Restrict(vHLow_tsd , REMEpoch))) , 'g')
-xlabel('Frequency (Hz)'), ylabel('Power (a.u.)'), xlim([0 15])
+xlabel('Frequency (Hz)'), ylabel('vHPC power (a.u.)'), xlim([0 15])
 makepretty
 
 
@@ -187,15 +265,15 @@ Legends = {'d Wake','d NREM','v Wake','v NREM'};
 
 figure
 subplot(131)
-MakeSpreadAndBoxPlot3_SB({dSWR_dur_Wake dSWR_dur_NREM vSWR_dur_NREM vSWR_dur_NREM},Cols,X,Legends,'showpoints',1,'paired',0);
+MakeSpreadAndBoxPlot3_SB({dSWR_dur_Wake dSWR_dur_NREM vSWR_dur_Wake vSWR_dur_NREM},Cols,X,Legends,'showpoints',1,'paired',0);
 ylabel('SWR duration (ms)')
 
 subplot(132)
-MakeSpreadAndBoxPlot3_SB({dSWR_freq_Wake dSWR_freq_NREM vSWR_freq_NREM vSWR_freq_NREM},Cols,X,Legends,'showpoints',1,'paired',0);
+MakeSpreadAndBoxPlot3_SB({dSWR_freq_Wake dSWR_freq_NREM vSWR_freq_Wake vSWR_freq_NREM},Cols,X,Legends,'showpoints',1,'paired',0);
 ylabel('SWR frequency (Hz)')
 
 subplot(133)
-MakeSpreadAndBoxPlot3_SB({dSWR_amp_Wake dSWR_amp_NREM vSWR_amp_NREM vSWR_amp_NREM},Cols,X,Legends,'showpoints',1,'paired',0);
+MakeSpreadAndBoxPlot3_SB({dSWR_amp_Wake dSWR_amp_NREM vSWR_amp_Wake vSWR_amp_NREM},Cols,X,Legends,'showpoints',1,'paired',0);
 ylabel('SWR amplitude (Hz)')
 
 
@@ -267,10 +345,117 @@ end
 
 
 
+%% trash ?
 
 
 
 
+figure
+dH_Low = load('dH_rad_Low_Spectrum.mat');
+dHLow_tsd = tsd(dH_Low.Spectro{2}*1e4 , dH_Low.Spectro{1});
+subplot(211)
+imagesc(dH_Low.Spectro{2}/60 , dH_Low.Spectro{3} , runmean(runmean(log10(dH_Low.Spectro{1}),10)',3)), axis xy
+xlabel('time (min)'), ylabel('Frequency (Hz)')
+makepretty_BM2
+
+vH_Low = load('vH_Low_Spectrum.mat');
+vHLow_tsd = tsd(vH_Low.Spectro{2}*1e4 , vH_Low.Spectro{1});
+subplot(212)
+imagesc(vH_Low.Spectro{2}/60 , vH_Low.Spectro{3} , runmean(runmean(log10(vH_Low.Spectro{1}),10)',3)), axis xy
+xlabel('time (min)'), ylabel('Frequency (Hz)')
+makepretty_BM2
+
+colormap jet 
+
+
+
+figure
+dH_Middle = load('vH_Middle_Spectrum.mat');
+dH_Middle_tsd = tsd(dH_Middle.Spectro{2}*1e4 , dH_Middle.Spectro{1});
+subplot(211)
+imagesc(dH_Middle.Spectro{2}/60 , dH_Middle.Spectro{3} , runmean(runmean(log10(dH_Middle.Spectro{3}.*dH_Middle.Spectro{1}),100)',3)), axis xy
+xlabel('time (min)'), ylabel('Frequency (Hz)')
+makepretty_BM2
+
+vH_High = load('vH_VHigh_Spectrum.mat');
+vHHigh_tsd = tsd(vH_High.Spectro{2}*1e4 , vH_High.Spectro{1});
+subplot(212)
+imagesc(vH_High.Spectro{2}/60 , vH_High.Spectro{3} , runmean(runmean(log10(vH_High.Spectro{1}),10)',3)), axis xy
+xlabel('time (min)'), ylabel('Frequency (Hz)')
+makepretty_BM2
+
+colormap jet 
+
+
+
+figure
+subplot(121)
+plot(dH_Middle.Spectro{3} , nanmean(log10(dH_Middle.Spectro{3}.*Data(Restrict(dH_Middle_tsd , NoStimEpoch)))))
+
+subplot(122)
+plot(vH_High.Spectro{3} , nanmean(log10(vH_High.Spectro{3}.*Data(Restrict(vHHigh_tsd , NoStimEpoch)))))
+
+
+
+
+
+St = Start(StimEpoch);
+win_size = 20;
+for i=1:length(St)
+
+    dHPC_Around_stim(i,:,:) = Data(Restrict(dHLow_tsd , intervalSet(St(i)-win_size*1e4 , St(i)+win_size*1e4)));
+
+end
+
+figure
+for i=1:length(St)
+    subplot(2,5,i)
+    imagesc(linspace(-win_size , win_size , size(dHPC_Around_stim,2)) , dH_Low.Spectro{3} , runmean(runmean(log10(squeeze(dHPC_Around_stim(i,:,:))),5)',3)), axis xy
+end
+colormap jet
+
+
+
+figure
+imagesc(linspace(-10 , 10 , 100) , dH_Low.Spectro{3} , runmean(runmean(log10(squeeze(nanmean(dHPC_Around_stim))),1)',3)), axis xy
+colormap jet
+
+
+
+
+[M,T] = PlotRipRaw(SmoothTheta, Start(StimEpoch)/1e4, 20e3, 0, 1,1);
+
+
+[M,T] = PlotRipRaw(vSWR_density, Start(StimEpoch)/1e4, 20e3, 0, 1,1);
+[M,T] = PlotRipRaw(dSWR_density, Start(StimEpoch)/1e4, 20e3, 0, 1,1);
+
+figure
+plot(Range(dSWR_density,'s')/60 , runmean(Data(dSWR_density),3))
+hold on 
+plot(Range(vSWR_density,'s')/60 , runmean(Data(vSWR_density),3))
+vline(Start(StimEpoch)/60e4 ,'--k')
+xlabel('time (min)'), ylabel('SWR occurence (#/s)')
+legend('dSWRs','vSWRs')
+makepretty
+
+
+[c,lags] = xcorr(Data(vSWR_density) , Data(dSWR_density)); 
+figure
+plot(lags , c)
+
+
+load('LFPData/LFP189.mat')
+FilLFP = FilterLFP(Restrict(LFP,NoStimEpoch),[.5 5],1024);
+Gamma_v = tsd(Range(FilLFP),runmean(Data((FilLFP)).^2,ceil(.3/median(diff(Range(FilLFP,'s'))))));
+
+
+[M,T] = PlotRipRaw(Gamma_v, Start(StimEpoch)/1e4, 20e3, 0, 1,1);
+
+
+
+for i=1:7
+   saveFigure(i,['FM_ShockObs_' num2str(i)],'/home/ratatouille/Desktop/Figures_Baptiste/') 
+end
 
 
 

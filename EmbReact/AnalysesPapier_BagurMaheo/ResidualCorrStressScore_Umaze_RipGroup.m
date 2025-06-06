@@ -53,18 +53,17 @@ for group = 1:2
 
     end
 end
-    
-GoodMice{1} = find(PropNan(1,:)<0.5);
-GoodMice{2} = find(PropNan(2,:)<0.5);
+    LimPerc = 100;
+GoodMice{1} = find(PropNan(1,:)<LimPerc);
+GoodMice{2} = find(PropNan(2,:)<LimPerc);
 Cols = {[0.6 0.6 0.6],[1 0.6 0.6]}
 
 clf
 subplot(241)
-LimPerc = 0;
-for grp = 1:2
-DurHighBreathFz{grp} = DurHighBreathFz{grp}(GoodMice{grp});
-DurLowBreathFz{grp} = DurLowBreathFz{grp}(GoodMice{grp});
-end
+% for grp = 1:2
+% DurHighBreathFz{grp} = DurHighBreathFz{grp}(GoodMice{grp});
+% DurLowBreathFz{grp} = DurLowBreathFz{grp}(GoodMice{grp});
+% end
 
 [R,P] = PlotCorrelations_BM(log(DurHighBreathFz{1}),log(DurLowBreathFz{1}), 'conf_bound',1);
 % plot(DurHighBreathFz{1},DurLowBreathFz{1},'.')
@@ -76,7 +75,7 @@ axis square
 xlabel('Dur fast breath immobility')
 ylabel('Dur slow breath immobility')
 legend off
-[R,p] = corr(log(DurHighBreathFz{2})', log(DurLowBreathFz{2})','type','Spearman');
+[R,p] = corr(log(DurHighBreathFz{1})', log(DurLowBreathFz{1})','type','Spearman');
 title(['R= ' num2str(R) '  P= ' num2str(p)])
 
 
@@ -114,6 +113,11 @@ legend off
 title(['R= ' num2str(R) '  P= ' num2str(p)])
 xlabel('Recovery deviation')
 ylabel('Stress score')
+
+
+[R,p] = corr([residual_ctrl,residual_rip]',...
+[StressScore.Rip{1}(GoodMice{1}),StressScore.Rip{2}(GoodMice{2})]','type','Pearson','rows','complete');
+
 
 %% Separate correaltions
 Legends = {'Sham','Inhib'};

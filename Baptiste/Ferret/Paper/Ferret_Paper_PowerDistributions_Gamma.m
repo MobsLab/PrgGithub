@@ -1,14 +1,35 @@
 
 %% beautiful example
+clear all
+
+% sessions
+Dir1 = PathForExperimentsOB({'Labneh'}, 'freely-moving','saline');
+Dir2 = PathForExperimentsOB({'Labneh'}, 'freely-moving','none');
+Dir{1} = MergePathForExperiment(Dir1,Dir2);
+
+Dir1 = PathForExperimentsOB({'Brynza'}, 'freely-moving','saline');
+Dir2 = PathForExperimentsOB({'Brynza'}, 'freely-moving','none');
+Dir{2} = MergePathForExperiment(Dir1,Dir2);
+
+Dir1 = PathForExperimentsOB({'Shropshire'}, 'freely-moving','saline');
+Dir2 = PathForExperimentsOB({'Shropshire'}, 'freely-moving','none');
+Dir{3} = MergePathForExperiment(Dir1,Dir2);
+
+ferret=3; n=5; sess=5;
+load([Dir{ferret}.path{sess} filesep 'SleepScoring_OBGamma.mat'], 'Epoch','TotalNoiseEpoch', 'SmoothGamma')
+Smooth_Gamma{ferret}{n} = SmoothGamma;
+
+
+
 figure
 D = log10(Data(Smooth_Gamma{3}{5}));
-h=histogram(D,'BinLimits',[1.9 2.9],'NumBins',200); hold on
+h=histogram(D,'BinLimits',[1.9 2.9],'NumBins',100); hold on
 h.FaceColor=[.3 .3 .3];
-xlabel('OB gamma power (log)'), ylabel('PDF'), xlim([1.9 2.9]), ylim([0 1e6])
-yticks([0:3e5:9e5]), yticklabels({'0','.02','.04','.06'})
-v=vline(gamma_thresh{3}(5),'-r'); v.LineWidth=5;
-text(2,9e5,'Sleep','FontSize',15), text(2.7,9e5,'Wake','FontSize',15)
-makepretty
+xlabel('OB gamma power (log)'), ylabel('PDF'), xlim([1.9 2.9]), ylim([0 2e6])
+yticks([0:3e5:18e5]), yticklabels({'0','.02','.04','.06','.08','.10','.12'})
+v=vline(2.3,'--r'); v.LineWidth=3;
+text(2,18e5,'Sleep','FontSize',15), text(2.7,18e5,'Wake','FontSize',15)
+makepretty, axis square
 
 
 %% intra-variability
@@ -44,16 +65,18 @@ figure
 for i=1:10
     clf
     D = log10(Data(Smooth_Gamma{i}));
-    gamma_thresh(i) = GetGaussianThresh_BM(D, 0, 1);
+    [gamma_thresh(i) , mu(i)] = GetGaussianThresh_BM(D, 0, 1);
 end
 
-
+l = linspace(.01,.05,10);
 figure
-plot(linspace(1.8,3.1,200) , HistData' , 'k')
-xlabel('OB gamma power (log)'), ylabel('PDF'), xlim([1.8 3.1])
-hold on
-plot(gamma_thresh(1:10),linspace(.01,.05,10), '*r')
-makepretty
+for i=1:10
+    plot(linspace(1.8,3.1,200)-mu(i) , HistData(i,:)' , 'k')
+    hold on
+    plot(gamma_thresh(i)-mu(i) , l(i) , '*r')
+end
+xlabel('OB gamma power (log)'), ylabel('PDF'), xlim([-.25 .85])
+makepretty, axis square
 
 
 %% inter-variability
@@ -99,22 +122,69 @@ for ferret=1:3
         [gamma_thresh{ferret}(i),~,~,~,~,AshD{ferret}(i)] = GetGaussianThresh_BM(D, 0, 1);
     end
 end
-AshD{2}([1 2 5 6]) = NaN;
+AshD{2}([1 2 5 6 7]) = NaN;
+AshD{1}([2 9]) = NaN;
     
 % figures
 Cols = {[.2 .5 .8],[.8 .5 .2],[.5 .2 .8]};
 X = 1:3;
 Legends = {'F1','F2','F3'};
 
-
-PlotErrorBarN_KJ(AshD,...
-    'barcolors',Cols,'x_data',X,'showPoints',0,'newfig',1);
-ylabel('Ash D')
+figure
+PlotErrorBarN_KJ(AshD,'barcolors',Cols,'x_data',X,'showPoints',1,'newfig',0);
+ylabel('Bimodality index')
 set(gca,'XTick',X,'XtickLabel',Legends)
-makepretty
+makepretty_BM2, axis square
 
 
 
+
+
+%% different smoothing
+clear all
+
+% sessions
+Dir1 = PathForExperimentsOB({'Labneh'}, 'freely-moving','saline');
+Dir2 = PathForExperimentsOB({'Labneh'}, 'freely-moving','none');
+Dir{1} = MergePathForExperiment(Dir1,Dir2);
+
+Dir1 = PathForExperimentsOB({'Brynza'}, 'freely-moving','saline');
+Dir2 = PathForExperimentsOB({'Brynza'}, 'freely-moving','none');
+Dir{2} = MergePathForExperiment(Dir1,Dir2);
+
+Dir1 = PathForExperimentsOB({'Shropshire'}, 'freely-moving','saline');
+Dir2 = PathForExperimentsOB({'Shropshire'}, 'freely-moving','none');
+Dir{3} = MergePathForExperiment(Dir1,Dir2);
+
+ferret=3; n=5; sess=5;
+cd(Dir{ferret}.path{sess})
+
+n=1; Frequency = [40 60];
+load('ChannelsToAnalyse/Bulb_deep.mat')
+load(strcat(['LFPData/LFP',num2str(channel),'.mat']));
+for w = [.03 .3 3]
+    FilGamma = FilterLFP(LFP,Frequency,1024); % filtering
+    tEnveloppeGamma = tsd(Range(LFP), abs(hilbert(Data(FilGamma))) ); %tsd: hilbert transform then enveloppe
+    SmoothGamma = tsd(Range(tEnveloppeGamma), runmean(Data(tEnveloppeGamma), ...
+        ceil(w/median(diff(Range(tEnveloppeGamma,'s'))))));
+    Smooth_Gamma{n} = SmoothGamma;
+    n = n+1;
+end
+
+figure
+for i=1:3
+    h=histogram(log10(Data(Smooth_Gamma{i})),'BinLimits',[1.7 3.2],'NumBins',100);
+    HistData(i,:) = h.Values;
+end
+clf
+
+
+plot(linspace(1.7,3.2,100) , runmean(HistData(1,:),1) , 'Color' , [.3 .3 .3] , 'LineWidth' , 4)
+hold on
+plot(linspace(1.7,3.2,100) , runmean(HistData(2,:),1) , 'Color' , [.8 .5 .5] , 'LineWidth' , 4)
+plot(linspace(1.7,3.2,100) , runmean(HistData(3,:),1) , 'Color' , [.8 .2 .2] , 'LineWidth' , 4)
+xlim([1.7 3.2]), legend('0.03s','0.3s','3s'), xlabel('Gamma power (a.u.)'), ylabel('PDF')
+makepretty, axis square
 
 
 

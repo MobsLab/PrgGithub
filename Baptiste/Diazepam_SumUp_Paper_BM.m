@@ -99,13 +99,18 @@ ylabel('SZ occupancy (prop)'), ylim([0 .35])
 
 %Freezing
 figure
-subplot(121)
-MakeSpreadAndBoxPlot3_SB(FreezingShock_Dur.Cond,Cols3,X3,Legends3,'showpoints',1,'paired',0);
+subplot(131)
+MakeSpreadAndBoxPlot3_SB(Freezing_Dur.Cond,Cols2,X2,Legends2,'showpoints',1,'paired',0);
 ylabel('Fz duration, shock zone (s)')%, ylim([0 .4])
 makepretty_BM2
 
-subplot(122)
-MakeSpreadAndBoxPlot3_SB(FreezingSafe_Dur.Cond,Cols3,X3,Legends3,'showpoints',1,'paired',0);
+subplot(132)
+MakeSpreadAndBoxPlot3_SB(FreezingShock_Dur.Cond,Cols2,X2,Legends2,'showpoints',1,'paired',0);
+ylabel('Fz duration, shock zone (s)')%, ylim([0 .4])
+makepretty_BM2
+
+subplot(133)
+MakeSpreadAndBoxPlot3_SB(FreezingSafe_Dur.Cond,Cols2,X2,Legends2,'showpoints',1,'paired',0);
 ylabel('Fz duration, safe zone (s)')%, ylim([0 .4])
 makepretty_BM2
 

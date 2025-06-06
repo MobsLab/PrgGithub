@@ -5,23 +5,23 @@ function ExampleTrajectoryMFB_DB(Dir, IsPCDriven, varargin)
 %  zone occupancies
 %
 %  INPUT
-%       
+%
 %       Dir             directory with behavResources.mat
 %       ISPCDriven      true if the mouse was stimulated using BCI and info
 %                           about stims is stored only in StimEpoch (boolean)
 %       IsSave          true if you want to save the resulting figure in
 %                           Dir (boolean - default = false)
 %       NumTest         number of tests to plot the trajectories (default = 4)
-% 
-% 
+%
+%
 %  OUTPUT
 %
 %       Figure
 %
 %       See
-%   
+%
 %       BehaviorERC, PathForExperimentERC_Dima
-% 
+%
 % Coded by Dima Bryzgalov, MOBS team, Paris, France
 % 27/10/2020, based on my own script coded in 2019
 % github.com/bryzgalovdm
@@ -33,8 +33,8 @@ numtest=4;
 IsColorTests = false;
 
 %% Optional parameters
-for i=1:2:length(varargin)    
-    switch(lower(varargin{i})) 
+for i=1:2:length(varargin)
+    switch(lower(varargin{i}))
         case 'issave'
             IsSave = varargin{i+1};
             if IsSave ~= 1 && IsSave ~= 0
@@ -49,7 +49,7 @@ for i=1:2:length(varargin)
             IsColorTests =  varargin{i+1};
             if IsColorTests ~= 1 && IsColorTests ~= 0
                 error('Incorrect value for property ''ColorTests'' (type ''help ExampleTrajectory_DB'' for details).');
-            end    
+            end
     end
 end
 
@@ -78,6 +78,10 @@ end
 id_Pre=find(id_Pre);
 id_Cond=find(id_Cond);
 id_Post=find(id_Post);
+numtest = min(numtest, length(id_Post));
+id_Pre = id_Pre(1:numtest);
+id_Cond = id_Cond(1:numtest);
+id_Post = id_Cond(1:numtest);
 
 %% Calculate average occupancy
 % Calculate occupancy de novo
@@ -144,7 +148,7 @@ CondTraj_Axes = axes('position', [0.38 0.54 0.28 0.38]);
 PostTestTraj_Axes = axes('position', [0.69 0.54 0.28 0.38]);
 
 maze = [0 0; 0 1; 1 1; 1 0; 0.63 0; 0.63 0.75; 0.35 0.75; 0.35 0; 0 0];
-shockZone = [0 0; 0 0.43; 0.35 0.43; 0.35 0; 0 0]; 
+shockZone = [0 0; 0 0.43; 0.35 0.43; 0.35 0; 0 0];
 
 %% Plot
 % Trajectories
@@ -163,7 +167,7 @@ box off
 set(gca,'XtickLabel',{},'YtickLabel',{});
 set(gca,'XDir','reverse');
 plot(maze(:,1),maze(:,2),'k','LineWidth',3)
-plot(shockZone(:,1),shockZone(:,2),'g','LineWidth',3)
+plot(shockZone(:,1),shockZone(:,2),'r','LineWidth',3)
 title('PreTests','FontSize',18,'FontWeight','bold');
 xlim([0 1])
 ylim([0 1])
@@ -185,7 +189,11 @@ for i=1:numtest
     tempY = Data(a.behavResources(id_Cond(i)).AlignedYtsd);
     if IsPCDriven
         StimTimes_TTL = Restrict(tsStim, a.SessionEpoch.(['Cond' num2str(i)]));
-        Times_MAT = ts(a.behavResources(id_Cond(i)).CleanPosMat(:,1)*1e4);
+        try
+            Times_MAT = ts(a.behavResources(id_Cond(i)).CleanPosMat(:,1)*1e4);
+        catch
+            Times_MAT = ts(a.behavResources(id_Cond(i)).PosMat(:,1)*1e4);
+        end
         StimTimes_plot = Range(Restrict(Times_MAT,StimTimes_TTL, 'align', 'closest'));
         for j = 1:length(StimTimes_plot)
             plot(tempX(a.behavResources(id_Cond(i)).PosMat(:,1)==StimTimes_plot(j)/1e4),...
@@ -286,6 +294,6 @@ end
 %% Write to xls file
 % T = table(Pre_Occup_mean, Post_Occup_mean, Pre_entnum_mean, Post_entnum_mean,Pre_FirstTime_mean,Post_FirstTime_mean,...
 %     Pre_VZmean_mean, Post_VZmean_mean);
-% 
+%
 % filenme = [dir_out 'finalxls.xlsx'];
 % writetable(T, filenme, 'Sheet',1,'Range','A1');

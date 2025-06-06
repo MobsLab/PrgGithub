@@ -4,16 +4,16 @@
 % Plot number of entries in the shock zone in the PreTests vs PostTests
 % Plot time to enter in the shock zone in the PreTests vs PostTests
 % Plot average speed in the shock zone in the PreTests vs PostTests
-% 
-% 
+%
+%
 %  OUTPUT
 %
 %    Figure
 %
 %       See
-%   
+%
 %       QuickCheckBehaviorERC, PathForExperimentERC_Dima
-% 
+%
 %       2018 by Dmitri Bryzgalov
 
 %% Parameters
@@ -29,7 +29,7 @@ safe = 0; % Do you want to plot statistics for safe
 Mice_to_analyze = 994;
 
 % Get directories
-Dir = PathForExperimentsERC_Dima('UMazePAG');
+Dir = PathForExperimentsERC('SubPAG');
 Dir = RestrictPathForExperiment(Dir,'nMice', Mice_to_analyze);
 
 clrs = {'ko', 'ro', 'go','co'; 'k','r', 'g', 'c'};
@@ -56,7 +56,7 @@ PostTestTraj_Axes = axes('position', [0.69 0.54 0.28 0.38]);
 % PostTestBar_Axes = axes('position', [0.69 0.05 0.28 0.41]);
 
 maze = [0 0; 0 1; 1 1; 1 0; 0.63 0; 0.63 0.75; 0.35 0.75; 0.35 0; 0 0];
-shockZone = [0 0; 0 0.43; 0.35 0.43; 0.35 0; 0 0]; 
+shockZone = [0 0; 0 0.43; 0.35 0.43; 0.35 0; 0 0];
 
 %% Get data
 
@@ -89,20 +89,20 @@ id_Post=find(id_Post);
 % Calculate occupancy de novo
 for k=1:length(id_Pre)
     for t=1:length(a.behavResources(id_Pre(k)).Zone)
-        Pre_Occup(k,t)=size(a.behavResources(id_Pre(k)).CleanZoneIndices{t},1)./...
-            size(Data(a.behavResources(id_Pre(k)).CleanXtsd),1);
+        Pre_Occup(k,t)=size(a.behavResources(id_Pre(k)).ZoneIndices{t},1)./...
+            size(Data(a.behavResources(id_Pre(k)).Xtsd),1);
     end
 end
 for k=1:length(id_Cond)
     for t=1:length(a.behavResources(id_Cond(k)).Zone)
-        Cond_Occup(k,t)=size(a.behavResources(id_Cond(k)).CleanZoneIndices{t},1)./...
-            size(Data(a.behavResources(id_Cond(k)).CleanXtsd),1);
+        Cond_Occup(k,t)=size(a.behavResources(id_Cond(k)).ZoneIndices{t},1)./...
+            size(Data(a.behavResources(id_Cond(k)).Xtsd),1);
     end
 end
 for k=1:length(id_Post)
     for t=1:length(a.behavResources(id_Post(k)).Zone)
-        Post_Occup(k,t)=size(a.behavResources(id_Post(k)).CleanZoneIndices{t},1)./...
-            size(Data(a.behavResources(id_Post(k)).CleanXtsd),1);
+        Post_Occup(k,t)=size(a.behavResources(id_Post(k)).ZoneIndices{t},1)./...
+            size(Data(a.behavResources(id_Post(k)).Xtsd),1);
     end
 end
 Pre_Occup_Shock = squeeze(Pre_Occup(:,1));
@@ -134,7 +134,7 @@ p_pre_post = signrank(Pre_Occup_Shock_mean, Post_Occup_Shock_mean);
 % Trajectories
 axes(PreTestTraj_Axes);
 for i=1:length(id_Pre)
-    plot(Data(a.behavResources(id_Pre(i)).CleanAlignedXtsd),Data(a.behavResources(id_Pre(i)).CleanAlignedYtsd),...
+    plot(Data(a.behavResources(id_Pre(i)).AlignedXtsd),Data(a.behavResources(id_Pre(i)).AlignedYtsd),...
         'LineWidth',3);
     hold on
 end
@@ -151,11 +151,11 @@ ylim([0 1])
 % Cond
 axes(CondTraj_Axes);
 for i=1:length(id_Cond)
-    plot(Data(a.behavResources(id_Cond(i)).CleanAlignedXtsd),Data(a.behavResources(id_Cond(i)).CleanAlignedYtsd),...
+    plot(Data(a.behavResources(id_Cond(i)).AlignedXtsd),Data(a.behavResources(id_Cond(i)).AlignedYtsd),...
         'LineWidth',3);
     hold on
-    tempX = Data(a.behavResources(id_Cond(i)).CleanAlignedXtsd);
-    tempY = Data(a.behavResources(id_Cond(i)).CleanAlignedYtsd);
+    tempX = Data(a.behavResources(id_Cond(i)).AlignedXtsd);
+    tempY = Data(a.behavResources(id_Cond(i)).AlignedYtsd);
     plot(tempX(a.behavResources(id_Cond(i)).PosMat(:,4)==1),tempY(a.behavResources(id_Cond(i)).PosMat(:,4)==1),...
         'p','Color','r','MarkerFaceColor','red','MarkerSize',16);
     clear tempX tempY
@@ -173,7 +173,7 @@ ylim([0 1])
 % PostTests
 axes(PostTestTraj_Axes);
 for i=1:length(id_Post)
-    plot(Data(a.behavResources(id_Post(i)).CleanAlignedXtsd),Data(a.behavResources(id_Post(i)).CleanAlignedYtsd),...
+    plot(Data(a.behavResources(id_Post(i)).AlignedXtsd),Data(a.behavResources(id_Post(i)).AlignedYtsd),...
         'LineWidth',3);
     hold on
 end
@@ -238,7 +238,7 @@ end
 %% Write to xls file
 % T = table(Pre_Occup_mean, Post_Occup_mean, Pre_entnum_mean, Post_entnum_mean,Pre_FirstTime_mean,Post_FirstTime_mean,...
 %     Pre_VZmean_mean, Post_VZmean_mean);
-% 
+%
 % filenme = [dir_out 'finalxls.xlsx'];
 % writetable(T, filenme, 'Sheet',1,'Range','A1');
 

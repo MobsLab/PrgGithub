@@ -27,7 +27,7 @@ set(n,'paperPositionMode','auto')
 try
     eval(['print -f',num2str(n),' -dpng ', Dossier filesep title,'.png'])
     saveas(n,[Dossier filesep title '.fig'])
-    saveas(n,[Dossier filesep title '.svg'])
+    print(n, [Dossier filesep title], '-dsvg');
     eval(['print -f',num2str(n),' -painters',' -depsc2 ',Dossier filesep title,'.eps'])
 catch
 %     try was added to accomodate new Matlab version - SB

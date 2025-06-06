@@ -8,7 +8,7 @@
 clear all
 GetEmbReactMiceFolderList_BM
 Mouse = Drugs_Groups_UMaze_BM(22);
-Session_type = {'Habituation','Cond'};
+Session_type = {'TestPre','Cond'};
 
 for mouse=1:length(Mouse)
     Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
@@ -83,7 +83,7 @@ b=bar(Mean_All_Sp); b.FaceColor=[.5 .5 .5]; hold on
 errorbar([1:size(FreezeAll_Prop_All,2)],Mean_All_Sp,zeros(size(Conf_Inter)),Conf_Inter,'.','vertical','Color','k')
 ylim([0 .2]), ylabel('immobility (prop)'), box off
 line([size(FreezeAll_Prop_All,2)/2+.5 size(FreezeAll_Prop_All,2)/2+.5],[0 .15],'LineStyle','--','Color','k'), text(15,.17,'first aversive stimulation')
-text(6,.2,'Habituation','FontSize',15), text(26,.2,'Conditioning','FontSize',15)
+text(6,.2,'Pre-cond','FontSize',15), text(26,.2,'Conditioning','FontSize',15)
 makepretty_BM2
 
 subplot(3,5,8:9)
@@ -92,7 +92,7 @@ Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 Mean_All_Sp=nanmean(Data_to_use);
 b=bar(Mean_All_Sp); b.FaceColor=[1 .5 .5]; hold on
 errorbar([1:size(FreezeAll_Prop_All(:,1:20),2)],Mean_All_Sp,zeros(size(Conf_Inter)),Conf_Inter,'.','vertical','Color','k')
-ylim([0 .2]), ylabel('im. breathing>4.5Hz (prop)'), box off
+ylim([0 .07]), ylabel('im. breathing>4.5Hz (prop)'), box off
 makepretty_BM2
 
 subplot(3,5,13:14)
@@ -101,7 +101,7 @@ Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 Mean_All_Sp=nanmean(Data_to_use);
 b=bar(Mean_All_Sp); b.FaceColor=[.5 .5 1]; hold on
 errorbar([1:size(FreezeAll_Prop_All(:,1:20),2)],Mean_All_Sp,zeros(size(Conf_Inter)),Conf_Inter,'.','vertical','Color','k')
-ylim([0 .2]), ylabel('im. breathing<4.5Hz (prop)'), box off
+ylim([.05 .13]), ylabel('im. breathing<4.5Hz (prop)'), box off
 xlabel('time (norm)'), ylabel('freezing prop')
 makepretty_BM2
 

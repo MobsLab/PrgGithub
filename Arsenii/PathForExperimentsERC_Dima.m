@@ -96,60 +96,60 @@ if strcmp(experiment,'UMazePAG')
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/12112018/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse828
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-828/20190305/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-828/20190305/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse861
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-861/20190313/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-861/20190313/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse882
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-882/20190409/PAGexp/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-882/20190409/PAGexp/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse905
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-905/20190404/PAGExp/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-905/20190404/PAGExp/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse906
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-906/20190418/PAGExp/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-906/20190418/PAGExp/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse911
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-911/20190508/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-911/20190508/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse912
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-912/20190515/PAGexp/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-912/20190515/PAGexp/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse977
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-977/20190812/PAGexp/Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-977/20190812/PAGexp/Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse994
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-994/20191013/PagExp/_Concatenated/';
-%         a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-994/20191106/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-994/20191013/PagExp/_Concatenated/';
+%         a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-994/20191106/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse1117
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-K117/20201109/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-K117/20201109/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse1124
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-K124/20201120/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-K124/20201120/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse1161
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-K161/20201224/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-K161/20201224/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse1162
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-K162/20210121/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-K162/20210121/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse1168
@@ -179,12 +179,12 @@ if strcmp(experiment,'UMazePAG')
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'Reversal')
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-K081/20200925/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-K081/20200925/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     
 elseif strcmp(experiment,'UMazePAGPCdriven')
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-K115/20201006/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-K115/20201006/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     
@@ -192,11 +192,11 @@ elseif strcmp(experiment,'UMazePAGPCdriven')
 elseif strcmp(experiment,'FirstExplo')
     
     % Mouse828
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-828/20190301/ExploDay/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-828/20190301/ExploDay/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse861
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-861/20190312/ExploDay/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-861/20190312/ExploDay/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse882
@@ -208,15 +208,15 @@ elseif strcmp(experiment,'FirstExplo')
 %     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse912
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-912/20190506/ExploDay/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-912/20190506/ExploDay/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse977
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-977/20190809/FirstUMaze/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-977/20190809/FirstUMaze/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse979
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-979/20190828/FirstExplo/_Concatenated/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-979/20190828/FirstExplo/_Concatenated/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % MouseK016
@@ -330,25 +330,25 @@ elseif strcmp(experiment,'Calib')
     Dir.path{a}{7}='/media/DataMOBsRAIDN/ProjetERC2/Mouse-797/10112018/Calib/Calib-3.0V/';
     load([Dir.path{a}{7},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-0.0V/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-0.0V/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
-    Dir.path{a}{2}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-0.5V/';
+    Dir.path{a}{2}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-0.5V/';
     load([Dir.path{a}{2},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
-    Dir.path{a}{3}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-1.0V/';
+    Dir.path{a}{3}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-1.0V/';
     load([Dir.path{a}{3},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
-    Dir.path{a}{4}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-1.5V/';
+    Dir.path{a}{4}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-1.5V/';
     load([Dir.path{a}{4},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
-    Dir.path{a}{5}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-2.0V/';
+    Dir.path{a}{5}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-2.0V/';
     load([Dir.path{a}{5},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
-    Dir.path{a}{6}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-2.5V/';
+    Dir.path{a}{6}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-2.5V/';
     load([Dir.path{a}{6},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
-    Dir.path{a}{7}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-3.0V/';
+    Dir.path{a}{7}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-3.0V/';
     load([Dir.path{a}{7},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
-    Dir.path{a}{8}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-3.5V/';
+    Dir.path{a}{8}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-3.5V/';
     load([Dir.path{a}{8},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
-    Dir.path{a}{9}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-4.0V/';
+    Dir.path{a}{9}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-4.0V/';
     load([Dir.path{a}{9},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
-    Dir.path{a}{10}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-4.5V/';
+    Dir.path{a}{10}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-4.5V/';
     load([Dir.path{a}{10},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'NeutralContextDay1')
@@ -357,7 +357,7 @@ elseif strcmp(experiment,'NeutralContextDay1')
     a=a+1;Dir.path{a}{1}='/media/DataMOBsRAIDN/ProjetERC2/Mouse-797/10112018/NeutralContextDay1/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/10112018/NeutralContextDay1/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/NeutralContextDay1/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'NeutralContextDay2')
@@ -366,7 +366,7 @@ elseif strcmp(experiment,'NeutralContextDay2')
     a=a+1;Dir.path{a}{1}='/media/DataMOBsRAIDN/ProjetERC2/Mouse-797/11112018/NeutralContextDay2/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/11112018/NeutralContextDay2/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/11112018/NeutralContextDay2/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'AversiveContextDay1')
@@ -375,7 +375,7 @@ elseif strcmp(experiment,'AversiveContextDay1')
     a=a+1;Dir.path{a}{1}='/media/DataMOBsRAIDN/ProjetERC2/Mouse-797/10112018/Calib/Calib-3.0V/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/10112018/Calib/Calib-4.0V/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/10112018/Calib/Calib-4.0V/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'AversiveContextDay2')
@@ -384,7 +384,7 @@ elseif strcmp(experiment,'AversiveContextDay2')
     a=a+1;Dir.path{a}{1}='/media/DataMOBsRAIDN/ProjetERC2/Mouse-797/11112018/AversiveContextDay2/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/11112018/AversiveContextDay2/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/11112018/AversiveContextDay2/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'HabBehav')
@@ -465,7 +465,7 @@ elseif strcmp(experiment,'HabBehav')
     a=a+1;Dir.path{a}{1}='/media/DataMOBsRAIDN/ProjetERC2/Mouse-797/11112018/Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/12112018/Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'Hab')
@@ -492,34 +492,34 @@ elseif strcmp(experiment,'Hab')
     a=a+1;Dir.path{a}{1}='/media/DataMOBsRAIDN/ProjetERC2/Mouse-797/11112018/Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/12112018/Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse828
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-828/20190305/Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-828/20190305/Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse861
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-861/20190313/Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-861/20190313/Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse882
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-882/20190409/PAGexp/Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-882/20190409/PAGexp/Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse905
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-905/20190404/PAGExp/Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-905/20190404/PAGExp/Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse906
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-906/20190418/PAGExp/6-Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-906/20190418/PAGExp/6-Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse911
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-911/20190508/Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-911/20190508/Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse912
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-912/20190515/PAGexp/07-Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-912/20190515/PAGexp/07-Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse977
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-977/20190812/PAGexp/Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-977/20190812/PAGexp/Hab/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse994
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-994/20191013/PagExp/Hab/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-994/20191013/PagExp/Hab/';
 %     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse1081
     a=a+1;Dir.path{a}{1}='/media/mobsrick/DataMOBs113/Mouse-K081/20200925/02 Maze2/';
@@ -609,7 +609,7 @@ elseif strcmp(experiment,'PreSleep')
     a=a+1;Dir.path{a}{1}='/media/DataMOBsRAIDN/ProjetERC2/Mouse-797/11112018/PreSleep/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/12112018/PreSleep/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/PreSleep/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'TestPreBehav')
@@ -778,7 +778,7 @@ elseif strcmp(experiment,'TestPreBehav')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-798/12112018/TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/TestPre/TestPre',num2str(c),'/'];
         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -853,7 +853,7 @@ elseif strcmp(experiment,'TestPre')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-798/12112018/TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/TestPre/TestPre',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -862,7 +862,7 @@ elseif strcmp(experiment,'TestPre')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-828/20190305/TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-828/20190305/TestPre/TestPre',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -871,7 +871,7 @@ elseif strcmp(experiment,'TestPre')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-861/20190313/TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-861/20190313/TestPre/TestPre',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -880,7 +880,7 @@ elseif strcmp(experiment,'TestPre')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-882/20190409/PAGexp/TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-882/20190409/PAGexp/TestPre/TestPre',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -889,7 +889,7 @@ elseif strcmp(experiment,'TestPre')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-905/20190404/PAGExp/TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-905/20190404/PAGExp/TestPre/TestPre',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -898,7 +898,7 @@ elseif strcmp(experiment,'TestPre')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-906/20190418/PAGExp/7-TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-906/20190418/PAGExp/7-TestPre/TestPre',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -907,7 +907,7 @@ elseif strcmp(experiment,'TestPre')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-911/20190508/TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-911/20190508/TestPre/TestPre',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -916,7 +916,7 @@ elseif strcmp(experiment,'TestPre')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-912/20190515/PAGexp/08-TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-912/20190515/PAGexp/08-TestPre/TestPre',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -925,7 +925,7 @@ elseif strcmp(experiment,'TestPre')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-977/20190812/PAGexp/TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-977/20190812/PAGexp/TestPre/TestPre',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -934,7 +934,7 @@ elseif strcmp(experiment,'TestPre')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-994/20191013/PagExp/TestPre/TestPre',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-994/20191013/PagExp/TestPre/TestPre',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1138,7 +1138,7 @@ elseif strcmp(experiment,'Cond')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-798/12112018/Cond/Cond',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/Cond/Cond',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-6),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1148,7 +1148,7 @@ elseif strcmp(experiment,'Cond')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-828/20190305/Cond/Cond',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-828/20190305/Cond/Cond',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1157,7 +1157,7 @@ elseif strcmp(experiment,'Cond')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-861/20190313/Cond/Cond',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-861/20190313/Cond/Cond',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1166,7 +1166,7 @@ elseif strcmp(experiment,'Cond')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-882/20190409/PAGexp/Cond/Cond',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-882/20190409/PAGexp/Cond/Cond',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1175,7 +1175,7 @@ elseif strcmp(experiment,'Cond')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-905/20190404/PAGExp/Cond/Cond',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-905/20190404/PAGExp/Cond/Cond',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1184,7 +1184,7 @@ elseif strcmp(experiment,'Cond')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-906/20190418/PAGExp/8-Cond/Cond',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-906/20190418/PAGExp/8-Cond/Cond',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1193,7 +1193,7 @@ elseif strcmp(experiment,'Cond')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-911/20190508/Cond/Cond',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-911/20190508/Cond/Cond',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1202,7 +1202,7 @@ elseif strcmp(experiment,'Cond')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-912/20190515/PAGexp/09-Cond/Cond',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-912/20190515/PAGexp/09-Cond/Cond',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1211,7 +1211,7 @@ elseif strcmp(experiment,'Cond')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-977/20190812/PAGexp/Cond/Cond',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-977/20190812/PAGexp/Cond/Cond',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1220,7 +1220,7 @@ elseif strcmp(experiment,'Cond')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-994/20191013/PagExp/Cond/Cond',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-994/20191013/PagExp/Cond/Cond',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1382,7 +1382,7 @@ elseif strcmp(experiment,'PostSleep')
     a=a+1;Dir.path{a}{1}='/media/DataMOBsRAIDN/ProjetERC2/Mouse-797/11112018/PostSleep/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/12112018/PostSleep/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/PostSleep/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'TestPost')
@@ -1445,7 +1445,7 @@ elseif strcmp(experiment,'TestPost')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-798/12112018/TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/TestPost/TestPost',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-10),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1454,7 +1454,7 @@ elseif strcmp(experiment,'TestPost')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-828/20190305/TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-828/20190305/TestPost/TestPost',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1463,7 +1463,7 @@ elseif strcmp(experiment,'TestPost')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-861/20190313/TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-861/20190313/TestPost/TestPost',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1472,7 +1472,7 @@ elseif strcmp(experiment,'TestPost')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-882/20190409/PAGexp/TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-882/20190409/PAGexp/TestPost/TestPost',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1481,7 +1481,7 @@ elseif strcmp(experiment,'TestPost')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-905/20190404/PAGExp/TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-905/20190404/PAGExp/TestPost/TestPost',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1490,7 +1490,7 @@ elseif strcmp(experiment,'TestPost')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-906/20190418/PAGExp/10-TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-906/20190418/PAGExp/10-TestPost/TestPost',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1499,7 +1499,7 @@ elseif strcmp(experiment,'TestPost')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-911/20190508/TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-911/20190508/TestPost/TestPost',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1508,7 +1508,7 @@ elseif strcmp(experiment,'TestPost')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-912/20190515/PAGexp/11-TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-912/20190515/PAGexp/11-TestPost/TestPost',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1517,7 +1517,7 @@ elseif strcmp(experiment,'TestPost')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-977/20190812/PAGexp/TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-977/20190812/PAGexp/TestPost/TestPost',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1526,7 +1526,7 @@ elseif strcmp(experiment,'TestPost')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-994/20191013/PagExp/TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-994/20191013/PagExp/TestPost/TestPost',num2str(c),'/'];
 %         load([Dir.path{a}{1}(1:end-9),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1712,7 +1712,7 @@ elseif strcmp(experiment,'TestPost24h')
     a=a+1;
     cc=1;
     for c=1:4
-        Dir.path{a}{cc}=['/media/nas5/ProjetERC2/Mouse-798/13112018/TestPost/TestPost',num2str(c),'/'];
+        Dir.path{a}{cc}=['/media/nas8/mobs/ProjetERC2/Mouse-798/13112018/TestPost/TestPost',num2str(c),'/'];
         load([Dir.path{a}{1}(1:end-10),'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
         cc=cc+1;
     end
@@ -1747,25 +1747,25 @@ elseif strcmp(experiment,'BaselineSleep')
 elseif strcmp(experiment,'ExploAfter')
     
     %Mouse861
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-861/20190313/ExploAfter/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-861/20190313/ExploAfter/';
 %     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse882
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-882/20190409/PAGexp/ExploAfter/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-882/20190409/PAGexp/ExploAfter/';
 %     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse905
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-905/20190404/PAGExp/ExploAfter/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-905/20190404/PAGExp/ExploAfter/';
 %     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse906
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-906/20190418/PAGExp/11-ExploAfter/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-906/20190418/PAGExp/11-ExploAfter/';
 %     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse912
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-912/20190515/PAGexp/12-ExploAfter/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-912/20190515/PAGexp/12-ExploAfter/';
     %     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse977
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-977/20190812/PAGexp/ExploAfter/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-977/20190812/PAGexp/ExploAfter/';
     %     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse994
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-994/20191013/PagExp/ExploAfter/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-994/20191013/PagExp/ExploAfter/';
     %     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     %Mouse1081
     a=a+1;Dir.path{a}{1}='/media/mobsrick/DataMOBs113/Mouse-K081/20200925/09 Extinction/';
@@ -1843,23 +1843,23 @@ elseif strcmp(experiment,'TestPrePooled')
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/12112018/TestPre/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/TestPre/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse828
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-828/20190305/TestPre/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-828/20190305/TestPre/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse861
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-861/20190313/TestPre/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-861/20190313/TestPre/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse882
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-882/20190409/PAGexp/TestPre/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-882/20190409/PAGexp/TestPre/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse905
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-905/20190404/PAGExp/TestPre/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-905/20190404/PAGExp/TestPre/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse906
@@ -1867,11 +1867,11 @@ elseif strcmp(experiment,'TestPrePooled')
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse911
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-911/20190508/TestPre/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-911/20190508/TestPre/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse912
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-912/20190515/PAGexp/08-TestPre/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-912/20190515/PAGexp/08-TestPre/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'CondPooled')
@@ -1905,23 +1905,23 @@ elseif strcmp(experiment,'CondPooled')
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/12112018/Cond/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/Cond/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse828
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-828/20190305/Cond/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-828/20190305/Cond/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse861
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-861/20190313/Cond/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-861/20190313/Cond/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse882
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-882/20190409/PAGexp/Cond/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-882/20190409/PAGexp/Cond/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse905
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-905/20190404/PAGExp/Cond/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-905/20190404/PAGExp/Cond/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse906
@@ -1929,11 +1929,11 @@ elseif strcmp(experiment,'CondPooled')
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse911
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-911/20190508/Cond/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-911/20190508/Cond/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse912
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-912/20190515/PAGexp/09-Cond/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-912/20190515/PAGexp/09-Cond/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'TestPostPooled')
@@ -1963,23 +1963,23 @@ elseif strcmp(experiment,'TestPostPooled')
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/12112018/TestPost/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/12112018/TestPost/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse828
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-828/20190305/TestPost/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-828/20190305/TestPost/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse861
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-861/20190313/TestPost/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-861/20190313/TestPost/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse882
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-882/20190409/PAGexp/TestPost/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-882/20190409/PAGexp/TestPost/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse905
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-905/20190404/PAGExp/TestPost/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-905/20190404/PAGExp/TestPost/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse906
@@ -1987,11 +1987,11 @@ elseif strcmp(experiment,'TestPostPooled')
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse911
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-911/20190508/TestPost/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-911/20190508/TestPost/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse912
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-912/20190515/PAGexp/11-TestPost/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-912/20190515/PAGexp/11-TestPost/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 elseif strcmp(experiment,'TestPost24hPooled')
@@ -2017,7 +2017,7 @@ elseif strcmp(experiment,'TestPost24hPooled')
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
     % Mouse798
-    a=a+1;Dir.path{a}{1}='/media/nas5/ProjetERC2/Mouse-798/13112018/TestPost/';
+    a=a+1;Dir.path{a}{1}='/media/nas8/mobs/ProjetERC2/Mouse-798/13112018/TestPost/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}=ExpeInfo;
     
 else

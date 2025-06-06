@@ -16,10 +16,11 @@ try plo; catch, plo=0; end
 
 FilLFPP=FilterLFP(LFP,Options.FilBand,1024);
 dat=Data(FilLFPP);
-rmpath('/home/greta/PrgGithub/chronux2/spectral_analysis/continuous')
+
+rmpath([GitHubLocation 'PrgGithub/chronux2/spectral_analysis/continuous'])
 [YMax,XMax]=findpeaks(dat,'MinPeakHeight',std(dat)*Options.std(1),'MinPeakDistance',LimLength);
 [YMin,XMin]=findpeaks(-dat,'MinPeakHeight',std(dat)*Options.std(1),'MinPeakDistance',LimLength);
-rmpath('/home/greta/PrgGithub/chronux2/spectral_analysis/continuous')
+addpath([GitHubLocation 'PrgGithub/chronux2/spectral_analysis/continuous'])
 
 YMin=-YMin;
 AllPeaks=sortrows([[XMin,-ones(length(XMin),1)];[XMax,ones(length(XMax),1)]],1);

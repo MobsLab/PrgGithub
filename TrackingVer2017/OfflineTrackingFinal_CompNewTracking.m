@@ -335,6 +335,7 @@ hand(4)=uicontrol(hand(1),'style','pushbutton',...
                 set(hand(9),'enable','on');
 
                 review=figure;
+                set(review, 'Position', [100, 100, 1200, 600]);
                 subplot(131), imagesc(ref), colormap gray, axis image
                 hold on
                 plot(PosMat(:,2)*Ratio_IMAonREAL,PosMat(:,3)*Ratio_IMAonREAL,'color',[1 0.5 0.2]);
@@ -722,8 +723,14 @@ hand(4)=uicontrol(hand(1),'style','pushbutton',...
             IM=(double(vidFrames(:,:,3,1)));
             [l2,l1] = size(IM);
             typical_size = 5*sqrt(l1*l2);
-            durmax = inputdlg('how long is recording in s');
-            durmax = eval(durmax{1});
+            % durmax = inputdlg('how long is recording in s');
+            % durmax = eval(durmax{1});
+            %%%% Modified by EC 07/05/25
+            duration_sec = OBJ.Duration;  % Extract video duration in seconds
+            default_dur = {num2str(duration_sec)};
+            answer = inputdlg('How long is recording in seconds?', 'Recording Duration', 1, default_dur);
+            durmax = str2double(answer{1});
+            %%%%
             fcy=durmax/totframe;
             nx = l2/10;
             ny = l1/10;

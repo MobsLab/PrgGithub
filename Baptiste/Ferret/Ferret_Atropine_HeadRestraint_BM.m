@@ -166,13 +166,13 @@ title('Atropine')
 %% tools
 figure
 subplot(221)
-plot(Spectro{3} , (Spectro{3}.*OB_Wake_Bef_Inj{1})'), xlim([20 100])
+plot(Spectro{3} , (Spectro{3}.*OB_Wake_Bef_Inj{1})'), xlim([20 100]), ylim([0 2.5e5])
 subplot(222)
-plot(Spectro{3} , (Spectro{3}.*OB_Wake_Aft_Inj{1})'), xlim([20 100])
+plot(Spectro{3} , (Spectro{3}.*OB_Wake_Aft_Inj{1})'), xlim([20 100]), ylim([0 2.5e5])
 subplot(223)
-plot(Spectro{3} , (Spectro{3}.*OB_Wake_Bef_Inj{2})'), xlim([20 100])
+plot(Spectro{3} , (Spectro{3}.*OB_Wake_Bef_Inj{2})'), xlim([20 100]), ylim([0 2.5e5])
 subplot(224)
-plot(Spectro{3} , (Spectro{3}.*OB_Wake_Aft_Inj{2})'), xlim([20 100])
+plot(Spectro{3} , (Spectro{3}.*OB_Wake_Aft_Inj{2})'), xlim([20 100]), ylim([0 2.5e5])
 
 
 

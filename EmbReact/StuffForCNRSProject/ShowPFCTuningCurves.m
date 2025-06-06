@@ -1,4 +1,7 @@
-clear all,
+%% This code calculates 
+
+
+clear all
 MiceNumber=[490,507,508,509,510,512,514];
 epoch_names = {'Shock','NoShock','Centre','CentreShock','CentreNoShock'};
 SessionNames = {'UMazeCond'};
@@ -147,7 +150,7 @@ for sess=1:length(SessionNames)
     end
 end
 
-
+cd /media/DataMOBsRAIDN/SophieFigures
 save('OBTuning_PFC.mat','AllR2','AllRRand','AllPAnova','AllInfo','AllSpkAn','SpikeID','MouseID')
 
 %
