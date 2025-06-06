@@ -5,7 +5,7 @@ load('/media/nas8-2/ProjetEmbReact/transfer/AllSessions.mat')
 % GetEmbReactMiceFolderList_BM
 Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear','LastCondPre'};
 
-Mouse_names = 'M1612';
+Mouse_names = 'M1747';
 
 RangeLow = linspace(0.1526,20,261);
 RangeHigh = linspace(22,98,32);
@@ -22,10 +22,10 @@ for sess=1:length(Session_type)
     Speed.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'speed');
     Respi.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'respi_freq_bm');
     %             ThetaPower.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'hpc_theta_power');
-%     Ripples.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'ripples');
+    Ripples.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'ripples');
     StimEpoch.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'epoch','epochname','stimepoch');
-%     HR.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'heartrate');
-%     HR_Var.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'heartratevar');
+    HR.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'heartrate');
+    HR_Var.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'heartratevar');
     Xtsd.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'xalignedposition');
     Ytsd.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'yalignedposition');
     %             Accelero.(Session_type{sess}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names) , 'accelero');
@@ -156,7 +156,7 @@ for sess=1:length(Session_type)
     MeanSpectroBulbFzSafeCorr.(Session_type{sess})=nanmean(Data(SpectroBulbFzSafe.(Session_type{sess}))).* RangeLow;
     
     
-      MeanSpectroBulbFzShockCamera.(Session_type{sess})=nanmean(Data(SpectroBulbFzShockCamera.(Session_type{sess})));
+    MeanSpectroBulbFzShockCamera.(Session_type{sess})=nanmean(Data(SpectroBulbFzShockCamera.(Session_type{sess})));
     MeanSpectroBulbFzSafeCamera.(Session_type{sess})=nanmean(Data(SpectroBulbFzSafeCamera.(Session_type{sess})));
     MeanSpectroBulbFzShockCorrCamera.(Session_type{sess})=nanmean(Data(SpectroBulbFzShockCamera.(Session_type{sess}))).* RangeLow;
     MeanSpectroBulbFzSafeCorrCamera.(Session_type{sess})=nanmean(Data(SpectroBulbFzSafeCamera.(Session_type{sess}))).* RangeLow;
@@ -345,7 +345,7 @@ mtitle(Mouse_names);
 %% Physio
 th = 25;
 
-Sessions = {'Fear','CondPre','ExtPre','CondPost','ExtPost'};
+Sessions = {'Cond','CondPre','ExtPre','CondPost','ExtPost'};
 figure
 for i = 1:5
 subplot(2,5,i)

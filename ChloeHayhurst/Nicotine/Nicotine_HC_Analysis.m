@@ -57,8 +57,8 @@ for group = 4:5
         EpochDrugs1.(Name{group})(mouse) = min(Range(AlignedXtsd));
         EpochDrugs2.(Name{group})(mouse) = Start(Epoch_Drugs{2});
         
-        Fifteen_Bef_Inj = intervalSet(EpochDrugs1.(Name{group})(mouse) , EpochDrugs1.(Name{group})(mouse)+900e4);
-        Fifteen_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse) , EpochDrugs2.(Name{group})(mouse)+900e4);
+        Fifteen_Bef_Inj = intervalSet(EpochDrugs1.(Name{group})(mouse) , EpochDrugs1.(Name{group})(mouse)+1800e4);
+        Fifteen_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse) , EpochDrugs2.(Name{group})(mouse)+1800e4);
         
       
         %         figure
@@ -105,7 +105,7 @@ for group = 4:5
                 load('HeartBeatInfo.mat', 'EKG')
                 HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(EKG.HBRate,Epoch_to_use);
                 HRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-                MeanHRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = nanmean(HRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+                MeanHRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = nanmean(Data(HRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
             end
             
 %             subplot(1,2,sess)
@@ -124,8 +124,8 @@ Mouse = [5 8 9 10]; % These are the mice that freeze more than a few seconds and
 
 k = 1;
 
-for mouse = Mouse
-    Fifteen_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse) , EpochDrugs2.(Name{group})(mouse)+900e4);
+for mouse = 1:length(Mouse_names_NicHC)
+    Fifteen_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse) , EpochDrugs2.(Name{group})(mouse)+1800e4);
     Epoch_to_use = Fifteen_Aft_Inj;
     
     disp(Mouse_names(mouse));
@@ -133,7 +133,7 @@ for mouse = Mouse
     RipDensFzClean.(Name{group}).(Session_type{sess})(k) = RipDensFz.(Name{group}).(Session_type{sess})(mouse);
     
     a = Start(Epoch_to_use);
-    for i = 1:30
+    for i = 1:60
         
         Epoch = intervalSet(a,a+30e4);
         clear Fztemp riptemp riptemp2 riptempFz
@@ -163,6 +163,17 @@ for mouse = Mouse
                 NumberRipFzTemp.(Name{group}).(Session_type{sess})(k,i) = NaN;
             end
         end
+        try
+            hrtemp = Restrict(HRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch);
+            HRFzTemp.(Name{group}).(Session_type{sess})(mouse,i) = nanmean(Data(hrtemp));
+            hrVartemp = Restrict(HRVarFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch);
+            HRVarFzTemp.(Name{group}).(Session_type{sess})(mouse,i) = nanmean(Data(hrVartemp));
+            
+        catch
+            HRFzTemp.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
+            HRVarFzTemp.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
+        end
+        
         a = a+30e4;
     end
     k = k+1;
@@ -242,15 +253,15 @@ Mouse_names = Mouse_names_NicHC;
 Mouse = [2 3 4 5 8 9 10]; % These are the mice that freeze more than a few seconds
 k = 1;
 for mouse = Mouse
-    Fifteen_Aft_Inj = intervalSet(EpochDrugs2.NicotineHC(mouse) , EpochDrugs2.NicotineHC(mouse)+900e4);
+    Fifteen_Aft_Inj = intervalSet(EpochDrugs2.NicotineHC(mouse) , EpochDrugs2.NicotineHC(mouse)+1800e4);
     Epoch_to_use = Fifteen_Aft_Inj;
     disp(Mouse_names(k));
     disp(sess);
     a = Start(Epoch_to_use);
-    for i = 1:30
+    for i = 1:60
         Epoch = intervalSet(a, a+30e4);
         clear mtemp
-%         try
+        try
             SpectroTemp{i,k} = Restrict(SpectroBulbFz.NicotineHC.Post.(Mouse_names{mouse}),Epoch);
             MeanSpectroTemp{i}(k,:) = nanmean(Data(SpectroTemp{i,k}));
             [~,mtemp]= max(MeanSpectroTemp{i}(k,:));
@@ -260,9 +271,9 @@ for mouse = Mouse
                 m(k,i) = NaN;
             end
             
-%         catch
-%             m(k,i) = NaN;
-%         end
+        catch
+            m(k,i) = NaN;
+        end
         a = a+30e4;
     end
     k = k+1;
@@ -290,14 +301,32 @@ time = linspace(1,15,30);
 x = time; 
 y1 = m(:,1:30);
 y2 = DistanceToCenterActive.NicotineHC.Post(:,1:30); 
-y3 = RipDensTempFz.NicotineHC.Post(:,1:30);
+% y3 = RipDensTempFz.NicotineHC.Post(:,1:30);
+y3 = NumberRipTemp.NicotineHC.Post(:,1:30);
+
 
 label{1}={'Breathing frequency'};
 label{2}={'Thigmotaxis'};
 label{3}={'Ripples density'};
 
-[ax, hlines] = multiploty_Shaded_CH({x, y1}, {x, y2}, {x, y3},'time',label);
+[ax, hlines] = multiploty_Shaded_CH({x, y1}, {x, y2}, {x, y3},'time',label,'smooth',1);
 mtitle('HC')
+
+
+time = linspace(1,15,30);
+x = time(:,1:30); 
+y1 = m(:,1:30);
+y3 = HRVarFzTemp.NicotineHC.Post(:,1:30); 
+y2 = HRFzTemp.NicotineHC.Post(:,1:30);
+% y3 = NumberRipTemp.NicotineOF.Post(:,1:30);
+
+labelx={'time'};
+labely = {'Breathing frequency', 'Heart Rate', 'Heart Rate Var'};
+Cols = {[0 0 1],[1 0.4 0],[1 0.8 0]};
+
+[ax, hlines] = multiploty_Shaded_CH({x, y1}, {x, y2}, {x, y3},labelx,labely,'color',Cols);
+mtitle('OF, freezing accelero')
+
 
 figure
 Bar = bar(time, mean(Fztimetemp.NicotineHC.Post(:,1:30))/1e4, 'FaceAlpha', 0.3, 'FaceColor', [0.5 0.5 0.5],'EdgeColor','none');

@@ -8,6 +8,7 @@ NicotineOF.Pre{5}='/media/nas7/Nicotine/Mouse1687/NicotineOF/OF_Pre';
 NicotineOF.Pre{6}='/media/nas7/Nicotine/Mouse1685/NicotineOF/OFPre';
 NicotineOF.Pre{7}='/media/nas7/Nicotine/Mouse1713/NicotineOF/OFPre';
 NicotineOF.Pre{8}='/media/nas7/Nicotine/Mouse1714/NicotineOF/OFPre';
+NicotineOF.Pre{9}='/media/nas7/Nicotine/Mouse1747/NicotineOF/OFPre';
 
 
 NicotineOF.Post{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_OFPost';
@@ -19,6 +20,7 @@ NicotineOF.Post{5}='/media/nas7/Nicotine/Mouse1687/NicotineOF/OF_Post';
 NicotineOF.Post{6}='/media/nas7/Nicotine/Mouse1685/NicotineOF/OFPost';
 NicotineOF.Post{7}='/media/nas7/Nicotine/Mouse1713/NicotineOF/OFPost';
 NicotineOF.Post{8}='/media/nas7/Nicotine/Mouse1714/NicotineOF/OFPost';
+NicotineOF.Post{9}='/media/nas7/Nicotine/Mouse1747/NicotineOF/OFPost';
 
 
 SalineOF.Pre{1}='/media/nas7/Nicotine/Mouse1685/SalineOF/OF_Pre';

@@ -82,8 +82,8 @@ if not(exist('AlignedXtsd','var'))
         
         X=Data(Xtsd);Y=Data(Ytsd);
         figure
-        %         imagesc(double(ref)), colormap jet, hold on
-        plot(X,Y)
+%         imagesc(double(ref)), colormap jet, hold on
+        plot(X,Y,'k')
         title('give 3 corners : bottom left, bottom right and top left')
         [x,y] = ginput(3);
         

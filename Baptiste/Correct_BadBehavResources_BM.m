@@ -31,6 +31,7 @@ XXX = floor(Data(Xtsd)*Ratio_IMAonREAL);
 XXX(isnan(XXX)) = 240;
 YYY = floor(Data(Ytsd)*Ratio_IMAonREAL);
 YYY(isnan(YYY)) = 320;
+
 for t = 1:length(Zone)
     try
         ZoneIndices{t}=find(diag(Zone{t}(XXX,YYY)));
