@@ -25,7 +25,7 @@ load('ChannelsToAnalyse/Bulb_deep.mat');
 LowSpectrumSB([cd filesep],channel,'B');
 % FindNoiseEpoch_BM([cd filesep],channel,0);
 FindNoiseEpoch_BM([cd filesep],channel,0);
-             
+
 %% Get heart beats
 clear all
 Options.TemplateThreshStd=3;

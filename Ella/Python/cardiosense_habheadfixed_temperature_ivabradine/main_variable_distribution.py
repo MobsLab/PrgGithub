@@ -194,9 +194,21 @@ plot_variable_over_time(datasets, 1712, 'BreathFreq', dates='250311',
 
 for mouse in [1690, 1711, 1712]:
     for variable in variables:
-        plot_variable_distribution(datasets, 1690, variable, 
+        plot_variable_distribution(datasets, mouse, variable, 
                                    experiment_keys=["Injection_Saline", "Injection_Ivabradine_5mgkg", 
                                                     "Injection_Ivabradine_10mgkg", "Injection_Ivabradine_20mgkg"])
+
+
+plot_variable_distribution(datasets, 1690, 'Heartrate', 
+                           experiment_keys=["Injection_Saline", "Injection_Ivabradine_5mgkg", 
+                                            "Injection_Ivabradine_10mgkg", "Injection_Ivabradine_20mgkg"],
+                           dates=['250313', '250311', '250312', '250305'])
+
+plot_variable_over_time(datasets, 1690, 'Heartrate', 
+                        experiment_keys=['Injection_Saline', 'Injection_Ivabradine_10mgkg'], 
+                        smooth=True, smooth_window=100, ylim=(2,12),
+                        dates=['250313', '250312'])
+
 
 # %% Plot all distributions together 
 
