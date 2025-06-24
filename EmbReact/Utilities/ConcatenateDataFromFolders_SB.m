@@ -19,6 +19,7 @@
 %   - ripples_all : all ripples features (frequency, duration,...)
 %   - ripples_density
 %   - SpikePhase : loads 'InstFreqAndPhase_BNeuronPhaseLocking' type files,
+%   - SpikePhase_EKG : same but for EKG, slight different dat format
 %   - timesessions
 %   - deltawaves : gets epochs of delta wave times (start and stop)
 %   suffix_spikephase indicates which structure
@@ -1862,6 +1863,35 @@ switch(lower(TypeVariable))
             end
             tps=tps + tpsmax;
         end
+        
+        
+            case 'spikephase_ekg'
+        
+        
+        tps = 0; % this variable counts the total time of all concatenated data
+        
+        
+        for ff=1:length(FolderList)
+            cd(FolderList{ff})
+            load(['HeartBeatPhaseLocing_Spikes.mat'])
+            load('LFPData/LFP0.mat')
+            tpsmax = max(Range(LFP)); % use LFP to get precise end time
+            
+            
+            for sp=1:length(PhaseSpikes)
+                if ff==1
+                    OutPutVar{sp}=PhaseSpikes{sp};
+                else
+                    OutPutVar{sp}.Transf = tsd([Range(OutPutVar{sp}.Transf);Range(PhaseSpikes{sp}.Transf)+tps],...
+                        [Data(OutPutVar{sp}.Transf);Data(PhaseSpikes{sp}.Transf)]);
+                    OutPutVar{sp}.Nontransf = tsd([Range(OutPutVar{sp}.Nontransf);Range(PhaseSpikes{sp}.Nontransf)+tps],...
+                        [Data(OutPutVar{sp}.Nontransf);Data(PhaseSpikes{sp}.Nontransf)]);
+                    
+                end
+            end
+            tps=tps + tpsmax;
+        end
+        
         
     case 'timesessions'
         

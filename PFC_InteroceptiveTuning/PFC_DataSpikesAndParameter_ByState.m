@@ -302,13 +302,12 @@ for mm = 1:length(MiceNumber)
     VarOfInterest = VarOfInterest(3:end-3);
     OutPutParam{mm} = VarOfInterest;
     
-    % get the tuning curves and associated info
+    % get the spike times
     for sp = 1:length(S_concat)
         [Y,X] = hist(Range(S_concat{sp}),TimeBins);
         spike_dat_temp = tsd(TimeBins,Y');
         spike_dat_temp = Data(Restrict(spike_dat_temp,TotalEpoch));
         OutPutSpikes{mm}(sp,:) = spike_dat_temp(3:end-3);
-        
     end
     
     end
