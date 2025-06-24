@@ -56,6 +56,10 @@ classdef TrackingObject
                     text(0,0.8,'Setting up webcam ...');
                     if camnum ==1
                         imaqreset;
+                        a = imaqhwinfo('winvideo');
+                        if size(a.DeviceInfo,2)==2 % make sure you sue the webcam
+                            camnum = find([~isempty(strfind(a.DeviceInfo(1).DeviceName,'HD USB Camera')),~isempty(strfind(a.DeviceInfo(2).DeviceName,'HD USB Camera'))]);
+                        end
                     end
                     if isunix
                         VideoAdaptor = "linuxvideo";
