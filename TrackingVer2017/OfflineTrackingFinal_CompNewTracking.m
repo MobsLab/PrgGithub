@@ -1461,6 +1461,15 @@ hand(4)=uicontrol(hand(1),'style','pushbutton',...
                         GenTracking
                     end
 
+
+
+                    %% To add in order to align with real time
+                    % load online
+                    % temps du line
+                    % le mettre PosMat(:,1) ImDiff(:,1)
+                    % chrono = ImDiff(end,1);
+
+
                     disp('Tracking done, saving')
 
 
@@ -1485,6 +1494,8 @@ hand(4)=uicontrol(hand(1),'style','pushbutton',...
                     [~,nameFile,~]=fileparts(nameFile);
 
                     [PosMat,PosMatInit,im_diff,im_diffInit,Vtsd,Xtsd,Ytsd,Imdifftsd]=CommonInterpPosMatImDiff(im_diff,chrono,PosMat);
+
+
 
 
                     saveas(review,[nameFile 'review.fig']);
