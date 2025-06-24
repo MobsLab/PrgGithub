@@ -101,8 +101,8 @@ else
     PhasesSpikes.Nontransf=Data(phaseSpike{1});
     PhasesSpikes.Transf=TransPh;
     
-    [mu.Nontransf, Kappa.Nontransf, pval.Nontransf, Rmean, delta, sigma,confDw,confUp] = CircularMean(PhasesSpikes.Nontransf);
-    [mu.Transf, Kappa.Transf, pval.Transf, Rmean, delta, sigma,confDw,confUp] = CircularMean(PhasesSpikes.Transf);
+    [mu.Nontransf, Kappa.Nontransf, pval.Nontransf, Rmean, delta, sigma,confDw,confUp] = CircularMean_SB(PhasesSpikes.Nontransf);
+    [mu.Transf, Kappa.Transf, pval.Transf, Rmean, delta, sigma,confDw,confUp] = CircularMean_SB(PhasesSpikes.Transf);
     
     if plo
         
