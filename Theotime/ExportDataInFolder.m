@@ -10,7 +10,7 @@
 %   pathForExperimentName: Path to the experiment folder.
 
 Dir = PathForExperimentsERC('Sub')
-Folder = '~/Dropbox/Mobs_member/Theotime De Charrin/data/';
+Folder = '~/Dropbox/Mobs_member/Theotime_De_Charrin/data/';
 
 % Function to load and save CSV data (in the current folder)
 function [data, idx] = loadAndSaveCSV(filePath, varName, varargin)

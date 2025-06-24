@@ -3,7 +3,7 @@
 % Figure 1 : OB gamma tracks Wake/sleep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Raw traces
-edit Ferret_Paper_RawTraces_Gamma.m
+edit Ferret_Paper_RawTraces_SleepStates.m
 
 
 %% Mean spectrum
@@ -163,8 +163,12 @@ edit SleepTransitions_Ferret_BM.m
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Figure 3: Breathing on brain rhtyhms
+% Figure 3: OB/pupil correlation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% cross-corr
+
+
 
 
 %% corr Breathing/gamma

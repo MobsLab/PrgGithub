@@ -14,8 +14,8 @@ load('/media/nas7/ProjetEmbReact/DataEmbReact/NewData/SVM_tsd.mat')
 Group=[7 8];
 Drug_Group={'RipControl','RipInhib'};
 GetEmbReactMiceFolderList_BM
-l{1} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_RipInhib_Cond_2sFullBins.mat');
-l{2} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_RipInhib_Ctrl_Cond_2sFullBins.mat');
+l{1} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Respi_corrected_RipControl.mat');
+l{2} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Respi_corrected_RipInhib.mat');
 
 % DZP
 Group=[13 15];
@@ -36,7 +36,11 @@ for group=1:length(Group)
     Mouse=Drugs_Groups_UMaze_BM(Group(group));
     for mouse=1:length(Mouse)
         
-        D = Data(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,5}); D(isnan(D)) = [];
+        try
+            D = Data(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,5}); D(isnan(D)) = [];
+        catch
+            D = Data(l{group}.OutPutData.Cond.respi_freq_bm_clean.tsd{mouse,5}); D(isnan(D)) = [];
+        end
         if length(D)>30
             [tau_shock{group}(mouse), p_value_shock{group}(mouse), trend_shock{group}(mouse)] = mann_kendall_test(D,0.05);
             [R_shock{group}(mouse) , P_shock{group}(mouse)] = corr([1:length(D)]' , D);
@@ -44,7 +48,11 @@ for group=1:length(Group)
             trend_shock{group}(mouse) = NaN;
         end
         
-        D = Data(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,6}); D(isnan(D)) = [];
+        try
+            D = Data(l{group}.OutPutData.Cond.respi_freq_bm.tsd{mouse,6}); D(isnan(D)) = [];
+        catch
+            D = Data(l{group}.OutPutData.Cond.respi_freq_bm_clean.tsd{mouse,6}); D(isnan(D)) = [];
+        end
         if length(D)>30
             [tau_safe{group}(mouse), p_value_safe{group}(mouse), trend_safe{group}(mouse)] = mann_kendall_test(D,0.05);
             [R_safe{group}(mouse) , P_safe{group}(mouse)] = corr([1:length(D)]' , D);
@@ -60,15 +68,16 @@ for group=1:length(Group)
     P_safe{group}(P_safe{group}==0) = NaN;
 end
 
-
+% if DZP, R_safe{1}(7) = -0.61;
+    
 for group=1:length(Group)
-    [h,p_shock(group)] = ttest(trend_shock{group}(~isnan(trend_shock{group})) , zeros(1,sum(~isnan(trend_shock{group}))));
-    [h,p_safe(group)] = ttest(trend_shock{group}(~isnan(trend_safe{group})) , zeros(1,sum(~isnan(trend_safe{group}))));
-    [h,p_shock2(group)] = ttest(R_shock{group}(~isnan(R_shock{group})) , zeros(1,sum(~isnan(R_shock{group}))));
-    [h,p_safe2(group)] = ttest(R_safe{group}(~isnan(R_safe{group})) , zeros(1,sum(~isnan(R_safe{group}))));
+    p_shock(group) = signrank(trend_shock{group}(~isnan(trend_shock{group})) , zeros(1,sum(~isnan(trend_shock{group}))));
+    p_safe(group) = signrank(trend_safe{group}(~isnan(trend_safe{group})) , zeros(1,sum(~isnan(trend_safe{group}))));
+    p_shock2(group) = signrank(R_shock{group}(~isnan(R_shock{group})) , zeros(1,sum(~isnan(R_shock{group}))));
+    p_safe2(group) = signrank(R_safe{group}(~isnan(R_safe{group})) , zeros(1,sum(~isnan(R_safe{group}))));
 end
 
-%% figure
+%% figures
 Cols = {[1 .5 .5],[.5 .5 1]};
 X = [1:2];
 Legends = {'Shock','Safe'};
@@ -103,14 +112,65 @@ Legends = {'Saline','DZP'};
 
 
 figure
-MakeSpreadAndBoxPlot3_SB(trend_safe,Cols,X,Legends,'showpoints',1,'paired',0);
+MakeSpreadAndBoxPlot3_SB(R_safe,Cols,X,Legends,'showpoints',1,'paired',0);
 ylabel('kendall tau'), hline(0,'--k')
 makepretty_BM2
 
 
-sigstar({[.7 1.3]},p(1))
-sigstar({[1.7 2.3]},p(2))
+sigstar({[.7 1.3]},p_safe(1))
+sigstar({[1.7 2.3]},p_safe(2))
 
+
+
+
+
+
+
+%% 0-15 / 85-100%
+clear all
+
+Group=22;
+Drug_Group={'Saline'};
+GetAllSalineSessions_BM
+l{1} = load('/media/nas7/ProjetEmbReact/DataEmbReact/Data_Physio_Freezing_Saline_Eyelid_Cond_2sFullBins.mat');
+load('/media/nas7/ProjetEmbReact/DataEmbReact/NewData/SVM_tsd.mat')
+
+Params={'respi_freq_bm','heartrate','heartratevar','ob_gamma_freq','ob_gamma_power','ripples_density','hpc_theta_freq','hpc_theta_delta'};
+group = 1;
+
+for param=1:8
+    for mouse = 1:length(Mouse)
+        try
+            clear D, D = Data(l{group}.OutPutData.Cond.(Params{param}).tsd{mouse,5});
+            DATA_shock.(Params{param})(mouse,:) = interp1(linspace(0,1,length(D)) , D , linspace(0,1,100));
+        end
+        try
+            clear D, D = Data(l{group}.OutPutData.Cond.(Params{param}).tsd{mouse,6});
+            DATA_safe.(Params{param})(mouse,:) = interp1(linspace(0,1,length(D)) , D , linspace(0,1,100));
+        end
+    end
+    DATA_shock.(Params{param})(DATA_shock.(Params{param})==0) = NaN;
+    DATA_safe.(Params{param})(DATA_safe.(Params{param})==0) = NaN;
+end
+param=1; bin=15;
+Respi_shock_beg = nanmean(DATA_shock.(Params{param})(:,1:bin)');
+Respi_safe_beg = nanmean(DATA_safe.(Params{param})(:,1:bin)');
+Respi_shock_end = nanmean(DATA_shock.(Params{param})(:,100-bin:end)');
+Respi_safe_end = nanmean(DATA_safe.(Params{param})(:,100-bin:end)');
+
+
+
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({Respi_shock_beg Respi_shock_end},{[.6 .5 .5],[1 .5 .5]},[1 2],{['0-' num2str(bin) '%'],[ num2str(bin) '-100%']},'showpoints',0,'paired',1);
+ylabel('Breathing (Hz)')
+makepretty_BM2
+
+subplot(122)
+[b, tf, lthresh, uthresh, center] = filloutliers(Respi_safe_beg,'linear');
+MakeSpreadAndBoxPlot3_SB({b Respi_safe_end},{[.5 .5 .6],[.5 .5 1]},[1 2],{['0-' num2str(bin) '%'],[ num2str(100-bin) '-100%']},'showpoints',0,'paired',1);
+ylabel('Breathing (Hz)')
+makepretty_BM2
 
 
 

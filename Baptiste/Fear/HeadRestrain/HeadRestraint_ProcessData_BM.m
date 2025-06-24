@@ -13,9 +13,9 @@ HighSpectrum([cd filesep],channel,'B');
 clear channel
 % load('ChannelsToAnalyse/dHPC_rip.mat')
 % LowSpectrumSB([cd filesep],channel,'H_rip')
-load('ChannelsToAnalyse/dHPC_rip.mat')
+% load('ChannelsToAnalyse/dHPC_rip.mat')
 LowSpectrumSB([cd filesep],channel,'H')
-% load('ChannelsToAnalyse/dHPC_deep.mat')
+load('ChannelsToAnalyse/dHPC_deep.mat')
 % LowSpectrumSB([cd filesep],channel,'H_deep')
 
 clear channel
@@ -64,7 +64,7 @@ Params.Accelero_thresh = thresh;
 save('behavResources_SB.mat','Behav','Params')
 
 % Ripples
-CreateRipplesSleep_BM
+CreateRipplesSleep
 
 % InstFreq
 MakeInstFreqForSession_BM

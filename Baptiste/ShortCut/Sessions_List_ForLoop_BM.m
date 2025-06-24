@@ -45,7 +45,13 @@ elseif convertCharsToStrings(Session_type{sess})=='ExtPost'
     FolderList=ExtPostSess;
 elseif convertCharsToStrings(Session_type{sess})=='LastCondPre'
     FolderList=LastCondPreSess;
-    elseif convertCharsToStrings(Session_type{sess})=='FirstExtPre'
+    elseif convertCharsToStrings(Session_type{sess})=='FirstCondPre'
+FolderList=FirstCondPreSess;
+elseif convertCharsToStrings(Session_type{sess})=='LastCondPost'
+    FolderList=LastCondPostSess;
+    elseif convertCharsToStrings(Session_type{sess})=='FirstCondPost'
+FolderList=FirstCondPostSess;
+elseif convertCharsToStrings(Session_type{sess})=='FirstExtPre'
     FolderList=FirstExtPreSess;
     
     % elseif convertCharsToStrings(Session_type{sess})=='sleep_pre'

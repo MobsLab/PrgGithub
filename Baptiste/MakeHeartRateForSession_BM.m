@@ -2,6 +2,7 @@
 function MakeHeartRateForSession_BM
 
 clear TTLInfo Behav EKG channel
+close all
 Options.TemplateThreshStd=3;
 Options.BeatThreshStd=0.05;
 load('ChannelsToAnalyse/EKG.mat')

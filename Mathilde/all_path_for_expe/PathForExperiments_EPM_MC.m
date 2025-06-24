@@ -29,28 +29,28 @@ function Dir=PathForExperiments_EPM_MC(experiment)
 %% Path
 a=0;
 if strcmp(experiment,'EPM_ctrl')
-    %Mouse 1449
+    Mouse 1449
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1449/20230414/EPM_Basal/ERC-Mouse-1449-14042023-EPM_00/';
-    %Mouse 1450
+    Mouse 1450
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1450/20230414/EPM_Basal/ERC-Mouse-1450-14042023-EPM_00/';
-    %Mouse 1451
+    Mouse 1451
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1451/20230414/EPM_Basal/ERC-Mouse-1451-14042023-EPM_00/';
-    %Mouse 1452
+    Mouse 1452
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1452/20230414/EPM_Basal/ERC-Mouse-1452-14042023-EPM_00/';
-    %Mouse 1453
+    Mouse 1453
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/M1453/20230414/EPM_Basal/ERC-Mouse-1453-14042023-EPM_00/';
-    %Eleonore's mice
-    %Mouse CLA231
+    Eleonore's mice
+    Mouse CLA231
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/CLA231/20230602/EPM_Basal/ERC-Mouse-NaN-02062023-EPM_00/';
-    %Mouse CLA232
+    Mouse CLA232
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/CLA232/20230602/EPM_Basal/ERC-Mouse-NaN-02062023-EPM_02/';
-    %Mouse CLA234
+    Mouse CLA234
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/CLA234/20230602/EPM_Basal/ERC-Mouse-NaN-02062023-EPM_05/';
-    %Mouse CLA235
+    Mouse CLA235
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/CLA235/20230602/EPM_Basal/ERC-Mouse-NaN-02062023-EPM_06/';
-    %Mouse EV93
+    Mouse EV93
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/EV93/20230602/EPM_Basal/ERC-Mouse-NaN-02062023-EPM_03/';
-    %Mouse EV94
+    Mouse EV94
     a=a+1;Dir.path{a}{1}='/media/nas7/ProjetPFCVLPO/EV94/20230602/EPM_Basal/ERC-Mouse-NaN-02062023-EPM_04/';
     
 elseif strcmp(experiment,'EPM_ctrl_EV')

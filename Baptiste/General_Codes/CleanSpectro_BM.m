@@ -2,7 +2,8 @@ function [Sc,Th,Epoch]=CleanSpectro_BM(S,f,id,f_thr)
 
 % S=tsd avec time and values of Spectrogram
 % [Sc,Th,Epoch]=CleanSpectro(S,f,id)
-% id from 1 to 8 (the higher the more removal
+% id from 1 to 9 (the higher the more removal
+% BM add: f_thr for focus only in range of interest
 
 Sp=Data(S);
 temp=tsd(Range(S)',mean(Sp(:,f>f_thr)')');

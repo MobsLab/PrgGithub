@@ -5,6 +5,8 @@ clear all
 GetEmbReactMiceFolderList_BM
 Drug_Group={'SalineSB','ChronicFlx','AcuteFlx','Midazolam','SalineBM','Diazepam','RipControl','RipInhib'};
 Group=7:8;
+scale = linspace(-400 , -50 , 437);
+dur_rip = 7;
 
 for group=1:length(Group)
     Mouse=Drugs_Groups_UMaze_BM(Group(group));
@@ -125,7 +127,7 @@ for n=1:2
 end
 
 
-group=1;
+Mouse=Drugs_Groups_UMaze_BM(7); group=1;
 for mouse=1:10
     Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
     
@@ -154,6 +156,11 @@ for mouse=1:10
     DELAY = [DELAY delay{mouse}];
 end
 
+
+
+
+%% figures
+% Stims by session, time, accuracy,...
 figure
 histogram(DELAY,32,'FaceColor','k');
 xlabel('delay from offline detection(ms)'), ylabel('#')
@@ -161,9 +168,6 @@ makepretty, vline(0,'--r')
 text(20,100,['median = ' num2str(nanmedian(DELAY)) 'ms'],'FontSize',15)
 
 
-
-%% figures
-% Stims by session, time, accuracy,...
 Cols = {[.65, .75, 0],[.63, .08, .18]};
 X = 1:2;
 Legends = {'Rip sham','Rip inhib'};
@@ -197,7 +201,7 @@ makepretty, xtickangle(45)
 
 
 
-%%
+%
 figure
 subplot(131)
 MakeSpreadAndBoxPlot3_SB(FreezeTime_All ,Cols,X,Legends , 'showpoints',1,'paired',0);
@@ -206,12 +210,12 @@ subplot(132)
 MakeSpreadAndBoxPlot3_SB(FreezeTime_Shock ,Cols,X,Legends , 'showpoints',1,'paired',0);
 title('Freeze shock'); ylabel('time (s)');
 subplot(133)
-MakeSpreadAndBoxPlot3_SB(FreezeTime_All ,Cols,X,Legends , 'showpoints',1,'paired',0);
+MakeSpreadAndBoxPlot3_SB(FreezeTime_Safe ,Cols,X,Legends , 'showpoints',1,'paired',0);
 title('Freeze safe'); ylabel('time (s)');
 
 
 
-
+%%
 figure
 subplot(341)
 MakeSpreadAndBoxPlot3_SB(VHC_Stim_Numb_All ,Cols,X,NoLegends , 'showpoints',1,'paired',0);

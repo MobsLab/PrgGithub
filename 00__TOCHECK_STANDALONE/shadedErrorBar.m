@@ -123,7 +123,8 @@ H.mainLine=plot(x,y,lineProps{:});
 % or a de-saturated solid colour for the patch surface.
 
 col=get(H.mainLine,'color');
-edgeColor=col+(1-col)*0.55;
+% edgeColor=col+(1-col)*0.55;
+edgeColor=[1 1 1]; % changed by BM on 18/03/2025 because KB doesn't like
 patchSaturation=0.15; %How de-saturated or transparent to make the patch
 if transparent
     faceAlpha=patchSaturation;
@@ -162,8 +163,8 @@ H.patch=patch(xP,yP,1,'facecolor',patchColor,...
 
 
 %Make nice edges around the patch. 
-H.edge(1)=plot(x,lE,'-','color',edgeColor);
-H.edge(2)=plot(x,uE,'-','color',edgeColor);
+% H.edge(1)=plot(x,lE,'-','color',edgeColor);
+% H.edge(2)=plot(x,uE,'-','color',edgeColor);
 
 %The main line is now covered by the patch object and was plotted first to
 %extract the RGB value of the main plot line. I am not aware of an easy way

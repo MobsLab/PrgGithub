@@ -2,21 +2,23 @@ clear all
 close all
 cd('/media/nas8-2/ProjetEmbReact/transfer')
 load('AllSessions.mat');
-Session_type={'Cond','Habituation'};
+Session_type={'Cond'};
 
 RangeLow = linspace(0.1526,20,261);
 RangeHigh = linspace(22,98,32);
 RangeVHigh = linspace(22,249,94);
 RangeLow2 = linspace(1.0681,20,249);
 
-Name = {'Clean','WithSham'};
+% Name = {'WithSham','Clean'};
+Name = {'WithSham'};
+
 
 % UMaze
-for group = 1:2
+for group = 1:length(Name)
     if group == 1
-        Mouse=[1500,1686,1687,1685,1385,1393];
-    elseif group == 2
         Mouse=[1500,1686,1687,1685,1385,1393,41531,1412,1415,1416];
+    elseif group == 2
+        Mouse=[1500,1686,1687,1685,1385,1393];
     end
     
     disp (Name{group})
@@ -96,9 +98,9 @@ end
 GetNicotineSessions_CH
 Name = {'SalineOF','NicotineOF','NicotineLowOF','SalineHC','NicotineHC','DiazepamHC'};
 
-Session_type = {'Pre','Post'};
+Session_type = {'Pre','Post','Post0to5','Post5to10','Post10toEnd'};
 
-Mouse_names_Nic = {'M1500','M1531','M1532','M1686','M1687','M1685'};
+Mouse_names_Nic = {'M1500','M1531','M1532','M1686','M1687','M1685','M1712','M1713'};
 Mouse_names_Sal = {'M1685','M1686','M1612','M1641','M1644','M1687'};
 Mouse_names_NicLow = {'M1614','M1644','M1688','M1641'};
 Mouse_names_SalHC = {'M1411','M1412','M1414','M1416','M1417','M1418','M1207','M1224','M1225','M1227','M1252','M1253','M1254'};
@@ -149,21 +151,31 @@ for group = 4:5
             disp('No EKG')
         end
         
-        EpochDrugs1.(Name{group})(mouse) = Stop(Epoch_Drugs{1});
+        EpochDrugs1.(Name{group})(mouse) = Start(Epoch_Drugs{1});
         EpochDrugs2.(Name{group})(mouse) = Start(Epoch_Drugs{2});
         
-        Fifteen_Bef_Inj = intervalSet(EpochDrugs1.(Name{group})(mouse)-900e4 , EpochDrugs1.(Name{group})(mouse));
-        Fifteen_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse) , EpochDrugs2.(Name{group})(mouse)+900e4);
+        Fifteen_Bef_Inj = intervalSet(EpochDrugs1.(Name{group})(mouse) , EpochDrugs1.(Name{group})(mouse)+1800e4);
+        Fifteen_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse) , EpochDrugs2.(Name{group})(mouse)+1800e4);
+        Zero_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse) , EpochDrugs2.(Name{group})(mouse)+300e4);
+        Five_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse)+300e4 , EpochDrugs2.(Name{group})(mouse)+600e4);
+        Ten_Aft_Inj = intervalSet(EpochDrugs2.(Name{group})(mouse)+600e4 , EpochDrugs2.(Name{group})(mouse)+900e4);
+        
+        
         
         for sess = 1:length(Session_type)
             if sess==1; Epoch_to_use = Fifteen_Bef_Inj;
             elseif sess==2; Epoch_to_use = Fifteen_Aft_Inj;
+            elseif sess ==3; Epoch_to_use = Zero_Aft_Inj; elseif sess==4; Epoch_to_use = Five_Aft_Inj; elseif sess == 5; Epoch_to_use = Ten_Aft_Inj;
             end
             
             FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = and(FreezeAccEpoch,Epoch_to_use);
             FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+            ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})= Epoch_to_use-FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse});
             Speed.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(Vtsd,Epoch_to_use);
             OB_Sp_tsd2 = Restrict(OBtsd,Epoch_to_use);
+            SpectroBulbActive.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(OB_Sp_tsd2, ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+            MeanSpectroActive.(Name{group}).(Session_type{sess})(mouse,:) = nanmean(Data(SpectroBulbActive.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+
             SpectroBulbFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(OB_Sp_tsd2, FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             MeanSpectroFz.(Name{group}).(Session_type{sess})(mouse,:) = nanmean(Data(SpectroBulbFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
             Respi2 = ConvertSpectrum_in_Frequencies_BM(RangeLow, Range(OB_Sp_tsd2), Data(OB_Sp_tsd2));
@@ -235,10 +247,13 @@ for group = 1:2
             FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FreezeAccEpoch;
             FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
             Speed.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Vtsd;
+            ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})=Epoch-FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse});
             
             try
                 load('B_Low_Spectrum.mat')
                 OB_Sp_tsd2 = tsd(Spectro{2}*1e4 , Spectro{1});
+                SpectroBulbActive.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(OB_Sp_tsd2,ActiveEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+                MeanSpectroActive.(Name{group}).(Session_type{sess})(mouse,:) = nanmean(Data(SpectroBulbActive.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
                 SpectroBulbFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(OB_Sp_tsd2,FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
                 MeanSpectroFz.(Name{group}).(Session_type{sess})(mouse,:) = nanmean(Data(SpectroBulbFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
                 Respi2 = ConvertSpectrum_in_Frequencies_BM(RangeLow, Range(OB_Sp_tsd2), Data(OB_Sp_tsd2));
@@ -305,9 +320,9 @@ for mouse = Mouse
 end
 
 
-Mouse=[1500,1686,1687,1685,1385,1393];
+Mouse=[1500,1686,1687,1685,1385,1393,1713,1714];
 for mouse = 1:length(Mouse)
-    [~,mtemp]= max(MeanSpectroBulbFzShock.Clean.Fear(mouse,:));
+    [~,mtemp]= max(MeanSpectroBulbFzShock.WithSham.Cond(mouse,:));
     mtemp = RangeLow(mtemp);
     m.Shock(mouse) = mtemp;
     
@@ -315,7 +330,7 @@ for mouse = 1:length(Mouse)
         m.Shock(mouse) = NaN;
     end
     
-    [~,mtemp]= max(MeanSpectroBulbFzSafe.Clean.Fear(mouse,:));
+    [~,mtemp]= max(MeanSpectroBulbFzSafe.WithSham.Cond(mouse,:));
     mtemp = RangeLow(mtemp);
     m.Safe(mouse) = mtemp;
     
@@ -340,7 +355,7 @@ for group = 1:5
         Mouse_names = {'M1411','M1412','M1413','M1414','M1416','M1417','M1418','M1385'};
     elseif group == 5
         Mouse_names = {'M1687','M1685','M1685','M1393'};
-        Sess2 = {'Fear'};
+        Sess2 = {'Cond'};
     end
     
     for sess = 1:length(Sess2)
@@ -401,22 +416,22 @@ Col3=[.5 .5 1];
 Col4=[0.13, 0.55, 0.13];
 
 % close all
-figure, 
+figure('color',[1 1 1])
 subplot(1,4,1:3)
 a1 = Plot_MeanSpectrumForMice_BM(MeanSpectroFz.NicotineOF.Post,'color',Col1);
 makepretty
 a1.mainLine.LineWidth = 2;
-a2 = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.Clean.Fear,'color',Col2);
+a2 = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.WithSham.Cond,'color',Col2);
 makepretty
 a2.mainLine.LineWidth = 2;
-a3 = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.Clean.Fear,'color',Col3);
+a3 = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.WithSham.Cond,'color',Col3);
 makepretty
 a3.mainLine.LineWidth = 2;
 a4 = Plot_MeanSpectrumForMice_BM(MeanSpectroFz.NicotineHC.Post,'color',Col4);
 makepretty
 a4.mainLine.LineWidth = 2;
 legend([a1.mainLine a4.mainLine a2.mainLine a3.mainLine],'Nicotine OF','NicotineHC','Shock','Safe')
-xlim([0 12])
+xlim([0 10])
 ylim([0 1.2])
 
 subplot(244)
@@ -424,7 +439,7 @@ Cols = {[1 .5 .5],[.5 .5 1],[1, 0, 1],[0.13, 0.55, 0.13]};
 X=[1:4];
 Legends={'Shock','Safe','OF Nicotine','HC Nicotine'};
 MakeSpreadAndBoxPlot3_SB({m.Shock m.Safe m.NicotineOF, m.NicotineHC},Cols,X,Legends,'showpoints',1,'paired',0)
-% MakeSpreadAndBoxPlot3_SB({Respi_Fz_Shock_mean.Clean.Fear Respi_Fz_Safe_mean.Clean.Fear MeanRespiFz.NicotineOF.Post, MeanRespiFz.NicotineHC.Post},Cols,X,Legends,'showpoints',1,'paired',0)
+% MakeSpreadAndBoxPlot3_SB({Respi_Fz_Shock_mean.Clean.Cond Respi_Fz_Safe_mean.Clean.Cond MeanRespiFz.NicotineOF.Post, MeanRespiFz.NicotineHC.Post},Cols,X,Legends,'showpoints',1,'paired',0)
 
 ylabel('Peak of OB spectrum');
 makepretty_CH
@@ -447,20 +462,20 @@ Cols = {[1 .5 .5],[.5 .5 1],[1, 0, 1],[0.13, 0.55, 0.13]};
 X=[1:4];
 Legends={'Shock','Safe','OF Nicotine','HC Nicotine'};
 subplot(223)
-MakeSpreadAndBoxPlot3_SB({HR_Fz_Shock_mean.Clean.Fear HR_Fz_Safe_mean.Clean.Fear MeanHRFz.NicotineOF.Post MeanHRFz.NicotineHC.Post},Cols,X,Legends,'showpoints',1,'paired',0)
+MakeSpreadAndBoxPlot3_SB({HR_Fz_Shock_mean.WithSham.Cond HR_Fz_Safe_mean.WithSham.Cond MeanHRFz.NicotineOF.Post MeanHRFz.NicotineHC.Post},Cols,X,Legends,'showpoints',1,'paired',0)
 ylabel('Heart Rate (Hz)');
 makepretty_CH
 title('Heart rate freezing')
 
 subplot(224)
-MakeSpreadAndBoxPlot3_SB({HRVar_Fz_Shock_mean.Clean.Fear HRVar_Fz_Safe_mean.Clean.Fear MeanHRVarFz.NicotineOF.Post MeanHRVarFz.NicotineHC.Post},Cols,X,Legends,'showpoints',1,'paired',0)
+MakeSpreadAndBoxPlot3_SB({HRVar_Fz_Shock_mean.WithSham.Cond HRVar_Fz_Safe_mean.WithSham.Cond MeanHRVarFz.NicotineOF.Post MeanHRVarFz.NicotineHC.Post},Cols,X,Legends,'showpoints',1,'paired',0)
 ylabel('Heart Rate Variability');
 makepretty_CH
 title('Heart rate var freezing')
 
 subplot(222)
 
-MakeSpreadAndBoxPlot3_SB({Ripples_Fz_Shock_density.Clean.Fear Ripples_Fz_Safe_density.Clean.Fear Ripples_density.NicotineOF.Post Ripples_density.NicotineHC.Post},Cols,X,Legends,'showpoints',1,'paired',0)
+MakeSpreadAndBoxPlot3_SB({Ripples_Fz_Shock_density.WithSham.Cond Ripples_Fz_Safe_density.WithSham.Cond Ripples_density.NicotineOF.Post Ripples_density.NicotineHC.Post},Cols,X,Legends,'showpoints',1,'paired',0)
 ylabel('density (ripples/second)');
 makepretty_CH
 title('Ripples density freezing')
@@ -520,7 +535,7 @@ Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 h4=shadedErrorBar(linspace(0,15,100) , movmean(nanmean(Data_to_use),5,'omitnan') , movmean(Conf_Inter,5,'omitnan'),'b',1);
 h4.mainLine.Color=Cols4; h4.patch.FaceColor=Cols4; h4.edge(1).Color=Cols4; h4.edge(2).Color=Cols4;
 
-Data_to_use = H.HeartRate.Clean.Fear; Data_to_use(Data_to_use==0)=NaN;
+Data_to_use = H.HeartRate.Clean.Cond; Data_to_use(Data_to_use==0)=NaN;
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 h5=shadedErrorBar(linspace(0,15,100) , movmean(nanmean(Data_to_use),5,'omitnan') , movmean(Conf_Inter,5,'omitnan'),'b',1);
 h5.mainLine.Color=Cols5; h5.patch.FaceColor=Cols5; h5.edge(1).Color=Cols5; h5.edge(2).Color=Cols5;
@@ -563,7 +578,7 @@ Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 h4=shadedErrorBar(linspace(0,15,100) , movmean(nanmean(Data_to_use),5,'omitnan') , movmean(Conf_Inter,5,'omitnan'),'b',1);
 h4.mainLine.Color=Cols4; h4.patch.FaceColor=Cols4; h4.edge(1).Color=Cols4; h4.edge(2).Color=Cols4;
 
-Data_to_use = H.HeartRateVar.Clean.Fear; Data_to_use(Data_to_use==0)=NaN;
+Data_to_use = H.HeartRateVar.Clean.Cond; Data_to_use(Data_to_use==0)=NaN;
 Conf_Inter=nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 h5=shadedErrorBar(linspace(0,15,100) , movmean(nanmean(Data_to_use),5,'omitnan') , movmean(Conf_Inter,5,'omitnan'),'b',1);
 h5.mainLine.Color=Cols5; h5.patch.FaceColor=Cols5; h5.edge(1).Color=Cols5; h5.edge(2).Color=Cols5;

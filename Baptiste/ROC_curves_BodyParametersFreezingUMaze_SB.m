@@ -185,7 +185,9 @@ MakeSpreadAndBoxPlot3_SB(AUC_all(Order),Cols,X,Var(Order),'showpoints',1,'paired
 hline(.5,'--k')
 ylabel('AUC'), ylim([0 1.15]), makepretty_BM2
 for v = 1:length(Order)
-    [p,h] = signrank(AUC_all{Order(v)},0.5);
+    [p,h,stats] = signrank(AUC_all{Order(v)},0.5);
+    p
+    stats
     sigstar({[X(v),X(v)+0.01]},p)
 end
 

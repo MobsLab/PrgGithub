@@ -1,7 +1,6 @@
 clear all
 
 %% Sleep
-figure
 Eyelid = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/All_Eyelid_Sleep.mat','Prop');
 Respi = load('/media/nas7/ProjetEmbReact/DataEmbReact/ThesisData/Physio_BehavGroup.mat', 'DATA_SAL');
 HR = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/HR_Homecage_Eyelid.mat');
@@ -12,6 +11,13 @@ HR.HR_Wake_First5min{1}(7)=NaN;
 Eyelid.Prop.REM_s_l_e_e_p{2}(7)=NaN;
 Eyelid.Prop.Wake{2}(7)=NaN;
 
+
+figure
+PlotCorrelations_BM(Respi_safe , PCVal)
+
+
+%
+figure
 subplot(421)
 PlotCorrelations_BM(Respi_safe , Eyelid.Prop.Wake{2})
 axis square
@@ -151,6 +157,10 @@ PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , Thigmo.Thigmo_sc
 axis square
 xlabel('SWR occurence, fz safe side (#/s)'), ylabel('thigmo score, Sleep Post'), xlim([0 1.2]), ylim([0 .15])
 
+figure
+PlotCorrelations_BM(OutPutData.Cond.ripples_density.mean(:,6) , PCVal)
+axis square
+xlabel('SWR occurence, fz safe side (#/s)'), ylabel('stress score'), xlim([0 1.2]), ylim([-.6 .8])
 
 %% Homeostasis with low vs high breathig states
 figure

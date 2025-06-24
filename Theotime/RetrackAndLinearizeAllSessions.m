@@ -18,6 +18,7 @@ end
 old_dir = pwd;
 cd(dirin);
 for i = 1:length(sessions)
+    skip_tracking = false;
     cd(sessions{i});
     disp('Loading session:');
     disp(sessions{i});
@@ -42,30 +43,40 @@ for i = 1:length(sessions)
     xmlFiles = xmlFiles(ind);
 
     %% First, track and linearize the first, "template" session
-    % Get the amplifier and xml files
-    folder = amplifierSorted(1).folder;
-    amplifier_name = amplifierSorted(1).name;
-    amplifier_file = fullfile(folder, amplifier_name);
-    xml_file = fullfile(xmlFiles(1).folder, xmlFiles(1).name);
-    warning('off')
-    xml = LoadXml(xml_file);
-    warning('on')
-    sampling_rate = xml.SampleRate;
-    nChannels = xml.nChannels;
-    % Finally, get the duration of the amplifier file in seconds.
-    % as it's Int16, one element is 2 bytes - hence there are 2*nChannels bytes per sample point
-    amplifier = dir(amplifier_file);
-    size_bytes = amplifier.bytes;
-    durationTemplate = size_bytes / (nChannels * 2 * sampling_rate);
-    disp('Duration of the amplifier file:');
-    disp(durationTemplate/60);
-
-    nb_sessions = length(aviFiles);
-    nb_amplifier = length(amplifierSorted);
-    if nb_sessions ~= nb_amplifier
-        disp('Number of avi files and amplifier files do not match');
-        disp('Exiting...');
-        return
+    try
+        % Get the amplifier and xml files
+        folder = amplifierSorted(1).folder;
+        amplifier_name = amplifierSorted(1).name;
+        amplifier_file = fullfile(folder, amplifier_name);
+        xml_file = fullfile(xmlFiles(1).folder, xmlFiles(1).name);
+        warning('off')
+        xml = LoadXml(xml_file);
+        warning('on')
+        sampling_rate = xml.SampleRate;
+        nChannels = xml.nChannels;
+        % Finally, get the duration of the amplifier file in seconds.
+        % as it's Int16, one element is 2 bytes - hence there are 2*nChannels bytes per sample point
+        amplifier = dir(amplifier_file);
+        size_bytes = amplifier.bytes;
+        % the duration is the closest lower integer dividable by 10 (all Exp are ).
+        durationTemplate = floor((size_bytes / (nChannels * 2 * sampling_rate))/10)*10;
+        fprintf('Duration of the amplifier file for the %s session:\n', sessions{i});
+        disp(durationTemplate/60);
+    
+        nb_sessions = length(aviFiles);
+        nb_amplifier = length(amplifierSorted);
+        if nb_sessions ~= nb_amplifier
+            disp('Number of avi files and amplifier files do not match');
+            disp('Exiting...');
+            return
+        end
+    catch e
+        if contains(lower(sessions{i}), 'sleep')
+            disp('Processing sleep session - no amplifier found so will skip the tracking.')
+            skip_tracking = true;
+        else
+            fprintf(1,'There was an error! The message was:\n%s',e.message);
+        end
     end
 
     done = false;
@@ -74,7 +85,7 @@ for i = 1:length(sessions)
     aviFile = aviFiles(1).name;
     aviFile = fullfile(folder, aviFile);
     sess_number = 1;
-
+    
     % Cd to the folder containing the avi file
     cd(folder);
 
@@ -100,7 +111,7 @@ for i = 1:length(sessions)
             % If it is, skip the GUI
             disp('behavResources.mat was created today, skipping GUI');
             done = true;
-        else
+        elseif ~skip_tracking
             % If it is not, call the GUI
             % This will create a new behavResources_Offline.mat file
             FastOfflineTrackingFinal_CompNewTracking('aviFile', aviFile, 'duration', durationTemplate)
@@ -175,11 +186,19 @@ for i = 1:length(sessions)
     if isFileModifiedToday('behavResources.mat') && ~redo
         disp('');
     else
-        % Do the same with MorphLinearize and AlignMaze
-        [AlignedXtsd,AlignedYtsd,ZoneEpochAligned,XYOutput] = MorphMazeToSingleShape_EmbReact_DB...
-            (Xtsd,Ytsd, Zone{1}, ref, Ratio_IMAonREAL);
-        [LinearDist, curvexy] = LinearizeMaze(data, 1);
-
+        if contains(lower(sessions{i}), 'sleep')
+            ZoneEpochAligned = [];
+            XYOutput = [];
+            curvexy = [];
+            LinearDist = [];
+            curvexy = [];
+            [AlignedXtsd, AlignedYtsd] = HCTracking(Xtsd, Ytsd, Ratio_IMAonREAL, 'plot', true);
+        else
+            % Do the same with MorphLinearize and AlignMaze
+            [AlignedXtsd,AlignedYtsd,ZoneEpochAligned,XYOutput] = MorphMazeToSingleShape_EmbReact_DB...
+                (Xtsd,Ytsd, Zone{1}, ref, Ratio_IMAonREAL);
+            [LinearDist, curvexy] = LinearizeMaze(data, 1);
+        end
         % Save the new data
         save('behavResources.mat', 'PosMat', 'im_diff', 'Vtsd', 'Xtsd', 'Ytsd', 'Imdifftsd', 'ref', 'mask', 'Ratio_IMAonREAL', ...
             'BW_threshold', 'strsz', 'smaller_object_size', 'shape_ratio', ...
@@ -214,32 +233,41 @@ for i = 1:length(sessions)
         end
 
         % Process the file (no need to check skipProcessing again)
-        amplifier = amplifierSorted(w);
-        amplifier_file = fullfile(amplifier.folder, amplifier.name);
-        xml_file = fullfile(xmlFiles(w).folder, xmlFiles(w).name);
-        warning('off');
-        xml = LoadXml(xml_file);
-        warning('on');
-        sampling_rate = xml.SampleRate;
-        nChannels = xml.nChannels;
+        try
+            amplifier = amplifierSorted(w);
+            amplifier_file = fullfile(amplifier.folder, amplifier.name);
+            xml_file = fullfile(xmlFiles(w).folder, xmlFiles(w).name);
+            warning('off');
+            xml = LoadXml(xml_file);
+            warning('on');
+            sampling_rate = xml.SampleRate;
+            nChannels = xml.nChannels;
 
-        % Calculate duration
-        amplifier = dir(amplifier_file);
-        size_bytes = amplifier.bytes;
-        durationNew = size_bytes / (nChannels * 2 * sampling_rate);
-        % Check duration difference
-        if abs(durationNew - durationTemplate) > 0.1* durationTemplate
-            if amplifier.folder ~= xmlFiles(w).folder
-                warning('xml and dat files dont come from the same folder!')
+            % Calculate duration
+            amplifier = dir(amplifier_file);
+            size_bytes = amplifier.bytes;
+            durationNew = floor((size_bytes / (nChannels * 2 * sampling_rate))/10)*10;
+            % Check duration difference
+            if abs(durationNew - durationTemplate) > 0.1* durationTemplate
+                if amplifier.folder ~= xmlFiles(w).folder
+                    warning('xml and dat files dont come from the same folder!')
+                end
+                disp(['Duration of the amplifier file (' amplifier.folder ', xml ' xmlFiles(w).folder '):']);
+                disp(durationNew/60);
+                disp('Duration of the template session:');
+                disp(durationTemplate/60);
+                duration = inputdlg('Duration of the amplifier file (in seconds)', '/!\Duration differs from template!', 1, {num2str(durationNew)});
+                duration = eval(duration{1});
+            else
+                duration = durationNew;
             end
-            disp(['Duration of the amplifier file (' amplifier.folder ', xml ' xmlFiles(w).folder '):']);
-            disp(durationNew/60);
-            disp('Duration of the template session:');
-            disp(durationTemplate/60);
-            duration = inputdlg('Duration of the amplifier file (in seconds)', '/!\ Duration differs from template!', 1, {num2str(durationNew)});
-            duration = eval(duration{1});
-        else
-            duration = durationNew;
+        catch
+            if contains(lower(sessions{i}), 'sleep')
+                disp('Processing sleep session - no amplifier found so will skip the tracking.')
+                duration = [];
+            else
+                fprintf(1,'There was an error! The message was:\n%s',e.message);
+            end
         end
 
         while ~happy
@@ -291,12 +319,24 @@ for i = 1:length(sessions)
             save('behavResources_Offline.mat', 'Zone', '-append');
             ref = data.ref;
 
-            [AlignedXtsd, AlignedYtsd, ZoneEpochAligned, XYOutput] = MorphMazeToSingleShape_EmbReact_DB(Xtsd, Ytsd, Zone{1}, ref, Ratio_IMAonREAL, XYOutput);
-            [LinearDist, curvexy] = LinearizeMaze(data, 1, 'curvexy', curvexy);
-
+            if contains(lower(sessions{i}), 'sleep')
+                ZoneEpochAligned = [];
+                XYOutput = [];
+                curvexy = [];
+                LinearDist = [];
+                curvexy = [];
+                [AlignedXtsd, AlignedYtsd] = AlignHCBehaviour(Xtsd, Ytsd, Ratio_IMAonREAL, 'plot', true);
+            else
+                [AlignedXtsd, AlignedYtsd, ZoneEpochAligned, XYOutput] = MorphMazeToSingleShape_EmbReact_DB(Xtsd, Ytsd, Zone{1}, ref, Ratio_IMAonREAL, XYOutput);
+                [LinearDist, curvexy] = LinearizeMaze(data, 1, 'curvexy', curvexy);
+            end
             % Save the new data
             happy = inputdlg('Happy with the tracking and linearization? (0/1)', 'redo with GUI');
-            happy = eval(happy{1});
+            try
+                happy = eval(happy{1});
+            catch
+                keyboard
+            end
 
             if ~happy
                 disp('Redoing the tracking and linearization with GUI');
@@ -323,5 +363,45 @@ if exist(filePath, 'file')
     isToday = (Y == year(today)) && (M == month(today)) && (D == day(today));
 else
     isToday = false;
+end
+end
+
+function [AlignedXtsd, AlignedYtsd] = HCTracking(Xtsd, Ytsd, Ratio_IMAonREAL, varargin)
+
+p = inputParser;
+addParameter(p, 'plot', false, @(x) islogical(x));
+parse(p, varargin{:});
+plotting = p.Results.plot;
+satisfied = 0;
+
+while satisfied ==0
+    % Behaviour
+    polygon = GetCageEdgesWithVideo(Data(Ytsd).*Ratio_IMAonREAL,Data(Xtsd).*Ratio_IMAonREAL);
+    x = polygon.Position(:,2);
+    y = polygon.Position(:,1);
+    if abs(x(1)-x(2))>abs(x(3)-x(2))
+        Coord1 = [x(1)-x(2),y(1)-y(2)];
+        Coord2 = [x(3)-x(2),y(3)-y(2)];
+    else
+        Coord2 = [x(1)-x(2),y(1)-y(2)];
+        Coord1 = [x(3)-x(2),y(3)-y(2)];
+    end
+    TranssMat = [Coord1',Coord2'];
+    XInit = Data(Xtsd).*Ratio_IMAonREAL-x(2);
+    YInit = Data(Ytsd).*Ratio_IMAonREAL-y(2);
+
+    % The Xtsd and Ytsd in new coordinates
+    A = ((pinv(TranssMat)*[XInit,YInit]')');
+    AlignedXtsd = tsd(Range(Xtsd),40*A(:,1));
+    AlignedYtsd = tsd(Range(Ytsd),20*A(:,2));
+    clf
+    if plotting
+        plot(Data(AlignedXtsd),Data(AlignedYtsd))
+        xlim([0 40])
+        ylim([0 20])
+    end
+
+    satisfied = input('happy?')
+
 end
 end

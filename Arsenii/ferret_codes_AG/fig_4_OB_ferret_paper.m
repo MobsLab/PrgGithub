@@ -1,5 +1,9 @@
 function fig_4_OB_ferret_paper(allPValues, allCorrelations, allPupilSizes)
 
+%%
+
+
+
 %% pupil distributions across states
 
 for sess = 1:size(allPValues, 2)

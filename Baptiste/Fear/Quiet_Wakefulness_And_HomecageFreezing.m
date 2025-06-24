@@ -11,7 +11,7 @@ smoofact_Acc = 30;
 th_immob_Acc = 1.7e7;
 thtps_immob=2;
 
-for sess=1:2
+for sess=2%1:2
     for mouse=1:length(Mouse)
         Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
 
@@ -33,18 +33,26 @@ for sess=1:2
             
             Fz_HC{sess}(mouse) = sum(DurationEpoch(and(Wake_Before_Sleep_Epoch , FreezeAccEpoch)))/60e4;
             Fz_HC_prop{sess}(mouse) = sum(DurationEpoch(and(Wake_Before_Sleep_Epoch , FreezeAccEpoch)))/sum(DurationEpoch(Wake_Before_Sleep_Epoch));
+            Fz_HC_prop_all{sess}(mouse) = sum(DurationEpoch(and(Wake_Before_Sleep_Epoch , FreezeAccEpoch)))/max(Range(NewMovAcctsd));
         
-            OB{sess,mouse} = Restrict(B_Sptsd , and(Wake_Before_Sleep_Epoch , FreezeAccEpoch));
-            OB_MeanSp_Fz_HC(sess,mouse,:) = nanmean(Data(OB{sess,mouse}));
-            Respi = ConcatenateDataFromFolders_SB({SleepSess.(Mouse_names{mouse}){sess}} , 'respi_freq_bm');
-            Respi_Fz_HC{sess,mouse} = Restrict(Respi , and(Wake_Before_Sleep_Epoch , FreezeAccEpoch));
-            
-            Ripples = ConcatenateDataFromFolders_SB({SleepSess.(Mouse_names{mouse}){sess}} , 'ripples');
-            RipplesDensity_Fz_HC(sess,mouse) = length(Restrict(Ripples , and(Wake_Before_Sleep_Epoch , FreezeAccEpoch)))./(sum(DurationEpoch(and(Wake_Before_Sleep_Epoch , FreezeAccEpoch)))/1e4);
+            Sleep_HC{sess}(mouse) = sum(DurationEpoch(Sleep))/60e4;
+            Sleep_prop{sess}(mouse) = sum(DurationEpoch(Sleep))/max(Range(NewMovAcctsd));
+        
+%             OB{sess,mouse} = Restrict(B_Sptsd , and(Wake_Before_Sleep_Epoch , FreezeAccEpoch));
+%             OB_MeanSp_Fz_HC(sess,mouse,:) = nanmean(Data(OB{sess,mouse}));
+%             Respi = ConcatenateDataFromFolders_SB({SleepSess.(Mouse_names{mouse}){sess}} , 'respi_freq_bm');
+%             Respi_Fz_HC{sess,mouse} = Restrict(Respi , and(Wake_Before_Sleep_Epoch , FreezeAccEpoch));
+%             
+%             Ripples = ConcatenateDataFromFolders_SB({SleepSess.(Mouse_names{mouse}){sess}} , 'ripples');
+%             RipplesDensity_Fz_HC(sess,mouse) = length(Restrict(Ripples , and(Wake_Before_Sleep_Epoch , FreezeAccEpoch)))./(sum(DurationEpoch(and(Wake_Before_Sleep_Epoch , FreezeAccEpoch)))/1e4);
         end
+        disp(mouse)
     end
     Fz_HC{sess}(Fz_HC{sess}==0) = NaN;
     Fz_HC_prop{sess}(Fz_HC_prop{sess}==0) = NaN;
+    Fz_HC_prop_all{sess}(Fz_HC_prop_all{sess}==0) = NaN;
+    Sleep_HC{sess}(Sleep_HC{sess}==0) = NaN;
+    Sleep_prop{sess}(Sleep_prop{sess}==0) = NaN;
     Fz_HC{sess}(Fz_HC{sess}>20) = NaN;
     Fz_HC_prop{sess}(Fz_HC_prop{sess}>.4) = NaN;
 end

@@ -1,4 +1,28 @@
 
+
+% run RipplesReactivation_UMaze_DataAnalysis_BM
+% or
+load('/media/nas7/ProjetEmbReact/DataEmbReact/RipplesReactivation_FzMaze.mat')
+
+
+figure
+MakeSpreadAndBoxPlot3_SB({AllComp_Shock_rip./nanmedian(AllComp_Shock_ctrl) AllComp_Safe_rip./nanmedian(AllComp_Safe_ctrl)},{[1 .5 .5],[.5 .5 1]},[1 2],{'Shock','Safe'},'showpoints',0,'paired',1)
+ylabel('Activation strength'), set(gca,'YScale','log')
+makepretty_BM2
+
+figure
+MakeSpreadAndBoxPlot3_SB({AllComp_Shock_ctrl./nanmedian(AllComp_Shock_ctrl) AllComp_Safe_ctrl./nanmedian(AllComp_Safe_ctrl)},{[1 .5 .5],[.5 .5 1]},[1 2],{'Shock','Safe'},'showpoints',0,'paired',1)
+ylabel('Activation strength'), set(gca,'YScale','log')
+makepretty_BM2
+
+
+
+
+
+
+
+
+%%
 % choosssse if you want to study PFC or HPC reactivations
 PFC=0;
 
@@ -382,7 +406,7 @@ end
 
 figure
 subplot(121)
-MakeSpreadAndBoxPlot_BM({AllComp_Shock_rip AllComp_Safe_rip},{[1 .5 .5],[.5 .5 1]},[1 2],{'Shock','Safe'},0,1)
+MakeSpreadAndBoxPlot3_SB({AllComp_Shock_rip AllComp_Safe_rip},{[1 .5 .5],[.5 .5 1]},[1 2],{'Shock','Safe'},'showpoints',0,'paired',1)
 ylabel('Reactivation strength'), ylim([l(11) l(12)])
 makepretty
 title('Ripples epoch')

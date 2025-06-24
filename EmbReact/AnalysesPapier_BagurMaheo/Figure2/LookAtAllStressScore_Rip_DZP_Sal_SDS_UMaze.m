@@ -8,7 +8,6 @@ AllDatSal = GetStressScoreValuesSaline_UMaze;
 [AllDat.SDS{1},AllDat.SDS{2}] = GetStressScoreValuesSDS_UMaze;
 GroupNames = fieldnames(AllDat);
 
-
 %% Choose which variables to include
 VarToUse = [1:4];
 AllDatSal = AllDatSal(VarToUse,:);

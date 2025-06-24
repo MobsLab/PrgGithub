@@ -4,6 +4,8 @@ RangeLow = linspace(0.1526,20,261);
 for group = 4:5
     if group == 2
         Mouse_names = Mouse_names_Nic;
+        sizemap1 = [0.01:0.01:1];
+        sizemap2 = [0.01:0.01:1];
     elseif group == 1
         Mouse_names = Mouse_names_Sal;
         sizemap1 = [0.01:0.01:1];
@@ -11,6 +13,8 @@ for group = 4:5
         
     elseif group == 3
         Mouse_names = Mouse_names_NicLow;
+        sizemap1 = [0.01:0.01:1];
+        sizemap2 = [0.01:0.01:1];
     elseif group == 4
         Mouse_names = Mouse_names_SalHC;
         sizemap1 = [-5:25];
@@ -18,8 +22,12 @@ for group = 4:5
         
     elseif group == 5
         Mouse_names = Mouse_names_NicHC;
+        sizemap1 = [-5:25];
+        sizemap2 = [-5:45];
     elseif group == 6
         Mouse_names = Mouse_names_DzpHC;
+        sizemap1 = [-5:25];
+        sizemap2 = [-5:45];
     end
     for mouse = 1:length(Mouse_names)
         %         Fifteen_Bef_Inj = intervalSet(EpochDrugs1.(Name{group})(mouse)-900e4 , EpochDrugs1.(Name{group})(mouse));
@@ -79,13 +87,13 @@ for group = 4:5
         
         subplot(2,4,5:6)
         try
-        imagesc(linspace(0,max(Range(SpectroBulbFz.(Name{group}).Post.(Mouse_names{mouse}),'s')),length(Range(SpectroBulbFz.(Name{group}).Post.(Mouse_names{mouse})))),RangeLow, Data(SpectroBulbFz.(Name{group}).Post.(Mouse_names{mouse}))'), axis xy
+            imagesc(linspace(0,max(Range(SpectroBulbFz.(Name{group}).Post.(Mouse_names{mouse}),'s')),length(Range(SpectroBulbFz.(Name{group}).Post.(Mouse_names{mouse})))),RangeLow, Data(SpectroBulbFz.(Name{group}).Post.(Mouse_names{mouse}))'), axis xy
         end
         ylim([0 12])
         makepretty
         mtitle([Name{group},', ',Mouse_names{mouse}]);
-        saveFigure(1,[Name{group},Mouse_names{mouse}],'/home/greta/Dropbox/Mobs_member/ChloeHayhurst/Data/Nicotine/IDCards')
-        close all
+%         saveFigure(1,[Name{group},Mouse_names{mouse}],'/home/greta/Dropbox/Mobs_member/ChloeHayhurst/Data/Nicotine/IDCards')
+%         close all
     end
 end
 

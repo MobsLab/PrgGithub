@@ -1,5 +1,5 @@
 function [OutPutData , Epoch , NameEpoch , OutPutTsd] = MeanPhysioParameters(MazeType,Mouse_List,Session_Type,varargin)
-
+%% stolen from MeanValuesPhysiologicalParameters_BM
 Dir = PathForExperimentsERC(MazeType);
 Dir = RestrictPathForExperiment(Dir , 'nMice' ,Mouse_List);
 

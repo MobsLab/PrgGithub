@@ -1,7 +1,7 @@
 
-Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','','Baseline'};
+Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','TrueBaseline','Saline','SalineLong','SalineCourt','All'};
 Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond'};
-group = 7;
+% group = 8;
 % group = 9;
 
 %% BEHAVIOUR
@@ -15,18 +15,18 @@ Legends={'Shock','Safe'};
 
 subplot(241)
 MakeSpreadAndBoxPlot3_SB({PropShockZone.(Name{group}).TestPre PropSafeZone.(Name{group}).TestPre},Cols,X,Legends,'showpoints',1,'paired',1);
-ylim([0 1]);
+ylim([0 0.8]);
 ylabel('Prop of time');
 title('Test Pre')
 makepretty_CH
 subplot(242)
 MakeSpreadAndBoxPlot3_SB({PropShockZone.(Name{group}).TestPostPre PropSafeZone.(Name{group}).TestPostPre},Cols,X,Legends,'showpoints',1,'paired',1);
-ylim([0 1]);
+ylim([0 0.8]);
 title('Test PostPre')
 makepretty_CH
 subplot(243)
 MakeSpreadAndBoxPlot3_SB({PropShockZone.(Name{group}).TestPostPost PropSafeZone.(Name{group}).TestPostPost },Cols,X,Legends,'showpoints',1,'paired',1);
-ylim([0 1]);
+ylim([0 0.8]);
 title('Test PostPost')
 makepretty_CH
 subplot(245)
@@ -48,7 +48,7 @@ makepretty_CH
 
 subplot(244)
 MakeSpreadAndBoxPlot3_SB({FreezeShock_Prop.(Name{group}).Cond FreezeSafe_Prop.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1);
-ylim([0 0.2]);
+ylim([0 0.15]);
 title('Freezing prop')
 makepretty_CH
  
@@ -57,7 +57,7 @@ X=[1:3];
 Legends={'TestPre','TestPostPre','TestPostPost'};
   
 subplot(248)
-MakeSpreadAndBoxPlot3_SB({Thigmo_Active.(Name{group}).TestPre Thigmo_Active.(Name{group}).TestPostPre Thigmo_Active.(Name{group}).TestPostPost},Cols,X,Legends,'showpoints',1,'paired',1);
+MakeSpreadAndBoxPlot3_SB({Thigmo_Active.(Name{group}).TestPre Thigmo_Active.(Name{group}).TestPostPre Thigmo_Active.(Name{group}).TestPostPost},Cols,X,Legends,'showpoints',1,'paired',1)
 title('Thigmotaxis')
 makepretty_CH
 
@@ -191,25 +191,68 @@ end
 % We do find the difference between shock and safe freezing, either by
 % looking at the breathing or the mean spectrums
 figure('color',[1 1 1])
-Sessions = {'Fear','CondPre','ExtPre','CondPost','ExtPost'}
+Sessions = {'Cond','CondPre','ExtPre','CondPost','ExtPost'}
 Mouse=Drugs_Groups_UMaze_CH(group);
-figure
+Col1 = [1 .5 .5];
+Col2 =[.5 .5 1];
 for i = 1:5
-    subplot(1,5,i)
+    subplot(2,5,i)
     
     Cols = {[1 .5 .5],[.5 .5 1]};
     X=[1:2];
     Legends={'Shock','Safe'};
     
-    MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).(Sessions{i}) RespiFzSafe_mean.(Name{group}).(Sessions{i})},Cols,X,Legends,'showpoints',1,'paired',1);
-    title('Fear')
+    MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).(Sessions{i}) RespiFzSafe_mean.(Name{group}).(Sessions{i})},Cols,X,Legends,'showpoints',1,'paired',1)
     ylim([1.5 6.5])
+        ylabel('Breathing rate (Hz)')
     makepretty_CH
     title(Sessions{i})
     makepretty_CH
+    
+    subplot(2,5,i+5)
+    a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).(Sessions{i}),'color',Col1);
+    a.mainLine.LineWidth = 2;
+    hold on
+    a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).(Sessions{i}),'color',Col2);
+    xlim([0 10])
+    ylim([0 1.1])
+    title(Sessions{i})
+    a.mainLine.LineWidth = 2;
+    makepretty_CH
+    
 end
 
 mtitle('freezing breathing frequency')
+
+
+figure('color',[1 1 1])
+Sessions = {'Cond','CondPre','ExtPre','CondPost','ExtPost'};
+Mouse=Drugs_Groups_UMaze_CH(group);
+for i = 1:5
+    subplot(2,5,i)
+    
+    Cols = {[1 .5 .5],[.5 .5 1]};
+    X=[1:2];
+    Legends={'Shock','Safe'};
+    
+    MakeSpreadAndBoxPlot3_SB({HR_Fz_Shock_mean.(Name{group}).(Sessions{i}) HR_Fz_Safe_mean.(Name{group}).(Sessions{i})},Cols,X,Legends,'showpoints',1,'paired',1)
+    makepretty_CH
+    title(Sessions{i});
+    makepretty_CH
+    ylabel('Heart rate (Hz)')
+    
+    subplot(2,5,i+5)
+    
+    
+    MakeSpreadAndBoxPlot3_SB({HRVar_Fz_Shock_mean.(Name{group}).(Sessions{i}) HRVar_Fz_Safe_mean.(Name{group}).(Sessions{i})},Cols,X,Legends,'showpoints',1,'paired',1)
+    makepretty_CH
+    title(Sessions{i});
+    makepretty_CH
+    ylabel('Heart rate variability')
+    
+end
+
+mtitle('Heart Rate');
 
 
 
@@ -223,16 +266,16 @@ Col2 =[.5 .5 1];
 x = 0;
 Mouse=Drugs_Groups_UMaze_CH(group);
 for i = 1:5
-subplot(1,5,i)
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).(Sessions{i}),'color',Col1);
-a.mainLine.LineWidth = 2;
-hold on
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).(Sessions{i}),'color',Col2);
-xlim([0 10])
-ylim([0 1.1])
-title(Sessions{i})
-a.mainLine.LineWidth = 2;
-makepretty_CH
+    subplot(1,5,i)
+    a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).(Sessions{i}),'color',Col1);
+    a.mainLine.LineWidth = 2;
+    hold on
+    a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).(Sessions{i}),'color',Col2);
+    xlim([0 10])
+    ylim([0 1.1])
+    title(Sessions{i})
+    a.mainLine.LineWidth = 2;
+    makepretty_CH
 end
 
 %% SLEEP FEATURES
@@ -325,9 +368,9 @@ time = linspace(1,100,10);
 figure
 
 subplot(311), hold on
-a1 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPre),stdError(WakePropTemp.Baseline.SleepPre),'color',Col1);
-a2 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPostPre),stdError(WakePropTemp.Baseline.SleepPostPre),'color',Col2);
-a3 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPostPost),stdError(WakePropTemp.Baseline.SleepPostPost),'color',Col3);
+a1 = errorbar(time, nanmean(WakePropTemp.(Name{group}).SleepPre),stdError(WakePropTemp.(Name{group}).SleepPre),'color',Col1);
+a2 = errorbar(time, nanmean(WakePropTemp.(Name{group}).SleepPostPre),stdError(WakePropTemp.(Name{group}).SleepPostPre),'color',Col2);
+a3 = errorbar(time, nanmean(WakePropTemp.(Name{group}).SleepPostPost),stdError(WakePropTemp.(Name{group}).SleepPostPost),'color',Col3);
 
 ylabel('Wake')
 xlabel('time (minutes)')
@@ -336,9 +379,9 @@ makepretty_CH
 
 
 subplot(312), hold on
-a1 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPre),stdError(NREMPropTemp.Baseline.SleepPre),'color',Col1);
-a2 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPostPre),stdError(NREMPropTemp.Baseline.SleepPostPre),'color',Col2);
-a3 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPostPost),stdError(NREMPropTemp.Baseline.SleepPostPost),'color',Col3);
+a1 = errorbar(time, nanmean(NREMPropTemp.(Name{group}).SleepPre),stdError(NREMPropTemp.(Name{group}).SleepPre),'color',Col1);
+a2 = errorbar(time, nanmean(NREMPropTemp.(Name{group}).SleepPostPre),stdError(NREMPropTemp.(Name{group}).SleepPostPre),'color',Col2);
+a3 = errorbar(time, nanmean(NREMPropTemp.(Name{group}).SleepPostPost),stdError(NREMPropTemp.(Name{group}).SleepPostPost),'color',Col3);
 
 ylabel('NREM')
 xlabel('time (minutes)')
@@ -347,9 +390,9 @@ makepretty_CH
 
 
 subplot(313), hold on
-a1 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPre),stdError(REMPropTemp.Baseline.SleepPre),'color',Col1);
-a2 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPostPre),stdError(REMPropTemp.Baseline.SleepPostPre),'color',Col2);
-a3 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPostPost),stdError(REMPropTemp.Baseline.SleepPostPost),'color',Col3);
+a1 = errorbar(time, nanmean(REMPropTemp.(Name{group}).SleepPre),stdError(REMPropTemp.(Name{group}).SleepPre),'color',Col1);
+a2 = errorbar(time, nanmean(REMPropTemp.(Name{group}).SleepPostPre),stdError(REMPropTemp.(Name{group}).SleepPostPre),'color',Col2);
+a3 = errorbar(time, nanmean(REMPropTemp.(Name{group}).SleepPostPost),stdError(REMPropTemp.(Name{group}).SleepPostPost),'color',Col3);
 
 ylabel('REM')
 xlabel('time (minutes)')
@@ -369,9 +412,9 @@ time = linspace(1,100,10);
 figure
 
 subplot(311), hold on
-a1 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPre),stdError(WakePropTemp.Baseline.SleepPre),'color',Col1);
-a2 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPre),stdError(NREMPropTemp.Baseline.SleepPre),'color',Col2);
-a3 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPre),stdError(REMPropTemp.Baseline.SleepPre),'color',Col3);
+a1 = errorbar(time, nanmean(WakePropTemp.(Name{group}).SleepPre),stdError(WakePropTemp.(Name{group}).SleepPre),'color',Col1);
+a2 = errorbar(time, nanmean(NREMPropTemp.(Name{group}).SleepPre),stdError(NREMPropTemp.(Name{group}).SleepPre),'color',Col2);
+a3 = errorbar(time, nanmean(REMPropTemp.(Name{group}).SleepPre),stdError(REMPropTemp.(Name{group}).SleepPre),'color',Col3);
 
 ylabel('SleepPre')
 xlabel('time (minutes)')
@@ -379,9 +422,9 @@ legend([a1 a2 a3],'Wake','NREM','REM')
 makepretty_CH
 
 subplot(312), hold on
-a1 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPostPre),stdError(WakePropTemp.Baseline.SleepPostPre),'color',Col1);
-a2 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPostPre),stdError(NREMPropTemp.Baseline.SleepPostPre),'color',Col2);
-a3 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPostPre),stdError(REMPropTemp.Baseline.SleepPostPre),'color',Col3);
+a1 = errorbar(time, nanmean(WakePropTemp.(Name{group}).SleepPostPre),stdError(WakePropTemp.(Name{group}).SleepPostPre),'color',Col1);
+a2 = errorbar(time, nanmean(NREMPropTemp.(Name{group}).SleepPostPre),stdError(NREMPropTemp.(Name{group}).SleepPostPre),'color',Col2);
+a3 = errorbar(time, nanmean(REMPropTemp.(Name{group}).SleepPostPre),stdError(REMPropTemp.(Name{group}).SleepPostPre),'color',Col3);
 
 ylabel('SleepPostPre')
 xlabel('time (minutes)')
@@ -389,9 +432,9 @@ legend([a1 a2 a3],'Wake','NREM','REM')
 makepretty_CH
 
 subplot(313), hold on
-a1 = errorbar(time, nanmean(WakePropTemp.Baseline.SleepPostPost),stdError(WakePropTemp.Baseline.SleepPostPost),'color',Col1);
-a2 = errorbar(time, nanmean(NREMPropTemp.Baseline.SleepPostPost),stdError(NREMPropTemp.Baseline.SleepPostPost),'color',Col2);
-a3 = errorbar(time, nanmean(REMPropTemp.Baseline.SleepPostPost),stdError(REMPropTemp.Baseline.SleepPostPost),'color',Col3);
+a1 = errorbar(time, nanmean(WakePropTemp.(Name{group}).SleepPostPost),stdError(WakePropTemp.(Name{group}).SleepPostPost),'color',Col1);
+a2 = errorbar(time, nanmean(NREMPropTemp.(Name{group}).SleepPostPost),stdError(NREMPropTemp.(Name{group}).SleepPostPost),'color',Col2);
+a3 = errorbar(time, nanmean(REMPropTemp.(Name{group}).SleepPostPost),stdError(REMPropTemp.(Name{group}).SleepPostPost),'color',Col3);
 
 ylabel('SleepPostPost')
 xlabel('time (minutes)')

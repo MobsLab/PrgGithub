@@ -1,5 +1,39 @@
 
 
+
+clear all
+Session_type={'Cond'};
+Mouse=Drugs_Groups_UMaze_BM(22);
+for sess=1:length(Session_type)
+    [OutPutData.(Session_type{sess}) , Epoch1.(Session_type{sess}) , NameEpoch] = ...
+        MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'ob_high');
+end
+
+
+
+Cols = {[1 .5 .5],[.5 .5 1]};
+X = [1:2.5];
+Legends = {'Shock','Safe'};
+
+figure
+subplot(121)
+MakeSpreadAndBoxPlot3_SB({nanmean(OutPutData.Cond.ob_high.mean(:,5,13:end),3) nanmean(OutPutData.Cond.ob_high.mean(:,6,13:end),3)},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('OB gamma power (a.u.)')
+makepretty_BM2
+
+subplot(122)
+MakeSpreadAndBoxPlot3_SB({OutPutData.Cond.ob_high.max_freq(:,5) OutPutData.Cond.ob_high.max_freq(:,6)},Cols,X,Legends,'showpoints',0,'paired',1);
+ylabel('OB gamma power (a.u.)')
+makepretty_BM2
+
+figure
+plot(linspace(20,100,32) , squeeze(OutPutData.Cond.ob_high.mean(:,5,:))' , 'Color' , [1 .5 .5])
+hold on
+plot(linspace(20,100,32) , squeeze(OutPutData.Cond.ob_high.mean(:,6,:))' , 'Color' , [.5 .5 1])
+xlabel('Frequency (Hz)'), ylabel('Power (a.u.)')
+
+
+%%
 GetEmbReactMiceFolderList_BM
 
 Session_type={'Fear','Cond','Ext','CondPre','CondPost','TestPre','TestPost'};

@@ -54,6 +54,13 @@ for group=1:length(Group)
         Prop_safeSafe{group}(n,mouse) = sum(D_safe<FreqLim)/length(D_safe);
         Length_shockSafe{group}(n,mouse) = sum(D_safe>FreqLim)*.2;
         Length_safeSafe{group}(n,mouse) = sum(D_safe<FreqLim)*.2;
+        
+        try, Length_shockSafe_end{group}(n,mouse) = sum(D_safe(round(length(D_safe)*.9):end)>FreqLim)*.2; end
+        try, Length_safeSafe_end{group}(n,mouse) = sum(D_safe(round(length(D_safe)*.9):end)<FreqLim)*.2; end
+        
+        try, Length_shockShock_end{group}(n,mouse) = sum(D_shock(round(length(D_shock)*.9):end)>FreqLim)*.2; end
+        try, Length_safeShock_end{group}(n,mouse) = sum(D_shock(round(length(D_shock)*.9):end)<FreqLim)*.2; end
+        
     end
     Prop_shock{group}(Prop_shock{group}==0)=NaN;
     Prop_safe{group}(Prop_safe{group}==0)=NaN;
@@ -231,11 +238,3 @@ Prop_safeSafe([9:13])
 
 
 %% trash ?
-try, Length_shockSafe_end{group}(n,mouse) = sum(D_safe(round(length(D_safe)*.9):end)>FreqLim)*.2; end
-try, Length_safeSafe_end{group}(n,mouse) = sum(D_safe(round(length(D_safe)*.9):end)<FreqLim)*.2; end
-
-try, Length_shockShock_end{group}(n,mouse) = sum(D_shock(round(length(D_shock)*.9):end)>FreqLim)*.2; end
-try, Length_safeShock_end{group}(n,mouse) = sum(D_shock(round(length(D_shock)*.9):end)<FreqLim)*.2; end
-
-try, Prop_safeShock_end{group}(n,mouse) = sum(D_shock(round(length(D_shock)*.9):end)<FreqLim)/length(D_shock(round(length(D_shock)*.9):end)); end
-try, Prop_safeSafe_end{group}(n,mouse) = sum(D_safe(round(length(D_safe)*.9):end)<FreqLim)/length(D_safe(round(length(D_safe)*.9):end)); end

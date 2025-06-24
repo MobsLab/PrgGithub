@@ -1,12 +1,96 @@
 
 
+load('')
+
+
+% mean values
+Session_type={'Cond','Ext'};
+Group=[22 9];
+Drug_Group={'Eyelid','PAG'};
+
+for sess=1:2
+    for group=1:length(Drug_Group)
+        Mouse=Drugs_Groups_UMaze_BM(Group(group));
+        [OutPutData.(Session_type{sess}).(Drug_Group{group}) , Epoch1.(Session_type{sess}).(Drug_Group{group}) , NameEpoch] = ...
+            MeanValuesPhysiologicalParameters_BM('all_saline',Mouse,lower(Session_type{sess}),'respi_freq_bm');
+    end
+end
+
+GetEmbReactMiceFolderList_BM
+sess=1;
+for group=1
+    Mouse=Drugs_Groups_UMaze_BM(Group(group));
+    for mouse=1:length(Mouse)
+        Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
+        try
+            TotEpoch.(Mouse_names{mouse}) = intervalSet(0,max(Range(OutPutData.Cond.Eyelid.respi_freq_bm.tsd{mouse,1})));
+            Blocked_Epoch.(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(CondSess.(Mouse_names{mouse}),'epoch','epochname','blockedepoch');
+            UnblockedEpoch.(Mouse_names{mouse}) = TotEpoch.(Mouse_names{mouse})-Blocked_Epoch.(Mouse_names{mouse});
+            
+            Respi_bl_shock(mouse) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).(Drug_Group{group}).respi_freq_bm.tsd{mouse,5} , Blocked_Epoch.(Mouse_names{mouse}))));
+            Respi_bl_safe(mouse) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).(Drug_Group{group}).respi_freq_bm.tsd{mouse,6} , Blocked_Epoch.(Mouse_names{mouse}))));
+            Respi_unbl_shock(mouse) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).(Drug_Group{group}).respi_freq_bm.tsd{mouse,5} , UnblockedEpoch.(Mouse_names{mouse}))));
+            Respi_unbl_safe(mouse) = nanmean(Data(Restrict(OutPutData.(Session_type{sess}).(Drug_Group{group}).respi_freq_bm.tsd{mouse,6} , UnblockedEpoch.(Mouse_names{mouse}))));
+            
+            disp(Mouse_names{mouse})
+        end
+    end
+end
+Respi_unbl_shock(4)=NaN;
+
+
+Cols={[1 .5 .5],[.5 .5 1]};
+X=[1:2];
+Legends={'Shock','Safe'};
+
+Shock_PAG(7)=NaN;
+Shock_Eyelid_Unb([3 5]) = NaN;
+
+figure
+subplot(151)
+MakeSpreadAndBoxPlot3_SB({OutPutData.Cond.Eyelid.respi_freq_bm.mean(:,5)  OutPutData.Cond.Eyelid.respi_freq_bm.mean(:,6)},...
+    Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('Breathing (Hz)'), ylim([1.5 7.5])
+
+subplot(152)
+MakeSpreadAndBoxPlot3_SB({OutPutData.Ext.Eyelid.respi_freq_bm.mean(:,5)  OutPutData.Ext.Eyelid.respi_freq_bm.mean(:,6)},...
+    Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('Breathing (Hz)'), ylim([1.5 7.5])
+
+subplot(153)
+MakeSpreadAndBoxPlot3_SB({OutPutData.Cond.PAG.respi_freq_bm.mean(:,5)  OutPutData.Cond.PAG.respi_freq_bm.mean(:,6)},...
+    Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('Breathing (Hz)'), ylim([1.5 7.5])
+
+subplot(154)
+MakeSpreadAndBoxPlot3_SB({Respi_bl_shock  Respi_bl_safe},...
+    Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('Breathing (Hz)'), ylim([1.5 7.5])
+
+subplot(155)
+MakeSpreadAndBoxPlot3_SB({Respi_unbl_shock  Respi_unbl_safe},...
+    Cols,X,Legends,'showpoints',0,'paired',1);
+makepretty_BM2
+ylabel('Breathing (Hz)'), ylim([1.5 7.5])
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Behaviour 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 load('/media/nas7/ProjetEmbReact/DataEmbReact/Blocked_Unblocked_Freezing_Analysis.mat')
 
 
 %% freezing features
 
 clear all
-Group=[9 10];
+Group=[9 22];
 
 GetAllSalineSessions_BM
 GetEmbReactMiceFolderList_BM
@@ -25,10 +109,9 @@ Zones_Lab={'Shock','Shock middle','Middle','Safe middle','Safe'};
 
 
 
-
 % Freeze duration
-for group=Group
-    Mouse=Drugs_Groups_UMaze_BM(group);
+for group=1:length(Group)
+    Mouse=Drugs_Groups_UMaze_BM(Group(group));
     for mouse=1:length(Mouse)
         Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
         for sess=1:length(Session_type)
@@ -186,28 +269,6 @@ makepretty
 v1=vline(nanmean(5.038)); set(v1,'LineStyle','--','Color',[1 .5 .5]); v2=vline(nanmean(3.435)); set(v2,'LineStyle','--','Color',[.5 .5 1])
 xticks([0:2:14])
 axis square
-
-
-
-
-
-
-Cols={[1 .5 .5],[.5 .5 1],[1 .5 .5],[.5 .5 1],[1 .5 .5],[.5 .5 1]};
-X=[1:6];
-Legends={'Shock','Safe','Shock','Safe','Shock','Safe'};
-
-Shock_PAG(7)=NaN;
-Shock_Eyelid_Unb([3 5]) = NaN;
-
-figure
-MakeSpreadAndBoxPlot3_SB({Shock_PAG Safe_PAG Shock_Eyelid_Blo Safe_Eyelid_Blo Shock_Eyelid_Unb Safe_Eyelid_Unb},...
-    Cols,X,Legends,'showpoints',1,'paired',0);
-makepretty_BM2
-ylabel('Breathing (Hz)')
-
-
-
-
 
 
 
