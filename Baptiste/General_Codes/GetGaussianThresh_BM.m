@@ -1,5 +1,6 @@
 function [gamma_thresh , mu1 , mu2 , std1 , std2 , AshD] = GetGaussianThresh_BM(sm_ghi, user_confirmation, PlotFig)
 
+figure
 if sum(sm_ghi<0)
     neg_val=1;
     cor = abs(min(sm_ghi));

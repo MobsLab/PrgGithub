@@ -35,40 +35,20 @@ SmoothDeltaAuC  = tsd(Range(tEnveloppe), runmean(Data(tEnveloppe), ...
 
 
 
-bin = 5e3;
+bin = 1e4;
 figure
-subplot(121)
-X = log10(Data(Restrict(SmoothDelta_OB , Sleep)));
-Y = log10(Data(Restrict(SmoothDeltaPFC , Sleep)));
+X = log10(Data(Restrict(SmoothDelta_OB , SWSEpoch)));
+Y = log10(Data(Restrict(SmoothDeltaPFC , SWSEpoch)));
 [R1,P1]=PlotCorrelations_BM(X(1:bin:end) , Y(1:bin:end) , 'color' , 'k' , 'marker_size' , 5);
 axis square
-xlabel('OB delta power'), ylabel('PFC delta power'), xlim([1.8 2.5]), ylim([1.5 2.4])
+xlabel('OB delta power'), ylabel('PFC delta power'), xlim([2.3 3]), ylim([2.1 3.2])
 makepretty_BM2
-
-subplot(122)
-X = log10(Data(Restrict(SmoothDelta_OB , Sleep)));
-Y = log10(Data(Restrict(SmoothDeltaAuC , Sleep)));
-[R2,P2]=PlotCorrelations_BM(X(1:bin:end) , Y(1:bin:end) , 'color' , 'k' , 'marker_size' , 5);
-axis square
-xlabel('OB delta power'), ylabel('AuC delta power'), xlim([1.8 2.5]), ylim([1.7 2.5])
-makepretty_BM2
-
-
-
-% subplot(133)
-% X = log10(Data(Restrict(SmoothDeltaPFC , SWSEpoch)));
-% Y = log10(Data(Restrict(SmoothDeltaAuC , SWSEpoch)));
-% [r3, p3] = corr(X,Y);
-% plot(X(1:bin:end) , Y(1:bin:end) , '.k')
-% axis square
-% xlabel('PFC delta power'), ylabel('AuC delta power'), xlim([2.1 3.1]), ylim([2.2 2.8])
-% makepretty_BM2
-
-
 
 
 %% all ferrets
 clear all
+
+smootime = 10;
 
 Dir1 = PathForExperimentsOB({'Labneh'}, 'freely-moving','saline');
 Dir2 = PathForExperimentsOB({'Labneh'}, 'freely-moving','none');
@@ -136,7 +116,7 @@ r2 = r2(2:3);
 r3 = r3(2:3);
 
 Cols = {[.8 .5 .2],[.5 .2 .8]};
-X = 2:3;
+X = 1:2;
 Legends = {'F2','F3'};
 
 

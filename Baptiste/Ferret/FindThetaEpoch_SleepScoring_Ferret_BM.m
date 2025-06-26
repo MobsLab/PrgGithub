@@ -105,6 +105,8 @@ if ~exist('Frequency','var')
     Frequency{2} = [2 5];
 end
 
+disp(['Note, that chosen Theta power is calculated as ratio of ' num2str(Frequency{1}(1)) '-' num2str(Frequency{1}(2))...
+    'Hz / ' num2str(Frequency{2}(1)) '-' num2str(Frequency{2}(2)) 'Hz'])
 
 
 %% find theta epochs
@@ -116,11 +118,9 @@ FilTheta = FilterLFP(LFP,Frequency{1},1024);
 FilDelta = FilterLFP(LFP,Frequency{2},1024);
 hilbert_theta = abs(hilbert(Data(FilTheta)));
 hilbert_delta = abs(hilbert(Data(FilDelta)));
-hilbert_delta(hilbert_delta<10) = 10;
-% hilbert_delta(hilbert_delta<100) = 100;    % mice values
+hilbert_delta(hilbert_delta<10) = 10; % 100 mice values
 
 theta_ratio = hilbert_theta./hilbert_delta;
-% ThetaRatioTSD = tsd(Range(FilDelta), theta_ratio);
 ThetaRatioTSD = tsd(Range(FilTheta), theta_ratio);
 
 
@@ -150,7 +150,6 @@ if continuity
     disp('     --- Fixing continuity issues ---')
     LongThetaEpoch = mergeCloseIntervals(ThetaEpoch,minduration*5*1E4); % long merge
     disp(['     Number of epochs after long merge:                   ' num2str(length(Start(LongThetaEpoch)))])
-    %nonThetaEpoch = thresholdIntervals(Restrict(SmoothTheta,LongThetaEpoch), theta_thresh/2, 'Direction','Below'); % 2nd thresh 
     tmean = mean(Data(Restrict(SmoothTheta,SleepEpoch)));% find averaged theta
     nonThetaEpoch = thresholdIntervals(Restrict(SmoothTheta,LongThetaEpoch), ...
         theta_thresh-(tmean/2), 'Direction','Below'); % 2nd thresh 
@@ -168,8 +167,7 @@ disp('----------------------------------')
 
 ThetaEpoch = mergeCloseIntervals(ThetaEpoch, minduration*1E4);
 ThetaEpoch = dropShortIntervals(ThetaEpoch, minduration*1E4);
-% update SleepEpoch for added bouts (with continuity)
-% SleepEpoch = or(SleepEpoch,ThetaEpoch);
+
 
 %% generate output
 Info.theta_thresh = theta_thresh;
