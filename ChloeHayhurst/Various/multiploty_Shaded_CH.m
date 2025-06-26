@@ -54,7 +54,8 @@ Data_to_use = set1{1,2};
 Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 Mean_All_Sp = nanmean(Data_to_use);
 hlines{1} = shadedErrorBar(set1{1,1} , runmean_BM(Mean_All_Sp,smooth) , runmean(Conf_Inter,smooth),'-b',1);
-hlines{1}.mainLine.LineWidth = 2; hlines{1}.mainLine.Color = color{1}; hlines{1}.patch.FaceColor = color{1}; hlines{1}.edge(1).Color = color{1}; hlines{1}.edge(2).Color = color{1};
+% hlines{1}.mainLine.LineWidth = 5; hlines{1}.mainLine.Color = color{1}; hlines{1}.patch.FaceColor = color{1}; hlines{1}.edge(1).Color = color{1}; hlines{1}.edge(2).Color = color{1};
+hlines{1}.mainLine.LineWidth = 5; hlines{1}.mainLine.Color = color{1}; hlines{1}.patch.FaceColor = color{1}; hlines{1}.edge(1).Color = 'none'; hlines{1}.edge(2).Color = 'none'; hlines{1}.patch.FaceAlpha = 0.08;
 
 xlabel(xlabels)
 ax(1).YColor = color{1};
@@ -68,7 +69,7 @@ Data_to_use = set2{1,2};
 Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 Mean_All_Sp = nanmean(Data_to_use);
 hlines{2} = shadedErrorBar(set2{1,1} , runmean_BM(Mean_All_Sp,smooth) , runmean(Conf_Inter,smooth),'-r',1);
-hlines{2}.mainLine.LineWidth = 2; hlines{2}.mainLine.Color = color{2}; hlines{2}.patch.FaceColor = color{2}; hlines{2}.edge(1).Color = color{2}; hlines{2}.edge(2).Color = color{2};
+hlines{2}.mainLine.LineWidth = 5; hlines{2}.mainLine.Color = color{2}; hlines{2}.patch.FaceColor = color{2}; hlines{2}.edge(1).Color = 'none'; hlines{2}.edge(2).Color = 'none';hlines{2}.patch.FaceAlpha = 0.08;
 ax(2).YColor = color{2};
 ax(2).LineWidth = 2;
 ax(2).FontSize = 15;
@@ -96,7 +97,7 @@ Data_to_use = set3{1,2};
 Conf_Inter = nanstd(Data_to_use)/sqrt(size(Data_to_use,1));
 Mean_All_Sp = nanmean(Data_to_use);
 hlines{3} = shadedErrorBar(set3{1,1} , runmean_BM(Mean_All_Sp,smooth) , runmean(Conf_Inter,smooth),'-g',1);
-hlines{3}.mainLine.LineWidth = 2; hlines{3}.mainLine.Color = color{3}; hlines{3}.patch.FaceColor = color{3}; hlines{3}.edge(1).Color = color{3}; hlines{3}.edge(2).Color = color{3};
+hlines{3}.mainLine.LineWidth = 5; hlines{3}.mainLine.Color = color{3}; hlines{3}.patch.FaceColor = color{3}; hlines{3}.edge(1).Color = 'none'; hlines{3}.edge(2).Color = 'none';hlines{3}.patch.FaceAlpha = 0.08;
 ax(3).YColor = color{3};
 ax(3).LineWidth = 2;
 ax(3).FontSize = 15;

@@ -24,15 +24,16 @@ switch strtrim(evalc('system(''hostname'');'))
         p = fullfile('/home/gruffalo/',varargin{:});
     case 'MobsEcolo'
         p = fullfile('/home/greta',varargin{:});
-      case 'mobshamilton-HP-Z440-Workstation'
+    case 'mobshamilton-HP-Z440-Workstation'
         p = fullfile('/home/mobshamilton/Desktop/Alice/GitHub/',varargin{:});
     case 'pinky'
         p = fullfile('/home/pinky/Documents',varargin{:});
     case 'mouse'
         p = fullfile('/home/mickey/Documents/Theotime', varargin{:});
-            case 'ratatouille'
+    case 'ratatouille'
         p = fullfile('/home/ratatouille/', varargin{:});
-%##%
+    case 'pinky-VirtualBox'
+        p = fullfile('/media/sf_mickey/Documents/Theotime', varargin{:});
         % End hostname cases
     otherwise
         dbdr = uigetdir(pwd,'Please locate your GitHub folder.');
@@ -44,7 +45,7 @@ switch strtrim(evalc('system(''hostname'');'))
         thisfile = which(mfilename);
         fi = fopen(thisfile,'r');
         fo = fopen(tempfile,'wt');
-        if fo<0                                                     
+        if fo<0
             error('GitHub:GitHub:tempnameFailed',...
                 'Could not write temporary file to %s.',tempfile);
         end

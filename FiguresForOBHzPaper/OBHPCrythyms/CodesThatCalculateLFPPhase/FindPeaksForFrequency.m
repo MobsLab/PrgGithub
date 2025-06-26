@@ -16,6 +16,7 @@ try plo; catch, plo=0; end
 
 FilLFPP=FilterLFP(LFP,Options.FilBand,1024);
 dat=Data(FilLFPP);
+
 rmpath([GitHubLocation 'PrgGithub/chronux2/spectral_analysis/continuous'])
 [YMax,XMax]=findpeaks(dat,'MinPeakHeight',std(dat)*Options.std(1),'MinPeakDistance',LimLength);
 [YMin,XMin]=findpeaks(-dat,'MinPeakHeight',std(dat)*Options.std(1),'MinPeakDistance',LimLength);

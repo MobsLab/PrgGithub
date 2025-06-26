@@ -6,14 +6,16 @@ load('AllSessions.mat');
 
 % GetEmbReactMiceFolderList_BM
 % GetAllSalineSessions_BM
-Group = 9;
+Group = [3 4 8];
 % Group = [7 3];
 
 Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','TrueBaseline','Saline','SalineLong','SalineCourt','All'};
 % Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear'};
-% Session_type = {'TestPre','TestPostPre','TestPostPost','CondPre','CondPost'};
+Session_type = {'TestPre','TestPostPre','TestPostPost'};
 % Session_type={'CondPre','CondPost','ExtPre','ExtPost','Cond'};
-Session_type = {'Cond'};
+% Session_type = {'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','Cond'};
+% Session_type = {'ExtPre','ExtPost'};
+
 
 
 RangeLow = linspace(0.1526,20,261);
@@ -34,8 +36,8 @@ for group = Group
             % variables
             Speed.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'speed');
             Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'respi_freq_bm');
-            ThetaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'hpc_theta_power');
-            GammaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'ob_gamma_power');
+%             ThetaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'hpc_theta_power');
+%             GammaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'ob_gamma_power');
             Ripples.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'ripples');
             StimEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'epoch','epochname','stimepoch');
             %             SleepyEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'epoch','epochname','sleepyepoch');
@@ -46,7 +48,6 @@ for group = Group
             %             Accelero.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'accelero');
             %             LinearPosition.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'LinearPosition');
             Aligned_Position.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'alignedposition');
-%             StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'epoch','epochname','stimepoch2');
             SpectroBulb.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'spectrum','prefix','B_Low');
 %             SpectroBulbHigh.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'spectrum','prefix','B_High');
          
@@ -180,9 +181,7 @@ for group = Group
             
             Stim_num.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(StimEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/2000;
             Stim_num_unblocked.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(StimEpochUnblocked.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/2000;
-%             a = length(StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-%             Stim_num2.(Name{group}).(Session_type{sess})(mouse) = length(a);
-%             
+         
         end
     end
 end
@@ -198,8 +197,11 @@ for group = Group
             Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
             disp(Mouse_names{mouse})
             
+            RespiFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             RespiFzShock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeShockEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             RespiFzSafe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(Respi.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeSafeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+            
+%             FastBreathingEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = intervalSet(Data(RespiFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),)
             
             RespiFzShock_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(RespiFzShock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
             RespiFzSafe_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(RespiFzSafe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
@@ -238,19 +240,19 @@ for group = Group
             Ripples_Fz_Shock_density.(Name{group}).(Session_type{sess})(mouse) = length(Ripples_Fz_Shock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))/FreezeTime_Shock.(Name{group}).(Session_type{sess})(mouse);
             Ripples_Fz_Safe_density.(Name{group}).(Session_type{sess})(mouse) = length(Ripples_Fz_Safe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))/FreezeTime_Safe.(Name{group}).(Session_type{sess})(mouse);
             
-            GammaPower_Shock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(GammaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeShockEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            GammaPower_Safe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(GammaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeSafeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             GammaPower_Shock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(GammaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeShockEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             GammaPower_Safe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(GammaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeSafeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             
+%             ThetaPower_Shock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(ThetaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeShockEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             ThetaPower_Safe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(ThetaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeSafeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             
-            ThetaPower_Shock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(ThetaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeShockEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            ThetaPower_Safe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(ThetaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), FreezeSafeEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             
-            
-            GammaPower_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(GammaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-            GammaPower_Shock_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(GammaPower_Shock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-            GammaPower_Safe_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(GammaPower_Safe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-            
-            ThetaPower_Shock_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(ThetaPower_Shock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-            ThetaPower_Safe_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(ThetaPower_Safe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+%             GammaPower_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(GammaPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+%             GammaPower_Shock_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(GammaPower_Shock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+%             GammaPower_Safe_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(GammaPower_Safe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+%             
+%             ThetaPower_Shock_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(ThetaPower_Shock.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
+%             ThetaPower_Safe_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(ThetaPower_Safe.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
             
             
             
@@ -292,9 +294,9 @@ Create_Occup_Map_CH
 % Group = [1 2];
 % Group = [3 4 7];
 
-Group = 7;
+% Group = 7;
 Session_type={'SleepPre','SleepPostPre','SleepPostPost'};
-Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','TrueBaseline','Saline','SalineLong'};
+% Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','TrueBaseline','Saline','SalineLong'};
 
 
 for group = Group
@@ -313,6 +315,10 @@ for group = Group
         for mouse=1:length(Mouse)
             Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
             disp(Mouse_names{mouse})
+            
+                        StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'epoch','epochname','stimepoch2');
+   a = length(StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+            Stim_num2.(Name{group}).(Session_type{sess})(mouse) = length(a);
             
             Ripples.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'ripples');
             Xtsd.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'xposition');
@@ -360,12 +366,12 @@ for group = Group
             Wake_Dur_mean.(Name{group}).(Session_type{sess})(mouse) = nanmean((DurationEpoch(Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4);
             Wake_EpNumb.(Name{group}).(Session_type{sess})(mouse) = length(Start(Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
             Frag_Wake.(Name{group}).(Session_type{sess})(mouse) = Wake_EpNumb.(Name{group}).(Session_type{sess})(mouse)./Wake_Dur_mean.(Name{group}).(Session_type{sess})(mouse);
-            HR_Wake.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            HR_NREM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            HR_REM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            HRVar_Wake.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR_Var.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            HRVar_NREM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR_Var.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            HRVar_REM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR_Var.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             HR_Wake.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             HR_NREM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             HR_REM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             HRVar_Wake.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR_Var.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), Wake_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             HRVar_NREM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR_Var.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), NREM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             HRVar_REM.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HR_Var.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}), REM_Epoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             
             
             
@@ -539,8 +545,8 @@ end
 
 %% Figures
 
-Group = [7 3 4];
-Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline'};
+% Group = [7 3 4];
+% Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline'};
 Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear'};
 
 figure('color',[1 1 1])
@@ -617,7 +623,7 @@ Legends={'Shock','Safe'};
 n = 1;
 for group = Group
     Mouse=Drugs_Groups_UMaze_CH(group);
-    if group == 7
+    if group == 8
         i = 1;
     elseif group == 3
         i = 6;
@@ -625,7 +631,7 @@ for group = Group
         i = 11;
     end
     subplot(3,5,i)
-    MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).Fear RespiFzSafe_mean.(Name{group}).Fear},Cols,X,Legends,'showpoints',1,'paired',1);
+    MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).Cond RespiFzSafe_mean.(Name{group}).Cond},Cols,X,Legends,'showpoints',1,'paired',1);
     makepretty_CH
     if group == 3
         ylabel('Rip Control','FontSize',15)
@@ -635,7 +641,7 @@ for group = Group
         ylabel('Baseline','FontSize',15)
         
     end
-    title('Fear')
+    title('Cond')
     ylim([1.5 5.5])
     if group == 3
         ylabel('Rip Control','FontSize',15)
@@ -682,7 +688,7 @@ Legends={'Shock','Safe'};
 n = 1;
 for group = Group
     Mouse=Drugs_Groups_UMaze_CH(group);
-    if group == 7
+    if group == 8
         i = 1;
     elseif group == 3
         i = 5;
@@ -738,10 +744,10 @@ X=[1:4];
 Legends={'Shock','Safe','Shock','Safe'};
 
 subplot(1,5,1)
-MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.RipControlSleep.Fear RespiFzSafe_mean.RipControlSleep.Fear RespiFzShock_mean.RipInhibSleep.Fear RespiFzSafe_mean.RipInhibSleep.Fear},Cols,X,Legends,'showpoints',1,'paired',0);
+MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.RipControlSleep.Cond RespiFzSafe_mean.RipControlSleep.Cond RespiFzShock_mean.RipInhibSleep.Cond RespiFzSafe_mean.RipInhibSleep.Cond},Cols,X,Legends,'showpoints',1,'paired',0);
 ylim([1.5 5.5])
 ylabel('Breathing frequency (Hz)')
-title('Fear')
+title('Cond')
 makepretty_CH
 subplot(1,5,2)
 MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.RipControlSleep.CondPre RespiFzSafe_mean.RipControlSleep.CondPre RespiFzShock_mean.RipInhibSleep.CondPre RespiFzSafe_mean.RipInhibSleep.CondPre},Cols,X,Legends,'showpoints',1,'paired',0);
@@ -808,7 +814,8 @@ figure('color',[1 1 1])
 subplot(161)
 MakeSpreadAndBoxPlot3_SB({ShockZoneEntries.RipControlSleep.TestPre ShockZoneEntries.RipInhibSleep.TestPre},Cols,X,Legends,'showpoints',1,'paired',0);
 title('Test Pre')
-ylim([0 31])
+makepretty_CH
+ylim([0 35])
 subplot(262)
 a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShockCorr.RipControlSleep.CondPre,'color',Col1);
 a.mainLine.LineWidth = 2;
@@ -834,7 +841,8 @@ ylabel('Inhib')
 subplot(163)
 MakeSpreadAndBoxPlot3_SB({ShockZoneEntries.RipControlSleep.TestPostPre ShockZoneEntries.RipInhibSleep.TestPostPre},Cols,X,Legends,'showpoints',1,'paired',0);
 title('Test PostPre')
-ylim([0 31])
+makepretty_CH
+ylim([0 35])
 
 subplot(264)
 a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShockCorr.RipControlSleep.CondPost,'color',Col1);
@@ -861,7 +869,8 @@ ylabel('Inhib')
 subplot(165)
 MakeSpreadAndBoxPlot3_SB({ShockZoneEntries.RipControlSleep.TestPostPost ShockZoneEntries.RipInhibSleep.TestPostPost},Cols,X,Legends,'showpoints',1,'paired',0);
 title('Test Post Post')
-ylim([0 31])
+makepretty_CH
+ylim([0 35])
 
 subplot(266)
 a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShockCorr.RipControlSleep.ExtPost,'color',Col1);
@@ -895,7 +904,7 @@ Cols={[0.3 0.3 0.3],[0.3 0.3 0.3]};
 figure('color',[1 1 1])
 subplot(121)
 MakeSpreadAndBoxPlot3_SB({Stim_num2.RipControlSleep.SleepPostPre Stim_num2.RipControlSleep.SleepPostPost},Cols,X,Legends,'showpoints',1,'paired',1);
-
+ylim([400 2000])
 ylabel('# vhc stims')
 title('Rip Control')
 makepretty_CH
@@ -904,6 +913,7 @@ MakeSpreadAndBoxPlot3_SB({Stim_num2.RipInhibSleep.SleepPostPre Stim_num2.RipInhi
 title('Rip Inhib')
 ylabel('# vhc stims')
 makepretty_CH
+ylim([400 2000])
 
 
 %%
@@ -1657,10 +1667,10 @@ makepretty_CH
 
 %%
 
-Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','TrueBaseline','Saline','SalineLong','SalineCourt'};
-Group = 7;
-Session_type2 = {'CondPre','CondPost','ExtPre','ExtPost'};
-% Session_type2 = {'Cond',};
+% Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','TrueBaseline','Saline','SalineLong','SalineCourt'};
+% Group = 7;
+% Session_type2 = {'CondPre','CondPost'};
+Session_type2 = {'Ext'};
 
 for group = Group
     Mouse=Drugs_Groups_UMaze_CH(group);

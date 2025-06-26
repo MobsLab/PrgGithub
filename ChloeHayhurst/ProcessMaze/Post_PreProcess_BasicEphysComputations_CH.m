@@ -9,37 +9,27 @@ SessNames={'Habituation24HPre_PreDrug' 'Habituation_PreDrug' 'HabituationBlocked
     'SleepPost_PreDrug' ' TestPost_PreDrug' 'ExtinctionBlockedShock_PreDrug' 'ExtinctionBlockedSafe_PreDrug' 'UMazeCondExplo_PostDrug' 'UMazeCondBlockedShock_PostDrug' 'UMazeCondBlockedSafe_PostDrug',...
     'SleepPost_PostDrug' 'TestPost_PostDrug'  'ExtinctionBlockedShock_PostDrug' 'ExtinctionBlockedSafe_PostDrug'};
 
-MouseToDo = 1713;
+MouseToDo = 1740;
 Mouse_names{1}=['M' num2str(MouseToDo)];
 
 
 %% Do the Sess.mat and the AllSessions.mat
 
+clearvars -except MouseToDo SessNames
+cd('/media/nas6/ProjetEmbReact/transfer')
+Mouse_names{1}=['M' num2str(MouseToDo)];
+Sess.(Mouse_names{1}) = GetAllMouseTaskSessions_CH(MouseToDo);
+Sess2.(Mouse_names{1}) = Sess.(Mouse_names{1});
+load('Sess.mat', 'Sess')
+Sess.(Mouse_names{1}) = Sess2.(Mouse_names{1});
+save('Sess.mat', 'Sess')
 
-if MouseToDo >= 1685
-    clearvars -except MouseToDo SessNames
-    cd('/media/nas6/ProjetEmbReact/transfer')
-    Mouse_names{1}=['M' num2str(MouseToDo)];
-    Sess.(Mouse_names{1}) = GetAllMouseTaskSessions_CH(MouseToDo);
-    Sess2.(Mouse_names{1}) = Sess.(Mouse_names{1});
-    load('Sess.mat', 'Sess')
-    Sess.(Mouse_names{1}) = Sess2.(Mouse_names{1});
-    save('Sess.mat', 'Sess')
-    GetEmbReactMiceFolderList_CH
-else
-    clearvars -except MouseToDo SessNames
-    cd('/media/nas6/ProjetEmbReact/transfer')
-    Mouse_names{1}=['M' num2str(MouseToDo)];
-    Sess.(Mouse_names{1}) = GetAllMouseTaskSessions_CH(MouseToDo);
-    Sess2.(Mouse_names{1}) = Sess.(Mouse_names{1});
-    load('Sess.mat', 'Sess')
-    Sess.(Mouse_names{1}) = Sess2.(Mouse_names{1});
-    save('Sess.mat', 'Sess')
-    GetEmbReactMiceFolderList_BM
-end
 
-clear all
+% clear all
 cd('/media/nas8-2/ProjetEmbReact/transfer')
+load('AllSessions.mat')
+GetEmbReactMiceFolderList_BM
+GetEmbReactMiceFolderList_CH
 save('AllSessions.mat','CondExploSess','CondPostSess','CondPreSess','CondSafeSess','CondSess','CondShockSess','LastCondPreSess','FirstCondPreSess',...
     'ExtSafeSess','ExtSess', 'ExtShockSess','FearSess','FirstExtSess','ExtPreSess','ExtPostSess',...
     'HabSess','HabSess24','HabSessPre',...

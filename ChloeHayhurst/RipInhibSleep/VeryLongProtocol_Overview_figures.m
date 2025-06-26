@@ -1,7 +1,7 @@
 
 Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','TrueBaseline','Saline','SalineLong','SalineCourt','All'};
 Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond'};
-group = 8;
+% group = 8;
 % group = 9;
 
 %% BEHAVIOUR
@@ -57,7 +57,7 @@ X=[1:3];
 Legends={'TestPre','TestPostPre','TestPostPost'};
   
 subplot(248)
-MakeSpreadAndBoxPlot3_SB({Thigmo_Active.(Name{group}).TestPre Thigmo_Active.(Name{group}).TestPostPre Thigmo_Active.(Name{group}).TestPostPost},Cols,X,Legends,'showpoints',1,'paired',1);
+MakeSpreadAndBoxPlot3_SB({Thigmo_Active.(Name{group}).TestPre Thigmo_Active.(Name{group}).TestPostPre Thigmo_Active.(Name{group}).TestPostPost},Cols,X,Legends,'showpoints',1,'paired',1)
 title('Thigmotaxis')
 makepretty_CH
 
@@ -193,18 +193,33 @@ end
 figure('color',[1 1 1])
 Sessions = {'Cond','CondPre','ExtPre','CondPost','ExtPost'}
 Mouse=Drugs_Groups_UMaze_CH(group);
+Col1 = [1 .5 .5];
+Col2 =[.5 .5 1];
 for i = 1:5
-    subplot(1,5,i)
+    subplot(2,5,i)
     
     Cols = {[1 .5 .5],[.5 .5 1]};
     X=[1:2];
     Legends={'Shock','Safe'};
     
-    MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).(Sessions{i}) RespiFzSafe_mean.(Name{group}).(Sessions{i})},Cols,X,Legends,'showpoints',1,'paired',1);
+    MakeSpreadAndBoxPlot3_SB({RespiFzShock_mean.(Name{group}).(Sessions{i}) RespiFzSafe_mean.(Name{group}).(Sessions{i})},Cols,X,Legends,'showpoints',1,'paired',1)
     ylim([1.5 6.5])
+        ylabel('Breathing rate (Hz)')
     makepretty_CH
     title(Sessions{i})
     makepretty_CH
+    
+    subplot(2,5,i+5)
+    a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).(Sessions{i}),'color',Col1);
+    a.mainLine.LineWidth = 2;
+    hold on
+    a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).(Sessions{i}),'color',Col2);
+    xlim([0 10])
+    ylim([0 1.1])
+    title(Sessions{i})
+    a.mainLine.LineWidth = 2;
+    makepretty_CH
+    
 end
 
 mtitle('freezing breathing frequency')
@@ -214,7 +229,7 @@ figure('color',[1 1 1])
 Sessions = {'Cond','CondPre','ExtPre','CondPost','ExtPost'};
 Mouse=Drugs_Groups_UMaze_CH(group);
 for i = 1:5
-    subplot(1,5,i)
+    subplot(2,5,i)
     
     Cols = {[1 .5 .5],[.5 .5 1]};
     X=[1:2];
@@ -224,27 +239,20 @@ for i = 1:5
     makepretty_CH
     title(Sessions{i});
     makepretty_CH
-end
-
-mtitle('Heart Rate');
-
-figure('color',[1 1 1])
-Sessions = {'Cond','CondPre','ExtPre','CondPost','ExtPost'};
-Mouse=Drugs_Groups_UMaze_CH(group);
-for i = 1:5
-    subplot(1,5,i)
+    ylabel('Heart rate (Hz)')
     
-    Cols = {[1 .5 .5],[.5 .5 1]};
-    X=[1:2];
-    Legends={'Shock','Safe'};
+    subplot(2,5,i+5)
+    
     
     MakeSpreadAndBoxPlot3_SB({HRVar_Fz_Shock_mean.(Name{group}).(Sessions{i}) HRVar_Fz_Safe_mean.(Name{group}).(Sessions{i})},Cols,X,Legends,'showpoints',1,'paired',1)
     makepretty_CH
     title(Sessions{i});
     makepretty_CH
+    ylabel('Heart rate variability')
+    
 end
 
-mtitle('Heart Rate Variability');
+mtitle('Heart Rate');
 
 
 
@@ -258,16 +266,16 @@ Col2 =[.5 .5 1];
 x = 0;
 Mouse=Drugs_Groups_UMaze_CH(group);
 for i = 1:5
-subplot(1,5,i)
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).(Sessions{i}),'color',Col1);
-a.mainLine.LineWidth = 2;
-hold on
-a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).(Sessions{i}),'color',Col2);
-xlim([0 10])
-ylim([0 1.1])
-title(Sessions{i})
-a.mainLine.LineWidth = 2;
-makepretty_CH
+    subplot(1,5,i)
+    a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzShock.(Name{group}).(Sessions{i}),'color',Col1);
+    a.mainLine.LineWidth = 2;
+    hold on
+    a = Plot_MeanSpectrumForMice_BM(MeanSpectroBulbFzSafe.(Name{group}).(Sessions{i}),'color',Col2);
+    xlim([0 10])
+    ylim([0 1.1])
+    title(Sessions{i})
+    a.mainLine.LineWidth = 2;
+    makepretty_CH
 end
 
 %% SLEEP FEATURES

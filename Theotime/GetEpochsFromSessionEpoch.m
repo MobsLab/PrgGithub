@@ -1,9 +1,10 @@
-function [testPre, hab, cond, testPost, sleep, tot] = GetEpochsFromSessionEpoch(SessionEpoch)
+function [testPre, hab, cond, testPost, sleep, tot, extinct] = GetEpochsFromSessionEpoch(SessionEpoch)
 %GETEPOCHSFROMSESSIONEPOCH This function takes a SessionEpoch object and returns several epochs of interest.
 %   The function takes a SessionEpoch object and returns the following epochs:
 %   testPre, hab, cond, testPost, sleep, tot.
 %   The function is able to handle both the old and new style of data.
 sleep = 0;
+extinct = 0;
 try
     preSleep=SessionEpoch.PreSleep;
     try
@@ -18,11 +19,33 @@ try
         testPre=or(SessionEpoch.Hab,or(or(SessionEpoch.TestPre1,SessionEpoch.TestPre2),or(SessionEpoch.TestPre3,SessionEpoch.TestPre4)));
     end
 
+
     cond=or(or(SessionEpoch.Cond1,SessionEpoch.Cond2),or(SessionEpoch.Cond3,SessionEpoch.Cond4));
     postSleep=SessionEpoch.PostSleep;
     testPost=or(or(SessionEpoch.TestPost1,SessionEpoch.TestPost2),or(SessionEpoch.TestPost3,SessionEpoch.TestPost4));
+        
+    try 
+        testPre2 = or(or(SessionEpoch.TestPre5,SessionEpoch.TestPre6),or(SessionEpoch.TestPre7,SessionEpoch.TestPre8));
+        testPost2 = or(or(SessionEpoch.TestPost5,SessionEpoch.TestPost6),or(SessionEpoch.TestPost7,SessionEpoch.TestPost8));
+        cond2 = or(or(SessionEpoch.Cond5,SessionEpoch.Cond6),or(SessionEpoch.Cond7,SessionEpoch.Cond8));
+
+        testPre = or(testPre, testPre2);
+        testPost = or(testPost, testPost2);
+        cond = or(cond, cond2);
+        disp('Found 8 testPre, testPost, and cond sessions')
+    catch
+    end
+
     try
-        extinct = SessionEpoch.Extinct;
+        try
+            extinct = SessionEpoch.Extinct;
+        catch
+            try
+                extinct = SessionEpoch.Extinction;
+            catch 
+                extinct = SessionEpoch.Ext;
+            end
+        end
         sleep = or(preSleep,postSleep);
         tot=or(or(hab,or(testPre,or(testPost,or(cond,extinct)))),sleep);
     catch

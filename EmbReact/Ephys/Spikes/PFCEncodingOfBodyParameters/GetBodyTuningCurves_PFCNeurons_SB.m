@@ -5,6 +5,7 @@ function GetBodyTuningCurves_PFCNeurons_SB(Parameter, Period)
 %   - HR : heart rate
 %   - BR : breathing rate
 %   - HRV : heart rate variability
+%   - Speed : speed
 %
 % Period : which period in time
 %   - Freezing : all freezing from the umaze conditionning
@@ -32,6 +33,10 @@ switch Parameter
     case 'HRV'
         FreqLims = [-5:0.3:1];
         MiceNumber=[507,508,509,510];
+    case 'Speed' % To adapt
+        FreqLims = [-5:0.3:1];
+        MiceNumber=[507,508,509,510];
+
         
 end
 
@@ -71,7 +76,7 @@ for mm = 1:length(MiceNumber)
             JustSleep = 0; % will get rid of sleep
             RemoveSleep = 1;
             RemoveFreez = 0;
-              case 'Wake_Explo'
+        case 'Wake_Explo'
             FolderList = GetAllMouseTaskSessions(MiceNumber(mm),0);
             x1 = strfind(FolderList,'Cond');
             ToKeep = find(cellfun(@isempty,x1));
@@ -171,7 +176,7 @@ for mm = 1:length(MiceNumber)
         spike_dat = spike_dat(3:end-3);
         AllSpkAnova=[];
         AllIdAnova = [];
-        
+
         for k=1:length(FreqLims)-1
             
             Bins=find(VarOfInterest>FreqLims(k) & VarOfInterest<FreqLims(k+1));
@@ -206,7 +211,10 @@ for mm = 1:length(MiceNumber)
         occ  = (Occup{mm}/sum(Occup{mm}));
         meanrate=sum(sum(MeanSpk{mm}(sp,:).*occ));
         
-        Info{mm}(sp) = nansum(occ.*MeanSpk{mm}(sp,:).*log2(MeanSpk{mm}(sp,:)/meanrate));
+        % Calculate the mutual information
+        
+        
+        Info{mm}(sp) = nansum(occ.*(MeanSpk{mm}(sp,:)).*log2(MeanSpk{mm}(sp,:)/meanrate));
         Infospike{mm}(sp) = Info{mm}(sp)/meanrate;
         
         
@@ -227,5 +235,5 @@ for mm = 1:length(MiceNumber)
     
 end
 
-save([SaveFolder filesep Parameter 'Tuning_',Period,'_PFC.mat'],'RSpk','RSpk_btstrp','PSpk_btstrp',...
-    'Info','MeanSpk_Half','MeanSpk_HalfAn','PvalAnovaInfo','Infospike','MiceNumber','MeanSpk_Err','FreqLims')
+save([SaveFolder filesep Parameter 'Tuning_',Period,'_PFC.mat'],'RSpk','PSpk','RSpk_btstrp','PSpk_btstrp',...
+    'Info','MeanSpk_Half','MeanSpk_HalfAn','PvalAnovaInfo','Infospike','MiceNumber','MeanSpk_Err','FreqLims','Occup')

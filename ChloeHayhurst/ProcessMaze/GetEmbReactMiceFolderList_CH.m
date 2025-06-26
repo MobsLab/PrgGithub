@@ -1,5 +1,5 @@
 
-SessNames={'TestPost_PostDrug'};
+SessNames={'TestPre_PreDrug'};
 
 Dir=PathForExperimentsEmbReact_CH(SessNames{1});
 
