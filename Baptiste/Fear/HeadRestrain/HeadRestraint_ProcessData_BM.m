@@ -14,8 +14,8 @@ clear channel
 % load('ChannelsToAnalyse/dHPC_rip.mat')
 % LowSpectrumSB([cd filesep],channel,'H_rip')
 % load('ChannelsToAnalyse/dHPC_rip.mat')
-LowSpectrumSB([cd filesep],channel,'H')
 load('ChannelsToAnalyse/dHPC_deep.mat')
+LowSpectrumSB([cd filesep],channel,'H')
 % LowSpectrumSB([cd filesep],channel,'H_deep')
 
 clear channel
@@ -36,7 +36,8 @@ VeryHighSpectrum([cd filesep],channel,'H')
 
 % Noise
 load('ChannelsToAnalyse/Bulb_deep.mat')
-FindNoiseEpoch_BM([cd filesep],channel,0);
+[Epoch,TotalNoiseEpoch,Info] = FindNoiseEpoch_BM([cd filesep],channel,0);
+save('StateEpochSB.mat','Epoch','TotalNoiseEpoch','Info')
 
 % Heart rate
 MakeHeartRateForSession_BM

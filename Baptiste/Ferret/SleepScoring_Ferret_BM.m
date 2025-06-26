@@ -178,8 +178,7 @@ disp('------------------------------------------------------------')
 disp(' STEP 1: DEFINING NOISE EPOCHS')
 disp('------------------------------------------------------------')
 disp(' ')
-[Epoch,TotalNoiseEpoch,SubNoiseEpoch,Info_temp] = FindNoiseEpoch_SleepScoring(channel_theta, ...
-    'foldername', foldername);
+[Epoch,TotalNoiseEpoch,Info_temp] = FindNoiseEpoch_BM(pwd , channel_theta);
 Info_OB = Info_temp;
 Info_accelero = Info_temp;
 
@@ -235,7 +234,7 @@ disp(' STEP 3: DEFINING IMMOBILITY EPOCHS')
 disp('------------------------------------------------------------')
 disp(' ')
 [ImmobilityEpoch,MovementEpoch,tsdMovement,Info_temp,microWakeEpochAcc,microSleepEpochAcc] = ...
-    FindMovementAccelero_SleepScoring(Epoch);
+    FindMovementAccelero_SleepScoring_BM(Epoch);
 if ~isempty(ImmobilityEpoch)
     is_accelero = true;
     Info_accelero=ConCatStruct(Info_accelero,Info_temp); clear Info_temp;
@@ -247,25 +246,26 @@ disp('Immobility: DONE')
 disp(' ')
 
 %% Find Theta epoch
-
 if doob
     disp(' ')
     disp('------------------------------------------------------------')
     disp(' STEP 4: DEFINING NREM and REM WITH HPC THETA')
     disp('         for OB Gamma scoring')
     disp('------------------------------------------------------------')
-    disp(' ') 
+    disp(' ')
     % restricted to sleep with OB gamma
-    % CHANGE WITH MICE --> delta between .1-2 Hz, theta between 3-6 Hz
-    Frequency{1}=[4 6]; Frequency{2}=[.2 3]; 
+    % CHANGE WITH MICE --> delta between .2-3 Hz, theta between 3-6 Hz
+    % BM on 09/06/25, change smooth time for it to be 10s for theta
+    Frequency{1}=[3 6];
+    Frequency{2}=[.2 3];
     if ~exist('StimEpoch')
         [ThetaEpoch_OB, SmoothTheta, ~, Info_temp] = ...
             FindThetaEpoch_SleepScoring_Ferret_BM(SleepOB, Epoch, channel_theta, minduration, 'foldername', foldername,...
-            'smoothwindow', smootime,'continuity',continuity,'controlepoch',ControlEpoch,'frequency',Frequency);
+            'continuity',continuity,'controlepoch',ControlEpoch,'frequency',Frequency);
     else
         [ThetaEpoch_OB, SmoothTheta, ~, Info_temp] = ...
             FindThetaEpoch_SleepScoring_Ferret_BM(SleepOB, Epoch, channel_theta, minduration, 'foldername', foldername,...
-            'smoothwindow', smootime, 'stimepoch', StimEpoch,'continuity',continuity,'controlepoch',ControlEpoch);
+            'stimepoch', StimEpoch,'continuity',continuity,'controlepoch',ControlEpoch);
     end
     Info_OB=ConCatStruct(Info_OB,Info_temp); clear Info_temp;
     clear ThetaEpoch Info;
@@ -331,7 +331,7 @@ if doob
     save('SleepScoring_OBGamma','REMEpoch','SWSEpoch','Wake','REMEpochWiNoise', ...
         'SWSEpochWiNoise', 'WakeWiNoise','Sleep','SleepWiNoise', ...
         'SmoothGamma','ThetaEpoch','SmoothTheta','Info',...
-        'Epoch','SubNoiseEpoch','TotalNoiseEpoch', ...
+        'Epoch','TotalNoiseEpoch', ...
         'microWakeEpochOB','microSleepEpochOB','-append');
     clear ThetaEpoch Info Sleep;
 end
@@ -351,7 +351,7 @@ if is_accelero
         'SWSEpochWiNoise', 'WakeWiNoise','Sleep','SleepWiNoise', ...
         'ImmobilityEpoch','tsdMovement', 'MovementEpoch', ...
         'ThetaEpoch','SmoothTheta', 'ThetaRatioTSD','Info',...
-        'Epoch','SubNoiseEpoch','TotalNoiseEpoch', ...
+        'Epoch','TotalNoiseEpoch', ...
         'microWakeEpochAcc','microSleepEpochAcc','-append');
     clear ThetaEpoch Info Sleep;
 end

@@ -1,7 +1,7 @@
 
-%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 2: sleep states
+% Sup 2: OB/pupil correlation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% PCA say the same
@@ -20,25 +20,11 @@ edit Ferret_Paper_REMconfirm_Pharmaco.m
 
 %% IS sleep study
 edit Ferret_Paper_IS_Sleep_Study.m
+% edit NREM_subtypes_Ferret_BM.m
 
 
 %% physio
 edit Physio_Sleep_Ferret_BM.m
-
-
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sup 3: Breathing influences on brain oscillations
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% raw traces
-
-
-%% mean breathing
-edit MeanPhysio_HeadRestraint_SleepSates_Ferret_BM.m
-
-
-%% Sniff
-edit Sniff_Triggered_OB_Gamma_Ferret_BM.m
 
 
 %% corr OB gamma / Breathing

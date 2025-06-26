@@ -9,11 +9,11 @@ function [aft_cell,bef_cell]=transEpoch(varargin)
 % %Start(aft_cell{2,1})---> beginning of all Wake  that is followed by SWS
 % %Start(bef_cell{2,1})---> beginning of all Wake  that is preceded by SWS
 
-% aft_cell(1,2) --> SWS before Wake
-% aft_cell(2,1) --> Wake before SWS
-% bef_cell(1,2) --> SWS after Wake
-% bef_cell(1,2) --> Wake after SWS
-% right ? BM
+% aft_cell{1,2} --> SWS before Wake
+% aft_cell{2,1} --> Wake before SWS
+% bef_cell{1,2} --> SWS after Wake
+% bef_cell{1,2} --> Wake after SWS
+
 
 k=size(varargin,2);
 aft_cell=cell(k,k);
