@@ -101,3 +101,18 @@ if not(exist('AlignedXtsd','var'))
 end
 save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd','-append');
 
+
+%%
+if not(exist('GroomingInfo','var'))
+    close all
+    try 
+        load('behavResources.mat', 'Vtsd','MovAcctsd');
+        Speed=Vtsd;
+        Accelero=MovAcctsd;
+        GroomingInfo= FindGrooming_BM(Speed , Accelero);
+        save('behavResources.mat','GroomingInfo','-append');
+        
+    catch
+        disp('Have not been able to calculate the grooming');
+    end
+end

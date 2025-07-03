@@ -53,6 +53,8 @@ for group = 1:3
             FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FreezeAccEpoch;
             FreezeEpochCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FreezeEpoch;
             
+            GroomInfo.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = GroomingInfo;
+
             
             FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4;
             FreezeTimeCam.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(FreezeEpochCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4;
@@ -277,7 +279,7 @@ for mouse = 1:length(Mouse_names_Nic)
             end
         end
         plot(RangeLow,MeanSpectroTemp{i}(mouse,:))
-        keyboard
+%         keyboard
         j = j+30e4;
     end
 end
