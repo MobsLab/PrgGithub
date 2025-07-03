@@ -1,4 +1,19 @@
-function Epoch=FindNoiseEpoch_BM(filename,chH,fixcax)
+function Epoch=FindNoiseEpoch_BM(filename,chH,fixcax,varargin)
+
+for i = 1:2:length(varargin)
+    if ~ischar(varargin{i})
+        error(['Parameter ' num2str(i+2) ' is not a property.']);
+    end
+    switch lower(varargin{i})
+        case 'saving'
+            saving = varargin{i+1};
+    end
+end
+
+if ~exist('saving','var')
+    saving = 0;
+end
+
 
 %% BM 09/2020 : use Bulb to find noise
 
@@ -32,20 +47,20 @@ NoiseThresh=3E5;
 GndNoiseThresh=4E6; % default1E6
 Ok='n';
 while Ok~='y'
-
+    
     g=figure('color',[1 1 1],'Position',[2 scrsz(4) scrsz(3) scrsz(4)/3]); Nf=gcf;
     imagesc(tH,fH,10*log10(SpH)'), axis xy, if fixcax, caxis([20 65]);end
     title('Spectrogramm : determine noise periods');
-
+    
     if Ok~='m'
         Okk='n'; % high frequency noise
         figure('color',[1 1 1],'Position',[2 scrsz(1) scrsz(3) scrsz(4)/2]),hf=gcf;
         while Okk~='y'
-
+            
             HighSp=SpH(:,fH<=20 & fH>=18);
             subplot(2,1,1), hold off,
             imagesc(tH,fH(fH<=20 & fH>=18),10*log10(HighSp)'), axis xy,if fixcax, caxis([20 65]);end
-
+            
             NoiseTSD=tsd(tH*1E4,mean(HighSp,2));
             NoiseEpoch=thresholdIntervals(NoiseTSD,NoiseThresh,'Direction','Above');
             
@@ -53,7 +68,7 @@ while Ok~='y'
             yyaxis right,
             hold on, plot(Range(NoiseTSD,'s'), Data(NoiseTSD), 'b')
             ylabel('Power (18–20 Hz)')
-            hold on, 
+            hold on,
             plot(Range(Restrict(NoiseTSD,NoiseEpoch),'s'),Data(Restrict(NoiseTSD,NoiseEpoch)),'*w')
             ylim([0 max(Data(NoiseTSD))*1.2])
             
@@ -63,21 +78,21 @@ while Ok~='y'
             Okk=input('--- Are you satisfied with High Noise Epochs (y/n)? ','s');
             if Okk~='y', NoiseThresh=input('Give a new High Noise Threshold (Default=3E5) : '); end
         end
-
+        
         Okk='n'; % low frequency noise (grounding issue)
         while Okk~='y'
             LowSp=SpH(:,fH<=2);
             subplot(2,1,2), hold off,
             imagesc(tH,fH(fH<=2),10*log10(LowSp)'), axis xy,if fixcax, caxis([20 65]);end
-
+            
             GndNoiseTSD=tsd(tH*1E4,mean(LowSp,2));
             GndNoiseEpoch=thresholdIntervals(GndNoiseTSD,GndNoiseThresh,'Direction','Above');
-
+            
             % Plot noise trace (added by EC 22/04/25)
             yyaxis right,
             hold on, plot(Range(GndNoiseTSD,'s'), Data(GndNoiseTSD), 'b')
             ylabel('Power (0-2 Hz)')
-            hold on, 
+            hold on,
             plot(Range(Restrict(GndNoiseTSD,GndNoiseEpoch),'s'),Data(Restrict(GndNoiseTSD,GndNoiseEpoch)),'*w')
             ylim([0 max(Data(GndNoiseTSD))*1.2])
             
@@ -87,18 +102,18 @@ while Ok~='y'
             Okk=input('--- Are you satisfied with Ground Noise Epochs (y/n)? ','s');
             if Okk~='y', GndNoiseThresh=input('Give a new Ground Noise Threshold (Default=1E6) : '); end
         end
-
-
+        
+        
         % modif KB----------------------------------------------------------------------------
         % ------------------------------------------------------------------------------------
-
+        
         AddOk2=input('Do you want to add a ThresholdedNoiseEpoch (y/n)? ','s');
         if AddOk2=='y',
             load(strcat(filename,'LFPData/LFP',num2str(chH),'.mat'))
             Okk='n'; % low frequency noise (grounding issue)
             figure('color',[1 1 1],'Position',[2 scrsz(4) scrsz(3) scrsz(4)/2]),
             num=gcf;
-
+            
             while Okk~='y'
                 figure(num),clf
                 plot(Range(LFP,'s'),Data(LFP))
@@ -117,19 +132,19 @@ while Ok~='y'
                 if Okk=='k'
                     keyboard
                 end
-
+                
             end
         else
             ThresholdedNoiseEpoch=intervalSet([],[]);
             ThresholdedNoiseEpochThreshold=[];
         end
-
+        
         % modif KB----------------------------------------------------------------------------
         % ------------------------------------------------------------------------------------
-
-
-
-
+        
+        
+        
+        
         AddOk=input('Do you want to add a WeirdNoiseEpoch (y/n)? ','s');
         if AddOk=='y', disp('Enter start and stop time (s) of WeirdNoise')
             disp('(e.g. [1,200, 400,500] to put 1-200s and 400-500s periods into noise)')
@@ -138,8 +153,8 @@ while Ok~='y'
             catch, keyboard; end
         else WeirdNoiseEpoch=intervalSet([],[]);
         end
-
-
+        
+        
     else
         % high frequency noise
         NoiseEpoch=input('Enter start and stop time of high noise periods : ');
@@ -149,7 +164,7 @@ while Ok~='y'
         %             NoiseEpoch(NoiseEpoch>max(Range(Mmov)))=max(Range(Mmov));
         NoiseEpoch(NoiseEpoch<0)=0;
         NoiseEpoch=intervalSet(NoiseEpoch(1:2:end),NoiseEpoch(2:2:end));
-
+        
         % low frequency noise (grounding issue)
         GndNoiseEpoch=input('Enter start and stop time of ground noise periods (very low frequencies) : ');
         keyboard
@@ -158,7 +173,7 @@ while Ok~='y'
         GndNoiseEpoch(GndNoiseEpoch<0)=0;
         GndNoiseEpoch=intervalSet(GndNoiseEpoch(1:2:end),GndNoiseEpoch(2:2:end));
     end
-
+    
     if isempty(Start(NoiseEpoch))==0, hold on, line([Start(NoiseEpoch,'s') Start(NoiseEpoch,'s')]',[0 20],'color','k');end
     if isempty(Start(GndNoiseEpoch))==0,hold on, line([Start(GndNoiseEpoch,'s') Start(GndNoiseEpoch,'s')]',[0 20],'color','b');end
     if isempty(Start(WeirdNoiseEpoch))==0,hold on, line([Start(WeirdNoiseEpoch,'s') Start(WeirdNoiseEpoch,'s')]',[0 20],'color','c');end
@@ -174,11 +189,12 @@ TotalNoiseEpoch=or(or(GndNoiseEpoch,NoiseEpoch),or(WeirdNoiseEpoch,ThresholdedNo
 Epoch=Epoch-TotalNoiseEpoch;
 % modif KB-------------------
 
-try
-    save(strcat(filename,'StateEpochSB'),'Epoch','NoiseEpoch','GndNoiseEpoch','NoiseThresh', 'GndNoiseThresh','ThresholdedNoiseEpoch','ThresholdedNoiseEpochThreshold','TotalNoiseEpoch','-v7.3','-append');
-catch
-    save(strcat(filename,'StateEpochSB'),'Epoch','NoiseEpoch','GndNoiseEpoch','NoiseThresh', 'GndNoiseThresh','ThresholdedNoiseEpoch','ThresholdedNoiseEpochThreshold','TotalNoiseEpoch','-v7.3');
+if saving ==1
+    try
+        save(strcat(filename,'StateEpochSB'),'Epoch','NoiseEpoch','GndNoiseEpoch','NoiseThresh', 'GndNoiseThresh','ThresholdedNoiseEpoch','ThresholdedNoiseEpochThreshold','TotalNoiseEpoch','-v7.3','-append');
+    catch
+        save(strcat(filename,'StateEpochSB'),'Epoch','NoiseEpoch','GndNoiseEpoch','NoiseThresh', 'GndNoiseThresh','ThresholdedNoiseEpoch','ThresholdedNoiseEpochThreshold','TotalNoiseEpoch','-v7.3');
+    end
 end
-
 
 end
