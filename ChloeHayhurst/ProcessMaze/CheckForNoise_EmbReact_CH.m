@@ -9,7 +9,7 @@ for sess = 1:length(Sess.(Mouse_names{1}))
         if (exist('ChannelsToAnalyse/Bulb_deep.mat'))
         load('ChannelsToAnalyse/Bulb_deep.mat')
         channel;
-        FindNoiseEpoch_BM([cd filesep],channel,0);
+        FindNoiseEpoch_BM([cd filesep],channel,0,'saving',1);
         else
             load('ChannelsToAnalyse/dHPC_rip.mat')
              channel;

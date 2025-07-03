@@ -1,14 +1,14 @@
-function FolderName=OrganizeFilesEmbReactNewProtocolBM(MouseNum,Date,SaveFolderName,ExpeInfo)
-% This organizes the files for the new protocol (short)
+function FolderName=OrganizeFilesEmbReactShortProtocol(MouseNum,Date,SaveFolderName,ExpeInfo)
+% This organizes the files for the short protocol
 AllFold=1;
 if ~(SaveFolderName(end)==filesep),SaveFolderName=[SaveFolderName filesep]; end
 
 BaseName='ProjectEmbReact_M';
 ExperimentalConditions={'Habituation24HPre_PreDrug' 'Habituation_PreDrug' 'HabituationBlockedShock_PreDrug' 'HabituationBlockedSafe_PreDrug' 'SleepPre',...
     'TestPre_PreDrug' 'UMazeCondExplo_PostDrug' 'UMazeCondBlockedShock_PostDrug' 'UMazeCondBlockedSafe_PostDrug' 'SleepPost',...
-    'TestPost_PostDrug'  'ExtinctionBlockedShock_PostDrug' 'ExtinctionBlockedSafe_PostDrug' 'Recall_PostDrug' 'Extinction_PostDrug'};
+    'TestPost_PostDrug'  'ExtinctionBlockedShock_PostDrug' 'ExtinctionBlockedSafe_PostDrug' 'Recall_PostDrug'};
 
-IsSleep=zeros(18,1);
+IsSleep=zeros(14,1);
 IsSleep(5)=1;IsSleep(10)=1;IsSleep(14)=1;
 
 for e=1:length(ExperimentalConditions)

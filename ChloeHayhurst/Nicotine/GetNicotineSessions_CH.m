@@ -9,6 +9,10 @@ NicotineOF.Pre{6}='/media/nas7/Nicotine/Mouse1685/NicotineOF/OFPre';
 NicotineOF.Pre{7}='/media/nas7/Nicotine/Mouse1713/NicotineOF/OFPre';
 NicotineOF.Pre{8}='/media/nas7/Nicotine/Mouse1714/NicotineOF/OFPre';
 NicotineOF.Pre{9}='/media/nas7/Nicotine/Mouse1747/NicotineOF/OFPre';
+NicotineOF.Pre{10}='/media/nas7/Nicotine/Mouse1742/NicotineOF/OFPre';
+NicotineOF.Pre{11}='/media/nas7/Nicotine/Mouse1743/NicotineOF/OFPre';
+NicotineOF.Pre{12}='/media/nas7/Nicotine/Mouse1745/NicotineOF/OFPre';
+NicotineOF.Pre{13}='/media/nas7/Nicotine/Mouse1746/NicotineOF/OFPre';
 
 
 NicotineOF.Post{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_OFPost';
@@ -21,7 +25,32 @@ NicotineOF.Post{6}='/media/nas7/Nicotine/Mouse1685/NicotineOF/OFPost';
 NicotineOF.Post{7}='/media/nas7/Nicotine/Mouse1713/NicotineOF/OFPost';
 NicotineOF.Post{8}='/media/nas7/Nicotine/Mouse1714/NicotineOF/OFPost';
 NicotineOF.Post{9}='/media/nas7/Nicotine/Mouse1747/NicotineOF/OFPost';
+NicotineOF.Post{10}='/media/nas7/Nicotine/Mouse1742/NicotineOF/OFPost';
+NicotineOF.Post{11}='/media/nas7/Nicotine/Mouse1743/NicotineOF/OFPost';
+NicotineOF.Post{12}='/media/nas7/Nicotine/Mouse1745/NicotineOF/OFPost';
+NicotineOF.Post{13}='/media/nas7/Nicotine/Mouse1746/NicotineOF/OFPost';
 
+%%
+
+NicotineOFSleep.Pre{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_SleepPre';
+NicotineOFSleep.Pre{2}='/media/nas7/Nicotine/Mouse1531/1531_NicotineOF_SleepPre';
+NicotineOFSleep.Pre{3}='/media/nas7/Nicotine/Mouse1742/NicotineOF/SleepPre';
+NicotineOFSleep.Pre{4}='/media/nas7/Nicotine/Mouse1743/NicotineOF/SleepPre';
+NicotineOFSleep.Pre{5}='/media/nas7/Nicotine/Mouse1745/NicotineOF/SleepPre';
+NicotineOFSleep.Pre{6}='/media/nas7/Nicotine/Mouse1746/NicotineOF/SleepPre';
+NicotineOFSleep.Pre{7}='/media/nas7/Nicotine/Mouse1747/NicotineOF/SleepPre';
+
+
+NicotineOFSleep.Post{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_SleepPost';
+NicotineOFSleep.Post{2}='/media/nas7/Nicotine/Mouse1531/1531_NicotineOF_SleepPost';
+NicotineOFSleep.Post{3}='/media/nas7/Nicotine/Mouse1742/NicotineOF/SleepPost';
+NicotineOFSleep.Post{4}='/media/nas7/Nicotine/Mouse1743/NicotineOF/SleepPost';
+NicotineOFSleep.Post{5}='/media/nas7/Nicotine/Mouse1745/NicotineOF/SleepPost';
+NicotineOFSleep.Post{6}='/media/nas7/Nicotine/Mouse1746/NicotineOF/SleepPost';
+NicotineOFSleep.Post{7}='/media/nas7/Nicotine/Mouse1747/NicotineOF/SleepPost';
+
+
+%%
 
 SalineOF.Pre{1}='/media/nas7/Nicotine/Mouse1685/SalineOF/OF_Pre';
 SalineOF.Pre{2}='/media/nas7/Nicotine/Mouse1686/SalineOF/OF_Pre';
@@ -40,6 +69,7 @@ SalineOF.Post{5}='/media/nas7/Nicotine/Mouse1644/SalineOF/OFPost';
 SalineOF.Post{6}='/media/nas7/Nicotine/Mouse1687/SalineOF/OFPost';
 SalineOF.Post{7}='/media/nas7/Nicotine/Mouse1688/SalineOF/OFPost';
 
+%%
 
 NicotineLowOF.Pre{1}='/media/nas7/Nicotine/Mouse1614/OFNicotine0.05/OFPre';
 NicotineLowOF.Pre{2}='/media/nas7/Nicotine/Mouse1644/OFNicotine0.05/OFPre';
@@ -54,6 +84,7 @@ NicotineLowOF.Post{3}='/media/nas7/Nicotine/Mouse1688/NicotineOF/OFPost';
 NicotineLowOF.Post{4}='/media/nas7/Nicotine/Mouse1641/NicotineOF/OFPost';
 NicotineLowOF.Post{5}='/media/nas7/Nicotine/Mouse1612/NicotineOF/OFPost';
 
+%%
 
 SalineHC{1}='/media/nas7/Nicotine/Mouse1411/20230224/';
 SalineHC{2}='/media/nas7/Nicotine/Mouse1412/20230224/'; 
@@ -68,6 +99,8 @@ SalineHC{10}='/media/nas6/ProjetEmbReact/Mouse1227/20210813/';
 SalineHC{11}='/media/nas6/ProjetEmbReact/Mouse1252/20220104/';
 SalineHC{12}='/media/nas6/ProjetEmbReact/Mouse1253/20220107/';
 SalineHC{13}='/media/nas6/ProjetEmbReact/Mouse1254/20220107/';
+
+%%
 
 NicotineHC{1}='/media/nas7/Nicotine/Mouse1411/20230225/';
 NicotineHC{2}='/media/nas7/Nicotine/Mouse1412/20230225/';
@@ -85,6 +118,8 @@ NicotineHC{10}='/media/nas7/Nicotine/Mouse1393/20230203/';
 % NicotineHC{13} ='/media/nas7/Nicotine/Mouse1376/20230206/'; % 0.2 mg/kg
 % NicotineHC{14}='/media/nas7/Nicotine/Mouse1377/20230206/'; % 0.2 mg/kg
 
+%%
+
 AtropineOF.Pre{1} = '/media/nas7/Atropine/Mouse1500/30012024/OF_Pre';
 AtropineOF.Pre{2} = '/media/nas7/Atropine/Mouse1531/OF_Pre';
 AtropineOF.Pre{3} = '/media/nas7/Atropine/Mouse1533/OF_Pre';
@@ -93,6 +128,7 @@ AtropineOF.Post{1} = '/media/nas7/Atropine/Mouse1500/30012024/OF_Post';
 AtropineOF.Post{2} = '/media/nas7/Atropine/Mouse1531/OF_Post';
 AtropineOF.Post{3} = '/media/nas7/Atropine/Mouse1533/OF_Post';
 
+%%
 
 DiazepamHC{1}='/media/nas6/ProjetEmbReact/Mouse1207/20210730/';
 DiazepamHC{2}='/media/nas6/ProjetEmbReact/Mouse1224/20210730/';

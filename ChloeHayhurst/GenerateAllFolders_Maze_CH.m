@@ -28,9 +28,9 @@ if not(isempty(Dates.BigExpe))
     ExpeInfo.RecordingRoom =  'UMaze';
     %     FolderName=OrganizeFilesEmbReactAtropineProtocol_CH(ExpeInfo.nmouse,ExpeInfo.date,[SaveFolderName num2str(ExpeInfo.date) filesep],ExpeInfo)
     %     FolderName=OrganizeFilesEmbReactNewProtocolSB_FLXbisV2(ExpeInfo.nmouse,ExpeInfo.date,[SaveFolderName num2str(ExpeInfo.date) filesep],ExpeInfo)
-%         FolderName=OrganizeFilesEmbReactNewProtocolBM(ExpeInfo.nmouse,ExpeInfo.date,[SaveFolderName num2str(ExpeInfo.date) filesep],ExpeInfo)
-
-    FolderName=OrganizeFilesEmbReactRipInhibSleep_CH(ExpeInfo.nmouse,ExpeInfo.date,[SaveFolderName num2str(ExpeInfo.date) filesep],ExpeInfo)
+        FolderName=OrganizeFilesEmbReactShortProtocol(ExpeInfo.nmouse,ExpeInfo.date,[SaveFolderName num2str(ExpeInfo.date) filesep],ExpeInfo)
+    
+%     FolderName=OrganizeFilesEmbReactRipInhibSleep_CH(ExpeInfo.nmouse,ExpeInfo.date,[SaveFolderName num2str(ExpeInfo.date) filesep],ExpeInfo)
 end
 AllFold=length(FolderName)+1;
 
