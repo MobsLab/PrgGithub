@@ -19,9 +19,9 @@ disp('all folder should contain amplifier_MXXX.xml,amplifier_MXXX.dat,digitalin.
 cd ..
 save('AllFolderNames.mat','FolderName')
 
-Fill_Folders_UMaze_RipInhib_Sleep
+% Fill_Folders_UMaze_RipInhib_Sleep
 
-Fill_Folders_UMaze_Short_Protocol_CH
+Fill_Folders_UMaze_Short_Protocol
 % Fill_Folders_UMaze_CH
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

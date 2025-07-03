@@ -10,7 +10,7 @@ for sess = 1:length(Sess.(Mouse_names{1}))
         load('StateEpochSB.mat','SWSEpoch','SWSEpochAcc','Wake','WakeAcc','Sleep','REMEpoch')
         load('behavResources_SB.mat','Behav')
         try
-            SWSEpoch
+            SWSEpoch;
         catch
             BulbSleepScript
         end

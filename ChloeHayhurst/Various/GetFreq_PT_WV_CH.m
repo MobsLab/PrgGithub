@@ -1,13 +1,13 @@
 function [LocalFreq,LocalPhase,AllPeaks,Wavelet] = GetFreq_PT_WV_CH(struct,varargin)
 
 Options.Fs = 1250; % Hz
-Options.FilBand = [1 15];
+Options.FilBand = [1.5 15];
 Options.std = [0.4 0.1];
 Options.TimeLim = 0.08;
 Options.NumOctaves = 8;
 Options.VoicesPerOctave = 48;
 Options.VoicesPerOctaveCoherence = 32;
-Options.FreqLim = [1.5, 30];
+Options.FreqLim = [1.5 15];
 Options.WVDownsample = 10;
 Options.TimeBandWidth = 15;
 Options1 = Options;
@@ -19,8 +19,11 @@ for i = 1:2:length(varargin)
         error(['Parameter ' num2str(i+2) ' is not a property.']);
     end
     switch lower(varargin{i})
-        case 'freqlim'
+        case 'FreqLimWV'
             Options.FreqLim = varargin{i+1};
+        case 'FreqLimPT'
+            Options.FilBand = varargin{i+1};
+            
         otherwise
             warning(['Unknown parameter: ' varargin{i}]);
     end
@@ -56,7 +59,7 @@ tps=Range((LFP));
 vals=Data((LFP));
 LFPdowns=tsd(tps(1:Options.WVDownsample:end),vals(1:Options.WVDownsample:end));
 
-rmpath('/home/greta/PrgGithub/chronux2/spectral_analysis/continuous')
+rmpath([GitHubLocation,'/PrgGithub/chronux2/spectral_analysis/continuous'])
 
 %%Get local phase and amplitude with two methods
 
@@ -79,7 +82,7 @@ Y=interp1(AllPeaks(:,1),AllPeaks(:,3),Range(LFPdowns,'s'));
 if AllPeaks(1,2)==1
     LocalPhase.PT=tsd(Range(LFPdowns),mod(Y,2*pi));
 else
-    LocalPhase.PT=tsd(LFPdowns,mod(Y+pi,2*pi));
+    LocalPhase.PT=tsd(Range(LFPdowns),mod(Y+pi,2*pi));
 end
 tpstemp=AllPeaks(2:2:end,1);
 LocalFreq.PT=tsd(tpstemp(1:end-1)*1e4,1./diff(AllPeaks(2:2:end,1)));

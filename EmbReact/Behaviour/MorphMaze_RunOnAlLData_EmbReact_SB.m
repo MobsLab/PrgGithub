@@ -4,17 +4,17 @@ clear all
 
 cd('/media/nas6/ProjetEmbReact/transfer')
 load('Sess.mat')
-Mouse_names={'M1747'}; mouse=1;
+Mouse_names={'M1775'}; mouse=1;
+
 Hab_24_Sess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Habituation24H'))));
 HabSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Habituation_P'))));
 HabBlockedShockSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'HabituationBlockedShock'))));
 TestPreSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'TestPre'))));
-TestPostPreSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'TestPost_Pre'))));
-TestPostPostSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'TestPost_Post'))));
-SleepSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Sleep'))));
+TestPostSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'TestPost'))));
+CondSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Cond'))));
 
 
-for cond = 1:7
+for cond = 4:5
     if cond==1
         start=Hab_24_Sess(1); stop=HabSess(1)-1;
     elseif cond==2
@@ -22,13 +22,9 @@ for cond = 1:7
     elseif cond==3
         start=HabBlockedShockSess(1); stop=TestPreSess(1)-1;
     elseif cond==4
-        start=TestPreSess(1); stop=TestPostPreSess(1)-1;
+        start=TestPreSess(1); stop=TestPostSess(1)-1;
     elseif cond==5
-        start=TestPostPreSess(1); stop=TestPostPostSess(1)-1;
-    elseif cond==6
-        start=TestPostPostSess(1); stop=length(Sess.(Mouse_names{mouse}));
-    elseif cond==7
-        start=SleepSess(1); stop=SleepSess(3);
+        start=TestPostSess(1); stop=length(Sess.(Mouse_names{mouse}));
     end
     
     clear XYOutput

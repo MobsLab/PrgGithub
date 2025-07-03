@@ -193,7 +193,55 @@ if strcmp(experiment,'Calibration')
         cc=cc+1;
     end
     
+              
+          % Mouse 1775
+    a=a+1;
+    cc=1;
+    StimLevels={'20','19','0','1','2','2.5'};
+    StimDur={'200','200','200','200','200','200'};
+    for c=1:length(StimLevels)
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1775/20250624/ProjectEmbReact_M1775_20250624_CalibrationEyelid_',StimLevels{c},'V_',StimDur{c},'ms/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
     
+                  
+          % Mouse 1776
+    a=a+1;
+    cc=1;
+    StimLevels={'0','1','2','3','4','5'};
+    StimDur={'200','200','200','200','200','200'};
+    for c=1:length(StimLevels)
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1776/20250626/ProjectEmbReact_M1776_20250626_CalibrationEyelid_',StimLevels{c},'V_',StimDur{c},'ms/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+    
+elseif strcmp(experiment,'Calibration_VHC')
+    
+    % Mouse 1775
+    a=a+1;
+    cc=1;
+    StimLevels={'0','1','2','3','4'};
+    StimDur={'200','200','200','200','200'};
+    for c=1:length(StimLevels)
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1775/20250624/ProjectEmbReact_M1775_20250624_CalibrationVHC_',StimLevels{c},'V_',StimDur{c},'ms/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+        % Mouse 1776
+    a=a+1;
+    cc=1;
+    StimLevels={'20','0','1','1.5','1.55','1.6','1.75'};
+    StimDur={'200','200','200','200','200','200','200'};
+    for c=1:length(StimLevels)
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1776/20250626/ProjectEmbReact_M1776_20250626_CalibrationVHC_',StimLevels{c},'V_',StimDur{c},'ms/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+        
 elseif strcmp(experiment,'Habituation24HPre_PreDrug')
     
     % Mouse 1594
@@ -291,6 +339,19 @@ elseif strcmp(experiment,'Habituation24HPre_PreDrug')
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
     Dir.path{a}{2}='/media/nas8-2/ProjetEmbReact/Mouse1747/20250513/ProjectEmbReact_M1747_20250513_Habituation24HPre_PreDrug/Hab2/';
     load([Dir.path{a}{2},'ExpeInfo.mat']),Dir.ExpeInfo{a}{2}=ExpeInfo;
+    
+          % Mouse 1775
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_Habituation24HPre_PreDrug/Hab1/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    Dir.path{a}{2}='/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_Habituation24HPre_PreDrug/Hab2/';
+    load([Dir.path{a}{2},'ExpeInfo.mat']),Dir.ExpeInfo{a}{2}=ExpeInfo;
+    
+           % Mouse 1776
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_Habituation24HPre_PreDrug/Hab1/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    Dir.path{a}{2}='/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_Habituation24HPre_PreDrug/Hab2/';
+    load([Dir.path{a}{2},'ExpeInfo.mat']),Dir.ExpeInfo{a}{2}=ExpeInfo;
+    
     
 elseif strcmp(experiment,'Habituation_PreDrug')
     
@@ -391,6 +452,19 @@ elseif strcmp(experiment,'Habituation_PreDrug')
     Dir.path{a}{2}='/media/nas8-2/ProjetEmbReact/Mouse1747/20250513/ProjectEmbReact_M1747_20250513_Habituation_PreDrug/Hab2/';
     load([Dir.path{a}{2},'ExpeInfo.mat']),Dir.ExpeInfo{a}{2}=ExpeInfo;
     
+             %  Mouse 1775
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_Habituation_PreDrug/Hab1/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    Dir.path{a}{2}='/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_Habituation_PreDrug/Hab2/';
+    load([Dir.path{a}{2},'ExpeInfo.mat']),Dir.ExpeInfo{a}{2}=ExpeInfo;
+    
+              %  Mouse 1776
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_Habituation_PreDrug/Hab1/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    Dir.path{a}{2}='/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_Habituation_PreDrug/Hab2/';
+    load([Dir.path{a}{2},'ExpeInfo.mat']),Dir.ExpeInfo{a}{2}=ExpeInfo;
+    
+    
 elseif strcmp(experiment,'HabituationBlockedShock_PreDrug')
     
   %      Mouse 1594
@@ -456,6 +530,14 @@ elseif strcmp(experiment,'HabituationBlockedShock_PreDrug')
     
           %      Mouse 1747
     a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1747/20250513/ProjectEmbReact_M1747_20250513_HabituationBlockedShock_PreDrug/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    
+         %      Mouse 1775
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_HabituationBlockedShock_PreDrug/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    
+        %      Mouse 1776
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_HabituationBlockedShock_PreDrug/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
     
    
@@ -526,6 +608,14 @@ elseif strcmp(experiment,'HabituationBlockedSafe_PreDrug')
     a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1747/20250513/ProjectEmbReact_M1747_20250513_HabituationBlockedSafe_PreDrug/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
     
+          %   Mouse 1775
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_HabituationBlockedSafe_PreDrug/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    
+           %   Mouse 1776
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_HabituationBlockedSafe_PreDrug/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    
     
 elseif strcmp(experiment,'SleepPre_PreDrug')
     
@@ -592,6 +682,14 @@ elseif strcmp(experiment,'SleepPre_PreDrug')
     
              % Mouse 1747
     a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1747/20250513/ProjectEmbReact_M1747_20250513_SleepPre_PreDrug/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    
+            % Mouse 1775
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_SleepPre/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    
+                % Mouse 1776
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_SleepPre/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
     
     
@@ -743,6 +841,24 @@ elseif strcmp(experiment,'TestPre_PreDrug')
         cc=cc+1;
     end
     
+             % Mouse 1775
+    a=a+1;
+    cc=1;
+    for c=1:4
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_TestPre_PreDrug/TestPre',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+      
+             % Mouse 1776
+    a=a+1;
+    cc=1;
+    for c=1:4
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_TestPre_PreDrug/TestPre',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
     
 elseif strcmp(experiment,'UMazeCondExplo_PreDrug')
     
@@ -890,6 +1006,25 @@ elseif strcmp(experiment,'UMazeCondExplo_PreDrug')
         cc=cc+1;
     end
     
+              % Mouse 1775
+    a=a+1;
+    cc=1;
+    for c=1:3
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_UMazeCondExplo_PostDrug/Cond',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+               % Mouse 1776
+    a=a+1;
+    cc=1;
+    for c=1:3
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_UMazeCondExplo_PostDrug/Cond',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+    
 elseif strcmp(experiment,'UMazeCondBlockedShock_PreDrug')
     
     % Mouse 1594
@@ -1036,6 +1171,23 @@ elseif strcmp(experiment,'UMazeCondBlockedShock_PreDrug')
         cc=cc+1;
     end
     
+               % Mouse 1775
+    a=a+1;
+    cc=1;
+    for c=1:3
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_UMazeCondBlockedShock_PostDrug/Cond',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+                   % Mouse 1776
+    a=a+1;
+    cc=1;
+    for c=1:3
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_UMazeCondBlockedShock_PostDrug/Cond',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
     
 elseif strcmp(experiment,'UMazeCondBlockedSafe_PreDrug')
    
@@ -1183,6 +1335,24 @@ elseif strcmp(experiment,'UMazeCondBlockedSafe_PreDrug')
         cc=cc+1;
     end
     
+                % Mouse 1775
+    a=a+1;
+    cc=1;
+    for c=1:3
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_UMazeCondBlockedSafe_PostDrug/Cond',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+                  % Mouse 1776
+    a=a+1;
+    cc=1;
+    for c=1:3
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_UMazeCondBlockedSafe_PostDrug/Cond',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
     
 elseif strcmp(experiment,'SleepPost_PreDrug')
     
@@ -1251,6 +1421,14 @@ elseif strcmp(experiment,'SleepPost_PreDrug')
      
          % Mouse 1747
     a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1747/20250513/ProjectEmbReact_M1747_20250513_SleepPost_PreDrug/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    
+         % Mouse 1775
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_SleepPost/';
+    load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    
+          % Mouse 1776
+    a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_SleepPost/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
     
     
@@ -1390,6 +1568,7 @@ elseif strcmp(experiment,'UMazeCondExplo_PostDrug')
         load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
         cc=cc+1;
     end
+
     
     
 elseif strcmp(experiment,'UMazeCondBlockedShock_PostDrug')
@@ -1528,6 +1707,7 @@ elseif strcmp(experiment,'UMazeCondBlockedShock_PostDrug')
         load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
         cc=cc+1;
     end
+    
     
     
 elseif strcmp(experiment,'ExtinctionBlockedShock_PreDrug')
@@ -1672,6 +1852,24 @@ elseif strcmp(experiment,'ExtinctionBlockedShock_PreDrug')
     cc=1;
     for c=1:3
         Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1740/20250509/ProjectEmbReact_M1740_20250509_ExtinctionBlockedShock_PostDrug/Ext',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+            % Mouse 1775
+    a=a+1;
+    cc=1;
+    for c=1:3
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_ExtinctionBlockedShock_PostDrug/Ext',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+            % Mouse 1776
+    a=a+1;
+    cc=1;
+    for c=1:3
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_ExtinctionBlockedShock_PostDrug/Ext',num2str(c),'/'];
         load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
         cc=cc+1;
     end
@@ -1822,6 +2020,23 @@ elseif strcmp(experiment,'ExtinctionBlockedSafe_PreDrug')
         cc=cc+1;
     end
     
+        % Mouse 1775
+    a=a+1;
+    cc=1;
+    for c=1:3
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_ExtinctionBlockedSafe_PostDrug/Ext',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+          % Mouse 1776
+    a=a+1;
+    cc=1;
+    for c=1:3
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_ExtinctionBlockedSafe_PostDrug/Ext',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
     
 elseif strcmp(experiment,'UMazeCondBlockedSafe_PostDrug')
    
@@ -1960,6 +2175,8 @@ elseif strcmp(experiment,'UMazeCondBlockedSafe_PostDrug')
         cc=cc+1;
     end
     
+
+    
 elseif strcmp(experiment,'SleepPost_PostDrug')
     
     % Mouse 1594
@@ -2021,6 +2238,8 @@ elseif strcmp(experiment,'SleepPost_PostDrug')
           % Mouse 1747
     a=a+1;Dir.path{a}{1}='/media/nas8-2/ProjetEmbReact/Mouse1747/20250513/ProjectEmbReact_M1747_20250513_SleepPost_PostDrug/';
     load([Dir.path{a}{1},'ExpeInfo.mat']),Dir.ExpeInfo{a}{1}=ExpeInfo;
+    
+   
     
 
 elseif strcmp(experiment,'TestPost_PostDrug')
@@ -2162,6 +2381,8 @@ elseif strcmp(experiment,'TestPost_PostDrug')
         cc=cc+1;
     end
 
+
+
     
 elseif strcmp(experiment,'ExtinctionBlockedShock_PostDrug')
     
@@ -2270,7 +2491,7 @@ elseif strcmp(experiment,'ExtinctionBlockedShock_PostDrug')
     Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1747/20250513/ProjectEmbReact_M1747_20250513_ExtinctionBlockedShock_PostDrug','/'];
     load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
     cc=cc+1;
-    
+
     
     
 elseif strcmp(experiment,'ExtinctionBlockedSafe_PostDrug')
@@ -2369,6 +2590,7 @@ elseif strcmp(experiment,'ExtinctionBlockedSafe_PostDrug')
     cc=1;
     Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1747/20250513/ProjectEmbReact_M1747_20250513_ExtinctionBlockedSafe_PostDrug','/'];
     load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+  
   
     
 elseif strcmp(experiment,'TestPost_PreDrug')
@@ -2529,6 +2751,26 @@ elseif strcmp(experiment,'TestPost_PreDrug')
     cc=1;
     for c=1:4
         Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1747/20250513/ProjectEmbReact_M1747_20250513_TestPost_PreDrug/TestPost',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+       % Mouse 1775
+    
+    a=a+1;
+    cc=1;
+    for c=1:4
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1775/20250625/ProjectEmbReact_M1775_20250625_TestPost_PostDrug/TestPost',num2str(c),'/'];
+        load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
+        cc=cc+1;
+    end
+    
+         % Mouse 1776
+    
+    a=a+1;
+    cc=1;
+    for c=1:4
+        Dir.path{a}{cc}=['/media/nas8-2/ProjetEmbReact/Mouse1776/20250627/ProjectEmbReact_M1776_20250627_TestPost_PostDrug/TestPost',num2str(c),'/'];
         load([Dir.path{a}{cc},'ExpeInfo.mat']),Dir.ExpeInfo{a}{cc}=ExpeInfo;
         cc=cc+1;
     end

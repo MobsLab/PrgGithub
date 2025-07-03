@@ -1,5 +1,5 @@
 function FolderName=OrganizeFilesEmbReactNewProtocolBM(MouseNum,Date,SaveFolderName,ExpeInfo)
-% This organizes the files for the new protocol
+% This organizes the files for the new protocol (short)
 AllFold=1;
 if ~(SaveFolderName(end)==filesep),SaveFolderName=[SaveFolderName filesep]; end
 
