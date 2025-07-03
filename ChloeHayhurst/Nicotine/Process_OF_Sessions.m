@@ -73,7 +73,20 @@ if not(exist('HeartBeatInfo.mat'))
         saveas(1,'EKGCheck.png')
         close all
         clear EKG NoiseEpoch TotalNoiseEpoch TTLInfo LFP EKG HearRate Template Times
+    catch
+        disp('No EKG channel')
     end
+    end
+end
+
+if not(exist('BreathingRate.mat'))
+    load('B_Low_Spectrum')
+    Spec = ConvertSpectrum_in_Frequencies_BM(Spectro{3} , Spectro{2}*1e4 , Spectro{1});
+    save('BreathingRate.mat','Spec');
+    Freq = GetFreq_PT_WV_CH('OB');
+    PT = Freq.PT;
+    WV = Freq.WV;
+    save('BreathingRate','PT','WV','-append');
 end
 
 satisfied = 0;
@@ -100,4 +113,20 @@ if not(exist('AlignedXtsd','var'))
     end
 end
 save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd','-append');
+
+
+load('SWR.mat', 'RipplesEpoch','tRipples')
+Rg_Acc = Range(MovAcctsd);
+i=1; bin_length = ceil(2/median(diff(Range(MovAcctsd,'s')))); % in 2s
+for bin=1:bin_length:length(Rg_Acc)-bin_length
+    SmallEpoch=intervalSet(Rg_Acc(bin),Rg_Acc(bin+bin_length));
+    RipDensity_temp(i) = length(Start(and(RipplesEpoch , SmallEpoch)));
+    TimeRange(i) = Rg_Acc(bin);
+    i=i+1;
+end
+RipDens_tsd = tsd(TimeRange' , RipDensity_temp');
+save('SWR.mat','RipDens_tsd','-append')
+
+
+
 
