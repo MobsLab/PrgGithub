@@ -24,7 +24,8 @@ global enableTrack % Controls whether the tracking is on or not
 
 % Variables for plotting
 global thimmobline % line that shows current freezing threshold
-global PlotFreez % the name of the Plot that shows im_diff
+global PlotTrials % the name of the Plot that shows im_diff
+global PlotTrialsSmo
 global StartChrono, StartChrono=0; % Variable set to one when the tracking begins
 % the handle of the chronometer object
 global PlotForVideo % the plot that will be saved to .avi if needed
@@ -43,6 +44,9 @@ global ExpeInfo
 global KeepTime
 KeepTime.t1=clock;
 KeepTime.t2=clock;
+KeepTime.InterTrialStart = clock;
+KeepTime.TrialStart = clock;
+
 % contains
 % - t1,t2 for tracking time between frames
 % - tDeb for tracking length of session ; ...
@@ -52,7 +56,7 @@ KeepTime.t2=clock;
 global th_immob; th_immob=20;
 global thtps_immob; thtps_immob=2;
 global maxyaxis ymax; maxyaxis=500;ymax=50;
-global maxfrvis;maxfrvis=800;
+global max_trial_xaxis;max_trial_xaxis=800;
 global maxth_immob; maxth_immob=200 ;
 
 % Time/date parameters
@@ -66,10 +70,12 @@ ExpeInfo.TodayIs=[jour mois annee];clear t jour mois annee
 global a % the arduino
 global arduinoDictionary % list of numbers to send to arduino for each case
 arduinoDictionary.On=1; % Tells Intan its time to go
-arduinoDictionary.Off=3; % switches Intan off
 arduinoDictionary.TenFrames=2; % Sync with intan every 1000 frames
-arduinoDictionary.StimulationWindowOpen = 5; % Sync with intan every 1000 frames
-
+arduinoDictionary.Off=3; % switches Intan off
+arduinoDictionary.StimulationWindowOpen_Lever1 = 4; % Open window for lever 1
+arduinoDictionary.StimulationWindowOpen_Lever2 = 5; % Open window for lever 2
+arduinoDictionary.StimulationWindowClose = 9; % Close which ever window is open
+TrialON = 0;
 %% Task parameters
 global nametypes; nametypes={'MFB Calibration'};
 
@@ -111,7 +117,7 @@ inputDisplay.Instructions=uicontrol(Fig_HeadFixedSession,'style','text','units',
 chronoshow=uicontrol('style','edit', 'units','normalized','position',[0.01 0.4 0.1 0.05],...
     'string',num2str(floor(0)),'ForegroundColor','g','BackgroundColor','k','FontSize',14);
 chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0.1 0.05],...
-    'string',num2str(floor(0)),'ForegroundColor','k','BackgroundColor','k','FontSize',14);
+    'string',num2str(floor(0)),'ForegroundColor','g','BackgroundColor','k','FontSize',14);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CALLED FUNCTIONS
@@ -188,7 +194,6 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
 
         function savProtoc(obj,event)
             
-            
             switch  ExpeInfo.namePhase
                 case 'MFB Calibration'
 
@@ -196,20 +201,25 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
                 default_answer{2}=num2str(100);
                 default_answer{3}='2';
                 default_answer{4}='2';
+                default_answer{5}='4';
 
-                answer = inputdlg({'NumberMouse','TrialNumber', 'VoltageMFB','Trial Duration'},'INFO',1,default_answer);
+                answer = inputdlg({'NumberMouse','TrialNumber', 'VoltageMFB','Trial Duration','InterTrialInterval'},'INFO',1,default_answer);
                 default_answer=answer; save default_answer default_answer
                 
-                ExpeInfo.MFBCalibrationTrialNum;
                 ExpeInfo.nmouse=str2double(answer{1});
                 ExpeInfo.TrialNumber = str2double(answer{2});
                 ExpeInfo.VoltageMFB = str2double(answer{3});
                 ExpeInfo.TrialDuration = str2double(answer{4});
+                ExpeInfo.InterTrialInterval = str2double(answer{5});
                 ExpeInfo.nPhase=0;
                 
-                % Set up trial structure
-                ExpeInfo.TrialId = ones(ExpeInfo.MFBCalibrationTrialNum,1);
+                % No Pag, set to 0
+                ExpeInfo.VoltagePAG = 0;
                 
+                % Set up trial structure
+                ExpeInfo.TrialId = ones(ExpeInfo.TrialNumber,1);
+                ExpeInfo.TrialResult = zeros(ExpeInfo.TrialNumber,1);
+
             if strcmp('New PulsePal',Stimulator)
 
                 ProgramPulsePalParam(1,'Phase1Voltage', ExpeInfo.VoltageMFB);
@@ -274,6 +284,7 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
 % -----------------------------------------------------------------
 %% StartSession
     function StartSession(obj,event)
+        
         % Clear the arduino
         if a.BytesAvailable>0
             fread(a,a.BytesAvailable);
@@ -319,10 +330,12 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
 
         im_diff=0;
         figure(Fig_HeadFixedSession), subplot(5,5,21:25)
-        PlotFreez=plot(0,0,'-b');
-        hold on, thimmobline=line([1,2000],[1 1]*th_immob,'Color','r');
-        xlim([0,maxfrvis]);
-        
+        PlotTrials = bar(1:length(ExpeInfo.TrialResult),ExpeInfo.TrialResult);
+        hold on
+        PlotTrialsSmo = plot(1:length(ExpeInfo.TrialResult),runmean(ExpeInfo.TrialResult,5),'r','linewidth',3);
+        xlim([0,ExpeInfo.TrialNumber]);
+               ylim([0 1.2]);
+
         % Follow TrialNumber and Type
         inputDisplay.TrialId=uicontrol(Fig_HeadFixedSession,'style','text','units','normalized','position',[0.01 0.26 0.16 0.02],'string',...
             'TrialID','FontSize',12,'BackgroundColor',color_on,'ForegroundColor','w','FontWeight','bold');
@@ -369,7 +382,7 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
                 
                 % How long since the beginning of the session
                 KeepTime.chrono=etime(KeepTime.t1,KeepTime.tDeb);
-                set(chronoshow,'string',[num2str(floor(KeepTime.chrono)),'/',num2str(ExpeInfo.lengthPhase)]);
+                set(chronoshow,'string',[num2str(floor(KeepTime.chrono)) ' s']);
                 time(num_fr,1)=KeepTime.chrono; % Time
 
 
@@ -384,7 +397,6 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
 
 
                 if strcmp(TrObjLocal.camera_type,'Webcam')
-
                     if length(size(IM))==3
                         IM = rgb2gray(IM);
                     end
@@ -424,43 +436,64 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
 
                 if mod(num_fr,10) == 0
                     fwrite(a, arduinoDictionary.TenFrames);
-                    disp('frame')
-
-                    if mod(num_fr,40) == 0
-                        fwrite(a, arduinoDictionary.GetTemp); % Request temperature
-
-                        pause(0.1); % Allow time for response
-
-                        if a.BytesAvailable > 0
-                            temp_str = fgetl(a);  % Read the temperature
-
-                            if strcmp(temp_str, 'ERROR')
-                                warning('Arduino failed to read temperature.');
-                                Temperature(num_fr,1) = NaN; % Assign NaN if no valid reading
-                            else
-                                Temperature(num_fr,1) = str2double(temp_str); % Convert to number
-                                disp(['Temperature: ', num2str(Temperature(num_fr,1), '%.2f'), ' Â°C']);
-                            end
-                        else
-                            warning('No temperature data received from Arduino.');
-                            Temperature(num_fr,1) = NaN;
-                        end
-                    end
+%Get temperature
+%                     if mod(num_fr,40) == 0
+%                         fwrite(a, arduinoDictionary.GetTemp); % Request temperature
+% 
+%                         pause(0.1); % Allow time for response
+% 
+%                         if a.BytesAvailable > 0
+%                             temp_str = fgetl(a);  % Read the temperature
+% 
+%                             if strcmp(temp_str, 'ERROR')
+%                                 warning('Arduino failed to read temperature.');
+%                                 Temperature(num_fr,1) = NaN; % Assign NaN if no valid reading
+%                             else
+%                                 Temperature(num_fr,1) = str2double(temp_str); % Convert to number
+%                                 disp(['Temperature: ', num2str(Temperature(num_fr,1), '%.2f'), ' °C']);
+%                             end
+%                         else
+%                             warning('No temperature data received from Arduino.');
+%                             Temperature(num_fr,1) = NaN;
+%                         end
+%                     end
                 end
                 
                 
                 % -------------------------------------------------------------------------------
                 % ------------------- Behaviour  -----------------------
                 
-                if etime(KeepTime.TrialStart,KeepTime.t1) > ExpeInfo.TrialDuration % next trial
+                if TrialON == 0 & etime(KeepTime.t1,KeepTime.InterTrialStart) > ExpeInfo.InterTrialInterval % next trial
                     % Tell adruino to open a new window that stimluates if
                     % lever press within ExpeInfo.TrialDuration seconds
-                    fwrite(a,arduinoDictionary.StimulationWindowOpen); 
+                    fwrite(a,arduinoDictionary.StimulationWindowOpen_Lever1);
+                    TrialON = 1;
                     KeepTime.TrialStart = clock;
                     KeepTime.CurrentTrial = KeepTime.CurrentTrial + 1;
+                    set(chronostim,'string',[num2str(floor(KeepTime.CurrentTrial)) '/' num2str(ExpeInfo.TrialNumber)]);
+                    set(inputDisplay.TrialId,'String','MFB available')
+                elseif TrialON == 1 & etime(KeepTime.t1,KeepTime.TrialStart) > ExpeInfo.TrialDuration % next trial
+                    % Tell adruino to close windo and
+                    % wait during the ITI
+                    fwrite(a,arduinoDictionary.StimulationWindowClose);
+                    TrialON = 0;
+                    KeepTime.InterTrialStart = clock;
+                    set(inputDisplay.TrialId,'String','InterTrial')
+                    if a.BytesAvailable>0
+                        bytes = a.BytesAvailable;
+                        data = fread(a, bytes);
+                        ExpeInfo.TrialResult(KeepTime.CurrentTrial) = eval(char(data'));
+                    else
+                        ExpeInfo.TrialResult(KeepTime.CurrentTrial) = 0;
+                    end
+                
+                    set(PlotTrials,'ydata',ExpeInfo.TrialResult);
+                    set(PlotTrialsSmo,'ydata',runmean(ExpeInfo.TrialResult,5));
+                    
                 end
-        
-
+                
+                
+                
                 
                 num_fr=num_fr+1;
                 KeepTime.t2 = clock;
@@ -470,15 +503,12 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
                 if StartChrono && KeepTime.CurrentTrial>ExpeInfo.TrialNumber
                     enableTrack=0;
                 end
-
             end
         end
 
         fwrite(a,arduinoDictionary.Off); % switch off intan
-
-
-
-        save([ExpeInfo.name_folder,filesep,'behavResources.mat'],'time', 'GotFrame','Temperature','im_diff','ExpeInfo');
+        TrialResult = ExpeInfo.TrialResult;
+        save([ExpeInfo.name_folder,filesep,'behavResources.mat'],'time', 'GotFrame','im_diff','ExpeInfo','TrialResult');
         clear ref mask Ratio_IMAonREAL
 
 
@@ -488,7 +518,7 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
         close(writerObj);
 
         pause(0.5)
-        try set(PlotFreez,'YData',0,'XData',0);end
+        try set(PlotTrials,'YData',0,'XData',0);end
 
         %% generate figure that gives overviewof the tracking session
 
