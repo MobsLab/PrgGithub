@@ -5,6 +5,8 @@ clear TTLInfo Behav EKG channel
 close all
 Options.TemplateThreshStd=3;
 Options.BeatThreshStd=0.05;
+Options.MaxFreq = 10; % values for rats, change to 14 for mice
+
 load('ChannelsToAnalyse/EKG.mat')
 load(['LFPData/LFP',num2str(channel),'.mat'])
 try
@@ -23,7 +25,7 @@ if ExpeInfo.SleepSession==0
 else
     NoiseEpoch=TotalNoiseEpoch;
 end
-[Times,Template,HeartRate,GoodEpoch]=DetectHeartBeats_EmbReact_SB(LFP,NoiseEpoch,Options,1);
+[Times,Template,HeartRate,GoodEpoch]=DetectHeartBeats_EmbReact_BM(LFP,NoiseEpoch,Options,1);
 EKG.HBTimes=ts(Times);
 EKG.HBShape=Template;
 EKG.DetectionOptions=Options;

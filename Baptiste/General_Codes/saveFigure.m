@@ -26,7 +26,7 @@ set(n,'paperPositionMode','auto')
 
 try
     eval(['print -f',num2str(n),' -dpng ', Dossier filesep title,'.png'])
-    saveas(n,[Dossier filesep title '.fig'])
+    try, saveas(n,[Dossier filesep title '.fig']), end
     print(n, [Dossier filesep title], '-dsvg');
     eval(['print -f',num2str(n),' -painters',' -depsc2 ',Dossier filesep title,'.eps'])
 catch

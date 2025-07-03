@@ -6,6 +6,8 @@ Respi = load('/media/nas7/ProjetEmbReact/DataEmbReact/ThesisData/Physio_BehavGro
 HR = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/HR_Homecage_Eyelid.mat');
 Thigmo = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/Thigmo_Eyelid.mat');
 load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/Fear_related_measures.mat')
+load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/PC_values.mat','PCVal')
+load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/recov_dev.mat', 'residual')
 % 668 bad recording of sleep post
 HR.HR_Wake_First5min{1}(7)=NaN;
 Eyelid.Prop.REM_s_l_e_e_p{2}(7)=NaN;
@@ -17,26 +19,27 @@ PlotCorrelations_BM(Respi_safe , PCVal)
 
 
 %
+
 figure
-subplot(421)
-PlotCorrelations_BM(Respi_safe , Eyelid.Prop.Wake{2})
+subplot(241)
+[R,P]=PlotCorrelations_BM(residual , Eyelid.Prop.Wake{2} , 'marker_size' , 20)
 axis square
-xlabel('Breathing, safe side (Hz)'), ylabel('Wake prop, Sleep Post'), xlim([1.5 5.5]), ylim([0 .85])
+xlabel('Slow/fast breathing deviation'), ylabel('Prop Wake'), xlim([-1.5 1]), ylim([0 .85])
 
-subplot(423)
-PlotCorrelations_BM(Respi_safe , Eyelid.Prop.REM_s_l_e_e_p{2})
+subplot(242)
+[R,P]=PlotCorrelations_BM(residual , Eyelid.Prop.REM_s_l_e_e_p{2} , 'marker_size' , 20)
 axis square
-xlabel('Breathing, safe side (Hz)'), ylabel('REM prop, Sleep Post'), xlim([1.5 5.5]), ylim([0 .15])
+xlabel('Slow/fast breathing deviation'), ylabel('Prop REM'), xlim([-1.5 1]), ylim([0 .15])
 
-subplot(425)
-PlotCorrelations_BM(Respi_safe , HR.HR_Wake_First5min{1} , 'method' , 'pearson')
+subplot(243)
+[R,P]=PlotCorrelations_BM(residual , HR.HR_Wake_First5min{1} , 'marker_size' , 20)
 axis square
-xlabel('Breathing, safe side (Hz)'), ylabel('HR homecage, Sleep Post'), xlim([1.5 5.5]), ylim([-3 2])
+xlabel('Slow/fast breathing deviation'), ylabel('Heart rate (norm)'), xlim([-1.5 1]), ylim([-3 2])
 
-subplot(427)
-PlotCorrelations_BM(Respi_safe , Thigmo.Thigmo_score{1} , 'method' , 'spearman')
+subplot(244)
+[R,P]=PlotCorrelations_BM(residual , Thigmo.Thigmo_score{1} , 'marker_size' , 20)
 axis square
-xlabel('Breathing, safe side (Hz)'), ylabel('thigmo score, Sleep Post'), xlim([1.5 5.5]), ylim([0 .15])
+xlabel('Slow/fast breathing deviation'), ylabel('Thigmotaxy'), xlim([-1.5 1]), ylim([0 .15])
 
 
 % Rip
@@ -45,23 +48,23 @@ Cols = {[.65, .75, 0],[.63, .08, .18]};
 X = [1:2];
 Legends = {'RipControl','RipInhib'};
 
-subplot(443)
+subplot(289)
 MakeSpreadAndBoxPlot3_SB(Rip.Prop.Wake,Cols,X,Legends,'showpoints',1,'paired',0);
 ylim([0 .85]), ylabel('Wake prop, Sleep Post')
 
-subplot(447)
+subplot(2,8,11)
 MakeSpreadAndBoxPlot3_SB(Rip.Prop.REM_s_l_e_e_p,Cols,X,Legends,'showpoints',1,'paired',0);
 ylim([0 .2]), ylabel('REM prop, Sleep Post')
 
 Rip2 = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/HR_Homecage_Rip.mat');
 
-subplot(4,4,11)
+subplot(2,8,13)
 MakeSpreadAndBoxPlot3_SB(Rip2.HR_Wake_First5min,Cols,X,Legends,'showpoints',1,'paired',0)
 ylim([-.6 1.8]), ylabel('HR norm, Wake, Sleep Post')
 
 Rip3 = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/Thigmo_Rip.mat');
 
-subplot(4,4,15)
+subplot(2,8,15)
 MakeSpreadAndBoxPlot3_SB(Rip3.Thigmo_score,Cols,X,Legends,'showpoints',1,'paired',0)
 ylim([0 .4]), ylabel('thigmo score, Sleep Post')
 
@@ -72,25 +75,26 @@ Cols = {[.3, .745, .93],[.85, .325, .098]};
 X = [1:2];
 Legends = {'Saline','DZP'};
 
-subplot(444)
+subplot(2,8,10)
 MakeSpreadAndBoxPlot3_SB(DZP.Prop.Wake,Cols,X,Legends,'showpoints',1,'paired',0);
 ylim([0 .85])
 
-subplot(448)
+subplot(2,8,12)
 MakeSpreadAndBoxPlot3_SB(DZP.Prop.REM_s_l_e_e_p,Cols,X,Legends,'showpoints',1,'paired',0);
 ylim([0 .2])
 
 DZP2 = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/HR_Homecage_DZP.mat');
 
-subplot(4,4,12)
+subplot(2,8,14)
 MakeSpreadAndBoxPlot3_SB(DZP2.HR_Wake_First5min,Cols,X,Legends,'showpoints',1,'paired',0)
 ylim([-.6 1.8])
 
 DZP3 = load('/media/nas7/ProjetEmbReact/DataEmbReact/SleepData/Thigmo_DZP.mat');
 
-subplot(4,4,16)
+subplot(2,8,16)
 MakeSpreadAndBoxPlot3_SB(DZP3.Thigmo_score,Cols,X,Legends,'showpoints',1,'paired',0)
 ylim([0 .4])
+
 
 
 

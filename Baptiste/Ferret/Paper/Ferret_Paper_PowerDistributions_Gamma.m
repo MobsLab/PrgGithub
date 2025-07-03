@@ -32,7 +32,7 @@ text(2,18e5,'Sleep','FontSize',15), text(2.7,18e5,'Wake','FontSize',15)
 makepretty, axis square
 
 
-%% intra-variability
+%% intra-variability across sessions
 clear all
 Dir{1} = PathForExperimentsOB({'Shropshire'}, 'freely-moving', 'none');
 drug=1;
@@ -189,8 +189,41 @@ makepretty, axis square
 
 
 
+%% intra-variability accross electrodes
+clear all
+smootime = 3;
+Frequency = [40 60];
+Cols = {[0.1, 0.4, 0.9],[0.95, 0.45, 0.1],[0.2, 0.7, 0.3],[0.6, 0.3, 0.75]};
+ind = 20:23;
+
+cd('/media/nas8/OB_ferret_AG_BM/Shropshire/freely-moving/20250107_LSP_saline')
+for l=ind
+    load([pwd '/LFPData/LFP' num2str(l) '.mat'])
+    FilGamma = FilterLFP(LFP,Frequency,1024); % filtering
+    tEnveloppeGamma = tsd(Range(LFP), abs(hilbert(Data(FilGamma))) ); %tsd: hilbert transform then enveloppe
+    SmoothGamma{l} = tsd(Range(tEnveloppeGamma), runmean(Data(tEnveloppeGamma), ...
+        ceil(smootime/median(diff(Range(tEnveloppeGamma,'s'))))));
+    h=histogram(log10(Data(SmoothGamma{l})),'BinLimits',[1.7 3.2],'NumBins',200);
+    HistData(l,:) = h.Values;
+end
 
 
+figure
+for i=ind
+    clf
+    D = log10(Data(SmoothGamma{i}));
+    [gamma_thresh(i) , mu(i)] = GetGaussianThresh_BM(D, 0, 1);
+end
+close
 
+figure, k=1;
+for i=ind
+    plot(linspace(1.8,3.1,200)-mu(i) , runmean(HistData(i,:)',5) , 'Color' , Cols{k} , 'LineWidth' , 2)
+    hold on
+    k=k+1;
+end
+xlabel('OB gamma power (log)'), ylabel('PDF'), xlim([-.25 .85])
+legend('electrode 1','electrode 2','electrode 3','electrode 4')
+makepretty_BM2, axis square
 
 

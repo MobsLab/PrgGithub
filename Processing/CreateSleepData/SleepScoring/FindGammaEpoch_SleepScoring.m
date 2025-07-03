@@ -97,8 +97,9 @@ end
 % choose gamma frequency 
 if ~exist('Frequency','var')
     Frequency = [50 70];
-    disp('Note, that chosen Gamma frequency is 50-70Hz')
 end
+
+disp(['Note, that chosen Gamma frequency is ' num2str(Frequency(1)) '-' num2str(Frequency(2)) 'Hz'])
 
 
 

@@ -30,9 +30,9 @@ end
 if ~exist('colortouse')
     colortouse = 'k';
 end
-if ~exist('method')
-    method = 'Pearson';
-end
+% if ~exist('method')
+%     method = 'Pearson';
+% end
 if ~exist('conf_bound')
     conf_bound = 1;
 end
@@ -44,8 +44,21 @@ if size(X_to_use,1)~=size(Y_to_use,1)
         disp('dimensions issues')
     end
 end
+if size(X_to_use,1)<11
+    method = 'Spearman';
+elseif and(size(X_to_use,1)>10 , size(X_to_use,1)<30)
+    [~,p1,~] = swtest(X_to_use);
+    [~,p2,~] = swtest(Y_to_use);
+    if and(p1>.05 , p2>.05)
+        method = 'Pearson';
+    else
+        method = 'Spearman';
+    end
+else
+    method = 'Pearson';
+end
 
-
+    
 lgcl_vect = ~isnan(X_to_use)&~isnan(Y_to_use); % logical vector
 
 X_to_use = X_to_use(lgcl_vect); Y_to_use = Y_to_use(lgcl_vect);
@@ -88,6 +101,8 @@ else
     f=get(gca,'Children'); legend([f(1)],['R = ' num2str(R) '     P = ' num2str(P)]);
     
 end
+box off
+disp(method)
 
 if conf_bound
     S1 = size(X_to_use);
