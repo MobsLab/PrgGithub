@@ -34,6 +34,9 @@ switch strtrim(evalc('system(''hostname'');'))
         p = fullfile('/home/ratatouille/', varargin{:});
     case 'pinky-VirtualBox'
         p = fullfile('/media/sf_mickey/Documents/Theotime', varargin{:});
+    case 'mobs'
+        p = fullfile('/home/bernard/', varargin{:});
+        
         % End hostname cases
     otherwise
         dbdr = uigetdir(pwd,'Please locate your GitHub folder.');

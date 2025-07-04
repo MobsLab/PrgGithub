@@ -115,6 +115,22 @@ end
 save('behavResources.mat', 'AlignedXtsd', 'AlignedYtsd','-append');
 
 
+%%
+if not(exist('GroomingInfo','var'))
+    close all
+    try 
+        load('behavResources.mat', 'Vtsd','MovAcctsd');
+        Speed=Vtsd;
+        Accelero=MovAcctsd;
+        GroomingInfo= FindGrooming_BM(Speed , Accelero);
+        save('behavResources.mat','GroomingInfo','-append');
+        
+    catch
+        disp('Have not been able to calculate the grooming');
+    end
+end
+
+
 load('SWR.mat', 'RipplesEpoch','tRipples')
 Rg_Acc = Range(MovAcctsd);
 i=1; bin_length = ceil(2/median(diff(Range(MovAcctsd,'s')))); % in 2s
