@@ -6,7 +6,6 @@
 % The raw files have to be organized in this way :
 %     - Sleep_Post
 %     - Sleep_Pre
-%     - Sleep_Pre
 %     - All of the intan files (from habituation 24h pre to Extinction)
 %     - All of the matlab files, there should be in order : Hab _03, BlockedWall_07, Cond_04,
 % CondWallSafe/Shock_02, SleepSession_01, TestPost_03, TestPre_03
@@ -18,7 +17,7 @@ for b=1:length(FolderName)
     FolderName{b} = [SaveFolderName,FolderName{b}];
 end
 
-source_UMaze = uigetdir('','please provide Maze folder')
+source_UMaze = uigetdir('','please provide Maze folder');
 
 files_UMaze = dir(fullfile(source_UMaze));
 
@@ -33,7 +32,7 @@ dir_UMaze_final(n) = [];
 
 
 for j = 1:33
-    List_for_loop_FillFolders_Maze_1
+    List_for_loop_FillFolders_ShortProtocol
     
     cd(dir_UMaze_final{j});
     source = dir_UMaze_final{j};
@@ -59,11 +58,16 @@ for j = 1:33
     files(n) = [];
     files(n) = [];
     
+    %        disp(dir_UMaze_final{j})
+    %     disp(FolderName{1,z})
+    %     keyboard
+    
     for k = 1:numel(files)
         file_source = fullfile(dir_UMaze_final{j}, files(k).name);
         file_destination = FolderName{1,z};
         movefile(file_source,file_destination);
     end
+ 
 end
 
 % Verify that your folders have all desired intan files :
@@ -89,12 +93,10 @@ end
 cd(SaveFolderName);
 
 load('AllFolderNames.mat')
-% SaveFolderName = uigetdir('', 'please provide Mouse''s folder ');
 for b=1:length(FolderName)
     FolderName{b} = [SaveFolderName,FolderName{b}];
 end
 
-% source_UMaze = uigetdir('','please provide Maze folder');
 
 files_UMaze = dir(fullfile(source_UMaze));
 
@@ -103,20 +105,23 @@ files_UMaze_names = sort(files_UMaze_names);
 dir_UMaze = {files_UMaze.folder};
 dir_UMaze_final = strcat(dir_UMaze, '/' ,files_UMaze_names);
 n = 1;
-c = 1;
 dir_UMaze_final(n) = [];
 dir_UMaze_final(n) = [];
 
 
 
 for c = 1:33
-    List_for_loop_FillFolders_Maze_1
+    List_for_loop_FillFolders_ShortProtocol
     cd(dir_UMaze_final{c});
     source = dir_UMaze_final{c};
     
     files = dir(fullfile(source, '*.*'));
     files(n) = [];
     files(n) = [];
+    
+    %        disp(dir_UMaze_final{c})
+    %     disp(FolderName{1,y})
+    %     keyboard
     
     for e = 1:numel(files)
         file_source = fullfile(dir_UMaze_final{c}, files(e).name);

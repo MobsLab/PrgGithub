@@ -13,6 +13,7 @@ global Stimulator PulsePalSystem nBytesAvailable % Stimulator type
 
 % Tracking parameters
 global BW_threshold; BW_threshold=0.45;
+global PosMat
 global smaller_object_size; smaller_object_size=12;
 global sm_fact; sm_fact=2;
 global strsz se; strsz=7; se= strel('disk',strsz);
@@ -508,6 +509,8 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
                     pfield=answer{4};
                     ProgramPulsePalParam(1,'Phase1Voltage', ExpeInfo.Voltage);
                     ProgramPulsePalParam(1,'Phase2Voltage', -(ExpeInfo.Voltage));
+                    ProgramPulsePalParam(2,'Phase1Voltage', ExpeInfo.Voltage);
+                    ProgramPulsePalParam(2,'Phase2Voltage', -(ExpeInfo.Voltage));
                     
                     if strcmp('SleepStim',ExpeInfo.namePhase)
                         StimSleepState = questdlg('Which state do you want to stimulate in? (press "Any" if you use OpenEphys and select appropriate stage there)',...
