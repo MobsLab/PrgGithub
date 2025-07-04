@@ -17,7 +17,7 @@ end
 if not(exist('StateEpochSB.mat'))
     load('ChannelsToAnalyse/Bulb_deep.mat')
     channel;
-    FindNoiseEpoch_BM([cd filesep],channel,0);
+    FindNoiseEpoch_BM([cd filesep],channel,0,'saving',1);
 end
 
 load('ChannelsToAnalyse/Bulb_deep.mat')
@@ -75,7 +75,6 @@ if not(exist('HeartBeatInfo.mat'))
         clear EKG NoiseEpoch TotalNoiseEpoch TTLInfo LFP EKG HearRate Template Times
     catch
         disp('No EKG channel')
-    end
     end
 end
 
