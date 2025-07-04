@@ -8,6 +8,7 @@ Session_type = {'Pre','Post'};
 
 Mouse_names_Nic_Sleep = {'M1500','M1531','M1742','M173','M1745','M1746','M1747'};
 
+
 sizeMap = 100;
 sizeMap2 = 1000;
 

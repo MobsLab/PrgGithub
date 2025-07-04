@@ -11,7 +11,7 @@ Session_type = {'Pre','Post'};
 
 Mouse_names_Nic = {'M1500','M1531','M1532','M1686','M1687','M1685','M1713','M1714','M1747','M1742','M1743','M1745','M1746'};
 
-Mouse_names_Sal = {'M1685','M1686','M1612','M1641','M1644','M1687','M1688'};
+Mouse_names_Sal = {'M1685','M1686','M1612','M1641','M1644','M1687','M1688','M1742','M1747'};
 Mouse_names_NicLow = {'M1614','M1644','M1688','M1641','M1612'};
 Mouse_names_SalHC = {'M1411','M1412','M1414','M1416','M1417','M1418','M1207','M1224','M1225','M1227','M1252','M1253','M1254'};
 Mouse_names_NicHC = {'M1411','M1412','M1613','M1414','M1415','M1416','M1417','M1418','M1385','M1391','M1393'};
@@ -55,6 +55,8 @@ for group = 1:2
             FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FreezeAccEpoch;
             FreezeEpochCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FreezeEpoch;
             
+            Groom.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = GroomingInfo;
+            GroomTime.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(GroomingInfo,'s'));
             
             FreezeTimeAcc.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4;
             FreezeTimeCam.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(FreezeEpochCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})))/1e4;
@@ -191,6 +193,13 @@ for group = 1:2
                 DistanceToCenterBasis_mean.(Name{group}).(Session_type{sess})(mouse) = NaN;
             end
             
+            try
+                DistanceToCenterBeginning_mean.(Name{group}).(Session_type{sess})(mouse)=nanmean(Data(Restrict(Distance,Epoch)));
+            catch
+                DistanceToCenterBeginning_mean.(Name{group}).(Session_type{sess})(mouse) = NaN;
+            end
+            
+            
             clear AlignedXtsd_Epoch AlignedYtsd_Epoch AlignedXtsdActive_Epoch AlignedYtsdActive_Epoch ActEpoch
             a = 0;
             for i = 1:60
@@ -295,7 +304,6 @@ for group = 1:2
                 MeanDurFzTemp.(Name{group}).(Session_type{sess})(mouse,i) = nanmean(DurationEpoch(Fztemp))/1e4;
                 FzEpNumbTemp.(Name{group}).(Session_type{sess})(mouse,i) = length(Start(Fztemp));
                 
-                
                 FztempCam = and(FreezeEpochCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch);
                 FztimetempCam.(Name{group}).(Session_type{sess})(mouse,i) = sum(DurationEpoch(FztempCam))/1e4;
                 
@@ -380,13 +388,26 @@ for group = 1:2
                  catch
                      RespiFzTemp.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
                      PowerFzTemp.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
+                     
                  end
                  
+                 try
+                     SpeedTemp.(Name{group}).(Session_type{sess})(mouse,i) = nanmean(Data(Restrict(Speed.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Epoch)));
+                 catch
+                     SpeedTemp.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
+                 end
+                 
+                 try       
+                     RespiTemp.(Name{group}).(Session_type{sess})(mouse,i) = nanmean(Data(Restrict(BreathingSpec.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),Acttemp)));
+                 catch
+                     RespiTemp.(Name{group}).(Session_type{sess})(mouse,i) = NaN;
+                 end
                  a = a+30e4;
             end
         end
     end
 end
+
 
 NumberRipTemp.NicotineOF.Post(7,:)=NaN;
 
@@ -457,7 +478,9 @@ Legends={'Saline Pre','Saline Post','Nicotine Pre','Nicotine Post','Stable'};
 Basis = [DistanceToCenterBasis_mean.SalineOF.Pre DistanceToCenterBasis_mean.NicotineOF.Pre];
 
 
-MakeSpreadAndBoxPlot3_SB({DistanceToCenter_mean.SalineOF.Pre DistanceToCenter_mean.SalineOF.Post DistanceToCenter_mean.NicotineOF.Pre DistanceToCenter_mean.NicotineOF.Post Basis},Cols,X,Legends,'showpoints',1,'paired',0)
+% MakeSpreadAndBoxPlot3_SB({DistanceToCenter_mean.SalineOF.Pre DistanceToCenter_mean.SalineOF.Post DistanceToCenter_mean.NicotineOF.Pre DistanceToCenter_mean.NicotineOF.Post Basis},Cols,X,Legends,'showpoints',1,'paired',0)
+MakeSpreadAndBoxPlot3_SB({DistanceToCenterBeginning_mean.SalineOF.Pre DistanceToCenterBeginning_mean.SalineOF.Post DistanceToCenterBeginning_mean.NicotineOF.Pre DistanceToCenterBeginning_mean.NicotineOF.Post Basis},Cols,X,Legends,'showpoints',1,'paired',0)
+
 ylabel('Thigmotaxis');
 makepretty_CH
 mtitle('OF');

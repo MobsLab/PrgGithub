@@ -4,10 +4,10 @@
 %% Intan files
 
 
-if j == 1 % Sleep Pre
-    z = 7;
-elseif j == 2 % Sleep Post
+if j == 1 % Sleep Post
     z = 21;
+elseif j == 2 % Sleep Pre
+    z = 7;
 elseif j == 3 % Hab 24pre
     z = 1;
 elseif j == 4
