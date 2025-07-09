@@ -12,8 +12,6 @@ __pycache__*
 .directory
 tmp*
 *tmp.m
-*test.m
-test*
 
 # Spyder configuration
 .spyproject/
