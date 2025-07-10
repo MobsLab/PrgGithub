@@ -4,14 +4,18 @@
 PhaseVoltage = 3.0;
 
 % Generate config
-frequencies = 9.5:-0.5:5.0;
+frequencies = 11;
 phaseDurations = [0.01, 0.005];
-burstDurations = [0.5, 1.0, 1.5];
+burstDurations = [1.5];
 
 configsByFreq = generate_stim_configs(frequencies, phaseDurations, burstDurations);
 
-% Define save path
-savePath = 'C:\path\to\your\folder\stim_configs.mat';
+% Create directory if needed
+folderPath = 'C:/OpenEphysData/1753';
+savePath = fullfile(folderPath, 'configData.mat');
+if ~exist(folderPath, 'dir')
+    mkdir(folderPath);
+end
 
 % Build frequency string
 if isscalar(frequencies)
@@ -23,15 +27,20 @@ freqStr = strrep(freqStr, '.', 'p');  % make MATLAB-variable-safe
 
 % Add timestamp
 timestamp = datestr(now, 'yyyymmdd_HHMMSS');
-
-% Final variable name
 varName = sprintf('configs_%s_%s', freqStr, timestamp);
 
-% Save with dynamic field name
+% Create struct
 S.(varName) = configsByFreq;
-save(savePath, '-struct', 'S', '-append');
+
+% Check if file exists
+if isfile(savePath)
+    save(savePath, '-struct', 'S', '-append');
+else
+    save(savePath, '-struct', 'S');  % no -append on first save
+end
 
 fprintf('Saved configs as "%s" to:\n%s\n', varName, savePath);
+
 
 %% Start communication
 PulsePal('COM6');
@@ -48,6 +57,7 @@ for fIdx = 1:length(configsByFreq)
         pause(10)
     end
 end
+pause(10)
 
 %% End communication
 EndPulsePal;
