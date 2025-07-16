@@ -15,7 +15,7 @@ SessNames={'Habituation24HPre_PreDrug' 'Habituation_PreDrug' 'HabituationBlocked
     'SleepPost_PreDrug' ' TestPost_PreDrug' 'ExtinctionBlockedShock_PreDrug' 'ExtinctionBlockedSafe_PreDrug'};
 
 
-MouseToDo = 1776;
+MouseToDo = 1594;
 Mouse_names{1}=['M' num2str(MouseToDo)];
 
 

@@ -76,8 +76,8 @@ if not(exist('HeartBeatInfo.mat'))
     catch
         disp('No EKG channel')
     end
-    end
 end
+
 
 if not(exist('BreathingRate.mat'))
     load('B_Low_Spectrum')
@@ -144,16 +144,3 @@ RipDens_tsd = tsd(TimeRange' , RipDensity_temp');
 save('SWR.mat','RipDens_tsd','-append')
 
 
-if not(exist('GroomingInfo','var'))
-    close all
-    try 
-        load('behavResources.mat', 'Vtsd','MovAcctsd');
-        Speed=Vtsd;
-        Accelero=MovAcctsd;
-        GroomingInfo= FindGrooming_BM(Speed , Accelero);
-        save('behavResources.mat','GroomingInfo','-append');
-
-    catch
-        disp('Have not been able to calculate the grooming');
-    end
-end

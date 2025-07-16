@@ -5,7 +5,7 @@ load('/media/nas8-2/ProjetEmbReact/transfer/AllSessions.mat')
 % GetEmbReactMiceFolderList_BM
 Session_type={'TestPre','TestPost','Cond','Ext','Fear'};
 
-Mouse_names = 'M1775';
+Mouse_names = 'M1777';
 
 RangeLow = linspace(0.1526,20,261);
 RangeHigh = linspace(22,98,32);
@@ -332,10 +332,10 @@ mtitle(Mouse_names);
 %% Physio
 th = 25;
 
-Sessions = {'Cond','CondPre','ExtPre','CondPost','ExtPost'};
+Sessions = {'Cond','Ext'};
 figure
-for i = 1:5
-subplot(2,5,i)
+for i = 1:2
+subplot(2,2,i)
 plot(RangeLow,MeanSpectroBulbFzShock.(Sessions{i}),'r')
 hold on
 [c,d]=max(MeanSpectroBulbFzShock.(Sessions{i})(th:end));
@@ -348,7 +348,7 @@ makepretty
 title(Sessions{i})
 xlim([0 10])
 
-subplot(2,5,i+5)
+subplot(2,2,i+2)
 plot(RangeLow,MeanSpectroBulbFzShockCorr.(Sessions{i}),'r')
 [~,d]=max(MeanSpectroBulbFzShockCorr.(Sessions{i})(th:end));
 hold on
@@ -431,9 +431,9 @@ title('safe freezing')
 
 subplot(1,4,4)
 
-x = categorical({'CondPre','ExtPre','CondPost','ExtPost'});
-x = reordercats(x,{'CondPre','ExtPre','CondPost','ExtPost'});
-vals = [RespiFzShock_mean(4) RespiFzSafe_mean(4);  RespiFzShock_mean(6) RespiFzSafe_mean(6); RespiFzShock_mean(5) RespiFzSafe_mean(5);  RespiFzShock_mean(7) RespiFzSafe_mean(7)];
+x = categorical({'Cond','Ext'});
+x = reordercats(x,{'Cond','Ext'});
+vals = [RespiFzShock_mean(3) RespiFzSafe_mean(3);  RespiFzShock_mean(4) RespiFzSafe_mean(4)];
 
 b = bar(x,vals);
 color1 = [1 .5 .5];
@@ -458,7 +458,7 @@ title('Respi Freezing')
 figure
 x = categorical({'Shock','ShockCorner','Middle','SafeCorner','Safe'});
 x = reordercats(x,{'Shock','ShockCorner','Middle','SafeCorner','Safe'});
-vals = [RespiFzShock_mean(8) RespiFzShockCorner_mean(8) RespiFzMiddle_mean(8) RespiFzSafeCorner_mean(8) RespiFzSafe2_mean(8)];
+vals = [RespiFzShock_mean(3) RespiFzShockCorner_mean(3) RespiFzMiddle_mean(3) RespiFzSafeCorner_mean(3) RespiFzSafe2_mean(3)];
 b = bar(x,vals);
 title('Respi Freezing')
 

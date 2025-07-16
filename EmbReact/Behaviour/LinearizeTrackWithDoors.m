@@ -5,7 +5,7 @@ clear all, close all
 
 cd('/media/nas6/ProjetEmbReact/transfer')
 load('Sess.mat')
-Mouse_names={'M1775'}; mouse=1;
+Mouse_names={'M1776'}; mouse=1;
 
 Hab_24_Sess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Habituation24H'))));
 HabSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Habituation_'))));
@@ -15,17 +15,17 @@ TestPostSess = find(not(cellfun(@isempty,strfind(Sess.(Mouse_names{mouse}) ,'Tes
 
 
 for cond = 1:5
-        if cond==1
-            start=Hab_24_Sess(1); stop=HabSess(1)-1;
-        elseif cond==2
-            start=HabSess(1); stop=HabBlockedShockSess(1)-1;
-        elseif cond==3
-            start=HabBlockedShockSess(1); stop=TestPreSess(1)-1;
-        elseif cond==4
-            start=TestPreSess(1); stop=TestPostSess(1)-1;
-        elseif cond==5
-            start=TestPostSess(1); stop=length(Sess.(Mouse_names{mouse}));
-        end
+    if cond==1
+        start=Hab_24_Sess(1); stop=HabSess(1)-1;
+    elseif cond==2
+        start=HabSess(1); stop=HabBlockedShockSess(1)-1;
+    elseif cond==3
+        start=HabBlockedShockSess(1); stop=TestPreSess(1)-1;
+    elseif cond==4
+        start=TestPreSess(1); stop=TestPostSess(1)-1;
+    elseif cond==5
+        start=TestPostSess(1); stop=length(Sess.(Mouse_names{mouse}));
+    end
     
     for f=start:stop
         
@@ -71,7 +71,7 @@ for cond = 1:5
                 clf
                 save('behavResources_SB.mat','Behav','Params','-append')
                 clear Behav Params TTLInfo Results t xy distance mapxy xybis distancebis tbis
-            
+                
             end
         end
     end

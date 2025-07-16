@@ -3,11 +3,11 @@ function Mouse=Drugs_Groups_UMaze_CH(group)
 if group==1 % rip control sleep ALL
     Mouse=[1610,1611,1614];
 elseif group==2 % rip inhib sleep ALL
-    Mouse=[1594,1612,1641];
+    Mouse=[1594,1612,1641,1777];
 elseif group==3 % rip control sleep GOOD
-    Mouse=[1610,1611,1614];
+    Mouse=[1610,1611,1614,1775,1776];
 elseif group==4 % rip inhib sleep GOOD
-    Mouse=[1594,1641,1747];
+    Mouse=[1594,1641,1747,1777];
 elseif group==5 % rip control wake
     Mouse=[1412,1415,1416,1437,1439,1446,1482,1502,41530,41531];
 elseif group==6 % rip inhib wake

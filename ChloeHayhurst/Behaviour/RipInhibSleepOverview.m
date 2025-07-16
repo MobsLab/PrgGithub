@@ -6,16 +6,13 @@ load('AllSessions.mat');
 
 % GetEmbReactMiceFolderList_BM
 % GetAllSalineSessions_BM
-Group = [3 4 8];
+Group = [3 4];
 % Group = [7 3];
 
 Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','TrueBaseline','Saline','SalineLong','SalineCourt','All'};
-% Session_type={'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','ExtPre','ExtPost','Cond','Fear'};
-Session_type = {'TestPre','TestPostPre','TestPostPost'};
-% Session_type={'CondPre','CondPost','ExtPre','ExtPost','Cond'};
-% Session_type = {'TestPre','TestPostPre','TestPostPost','CondPre','CondPost','Cond'};
-% Session_type = {'ExtPre','ExtPost'};
+% Session_type = {'TestPre','TestPostPre','TestPostPost'};
 
+Session_type=  {'TestPre','TestPostPre','CondPre','ExtPre'};
 
 
 RangeLow = linspace(0.1526,20,261);
@@ -49,8 +46,8 @@ for group = Group
             %             LinearPosition.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'LinearPosition');
             Aligned_Position.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'alignedposition');
             SpectroBulb.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'spectrum','prefix','B_Low');
-%             SpectroBulbHigh.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'spectrum','prefix','B_High');
-         
+            %             SpectroBulbHigh.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'spectrum','prefix','B_High');
+            
             
             % epochs
             TotEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = intervalSet(0,max(Range(Speed.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))));
@@ -295,7 +292,7 @@ Create_Occup_Map_CH
 % Group = [3 4 7];
 
 % Group = 7;
-Session_type={'SleepPre','SleepPostPre','SleepPostPost'};
+Session_type={'SleepPre','SleepPostPre'};
 % Name = {'RipControlSleepAll','RipInhibSleepAll','RipControlSleep','RipInhibSleep','RipControlWake','RipInhibWake','Baseline','TrueBaseline','Saline','SalineLong'};
 
 
@@ -307,8 +304,6 @@ for group = Group
             FolderList=SleepPreSess(1);
         elseif convertCharsToStrings(Session_type{sess})=='SleepPostPre'
             FolderList=SleepPostPreSess;
-        elseif convertCharsToStrings(Session_type{sess})=='SleepPostPost'
-            FolderList=SleepPostPostSess;
         end
         
         disp(Session_type{sess})
@@ -316,16 +311,16 @@ for group = Group
             Mouse_names{mouse}=['M' num2str(Mouse(mouse))];
             disp(Mouse_names{mouse})
             
-                        StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'epoch','epochname','stimepoch2');
-   a = length(StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+            StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'epoch','epochname','stimepoch2');
+            a = length(StimEpoch2.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
             Stim_num2.(Name{group}).(Session_type{sess})(mouse) = length(a);
             
             Ripples.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'ripples');
-            Xtsd.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'xposition');
-            Ytsd.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'yposition');
+%             Xtsd.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'xposition');
+%             Ytsd.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'yposition');
             HR.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'heartrate');
             HR_Var.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'heartratevar');
-%             SpectroHPC.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'spectrum','prefix','H_Low');
+            %             SpectroHPC.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = ConcatenateDataFromFolders_SB(FolderList.(Mouse_names{mouse}) , 'spectrum','prefix','H_Low');
         end
     end
 end
@@ -339,8 +334,6 @@ for group = Group
             FolderList=SleepPreSess(1);
         elseif convertCharsToStrings(Session_type{sess})=='SleepPostPre'
             FolderList=SleepPostPreSess;
-        elseif convertCharsToStrings(Session_type{sess})=='SleepPostPost'
-            FolderList=SleepPostPostSess;
         end
         disp(Session_type{sess})
         for mouse=1:length(Mouse)
@@ -454,8 +447,8 @@ for group = Group
                 clear REMEpochTemp  NREMEpochTemp
             end
             
-            %             load(strcat(cd,'/ChannelsToAnalyse/dHPC_rip.mat'))
-            %              rip_chan.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = channel;
+            load(strcat(cd,'/ChannelsToAnalyse/dHPC_rip.mat'))
+            rip_chan.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = channel;
             clear 'WakeAcc' 'Sleep' 'Epoch' 'a' channel
         end
     end

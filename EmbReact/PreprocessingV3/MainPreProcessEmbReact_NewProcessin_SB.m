@@ -66,13 +66,13 @@ end
 
 %% Delete amplifier_original if needed
 
-for j = 1:length(FolderName)
-    cd(FolderName{j});
-    if (exist('amplifier_original.dat')>0)
-        delete('amplifier_original.dat')
-    end
-end
-
+% for j = 1:length(FolderName)
+%     cd(FolderName{j});
+%     if (exist('amplifier_original.dat')>0)
+%         delete('amplifier_original.dat')
+%     end
+% end
+% 
 
 
 

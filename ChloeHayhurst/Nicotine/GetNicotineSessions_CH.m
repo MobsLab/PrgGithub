@@ -13,6 +13,8 @@ NicotineOF.Pre{10}='/media/nas7/Nicotine/Mouse1742/NicotineOF/OFPre';
 NicotineOF.Pre{11}='/media/nas7/Nicotine/Mouse1743/NicotineOF/OFPre';
 NicotineOF.Pre{12}='/media/nas7/Nicotine/Mouse1745/NicotineOF/OFPre';
 NicotineOF.Pre{13}='/media/nas7/Nicotine/Mouse1746/NicotineOF/OFPre';
+NicotineOF.Pre{14}='/media/nas7/Nicotine/Mouse1747/NicotineOF/OFPre';
+NicotineOF.Pre{15}='/media/nas7/Nicotine/Mouse1775/NicotineOF/OFPre';
 
 
 NicotineOF.Post{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_OFPost';
@@ -29,6 +31,10 @@ NicotineOF.Post{10}='/media/nas7/Nicotine/Mouse1742/NicotineOF/OFPost';
 NicotineOF.Post{11}='/media/nas7/Nicotine/Mouse1743/NicotineOF/OFPost';
 NicotineOF.Post{12}='/media/nas7/Nicotine/Mouse1745/NicotineOF/OFPost';
 NicotineOF.Post{13}='/media/nas7/Nicotine/Mouse1746/NicotineOF/OFPost';
+NicotineOF.Post{14}='/media/nas7/Nicotine/Mouse1747/NicotineOF/OFPost';
+NicotineOF.Post{15}='/media/nas7/Nicotine/Mouse1775/NicotineOF/OFPost';
+
+
 
 %%
 
@@ -39,6 +45,7 @@ NicotineOFSleep.Pre{4}='/media/nas7/Nicotine/Mouse1743/NicotineOF/SleepPre';
 NicotineOFSleep.Pre{5}='/media/nas7/Nicotine/Mouse1745/NicotineOF/SleepPre';
 NicotineOFSleep.Pre{6}='/media/nas7/Nicotine/Mouse1746/NicotineOF/SleepPre';
 NicotineOFSleep.Pre{7}='/media/nas7/Nicotine/Mouse1747/NicotineOF/SleepPre';
+NicotineOFSleep.Pre{8}='/media/nas7/Nicotine/Mouse1775/NicotineOF/SleepPre';
 
 
 NicotineOFSleep.Post{1}='/media/nas7/Nicotine/Mouse1500/1500_NicotineOF_SleepPost';
@@ -48,6 +55,7 @@ NicotineOFSleep.Post{4}='/media/nas7/Nicotine/Mouse1743/NicotineOF/SleepPost';
 NicotineOFSleep.Post{5}='/media/nas7/Nicotine/Mouse1745/NicotineOF/SleepPost';
 NicotineOFSleep.Post{6}='/media/nas7/Nicotine/Mouse1746/NicotineOF/SleepPost';
 NicotineOFSleep.Post{7}='/media/nas7/Nicotine/Mouse1747/NicotineOF/SleepPost';
+NicotineOFSleep.Post{8}='/media/nas7/Nicotine/Mouse1775/NicotineOF/SleepPost';
 
 
 %%
@@ -61,6 +69,8 @@ SalineOF.Pre{6}='/media/nas7/Nicotine/Mouse1687/SalineOF/OFPre';
 SalineOF.Pre{7}='/media/nas7/Nicotine/Mouse1688/SalineOF/OFPre';
 SalineOF.Pre{8}='/media/nas7/Nicotine/Mouse1742/SalineOF/OFPre';
 SalineOF.Pre{9}='/media/nas7/Nicotine/Mouse1747/SalineOF/OFPre';
+SalineOF.Pre{10}='/media/nas8-2/Nicotine/Mouse1746/SalineOF/OFPre';
+SalineOF.Pre{11}='/media/nas8-2/Nicotine/Mouse1776/SalineOF/OFPre';
 
 
 SalineOF.Post{1}='/media/nas7/Nicotine/Mouse1685/SalineOF/OF_Post';
@@ -72,6 +82,19 @@ SalineOF.Post{6}='/media/nas7/Nicotine/Mouse1687/SalineOF/OFPost';
 SalineOF.Post{7}='/media/nas7/Nicotine/Mouse1688/SalineOF/OFPost';
 SalineOF.Post{8}='/media/nas7/Nicotine/Mouse1742/SalineOF/OFPost';
 SalineOF.Post{9}='/media/nas7/Nicotine/Mouse1747/SalineOF/OFPost';
+SalineOF.Post{10}='/media/nas8-2/Nicotine/Mouse1746/SalineOF/OFPost';
+SalineOF.Post{10}='/media/nas8-2/Nicotine/Mouse1776/SalineOF/OFPost';
+
+
+%%
+
+SalineOFSleep.Pre{1}='/media/nas8-2/Mouse1746/SalineOF/SleepPre';
+SalineOFSleep.Pre{2}='/media/nas8-2/Mouse1747/SalineOF/SleepPre';
+SalineOFSleep.Pre{3}='/media/nas8-2/Mouse1776/SalineOF/SleepPre';
+
+SalineOFSleep.Post{1}='/media/nas8-2/Mouse1746/SalineOF/SleepPost';
+SalineOFSleep.Post{2}='/media/nas8-2/Mouse1747/SalineOF/SleepPost';
+SalineOFSleep.Post{3}='/media/nas8-2/Mouse1776/SalineOF/SleepPost';
 
 
 %%

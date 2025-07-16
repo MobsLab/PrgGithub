@@ -24,7 +24,7 @@ sizeMap2 = 1000;
 clear ActiveEpoch
 
 disp('Fetching data...')
-figure
+% figure
 for group = 1:2
     if group == 2
         Mouse_names = Mouse_names_Nic;
@@ -50,13 +50,14 @@ for group = 1:2
             
             AcceleroAll.(Name{group}).(Session_type{sess})(mouse,:) = interp1(linspace(0,1000,length(Accelero.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}))),Data(Accelero.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})), linspace(0,1000,1000));
             
-            TotalEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = intervalSet(0,max(Range(MovAcctsd)));
+            TotalEpoch.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Epoch;
           
             FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FreezeAccEpoch;
             FreezeEpochCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = FreezeEpoch;
             
             Groom.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = GroomingInfo;
             GroomTime.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(GroomingInfo,'s'));
+            GroomProp.(Name{group}).(Session_type{sess})(mouse) = sum(DurationEpoch(GroomingInfo,'s'))/sum(DurationEpoch(Epoch,'s'));
             GroomInfo.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = GroomingInfo;
 
             
@@ -70,37 +71,37 @@ for group = 1:2
             XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = AlignedXtsd;
             YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = AlignedYtsd;
             
-            XtsdAlignedFz = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            YtsdAlignedFz = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-            
-            subplot(1,2,sess)
-            clear h
-            h = histogram2(Data(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Data(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),[0.01:0.01:1],[0.01:0.01:1]);
-            OccupMap.(Name{group}).(Session_type{sess})(:,:,mouse) = (h.Values)./nansum(h.Values(:));
-            clf
-            clear h
-            h = histogram2(Data(YtsdAlignedFz),Data(XtsdAlignedFz),[0.01:0.01:1],[0.01:0.01:1]);
-            OccupMapFz.(Name{group}).(Session_type{sess})(:,:,mouse) = (h.Values)./nansum(h.Values(:));         
-            clf
-            
-            map = OccupMap.(Name{group}).(Session_type{sess})(:,:,mouse);
-            clear minVal maxVal totaltime
-            minVal = min(map(:));
-            maxVal = max(map(:));
-            totaltime = sum(map(:));
-            
-            OccupMapNorm.(Name{group}).(Session_type{sess})(:,:,mouse) = (map - minVal) / (maxVal - minVal); % normalized between 0 and 1
-            OccupMapNorm2.(Name{group}).(Session_type{sess})(:,:,mouse) = map / totaltime; % normalized by proportion of time
-            
-            mapfz = OccupMapFz.(Name{group}).(Session_type{sess})(:,:,mouse);
-            clear minVal maxVal totaltime
-            minVal = min(mapfz(:));
-            maxVal = max(mapfz(:));
-            totaltime = sum(mapfz(:));
-            
-            OccupMapNormFz.(Name{group}).(Session_type{sess})(:,:,mouse) = (mapfz - minVal) / (maxVal - minVal); % normalized between 0 and 1
-            OccupMapNormFz2.(Name{group}).(Session_type{sess})(:,:,mouse) = mapfz / totaltime; % normalized by proportion of time
-            
+%             XtsdAlignedFz = Restrict(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             YtsdAlignedFz = Restrict(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
+%             
+%             subplot(1,2,sess)
+%             clear h
+%             h = histogram2(Data(YtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),Data(XtsdAligned.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})),[0.01:0.01:1],[0.01:0.01:1]);
+%             OccupMap.(Name{group}).(Session_type{sess})(:,:,mouse) = (h.Values)./nansum(h.Values(:));
+%             clf
+%             clear h
+%             h = histogram2(Data(YtsdAlignedFz),Data(XtsdAlignedFz),[0.01:0.01:1],[0.01:0.01:1]);
+%             OccupMapFz.(Name{group}).(Session_type{sess})(:,:,mouse) = (h.Values)./nansum(h.Values(:));         
+%             clf
+%             
+%             map = OccupMap.(Name{group}).(Session_type{sess})(:,:,mouse);
+%             clear minVal maxVal totaltime
+%             minVal = min(map(:));
+%             maxVal = max(map(:));
+%             totaltime = sum(map(:));
+%             
+%             OccupMapNorm.(Name{group}).(Session_type{sess})(:,:,mouse) = (map - minVal) / (maxVal - minVal); % normalized between 0 and 1
+%             OccupMapNorm2.(Name{group}).(Session_type{sess})(:,:,mouse) = map / totaltime; % normalized by proportion of time
+%             
+%             mapfz = OccupMapFz.(Name{group}).(Session_type{sess})(:,:,mouse);
+%             clear minVal maxVal totaltime
+%             minVal = min(mapfz(:));
+%             maxVal = max(mapfz(:));
+%             totaltime = sum(mapfz(:));
+%             
+%             OccupMapNormFz.(Name{group}).(Session_type{sess})(:,:,mouse) = (mapfz - minVal) / (maxVal - minVal); % normalized between 0 and 1
+%             OccupMapNormFz2.(Name{group}).(Session_type{sess})(:,:,mouse) = mapfz / totaltime; % normalized by proportion of time
+%             
             try
                 load('B_Low_Spectrum.mat')
                 load('BreathingRate.mat')
@@ -129,24 +130,30 @@ for group = 1:2
                 OBPowerFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(OBPower.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
                 
             end
-            try
-                load('HeartBeatInfo.mat')
+              clear H H2
+            if exist('HeartBeatInfo.mat', 'file') == 2
+                load('HeartBeatInfo.mat');
                 HeartRate.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = EKG.HBRate;
+                HR_Var = tsd(Range(EKG.HBRate),movstd(Data(EKG.HBRate),5));
+                HeartRateVar.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = HR_Var;
+                H = Physio_Norm_by_Speed(Vtsd,EKG.HBRate,'HR');
+                HeartRate_Norm.(Name{group}).(Session_type{sess})(mouse,:) = H;
+                H2 = Physio_Norm_by_Speed(Vtsd,HR_Var,'HRVar');
+                HeartRateVar_Norm.(Name{group}).(Session_type{sess})(mouse,:) = H2;
+            else
+                disp('No HR for this mouse')
+                HeartRate_Norm.(Name{group}).(Session_type{sess})(mouse,1:100) = NaN;
+                HeartRateVar_Norm.(Name{group}).(Session_type{sess})(mouse,1:100) = NaN;
+            end
+            try
                 HRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(EKG.HBRate,FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
                 MeanHRFz.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(HRFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-                HRFzCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(EKG.HBRate,FreezeEpochCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-                MeanHRFzCam.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(HRFzCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-                HeartRateVar.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = tsd(Range(EKG.HBRate),movstd(Data(EKG.HBRate),5));
                 HRVarFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HeartRateVar.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochAcc.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
                 MeanHRVarFz.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(HRVarFz.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-                HRVarFzCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}) = Restrict(HeartRateVar.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}),FreezeEpochCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse}));
-                MeanHRVarFzCam.(Name{group}).(Session_type{sess})(mouse) = nanmean(Data(HRVarFzCam.(Name{group}).(Session_type{sess}).(Mouse_names{mouse})));
-            
+                
             catch
                 MeanHRFz.(Name{group}).(Session_type{sess})(mouse) = NaN;
-                MeanHRFzCam.(Name{group}).(Session_type{sess})(mouse) = NaN;
                 MeanHRVarFz.(Name{group}).(Session_type{sess})(mouse) = NaN;
-                MeanHRVarFzCam.(Name{group}).(Session_type{sess})(mouse) = NaN;
                 
             end
             try
@@ -158,6 +165,11 @@ for group = 1:2
             end
             clear RipplesEpoch tRipples RipDens_tsd
         end
+        HRNormPrePost.(Name{group})(mouse,:) = HeartRate_Norm.(Name{group}).Pre(mouse,:)-HeartRate_Norm.(Name{group}).Post(mouse,:);
+        HRNormPrePost_mean.(Name{group})(mouse) = nanmean(HRNormPrePost.(Name{group})(mouse,1:66));
+        HRVarNormPrePost.(Name{group})(mouse,:) = HeartRateVar_Norm.(Name{group}).Pre(mouse,:)-HeartRateVar_Norm.(Name{group}).Post(mouse,:);
+        HRVarNormPrePost_mean.(Name{group})(mouse) = nanmean(HRVarNormPrePost.(Name{group})(mouse,1:66));
+        
     end
 end
 
