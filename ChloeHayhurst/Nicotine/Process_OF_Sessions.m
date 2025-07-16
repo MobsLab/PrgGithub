@@ -17,7 +17,7 @@ end
 if not(exist('StateEpochSB.mat'))
     load('ChannelsToAnalyse/Bulb_deep.mat')
     channel;
-    FindNoiseEpoch_BM([cd filesep],channel,0);
+    FindNoiseEpoch_BM([cd filesep],channel,0,'saving',1);
 end
 
 load('ChannelsToAnalyse/Bulb_deep.mat')
