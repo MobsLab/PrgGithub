@@ -37,7 +37,7 @@ classdef TrackingObject
             % frame rate and decide whether or not to save mat files
             mask_UMaze = [111 193 245 193 245 130 142 132 142 92 245 92 245 29 111 31 111 193];
             TrObj.camera_type=questdlg('What kind of video input are you using?',['Camera ' num2str(camnum) ' choice'],'IRCamera','Webcam','IRCamera');
-            frame_rate_temp=inputdlg('What frame rate should we use? If <9 : direct compression',['Camera ' num2str(camnum)]);
+            frame_rate_temp=inputdlg('What frame rate should we use? If <9 : direct compression',['Camera ' num2str(camnum)],1,{'30'});
             frame_rate_temp=str2double(frame_rate_temp);frame_rate_temp=min([50,frame_rate_temp]);frame_rate_temp=max([5,frame_rate_temp]);
             TrObj.frame_rate=frame_rate_temp;
             tempanswer=questdlg('How do you want to save?',['Camera ' num2str(camnum) ' Save format'],'AVI only','AVI and MAT','AVI only');

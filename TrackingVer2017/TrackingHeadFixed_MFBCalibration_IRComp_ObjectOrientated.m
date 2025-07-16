@@ -21,7 +21,9 @@ global time_image;time_image = 1/TrObjLocal.frame_rate; % coutn time between fra
 global UpdateImage; UpdateImage=ceil(TrObjLocal.frame_rate/5); % update every n frames the picture shown on screen to show at 10Hz
 global writerObj  % allows us to save as .avi
 global enableTrack % Controls whether the tracking is on or not
-
+global StartTrials
+global WaitingForRelease
+global ArduinoDataRequested
 % Variables for plotting
 global thimmobline % line that shows current freezing threshold
 global PlotTrials % the name of the Plot that shows im_diff
@@ -74,7 +76,9 @@ arduinoDictionary.TenFrames=2; % Sync with intan every 1000 frames
 arduinoDictionary.Off=3; % switches Intan off
 arduinoDictionary.StimulationWindowOpen_Lever1 = 4; % Open window for lever 1
 arduinoDictionary.StimulationWindowOpen_Lever2 = 5; % Open window for lever 2
+arduinoDictionary.StimulationWindowOpen_Lever1_2 = 6; % Open window for lever 2
 arduinoDictionary.StimulationWindowClose = 9; % Close which ever window is open
+arduinoDictionary.RequestLeverState = 7;
 TrialON = 0;
 %% Task parameters
 global nametypes; nametypes={'MFB Calibration'};
@@ -145,11 +149,11 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
             % MFB parameters
             ProgramPulsePalParam(1,'IsBiphasic',1);
             ProgramPulsePalParam(1,'Phase1Voltage', 2);
-            ProgramPulsePalParam(1,'Phase1Duration', 0.01);
+            ProgramPulsePalParam(1,'Phase1Duration', 0.0005);
             ProgramPulsePalParam(1,'InterPhaseInterval', 0);
             ProgramPulsePalParam(1,'Phase2Voltage', -2);
-            ProgramPulsePalParam(1,'Phase2Duration', 0.01);
-            ProgramPulsePalParam(1,'InterPulseInterval', 0);
+            ProgramPulsePalParam(1,'Phase2Duration', 0.0005);
+            ProgramPulsePalParam(1,'InterPulseInterval', 0.0071);
             ProgramPulsePalParam(1,'BurstDuration', 0.1);
             ProgramPulsePalParam(1,'InterBurstInterval', 0);
             ProgramPulsePalParam(1,'PulseTrainDelay', 0);
@@ -158,15 +162,14 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
             ProgramPulsePalParam(1,'LinkTriggerChannel2', 0);
             ProgramPulsePalParam(1,'RestingVoltage', 0);
             ProgramPulsePalParam(1,'TriggerMode', 0);
-            
-            % PAG parameters
+
             ProgramPulsePalParam(2,'IsBiphasic',1);
             ProgramPulsePalParam(2,'Phase1Voltage', 2);
-            ProgramPulsePalParam(2,'Phase1Duration', 0.01);
+            ProgramPulsePalParam(2,'Phase1Duration', 0.0005);
             ProgramPulsePalParam(2,'InterPhaseInterval', 0);
             ProgramPulsePalParam(2,'Phase2Voltage', -2);
-            ProgramPulsePalParam(2,'Phase2Duration', 0.01);
-            ProgramPulsePalParam(2,'InterPulseInterval', 0);
+            ProgramPulsePalParam(2,'Phase2Duration', 0.0005);
+            ProgramPulsePalParam(2,'InterPulseInterval', 0.0071);
             ProgramPulsePalParam(2,'BurstDuration', 0.1);
             ProgramPulsePalParam(2,'InterBurstInterval', 0);
             ProgramPulsePalParam(2,'PulseTrainDelay', 0);
@@ -193,41 +196,42 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
 
 
         function savProtoc(obj,event)
-            
+
             switch  ExpeInfo.namePhase
                 case 'MFB Calibration'
 
-                default_answer{1}='007';
-                default_answer{2}=num2str(100);
-                default_answer{3}='2';
-                default_answer{4}='2';
-                default_answer{5}='4';
+                    default_answer{1}='007';
+                    default_answer{2}=num2str(100);
+                    default_answer{3}='2';
+                    default_answer{4}='2';
+                    default_answer{5}='4';
 
-                answer = inputdlg({'NumberMouse','TrialNumber', 'VoltageMFB','Trial Duration','InterTrialInterval'},'INFO',1,default_answer);
-                default_answer=answer; save default_answer default_answer
-                
-                ExpeInfo.nmouse=str2double(answer{1});
-                ExpeInfo.TrialNumber = str2double(answer{2});
-                ExpeInfo.VoltageMFB = str2double(answer{3});
-                ExpeInfo.TrialDuration = str2double(answer{4});
-                ExpeInfo.InterTrialInterval = str2double(answer{5});
-                ExpeInfo.nPhase=0;
-                
-                % No Pag, set to 0
-                ExpeInfo.VoltagePAG = 0;
-                
-                % Set up trial structure
-                ExpeInfo.TrialId = ones(ExpeInfo.TrialNumber,1);
-                ExpeInfo.TrialResult = zeros(ExpeInfo.TrialNumber,1);
+                    answer = inputdlg({'NumberMouse','TrialNumber', 'VoltageMFB','Trial Duration','InterTrialInterval'},'INFO',1,default_answer);
+                    default_answer=answer; save default_answer default_answer
 
-            if strcmp('New PulsePal',Stimulator)
+                    ExpeInfo.nmouse=str2double(answer{1});
+                    ExpeInfo.TrialNumber = str2double(answer{2});
+                    ExpeInfo.VoltageMFB = str2double(answer{3});
+                    ExpeInfo.TrialDuration = str2double(answer{4});
+                    ExpeInfo.InterTrialInterval = str2double(answer{5});
+                    ExpeInfo.nPhase=0;
 
-                ProgramPulsePalParam(1,'Phase1Voltage', ExpeInfo.VoltageMFB);
-                ProgramPulsePalParam(1,'Phase2Voltage', -(ExpeInfo.VoltageMFB));
-                ProgramPulsePalParam(2,'Phase1Voltage', ExpeInfo.VoltagePAG);
-                ProgramPulsePalParam(2,'Phase2Voltage', -(ExpeInfo.VoltagePAG));
+                    % No Pag, set to 0
+                    ExpeInfo.VoltagePAG = 0;
 
-            end
+                    % Set up trial structure
+                    ExpeInfo.TrialId = ones(ExpeInfo.TrialNumber,1);
+                    ExpeInfo.TrialResult = nan(ExpeInfo.TrialNumber,1);
+
+                    if strcmp('New PulsePal',Stimulator)
+
+                        ProgramPulsePalParam(1,'Phase1Voltage', ExpeInfo.VoltageMFB);
+                        ProgramPulsePalParam(1,'Phase2Voltage', -(ExpeInfo.VoltageMFB));
+                        ProgramPulsePalParam(2,'Phase1Voltage', ExpeInfo.VoltagePAG);
+                        ProgramPulsePalParam(2,'Phase2Voltage', -(ExpeInfo.VoltagePAG));
+
+                    end
+
             end
 
             nameTASK=['MFB Calibration - ' ExpeInfo.namePhase];
@@ -245,10 +249,13 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
         enableTrack=1;
         StartChrono=0;
         ExpeInfo.nPhase=ExpeInfo.nPhase+1;
-        ExpeInfo.name_folder=['HeadFixed-Mouse-' num2str(ExpeInfo.nmouse) '-' ExpeInfo.TodayIs '-' ExpeInfo.namePhase];
-        
-                
-        
+        switch  ExpeInfo.namePhase
+            case 'MFB Calibration'
+
+                ExpeInfo.name_folder=['HeadFixed-Mouse-' num2str(ExpeInfo.nmouse) '-' ExpeInfo.TodayIs '-' ExpeInfo.namePhase '-' num2str(ExpeInfo.VoltageMFB) 'V'];
+        end
+
+
         set(maskbutton.StartExpe,'enable','on','FontWeight','normal','string','3- START EXPE (OK)')
 
         if enableTrack
@@ -277,6 +284,9 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
 
             % enable button to start session
             set(maskbutton.StartSession,'enable','on','FontWeight','bold')
+
+
+            % Don't start trials until first press
             PerformTracking;
         end
     end
@@ -284,16 +294,22 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
 % -----------------------------------------------------------------
 %% StartSession
     function StartSession(obj,event)
-        
+
         % Clear the arduino
         if a.BytesAvailable>0
             fread(a,a.BytesAvailable);
         end
+        % Tell the arduino we're starting
+        fwrite(a,arduinoDictionary.On);
+        % Oepn window for first trial
+        fwrite(a,arduinoDictionary.StimulationWindowOpen_Lever1_2);
+        StartTrials = 0;
+        % Open arduino window for firt press
+        set(inputDisplay.TrialId,'String','Waiting first press ')
+
         % set the buttons to avoid problems
         set(maskbutton.StopSession,'enable','on','FontWeight','bold')
         set(maskbutton.StartSession,'enable','off','FontWeight','normal')
-        % Tell the arduino we're starting
-        fwrite(a,arduinoDictionary.On);
         % Tell the experimenter we're starting
         set(inputDisplay.Instructions,'string','RECORDING');
         % Initialize time
@@ -332,9 +348,9 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
         figure(Fig_HeadFixedSession), subplot(5,5,21:25)
         PlotTrials = bar(1:length(ExpeInfo.TrialResult),ExpeInfo.TrialResult);
         hold on
-        PlotTrialsSmo = plot(1:length(ExpeInfo.TrialResult),runmean(ExpeInfo.TrialResult,5),'r','linewidth',3);
+        PlotTrialsSmo = bar(1:length(ExpeInfo.TrialResult),runmean(ExpeInfo.TrialResult,5))%,'r','linewidth',3);
         xlim([0,ExpeInfo.TrialNumber]);
-               ylim([0 1.2]);
+        ylim([-0.1 1.2]);
 
         % Follow TrialNumber and Type
         inputDisplay.TrialId=uicontrol(Fig_HeadFixedSession,'style','text','units','normalized','position',[0.01 0.26 0.16 0.02],'string',...
@@ -379,7 +395,7 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
             % ---------------------------------------------------------
 
             if StartChrono
-                
+
                 % How long since the beginning of the session
                 KeepTime.chrono=etime(KeepTime.t1,KeepTime.tDeb);
                 set(chronoshow,'string',[num2str(floor(KeepTime.chrono)) ' s']);
@@ -436,65 +452,110 @@ chronostim=uicontrol('style','edit', 'units','normalized','position',[0.15 0.4 0
 
                 if mod(num_fr,10) == 0
                     fwrite(a, arduinoDictionary.TenFrames);
-%Get temperature
-%                     if mod(num_fr,40) == 0
-%                         fwrite(a, arduinoDictionary.GetTemp); % Request temperature
-% 
-%                         pause(0.1); % Allow time for response
-% 
-%                         if a.BytesAvailable > 0
-%                             temp_str = fgetl(a);  % Read the temperature
-% 
-%                             if strcmp(temp_str, 'ERROR')
-%                                 warning('Arduino failed to read temperature.');
-%                                 Temperature(num_fr,1) = NaN; % Assign NaN if no valid reading
-%                             else
-%                                 Temperature(num_fr,1) = str2double(temp_str); % Convert to number
-%                                 disp(['Temperature: ', num2str(Temperature(num_fr,1), '%.2f'), ' °C']);
-%                             end
-%                         else
-%                             warning('No temperature data received from Arduino.');
-%                             Temperature(num_fr,1) = NaN;
-%                         end
-%                     end
+
                 end
-                
-                
+
+
                 % -------------------------------------------------------------------------------
                 % ------------------- Behaviour  -----------------------
-                
-                if TrialON == 0 & etime(KeepTime.t1,KeepTime.InterTrialStart) > ExpeInfo.InterTrialInterval % next trial
-                    % Tell adruino to open a new window that stimluates if
-                    % lever press within ExpeInfo.TrialDuration seconds
-                    fwrite(a,arduinoDictionary.StimulationWindowOpen_Lever1);
-                    TrialON = 1;
-                    KeepTime.TrialStart = clock;
-                    KeepTime.CurrentTrial = KeepTime.CurrentTrial + 1;
-                    set(chronostim,'string',[num2str(floor(KeepTime.CurrentTrial)) '/' num2str(ExpeInfo.TrialNumber)]);
-                    set(inputDisplay.TrialId,'String','MFB available')
-                elseif TrialON == 1 & etime(KeepTime.t1,KeepTime.TrialStart) > ExpeInfo.TrialDuration % next trial
-                    % Tell adruino to close windo and
-                    % wait during the ITI
-                    fwrite(a,arduinoDictionary.StimulationWindowClose);
-                    TrialON = 0;
-                    KeepTime.InterTrialStart = clock;
-                    set(inputDisplay.TrialId,'String','InterTrial')
+                if StartTrials
+                    if TrialON == 0 & etime(KeepTime.t1,KeepTime.InterTrialStart) > ExpeInfo.InterTrialInterval % next trial
+                        % Tell adruino to open a new window that stimluates if
+                        % lever press within ExpeInfo.TrialDuration seconds
+                        fwrite(a,arduinoDictionary.StimulationWindowOpen_Lever1_2);
+                        TrialON = 1;
+                        KeepTime.TrialStart = clock;
+                        set(chronostim,'string',[num2str(floor(KeepTime.CurrentTrial)) '/' num2str(ExpeInfo.TrialNumber)]);
+                        set(inputDisplay.TrialId,'String','MFB available')
+
+                    elseif TrialON == 1 & etime(KeepTime.t1,KeepTime.TrialStart) > ExpeInfo.TrialDuration % next trial
+                        % Tell adruino to close windo and
+                        % wait during the ITI
+                        if WaitingForRelease ==0
+                            fwrite(a,arduinoDictionary.StimulationWindowClose);
+                            KeepTime.InterTrialStart = clock;
+                            set(inputDisplay.TrialId,'String','InterTrial')
+                            if a.BytesAvailable>0
+                                disp('bytes available')
+
+                                bytes = a.BytesAvailable;
+                                data = fread(a, bytes);
+                                try
+                                    temp = eval(char(data'));
+                                    ExpeInfo.TrialResult(KeepTime.CurrentTrial) = eval(char(data'));
+                                catch
+                                    ExpeInfo.TrialResult(KeepTime.CurrentTrial) = 0;
+                                end
+                            else
+                                ExpeInfo.TrialResult(KeepTime.CurrentTrial) = 0;
+                            end
+                            KeepTime.CurrentTrial = KeepTime.CurrentTrial + 1;
+                            WaitingForRelease = 1;
+                            ArduinoDataRequested = 0;
+                            set(inputDisplay.TrialId,'String','ITI ')
+                            set(PlotTrials,'ydata',double(ExpeInfo.TrialResult>0));
+                            
+                            % set(PlotTrialsSmo,'ydata',runmean(ExpeInfo.TrialResult>0,1));
+
+                        elseif WaitingForRelease ==1
+
+                            %% Wait until levers are up (output from arduino = 2)
+                            if ArduinoDataRequested ==0
+                                
+                                disp('empyting arduino')
+                                while a.BytesAvailable>0
+                                    fread(a, bytes);
+                                end
+                                
+                                disp('getting lever state')
+                                fwrite(a,arduinoDictionary.RequestLeverState); % ask for the info
+                                ArduinoDataRequested = 1;
+                            elseif ArduinoDataRequested==1
+                                
+                                if a.BytesAvailable==3
+                                    bytes = a.BytesAvailable;
+                                    data = fread(a, bytes);
+                                    try
+                                        temp = eval(char(data'));
+                                    catch
+                                        keyboard
+                                    end
+                                    if temp ==2
+                                        TrialON = 0;
+                                        WaitingForRelease = 0;
+                                        ArduinoDataRequested = 0;
+                                    else
+                                        fwrite(a,arduinoDictionary.RequestLeverState); % ask for the info
+                                    end
+                                end
+                            end
+                            
+                        end
+                    end
+                else
+
                     if a.BytesAvailable>0
                         bytes = a.BytesAvailable;
                         data = fread(a, bytes);
-                        ExpeInfo.TrialResult(KeepTime.CurrentTrial) = eval(char(data'));
-                    else
-                        ExpeInfo.TrialResult(KeepTime.CurrentTrial) = 0;
+                        try
+                            temp = eval(char(data'));
+                            ExpeInfo.TrialResult(KeepTime.CurrentTrial) = eval(char(data'));
+                        catch
+                            ExpeInfo.TrialResult(KeepTime.CurrentTrial) = 0;
+                        end
+                        StartTrials = 1;
+                        WaitingForRelease = 0;
                     end
-                
-                    set(PlotTrials,'ydata',ExpeInfo.TrialResult);
-                    set(PlotTrialsSmo,'ydata',runmean(ExpeInfo.TrialResult,5));
-                    
                 end
-                
-                
-                
-                
+
+
+
+
+
+
+
+
+
                 num_fr=num_fr+1;
                 KeepTime.t2 = clock;
 

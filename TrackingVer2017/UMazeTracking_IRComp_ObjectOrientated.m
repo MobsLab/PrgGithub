@@ -25,7 +25,8 @@ global UpdateImage; UpdateImage=ceil(TrObjLocal.frame_rate/5); % update every n 
 global writerObj  % allows us to save as .avi
 global enableTrack % Controls whether the tracking is on or not
 global Zone ZoneLabels  % the Zones in the UMaze - set by the user
-global DoorChangeMat % Matrix of times at which the door was moved
+global DoorChangeMat; % Matrix of times at which the door was moved
+global PosMat 
 global ShTN; ShTN=1; % Variable that count the shocks
 
 % Variables for plotting
